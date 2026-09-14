@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 804.4125 808.9999999999999" width="804.4125" height="808.9999999999999" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="RUN" data-to="ENV" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="306.9875,76.9 306.9875,96.9 166.197,96.9 166.197,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="RUN" data-to="COMPOSE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="306.9875,76.9 306.9875,96.9 447.778,96.9 447.778,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="COMPOSE" data-to="ROWS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="447.778,153.8 447.778,173.8 333.10775,173.8 333.10775,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="COMPOSE" data-to="TELEMETRY" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="447.778,153.8 447.778,173.8 562.44825,173.8 562.44825,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ROWS" data-to="BOOT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="333.10775,230.70000000000002 333.10775,250.70000000000005 447.778,250.70000000000005 447.778,270.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="TELEMETRY" data-to="BOOT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="562.44825,230.70000000000002 562.44825,250.70000000000005 447.778,250.70000000000005 447.778,270.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BOOT" data-to="BASEURL" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="447.778,307.6 447.778,327.6 305.87600000000003,327.6 305.87600000000003,578.3" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BOOT" data-to="PREPARE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="447.778,307.6 447.778,327.6 589.6800000000001,327.6 589.6800000000001,347.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PREPARE" data-to="MOUNT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="589.6800000000001,384.5 589.6800000000001,424.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MOUNT" data-to="SETTLE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="589.6800000000001,461.4 589.6800000000001,501.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SETTLE" data-to="AUDIT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="589.6800000000001,538.3 589.6800000000001,578.3" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="AUDIT" data-to="LIVE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="589.6800000000001,615.1999999999999 589.6800000000001,655.1999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="LIVE" data-to="READY" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="589.6800000000001,692.0999999999999 589.6800000000001,732.0999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="RUN" data-label="runProfile:一次启动的总入口" data-shape="rectangle">
+  <rect x="195.61050000000003" y="40" width="222.75399999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="306.9875" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">runProfile:一次启动的总入口</text>
+</g>
+<g class="node" data-id="ENV" data-label="装入启动器事实:代理与环境快照" data-shape="rectangle">
+  <rect x="40" y="116.9" width="252.39399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="166.197" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">装入启动器事实:代理与环境快照</text>
+</g>
+<g class="node" data-id="COMPOSE" data-label="composeProfile:按层收集 patch 文件" data-shape="rectangle">
+  <rect x="316.394" y="116.9" width="262.76800000000003" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="447.778" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">composeProfile:按层收集 patch 文件</text>
+</g>
+<g class="node" data-id="ROWS" data-label="composeEntries:唯一合成点" data-shape="rectangle">
+  <rect x="225.43575000000004" y="193.8" width="215.344" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="333.10775" y="212.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">composeEntries:唯一合成点</text>
+</g>
+<g class="node" data-id="TELEMETRY" data-label="遥测开关派生一层 patch" data-shape="rectangle">
+  <rect x="464.77975000000004" y="193.8" width="195.33699999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="562.44825" y="212.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">遥测开关派生一层 patch</text>
+</g>
+<g class="node" data-id="BOOT" data-label="boot:新建上下文并装入 Loader" data-shape="rectangle">
+  <rect x="330.1025" y="270.70000000000005" width="235.35099999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="447.778" y="289.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">boot:新建上下文并装入 Loader</text>
+</g>
+<g class="node" data-id="BASEURL" data-label="设置 baseUrl 与 harness 家目录" data-shape="rectangle">
+  <rect x="187.08900000000006" y="578.3" width="237.57399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="305.87600000000003" y="596.75" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">设置 baseUrl 与 harness 家目录</text>
+</g>
+<g class="node" data-id="PREPARE" data-label="宿主准备:注入环境快照与命令行服务" data-shape="rectangle">
+  <rect x="448.663" y="347.6" width="282.034" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="589.6800000000001" y="366.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">宿主准备:注入环境快照与命令行服务</text>
+</g>
+<g class="node" data-id="MOUNT" data-label="挂载根 Include 与内建插件" data-shape="rectangle">
+  <rect x="485.713" y="424.5" width="207.93399999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="589.6800000000001" y="442.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">挂载根 Include 与内建插件</text>
+</g>
+<g class="node" data-id="SETTLE" data-label="等整树 settle" data-shape="rectangle">
+  <rect x="529.8025" y="501.4" width="119.75500000000001" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="589.6800000000001" y="519.85" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">等整树 settle</text>
+</g>
+<g class="node" data-id="AUDIT" data-label="激活审计:点名失败与挂起条目" data-shape="rectangle">
+  <rect x="470.89300000000003" y="578.3" width="237.57399999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="589.6800000000001" y="596.75" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">激活审计:点名失败与挂起条目</text>
+</g>
+<g class="node" data-id="LIVE" data-label="live 模式:补装定时器与热替换并监听两个用户层" data-shape="rectangle">
+  <rect x="414.94750000000005" y="655.1999999999999" width="349.465" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="589.6800000000001" y="673.65" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">live 模式:补装定时器与热替换并监听两个用户层</text>
+</g>
+<g class="node" data-id="READY" data-label="提交就绪:进程寿命交还插件" data-shape="rectangle">
+  <rect x="478.30300000000005" y="732.0999999999999" width="222.75399999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="589.6800000000001" y="750.55" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">提交就绪:进程寿命交还插件</text>
+</g>
+</svg>

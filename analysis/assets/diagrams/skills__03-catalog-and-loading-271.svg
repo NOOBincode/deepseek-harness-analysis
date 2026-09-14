@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 403.53 1039.6999999999998" width="403.53" height="1039.6999999999998" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,76.9 201.765,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,153.8 201.765,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,230.70000000000002 201.765,270.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,307.6 201.765,347.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,384.5 201.765,424.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,461.4 201.765,501.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,538.3 201.765,578.3" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,615.1999999999999 201.765,655.1999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,692.0999999999999 201.765,732.0999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="J" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,768.9999999999999 201.765,808.9999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,845.8999999999999 201.765,885.8999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="L" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="201.765,922.7999999999998 201.765,962.7999999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="A" data-label="主循环进入 preStep" data-shape="rectangle">
+  <rect x="118.91649999999998" y="40" width="165.697" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">主循环进入 preStep</text>
+</g>
+<g class="node" data-id="B" data-label="认领收件箱并组装提示" data-shape="rectangle">
+  <rect x="106.69" y="116.9" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">认领收件箱并组装提示</text>
+</g>
+<g class="node" data-id="C" data-label="投影运行时上下文快照" data-shape="rectangle">
+  <rect x="106.69" y="193.8" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="212.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">投影运行时上下文快照</text>
+</g>
+<g class="node" data-id="D" data-label="进入 agent/pre-step 瀑布" data-shape="rectangle">
+  <rect x="105.949" y="270.70000000000005" width="191.63199999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="289.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">进入 agent/pre-step 瀑布</text>
+</g>
+<g class="node" data-id="E" data-label="默认末端给出已认领消息加上下文" data-shape="rectangle">
+  <rect x="69.63999999999999" y="347.6" width="264.25" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="366.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">默认末端给出已认领消息加上下文</text>
+</g>
+<g class="node" data-id="F" data-label="目录监听器确认 skill 工具还是自己那个" data-shape="rectangle">
+  <rect x="55.56100000000001" y="424.5" width="292.40799999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="442.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">目录监听器确认 skill 工具还是自己那个</text>
+</g>
+<g class="node" data-id="G" data-label="取快照 过滤 截断 算指纹" data-shape="rectangle">
+  <rect x="103.35549999999999" y="501.4" width="196.819" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="519.85" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">取快照 过滤 截断 算指纹</text>
+</g>
+<g class="node" data-id="H" data-label="和历史比对 决定追加还是原地替换" data-shape="rectangle">
+  <rect x="68.52850000000001" y="578.3" width="266.47299999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="596.75" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">和历史比对 决定追加还是原地替换</text>
+</g>
+<g class="node" data-id="I" data-label="手势监听器扫描本步用户消息里的斜杠名字" data-shape="rectangle">
+  <rect x="40" y="655.1999999999999" width="323.53" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="673.65" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">手势监听器扫描本步用户消息里的斜杠名字</text>
+</g>
+<g class="node" data-id="J" data-label="逐个加载并渲染成指令体" data-shape="rectangle">
+  <rect x="99.28" y="732.0999999999999" width="204.96999999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="750.55" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">逐个加载并渲染成指令体</text>
+</g>
+<g class="node" data-id="K" data-label="按顺序追加到本步消息末尾" data-shape="rectangle">
+  <rect x="91.87" y="808.9999999999999" width="219.78999999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="827.4499999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">按顺序追加到本步消息末尾</text>
+</g>
+<g class="node" data-id="L" data-label="首次尝试时逐条落成 user 消息事件" data-shape="rectangle">
+  <rect x="68.15799999999999" y="885.8999999999999" width="267.214" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="904.3499999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">首次尝试时逐条落成 user 消息事件</text>
+</g>
+<g class="node" data-id="M" data-label="模型请求从日志派生" data-shape="rectangle">
+  <rect x="114.1" y="962.7999999999998" width="175.32999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.765" y="981.2499999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">模型请求从日志派生</text>
+</g>
+</svg>

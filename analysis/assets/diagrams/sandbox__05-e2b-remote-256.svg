@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 591.424 656.8000000000001" width="591.424" height="656.8000000000001" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="_start" data-to="Connecting" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="this.ready = this.open()" points="362.70550000000003,68 362.70550000000003,168.3" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Connecting" data-to="Ready" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="cwd/runtimeRoot 就绪 + chmod 700" points="344.5988333333334,205.2 344.5988333333334,233.2 237.93700000000007,233.2 237.937,313.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Connecting" data-to="Failed" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="已做一次 kill 回滚" points="380.8121666666667,205.2 380.8121666666667,233.2 487.47400000000005,233.2 487.47400000000005,313.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Ready" data-to="Ready" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getSandbox() 返回同一句柄" points="197.69600000000003,325.8 187.69600000000003,333.80000000000007 187.69600000000003,346.1000000000001 197.69600000000003,338.1" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Failed" data-to="Failed" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getSandbox() 抛原始错误" points="447.97400000000005,325.8 437.97400000000005,317.80000000000007 437.97400000000005,330.1000000000001 447.97400000000005,338.1" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Ready" data-to="Disposing" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="disposer 置 disposed" points="237.937,350.4 237.93700000000007,430.70000000000005 345.8338333333334,430.70000000000005 345.8338333333334,442.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Failed" data-to="Disposing" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="置 disposed 后直接返回" points="487.47400000000005,350.4 487.47400000000005,430.70000000000005 379.57716666666676,430.70000000000005 379.57716666666676,442.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Disposing" data-to="Killed" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="sandbox.kill()" points="362.7055000000001,479.6 362.70550000000003,579.9000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="_start" data-to="Connecting" data-label="this.ready = this.open()">
+  <rect x="300.70550000000003" y="103" width="123.38200000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="362.39650000000006" y="118.15" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">this.ready = this.open()</text>
+</g>
+<g class="edge-label" data-from="Connecting" data-to="Ready" data-label="cwd/runtimeRoot 就绪 + chmod 700">
+  <rect x="146.93700000000007" y="240.2" width="181.00000000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="237.43700000000007" y="255.35" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">cwd/runtimeRoot 就绪 + chmod 700</text>
+</g>
+<g class="edge-label" data-from="Connecting" data-to="Failed" data-label="已做一次 kill 回滚">
+  <rect x="434.47400000000005" y="240.2" width="105.56200000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="487.25500000000005" y="255.35" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">已做一次 kill 回滚</text>
+</g>
+<g class="edge-label" data-from="Ready" data-to="Ready" data-label="getSandbox() 返回同一句柄">
+  <rect x="36.019999999999996" y="324.8" width="153.67600000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="112.858" y="339.95" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getSandbox() 返回同一句柄</text>
+</g>
+<g class="edge-label" data-from="Failed" data-to="Failed" data-label="getSandbox() 抛原始错误">
+  <rect x="298.178" y="308.8" width="141.796" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="369.076" y="323.95" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getSandbox() 抛原始错误</text>
+</g>
+<g class="edge-label" data-from="Ready" data-to="Disposing" data-label="disposer 置 disposed">
+  <rect x="177.93700000000007" y="393.40000000000003" width="119.81800000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="237.8460000000001" y="408.55" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">disposer 置 disposed</text>
+</g>
+<g class="edge-label" data-from="Failed" data-to="Disposing" data-label="置 disposed 后直接返回">
+  <rect x="418.97400000000005" y="377.40000000000003" width="136.45000000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="487.19900000000007" y="392.55" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">置 disposed 后直接返回</text>
+</g>
+<g class="edge-label" data-from="Disposing" data-to="Killed" data-label="sandbox.kill()">
+  <rect x="322.2055000000001" y="514.6000000000001" width="80.61400000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="362.5125000000001" y="529.7500000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">sandbox.kill()</text>
+</g>
+<g class="node" data-id="_start" data-label="" data-shape="state-start">
+  <circle cx="362.70550000000003" cy="54" r="12" fill="var(--_text)" stroke="none" />
+</g>
+<g class="node" data-id="Connecting" data-label="Connecting" data-shape="rounded">
+  <rect x="308.38550000000004" y="168.3" width="108.64" height="36.900000000000006" rx="6" ry="6" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="362.70550000000003" y="186.75" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Connecting</text>
+</g>
+<g class="node" data-id="Ready" data-label="Ready" data-shape="rounded">
+  <rect x="197.69600000000003" y="313.5" width="80.482" height="36.900000000000006" rx="6" ry="6" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="237.937" y="331.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Ready</text>
+</g>
+<g class="node" data-id="Failed" data-label="Failed" data-shape="rounded">
+  <rect x="447.97400000000005" y="313.5" width="79" height="36.900000000000006" rx="6" ry="6" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="487.47400000000005" y="331.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Failed</text>
+</g>
+<g class="node" data-id="Disposing" data-label="Disposing" data-shape="rounded">
+  <rect x="312.0905000000001" y="442.70000000000005" width="101.22999999999999" height="36.900000000000006" rx="6" ry="6" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="362.7055000000001" y="461.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Disposing</text>
+</g>
+<g class="node" data-id="Killed" data-label="Killed" data-shape="rounded">
+  <rect x="325.42850000000004" y="579.9000000000001" width="74.554" height="36.900000000000006" rx="6" ry="6" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="362.70550000000003" y="598.3500000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Killed</text>
+</g>
+</svg>

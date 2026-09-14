@@ -19,6 +19,8 @@ DeepSeek Harness(dsh)是**一个"一切皆插件"的 Cordis 应用**:没有可�
 4. **框架层完全自有**。Cordis 及其基础库被源码级 vendor 进 `vendor/` 并重定名到 `@deepseek-ai/*` 作用域(`vendor/README.md:5`),累计 19 条记录在案的本地修改(fiber 生命周期加固、事务化 Loader/Include 协调、HMR 精确配置监听等),harness 完全拥有自己的框架层。
 5. **应用形态只有三种入口**:`apps/cli`(dsh 启动器,web/headless/sdk/sdk-minimal/acp 五种出厂 profile)、`apps/web`(Vite 浏览器壳,由 `dsh web` 的 host 半服务)、`apps/desktop`(Electron 壳,不开任何监听端口,以 `dsh-app://` + 帧字节管道替代 Web 服务器)。
 
+这张图是本章的门面,读法很简单:**从上往下的四格是启动链**——命令行 → 启动胶 → 框架层 → 核心服务,每一条向下的箭头代表一次装配动作;到"核心服务"这一格之后画面分叉,左边一列是横向铺开的能力缝插件群,右边一列是驱动它们的主循环。图里没有颜色编码,分层只靠缩进与方框:一个方框就是一层,方框里的 `ctx.x` 是插件之间互相查找服务的稳定键名,不是全局变量。最底部的 `▲` 箭头表示"由下向上安装":`apps/web`、SDK、Desktop/ACP 这三种暴露面不是新的层级,而是同一棵插件树面向进程外的出口。
+
 ```text
                         ┌────────────────────────────────────────────────────┐
                         │  apps/cli  dsh 启动器(bin.ts → args.ts)           │
@@ -377,19 +379,27 @@ export async function boot(
 
 boot 完成后,`patchReload: 'live'` 的 profile(`web` 与自定义 profile)安装两个 `watchUserPatches` 监听(profile 层与 home 层,`profile-boot.ts:372-381`):文件变化 → 重新分层合成 `composeLive()`(`profile-boot.ts:328-333`,bundle 层在下、overlay 在上,用户编辑永远无法顶掉它们)→ 经 HMR `registerConfig` 回调对根 Include 做事务化 `entry.update`。若组合没挂 HMR 服务,启动器补挂一个 `root: []` 的仅监听实例(`profile-boot.ts:366-371`)。`headless`/`sdk`/`acp` 用 `startup`:所有层只在启动时应用一次,因为"替换一个已经占有工作的一次性或 stdio 应用的依赖会使其生命周期失效"(`docs/architecture.md:29`)。进程寿命交还插件:SIGTERM 退出 0、SIGINT 退出 130(`profile-boot.ts:309-310`),`ctx.appExit(code)` 走有界关闭。
 
+把第三节讲的启动链压成一张流程图:**前半段是"把配置变成一张表"**(环境快照 → 层叠合成 → 补丁应用),**后半段是"把表变成活插件"**(并发挂载 → 服务可用性驱动激活 → 激活审计),标着"有"的那条失败分支只做一件事——处置半成品树并报错退出,不静默降级。图上不再标函数名,对应的符号在同一节的正文里逐一给出。
+
+![流程图：01-architecture-overview](./assets/diagrams/01-architecture-overview-384.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
-  A["dsh --profile web [app args]"] --> B["bin.ts: parseDshArgs<br/>launcher flags / inner args 切分"]
-  B --> C["loadLayeredEnv<br/>inherited > project .env > home .env 快照"]
-  C --> D["composeProfile<br/>bundle 层 → profile 层 → home 层 → --patch → telemetry"]
-  D --> E["boot(): new Context → plugin(Loader) → prepare 注入<br/>cmdlineArgs/appExit/appReady/启动环境快照"]
-  E --> F["mountRootInclude: Include(空 cordis.yml + applyEntryPatches)"]
-  F --> G["Loader 并发挂载条目;inject 驱动激活"]
-  G --> H{"assertEntriesActivated<br/>FAILED/PENDING?"}
-  H -- 是 --> I["dispose 半成品树,带栈抛出 / exit 1"]
-  H -- 否 --> J["live profile: watchUserPatches × 2(HMR 精确监听)"]
-  J --> K["appReady.commit();进程寿命交还插件"]
+  A["启动:一条 dsh 命令"] --> B["命令行裁决:启动器旗标与内层参数切分"]
+  B --> C["环境快照:继承环境 高于 项目 .env 高于 家目录 .env"]
+  C --> D["层叠合成:bundle 层、profile 层、home 层、命令行叠加层、遥测层"]
+  D --> E["装配:新建上下文、装入 Loader、注入命令行服务"]
+  E --> F["挂载根 Include:空根配置文件加一次补丁合成"]
+  F --> G["加载器并发挂载条目:服务可用性驱动激活"]
+  G --> H{"激活审计:有失败或挂起的条目吗"}
+  H -->|有| I["处置半成品树并带栈报错退出"]
+  H -->|没有| J["热更新模式:对两个用户层装精确监听"]
+  J --> K["宣布就绪:进程寿命交还插件"]
 ```
+
+</details>
 
 ---
 
@@ -422,7 +432,7 @@ Desktop 是"Electron shell around the dsh Web UI",**不开任何监听端口**:�
 
 ## 第五节 模块依赖主干
 
-依赖图由 `scripts/gen-module-graph.ts` 生成并保鲜门禁于 CI(`packages/README.md:93`);`docs/module-graph.md:6` 说明其语义:只画 `@deepseek-ai/dsh-*` 包之间的 **peer 依赖**(消费者要求共享实例),`a --> b` 表示 a 把 b 声明为 peer。主干事实(边均出自 `docs/module-graph.md`):
+这张依赖图由 `scripts/gen-module-graph.ts` 生成,并由 CI 的保鲜门禁守着不让它过期(`packages/README.md:93`)。它只画 `@deepseek-ai/dsh-*` 包之间的 **peer 依赖**——也就是"消费者要求共享同一个实例"的那种依赖,`a --> b` 读作"a 把 b 声明为 peer"(语义说明见 `docs/module-graph.md:6`)。主干事实如下,边均出自 `docs/module-graph.md`:
 
 ![流程图：01-architecture-overview](./assets/diagrams/01-architecture-overview-427.svg)
 

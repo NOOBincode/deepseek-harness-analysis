@@ -18,6 +18,44 @@ DSH 的 MCP 集成是**一个 Cordis 桥接插件**(`@deepseek-ai/dsh-mcp-client
 3. **发现是配置驱动 + 协议驱动两层**:静态层由 `cordis.yml` 声明服务器;动态层由 MCP 协议的 `tools/list`(含分页)和 `notifications/tools/list_changed` 驱动。
 4. **主循环零感知**:MCP 工具经 `ctx.tools.register()` 进入 `ToolRuntime` 后,对 agent-loop 而言与内置工具无异——同一套 schema 投影、同一套并行调度、同一套审批/守卫管道。
 
+这一段讲的是**一个外部 MCP 工具从配置声明到被模型调用的完整生命周期**,也是全文的路线图。上半段是"发现与注册":把外部服务器上的工具变成注册表里一件普通工具;下半段是"使用":模型发出的调用怎么绕回外部服务器,结果又怎么回流成下一步的上下文。之所以要拉出这么长一条链,是因为 DSH 刻意不把 MCP 写进主循环——工具注册完之后与内置工具完全同构,主循环根本不知道 MCP 的存在。异常因此只影响链条的局部:服务器掉线由插件自己重连,工具列表变了由插件自己重新同步,主循环始终只看到一份稳定的工具表。
+
+![流程图：06-mcp](./assets/diagrams/06-mcp-23.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A["配置里声明一台 MCP 服务器"] --> B["插件激活时校验配置与命名"]
+  B --> C["建立连接通道"]
+  C --> D["拉取并同步工具列表"]
+  L["服务器通知工具列表有变"] --> D
+  D --> E["注册进全局工具注册表"]
+  E --> F["投影为模型可见的工具定义"]
+  F --> G["随请求发给模型"]
+  G --> H["模型产出工具调用"]
+  H --> I["策略审批与守卫管道"]
+  I --> J["以服务器原始工具名调用"]
+  J --> K["结果回流为下一步的上下文"]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 声明 | 每台外部服务器在 `cordis.yml` 里就是一条插件记录;ACP 客户端还能在会话创建时动态挂载 | `acp/acp/src/mcp.ts:26` |
+| 校验与命名预订 | 校验 Config,并在注册作用域内预订 `serverName`,重名的后到者直接加载失败 | `mcp-client/src/index.ts:146` |
+| 建立连接 | 按 `transport` 字段分派:要么拉起 stdio 子进程,要么连 Streamable HTTP | `mcp-client/src/transport.ts:31` |
+| 发现工具 | 分页排空 `tools/list`;同名工具重复或游标重复都判为服务器故障,保留旧工具表 | `mcp-client/src/tools.ts:144` |
+| 注册 | 每个工具以统一公开名 `mcp__<server>__<tool>` 进全局工具注册表 | `mcp-client/src/tools.ts:112` |
+| 进系统提示 | 作用域内可见的工具被投影成名字、描述、参数三字段;执行与展示回调不进模型视野 | `core/tools/src/index.ts:972` |
+| 进模型请求 | 每个 step 重新组装一次工具表;工具集有变化会额外落一条 `request/header` 会话事件 | `core/agent-loop/src/agent.ts:245`、`:553` |
+| 模型发起调用 | 从 assistant 消息里检出工具调用块,按并发模式分组后逐个派发 | `core/agent-loop/src/tool-calls.ts:60` |
+| 回到服务器 | 执行器用服务器原始工具名发 `tools/call`,取消信号与默认 60 秒超时一路透传 | `mcp-client/src/tools.ts:81`、`:91`、`:93` |
+| 结果回流 | 结果按模型给出的顺序提交,落 `tool/result` 事件,再作为下一步上下文回流 | `core/agent-loop/src/tool-calls.ts:60`、`:312` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 +-------------------------+        spawn / HTTP        +----------------------+
 | cordis.yml / ACP 声明   |                            | 外部 MCP 服务器        |
@@ -55,6 +93,8 @@ DSH 的 MCP 集成是**一个 Cordis 桥接插件**(`@deepseek-ai/dsh-mcp-client
                                                        v
                                               回流模型(下一步)
 ```
+
+</details>
 
 ---
 
@@ -135,7 +175,7 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
 
 ### 1.3 传输建立:`createTransport`
 
-`packages/mcp/mcp-client/src/transport.ts:31` 是一个判别式工厂:
+传输层是一个按 `transport` 字段分派的工厂:同一个入口,要么产出拉起子进程的 stdio 传输,要么产出 Streamable HTTP 传输(`transport.ts:31`)。
 
 ```typescript
 export function createTransport(config: Config): Transport {
@@ -159,6 +199,43 @@ stdio 路径的关键是 `buildChildEnv`(`transport.ts:21`):子进程环境 = �
 
 发现的核心在 `packages/mcp/mcp-client/src/tools.ts:144` 的 `syncTools`。它用**两阶段代际替换**保证模型要么看到完整的上一代工具表,要么看到完整的新一代,永远看不到半个列表:
 
+工具同步用的是"先在旁边把新一代建好、再一次性换上去"的两阶段做法。第一阶段只做拉取和构建,完全不碰注册表;第二阶段才撤掉旧一代、注册新一代。这样模型看到的工具表永远是完整的一代:要么旧的一整份,要么新的一整份,不会撞见换到一半的中间状态。失败也被这两阶段分得很干净——第一阶段出错就整批放弃,旧代照常服务;第二阶段出错则回滚本次已注册的部分,并留下一声响亮的报错。
+
+![流程图：06-mcp](./assets/diagrams/06-mcp-198.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A["开始一次工具同步"] --> B["按页拉取工具直到没有下一页"]
+  B --> C{"同一个工具名出现两次"}
+  C -->|是| Z["放弃本次同步并继续用旧一代"]
+  C -->|否| D{"分页游标回到出现过的值"}
+  D -->|是| Z
+  D -->|否| E["为每个工具生成公开名与执行定义"]
+  E --> F["在旁路构建出完整的新一代"]
+  F --> G["撤销上一代的全部注册"]
+  G --> H["逐个注册新一代工具"]
+  H --> I{"命名空间被外部注册抢占"}
+  I -->|是| J["回滚本次已注册的工具"]
+  I -->|否| K["新一代工具开始服务"]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 第一阶段 · 拉取分页 | 循环请求工具列表直到服务器不再给出下一页游标;不使用 SDK 的便捷方法,以便自己掌控传输后的 JSON 校验 | `mcp-client/src/tools.ts:155`、`:73` |
+| 第一阶段 · 判重名 | 服务器把同名工具列出两次即判为无效列表,整批放弃,旧代继续服务 | `mcp-client/src/tools.ts:158` |
+| 第一阶段 · 防游标死循环 | 记住本次同步用过的所有游标,游标回到出现过的值就拒绝整个列表 | `mcp-client/src/tools.ts:177` |
+| 第一阶段 · 构建新代 | 为每个工具算出公开名并构建执行定义,写进一个尚未生效的映射表 | `mcp-client/src/tools.ts:163`、`:112` |
+| 第二阶段 · 撤旧代 | 依次执行上一代每个注册项的 dispose 回调 | `mcp-client/src/tools.ts:187` |
+| 第二阶段 · 注册新代 | 逐个把新定义注册进全局工具注册表 | `mcp-client/src/tools.ts:191` |
+| 第二阶段 · 冲突回滚 | 命名空间被外部注册抢占时,撤销本次已注册的全部工具,回到零工具并响亮报错 | `mcp-client/src/tools.ts:197` |
+| 同步串行化 | 初始同步与通知触发的重同步全部挂在同一条 promise 链上,避免两次换代的撤旧与注册交错 | `mcp-client/src/connection.ts:161` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 阶段一 fetch(不触碰注册表)
   ├─ do { tools/list(cursor) } while (nextCursor)     ← 排空分页
@@ -173,6 +250,8 @@ stdio 路径的关键是 `buildChildEnv`(`transport.ts:21`):子进程环境 = �
   └─ 冲突(外部注册抢占 mcp__<serverName>__ 命名空间)
        → 回滚已注册的半代(零工具) + 响亮报错;startup 严格模式继续上抛
 ```
+
+</details>
 
 对应代码(`tools.ts:150-203`):
 
@@ -209,7 +288,7 @@ try {
 
 三个非显而易见的设计决策:
 
-1. **`listToolsUncached` / `callToolUncached`(`tools.ts:73,81`)绕过 MCP SDK 的便捷方法**,直接 `client.request(...)`:SDK 的 `listTools`/`callTool` 内置按页 output-schema 校验缓存,可能用桥不支持的模式预校验;桥要自己拥有传输后的 JSON 校验权(`RawCallToolResultSchema = z.record(z.string(), z.unknown())`)。
+1. **桥要自己掌握传输之后的 JSON 校验权,所以不用 SDK 的便捷方法。** `listToolsUncached` / `callToolUncached` 直接发协议请求,而 SDK 的 `listTools`/`callTool` 内置了按页 output-schema 校验缓存,可能用桥不支持的模式做预校验;桥要的正是自行校验收到的 JSON(`RawCallToolResultSchema = z.record(z.string(), z.unknown())`,`tools.ts:73`、`:81`)。
 2. **重复 cursor 检测**:空页无法靠工具名唯一性证明推进,所以维护本次同步内的 cursor 历史,发现环即拒绝整个列表(真实事故驱动,见官方 note 引用的 discussion #3660)。
 3. **工具schema 原样透传**:MCP 的 JSON Schema 和 description 不经任何 DSL 转换直接进注册表("garbage-in-garbage-out 是服务器作者的责任");只有 `outputSchema` 会经 `assertSupportedJsonSchema` 过滤,不支持的词汇降级为宽松 schema(`tools.ts:231`)。
 
@@ -288,6 +367,52 @@ flowchart LR
 
 主循环 `ReactLoopAgent.step()`(`agent-loop/src/agent.ts:352`)在 assistant 消息中检出 tool-call 块后,交给 `executeToolCalls`(`agent-loop/src/tool-calls.ts:60`)。全链路伪代码改写如下:
 
+这一段是**模型发出一次工具调用之后真正发生的事**:调用先被解析并落日志,再过策略管道(插件可以在这里改写或拦截)、审批和守卫,然后才派发到 MCP 桥的执行器。执行器用服务器的原始工具名发 `tools/call`,把结果归一成内容数组后,按模型给出的顺序提交回会话。对 MCP 而言最要紧的一点是管道全程没有特例:审批规则看到的只是 `mcp__github__create_issue` 这样的普通名字,取消信号和超时也照常一路透传下去。
+
+![时序图：06-mcp](./assets/diagrams/06-mcp-360.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant M as 模型
+    participant L as 主循环步进
+    participant P as 策略与审批管道
+    participant T as 工具注册表
+    participant B as MCP 桥接执行器
+    participant S as 外部 MCP 服务器
+    M->>L: 返回带工具调用的消息
+    L->>T: 解析参数并按名字取出工具
+    T->>P: 前置瀑布与审批守卫
+    P-->>T: 放行或拒绝
+    T->>B: 派发执行并透传取消信号
+    B->>S: 以服务器原始工具名发起调用
+    S-->>B: 返回内容块或错误标记
+    B-->>T: 归一为内容数组并处理图片
+    T->>L: 按模型给出的顺序提交结果
+    L->>M: 结果作为下一步上下文回流
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 取出调用 | 从本步 assistant 消息里过滤出工具调用块,逐个准备派发 | `core/agent-loop/src/tool-calls.ts:60` |
+| 参数解析 | 参数文本解析失败就保留原文,空输入按空对象处理,让工具自己报缺参 | `core/agent-loop/src/tool-calls.ts:60` |
+| 并发分组 | 按工具声明的并发模式分组:可并行的进有界滚动池,独占的等前面的调用全部结束 | `core/agent-loop/src/tool-calls.ts:89` |
+| 落调用事件 | 每个调用先写一条 `tool/call` 会话事件,再谈执行 | `core/agent-loop/src/tool-calls.ts:168` |
+| 前置瀑布与审批 | 插件可在 `tools/pre-execute` 瀑布里改写或拦截;需要审批的走 ask,守卫只可否决、不能强放 | `core/tools/src/index.ts:446` |
+| 派发执行 | 过了策略的调用交给调度器,由它调用工具体 | `core/tools/src/index.ts:1522` |
+| 桥接执行器 | 执行器把参数转给 MCP 的调用接口,取消信号与默认 60 秒请求超时一起下去 | `mcp-client/src/tools.ts:330`、`:91`、`:93` |
+| 发起协议调用 | 发给服务器的是 `rawName` 原文,永远不是模型看到的公开名 | `mcp-client/src/tools.ts:81` |
+| 错误归一 | 服务器标记 `isError` 时抛错,由注册表统一产出模型可见的错误结果 | `mcp-client/src/tools.ts:330` |
+| 结果归一 | 旧式 `toolResult` 形状统一成内容数组;含图片时转入图片准入与投影 | `mcp-client/src/tools.ts:366` |
+| 按序提交 | 结果按模型给出的顺序提交,逐个落 `tool/result` 会话事件 | `core/agent-loop/src/tool-calls.ts:147` |
+| 上下文回流 | 结果消息进下一步的收件箱,下一个 step 随上下文回到模型 | `core/agent-loop/src/agent.ts:490` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 ReactLoopAgent.step()
   └─ stream 完成 → message.content 中过滤出 tool-call 块
@@ -312,6 +437,8 @@ ReactLoopAgent.step()
        └─ 结果消息进 inbox('next-step') → 下一 step 随上下文回流模型
 ```
 
+</details>
+
 对 MCP 而言,关键的事实是**管道对 MCP 无特例**:
 
 - 审批与守卫:`tools/pre-execute` 瀑布和 guard 看到的是 `mcp__github__create_issue` 这样的普通名字,权限规则因此可以用 `mcp__github__*` 这类前缀形态稳定匹配——这正是命名契约里 `mcp__` 标记买来的能力。
@@ -335,6 +462,42 @@ export type McpResult<Structured extends JsonValue = JsonValue> = {
 
 图片走准入制,伪代码:
 
+工具结果里带图片时,桥不会把图片直接塞进模型上下文,而是先过两道闸门。第一道是整批严格解码:格式必须落在 png/jpeg/webp/gif 之内,base64 必须是规范写法,只要有一块不合格,整批图片就一起降级成一行诊断文本——绝不出现"部分图片被引用"的半成品。第二道是能力准入:既要挂着持久化附件库,又要调用方当前那个精确模型路由明确声明支持图像输入,缺任一条同样整批降级。两道都过了才落盘,并投影成图片引用块,保持原来的位置顺序。
+
+![流程图：06-mcp](./assets/diagrams/06-mcp-449.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A["工具结果里带有图片块"] --> B["整批严格解码并校验格式与编码"]
+  B --> C{"每一块都合格吗"}
+  C -->|否| D["整批降级为诊断文本"]
+  C -->|是| E{"持久化附件库已挂载吗"}
+  E -->|否| D
+  E -->|是| F{"当前模型路由声明支持图像吗"}
+  F -->|否| D
+  F -->|是| G["写入附件库并拿到持久引用"]
+  G --> H["投影为图片块并保持原有位序"]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 整批解码 | 逐块解码图片,格式限 png/jpeg/webp/gif,base64 必须是规范写法 | `mcp-client/src/tools.ts:443`、`:456` |
+| 整批否决 | 只要有一块不合格,就整批投影成诊断文本,不保留任何部分引用 | `mcp-client/src/tools.ts:462` |
+| 准入 · 附件库 | 必须挂载附件库服务,否则拒绝 | `mcp-client/src/tools.ts:410` |
+| 准入 · 精确路由 | 取调用方 Agent 当前请求头里的 provider 与 model,解析不出来即拒绝 | `mcp-client/src/tools.ts:412` |
+| 准入 · 能力声明 | 模型信息里必须显式声明支持图像输入,缺声明即拒绝 | `mcp-client/src/tools.ts:425` |
+| 准入失败 | 准入过程中的任何原因都整批降级为诊断文本,并把原因写进占位文本 | `mcp-client/src/tools.ts:474`、`:478` |
+| 持久化 | 把解码结果写进附件库,拿到持久引用 | `mcp-client/src/tools.ts:482` |
+| 投影 | 投影成图片引用块并按原始下标放回原位,文本段落保持换行合并 | `mcp-client/src/tools.ts:484`、`:519` |
+| 存储失败 | 落盘失败同样整批降级为诊断文本 | `mcp-client/src/tools.ts:492` |
+| 富投影交接 | 执行器把富投影暂存起来,注册表事后比对"值仍是原规范值且回退内容未变"才安装 | `mcp-client/src/tools.ts:272`、`:277` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 execute 返回含 image 块
   └─ prepareImageProjection()
@@ -350,6 +513,8 @@ execute 返回含 image 块
        └─ 投影为 { type:'image', attachment: ref } 块,保持原位序
 ```
 
+</details>
+
 投影的交接用了防竞态设计:executor 把富投影暂存在**以本次执行为键的 WeakMap**(`tools.ts:265`),`output.render` 保持同步纯函数;`finalizeContent`(`tools.ts:272`)只在注册表的事后结果**仍是原规范值且原回退内容**(`isDeepStrictEqual` 双比对)时才安装富投影——策略拦截、值替换或一次重同步都不会让旧代消费新执行的状态。
 
 ---
@@ -357,6 +522,53 @@ execute 返回含 image 块
 ## 第三节 连接监管:代际模型与有界重连
 
 `connection.ts` 的 supervisor 是可靠性核心,抽象为**代际(generation)**模型:一次连接尝试 = 新 `Client` + 新 transport(MCP SDK 把一个 Protocol 终身绑定到一个 transport,故重连必须整体换新),全局只有一个"当前代",`isCurrent()` 闸门(`connection.ts:153`)使过期代的 close/error/通知回调幂等失效。
+
+连接监管把每一次连接尝试做成一个**世代**:新建客户端和新传输,全局只认最后一个成功建立的世代,过期世代靠一道闸门把自己的关闭、报错、通知回调统统变成空操作。这样重连时不必小心翼翼地区分"这条通知来自哪次连接",也不会出现两代互相踩踏。它必须整体换新的原因是 MCP 的协议对象一旦绑定传输就终身不变,断线只能重建。掉线按指数退避重连,但同一次故障里共享一份有限的尝试预算;预算耗尽后插件会注销全部工具彻底停摆,只留下 dispose 或热替换一条复活路径——这比留一堆必然失败的工具要诚实。
+
+![流程图：06-mcp](./assets/diagrams/06-mcp-504.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A["开始一次连接尝试"] --> B["新建客户端与传输并连接"]
+  B --> C["排队执行一次工具同步"]
+  C --> D{"连接与同步是否成功"}
+  D -->|否| E["记录首次失败并关闭该世代"]
+  D -->|是| F["登记为当前世代并开始服务"]
+  F --> G{"连接是否断开"}
+  G -->|否| F
+  G -->|是| E
+  E --> H{"重连是否启用"}
+  H -->|否| I["报错并停摆"]
+  H -->|是| J{"上一段连接是否活过稳定窗口"}
+  J -->|是| K["重置失败计数"]
+  J -->|否| L["失败计数加一"]
+  K --> L
+  L --> M{"是否超过尝试上限"}
+  M -->|是| N["注销全部工具并停摆"]
+  M -->|否| O["按指数退避等待后重试"]
+  O --> A
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 建世代 | 每次尝试都新建客户端与传输;MCP 的协议对象终身绑定一个传输,重连只能整体换新 | `mcp-client/src/connection.ts:237` |
+| 连接与首次同步 | 连接成功后排队一次工具同步;工具变更的通知处理器在连接之前就注册好,免得初始同步期间的变更丢失 | `mcp-client/src/connection.ts:257`、`:272` |
+| 当前代闸门 | 只有当前世代能行动,过期世代的关闭、报错、通知回调一律变成空操作 | `mcp-client/src/connection.ts:153` |
+| 连接成功 | 记下连接建立时间,之后由关闭信号触发下线判断 | `mcp-client/src/connection.ts:303`、`:248` |
+| 连接失败 | 记下首次失败原因,关闭当前世代,再等一个 5 秒上限的关闭屏障 | `mcp-client/src/connection.ts:284`、`:285` |
+| 关闭超时 | 世代没在时限内关闭就停止重连,避免两个服务器子进程重叠 | `mcp-client/src/connection.ts:288` |
+| 重连被禁用 | 只报错并停摆;已注册的工具会一直调用失败,直到热替换或重启宿主 | `mcp-client/src/connection.ts:194` |
+| 稳定窗口 | 上一段连接活过最长退避间隔就视为上一次故障结束,失败计数清零,新故障重新计预算 | `mcp-client/src/connection.ts:203` |
+| 预算耗尽 | 失败次数超过上限后注销全部工具、彻底停摆,只有 dispose 或热替换能复活 | `mcp-client/src/connection.ts:206`、`:210` |
+| 退避重试 | 等待时间从初始值翻倍增长并封顶到最长间隔,定时器不阻止进程退出 | `mcp-client/src/connection.ts:216`、`:224` |
+| 同步串行化 | 所有世代的同步共用一条 promise 链,避免两次换代的撤旧与注册交错 | `mcp-client/src/connection.ts:161` |
+| 平息式终止 | 先清重连定时器,关当前世代并等它关闭,再等在途连接与排队同步收敛,最后才注销工具 | `mcp-client/src/connection.ts:327`、`:345`、`:347` |
+
+<details><summary>原图(供逐行核对)</summary>
 
 ```text
 connectGeneration(startup)
@@ -372,6 +584,8 @@ generationDown() → scheduleReconnect()
   │    → 注销全部工具,彻底停摆;只有 dispose/HMR 能复活
   └─ delay = min(maxDelayMs, 500ms × 2^(n-1)) → setTimeout(unref) → connectGeneration(false)
 ```
+
+</details>
 
 默认值(`RECONNECT_DEFAULTS`,`connection.ts:40`):`enabled: true`、`initialDelayMs: 500`、`maxDelayMs: 30_000`、`maxAttempts: 10`。
 

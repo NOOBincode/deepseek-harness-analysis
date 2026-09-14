@@ -112,7 +112,9 @@ frontmatter 解析(`parseFrontmatter`,`skill-filesystem/src/index.ts:917`)是**�
 | 500 | `user-agents` | `<agentsHome>/skills` | `$DSH_AGENTS_HOME` 或 `~/.agents` |
 | 600 | `bundled` | `Config.bundledSkillDir` / `$DSH_BUNDLED_SKILL_DIR` | `trustedHost: true`,绕过 `ctx.fs` 直读宿主机 |
 
-**项目根 = 含 `.git` 的最近祖先**,找不到就退回 cwd 本身(`findProjectRoot`,`skill-filesystem/src/index.ts:945-955`);有 `ctx.fs` 时 `.git` 探测走文件系统服务,沙箱/远程工作区不会落回宿主机边界。rank 数字即"层内同名裁决"的权重:**小的赢**(project > custom > user > bundled),与 Claude Code 的 project > user 优先级同向。`source` 字段是提示可见的元数据,本身不参与裁决(`skill/src/index.ts:39` 注释:"prompt-visible metadata, not precedence by itself")。
+项目根取"含 `.git` 的最近祖先",找不到就退回 cwd 本身(`findProjectRoot`,`skill-filesystem/src/index.ts:945-955`)。当 `ctx.fs` 存在时,`.git` 探测走文件系统服务,沙箱或远程工作区不会落回宿主机边界。
+
+rank 数字是"层内同名裁决"的权重,**小的赢**:project(100/200)> custom(300)> user(400/500)> bundled(600)。这个方向与 Claude Code 的 project > user 一致。`source` 字段只是提示可见的元数据,本身不参与裁决——源码注释写得很直接:prompt-visible metadata, not precedence by itself(`skill/src/index.ts:39`)。
 
 读取路径分双轨(`readSkillText`,`skill-filesystem/src/index.ts:846-860`):非 `trustedHost` 根且存在 `ctx.fs` 服务时走 `fs.resolve/stat/readText`(受沙箱策略约束);`bundled` 根或没有 fs 服务时走 Node `realpath + readFile`。`FS_NOT_TEXT`(二进制)等错误只让该文件被忽略,不炸整个发现(`skill-filesystem/src/index.ts:884-892`)。
 
@@ -240,7 +242,13 @@ export function apply(ctx: Context, config: Config = {}): void {
 
 所有失效都经 `control.invalidate()` 回到注册表的统一失效语义(2.3);provider dispose 是平息式的:清 roots/projects、等 opening 中的 watcher、逐个 close(`index.ts:343-355`)。
 
-**两条降级路径必须区分**(函数级细节见 [`skills/01-skill-format-and-discovery.md`](./skills/01-skill-format-and-discovery.md)):watcher 启动失败时 `list()` 的 try 只包住 watcher 启动,可读候选照常返回、本次观测标记 `complete: false`;而**目录扫描抛非"路径不存在"错误时会穿出 `list()`**,由注册表 `listLayerCandidates`(`packages/skill/skill/src/index.ts:604-608`)兜成"该 provider 本轮零候选 + incomplete"。前者是部分视界,后者是整层缺席——依赖 skill 目录的下游判断应据此区分"扫不全"与"没有"。
+这里有两条降级路径,必须区分开(函数级细节见 [`skills/01-skill-format-and-discovery.md`](./skills/01-skill-format-and-discovery.md))。
+
+第一条是 watcher 启动失败。`list()` 里的 try 只包住 watcher 启动这一段,可读候选照常返回,只是本次观测被标记为 `complete: false`。结果叫**部分视界**。
+
+第二条是目录扫描抛出非"路径不存在"的错误。这时异常会穿出 `list()`,由注册表的 `listLayerCandidates`(`packages/skill/skill/src/index.ts:604-608`)兜住,变成"该 provider 本轮零候选且不完整"。结果叫**整层缺席**。
+
+下游依赖 skill 目录的判断,应据此区分"扫不全"和"根本没有"。
 
 另一个打包 provider 的最小样本是 `dsh-skill-badge`(`skill-badge/src/index.ts:36-50`):整个 provider 是一个常量候选 + `get()` 里 `readFile` 打包资产,说明**provider 契约小到一个对象两个字面量方法就能实现**——远程 registry 型 provider 也面对同一契约。
 
@@ -288,7 +296,52 @@ export function renderSkillContent(skill: ...): string {
 
 ### 4.2 会话目录:durable、digest 比对、随可见性同生共死
 
-第二个监听器(`tool-skill/src/index.ts:213-251`)负责把目录投到模型视野。每个 `agent/pre-step` 上:
+第二个监听器负责把目录投到模型视野。它挂在 `agent/pre-step` 瀑布上,每个 step 跑一次,顺序是:先拿到本步的候选快照,算出一份条目指纹,再回头翻会话日志找上一次发布的目录。指纹一样就什么都不做;不一样才渲染一份新目录,追加或原地替换。这样目录只在真的变化时重发,不会每步都往上下文里塞一段一模一样的话。
+
+![流程图：04-skills](./assets/diagrams/04-skills-301.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A[先让内层走完 拿到本步消息] --> B{skill 工具还是本插件那个吗}
+  B -- 不是 --> C[按空目录处理]
+  B -- 是 --> D[按 agent 作用域取 skill 快照]
+  D --> E{快照完整吗}
+  E -- 不完整 --> F[原样放行 保留上次的好视图]
+  E -- 完整 --> G[过滤并截断成一行一条]
+  C --> G
+  G --> H[按条目算出指纹]
+  H --> I[回扫会话日志找上次发布的目录]
+  I --> J{指纹和上次一样吗}
+  J -- 一样 --> K[什么都不发 顺手剔除本步旧目录]
+  J -- 不一样 --> L{以前发布过吗}
+  L -- 没有且当前为空 --> M[保持沉默]
+  L -- 有 --> N[发整表替换目录 退休旧名字]
+  L -- 首次发布 --> O[发首版目录]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 监听器注册 | 目录监听器挂在 `agent/pre-step` 上,注册在手势监听器之后,所以它是内层 | `ctx.on('agent/pre-step', ...)`(`packages/skill/tool-skill/src/index.ts:213`) |
+| 先让内层走完 | 调用 `next()` 拿到默认末端产出的"已认领消息 + 上下文";`reject` 分支直接返回 | `index.ts:217-219` |
+| 判断工具可见性 | 比对的是本插件注册的那个定义对象本身,不是按名字查到的东西 | `ctx.tools.get('skill', agent) === skillTool`(`index.ts:220`) |
+| 取快照 | 以 agent 为 scope key,向注册表要一份该 agent 能看到的合并视图 | `ctx.skills.snapshot()`(`index.ts:221-223`) |
+| 快照不完整就放行 | 观测不完整时原样返回,保留上一次的好视图,不缓存的中间态不上屏 | `index.ts:225` |
+| 过滤 | 只留 `invocation.modelInvocable === true` 的条目 | `filter(isModelInvocable)`(`index.ts:226`) |
+| 投影 | 每条只保留 `name` 和 `description`,丢掉路径、来源、provider 等字段 | `catalogSourceEntries()`(`index.ts:224`、`50-58`) |
+| 截断 | 连续空白(含换行)压成单个空格,超长再截断并补省略号 | `catalogDescription()`(`index.ts:391-394`) |
+| 算指纹 | 逐条序列化后换行拼接再做 sha256;**算在条目上,不算在渲染文本上** | `digestCatalogEntries()`(`index.ts:228`、`328-335`) |
+| 找历史基准 | 从日志最新一条往旧扫,取第一条"可读且仍在 surface 上"的目录当基准 | `catalogHistory()`(`index.ts:229`、`361-378`) |
+| 找本步候选 | 在本步消息列表里找已有的目录消息,供原地替换用 | `catalogMessage()`(`index.ts:230`、`380-389`) |
+| 分支:无变化 | 指纹与历史一致就不重发;若本步消息里混进了旧目录消息,顺手剔掉避免重复 | `index.ts:231-235` |
+| 分支:本步已同款 | 本步候选目录的条目指纹和当前一致,直接放行,不做无意义的替换 | `index.ts:236` |
+| 分支:从未发布且为空 | 没有模型可见的 skill,且历史上从未发布过目录 → 保持沉默 | `index.ts:237-241` |
+| 分支:发布 | 发布过就用整表替换模板,首次发布用首版模板;已有候选则原地替换以保住消息位置 | `renderCatalogUpdate()` / `renderCatalogMessage()`(`index.ts:242-250`、`254-311`) |
+
+<details><summary>原图(供逐行核对)</summary>
 
 ```text
 catalog listener(agent, signal):
@@ -306,6 +359,8 @@ catalog listener(agent, signal):
   │   追加/替换进 decision.messages
   └─ 从未发布且当前为空 → 什么都不发
 ```
+
+</details>
 
 关键设计:
 

@@ -12,6 +12,55 @@
 
 其中影响最大的一条是第 (2) 步的第一步:**`composeFrom` 把子 agent 的 scope 父键指向 *预设 standing key*,而不是父 agent 的 scope 键**。
 
+### 人话版:四步把子 Agent 的"世界"装起来
+
+这段讲的是子 Agent 的"世界"是怎么装起来的:它能看见哪些工具、系统提示里多了哪几段、沙箱与审批策略又是什么。装配分四步,顺序本身带语义——先把委派策略写进子会话日志,再做组合(加入父 preset 的 standing 组合、写入固定的委派作用域声明、用 persona 遮蔽部署默认值、用 toolFilter 裁掉不该给的能力),然后按需挂上结构化输出运行时,最后挂上描述符但把真正的写入推迟到子 Agent 的第一轮。四步全部发生在创建子 Agent 的"未发布窗口"里,父 Agent 和兄弟 Agent 完全看不到这个过程,任何一步抛错就整体回滚。这里最容易记错的一条是:子 Agent 的 scope(作用域链)父键指向 **preset 的组合键**,而不是父 Agent 自己的 scope 键——preset 就是一份可挂载的组合配置,写明这个会话里装配哪些插件与工具行。
+
+![流程图：03-child-agent-composition](../assets/diagrams/multi-agent__03-child-agent-composition-19.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart LR
+  A["父 Agent 发起委派"]
+  B["先量深度:父深度加一,超上限就拒"]
+  C["抓一份委派策略快照"]
+  D["子 Agent 进入未发布窗口"]
+  E["把策略写进子会话日志"]
+  F["加入父 preset 的 standing 组合"]
+  G["写入固定的委派作用域声明"]
+  H["persona 遮蔽部署默认值"]
+  I["工具掩码裁掉不该给的能力"]
+  J["按需挂结构化输出运行时"]
+  K["挂描述符,写入延迟到第一轮"]
+  L["发布:父与兄弟都看不见这个过程"]
+  M["任一步抛错就整体回滚,子不发布"]
+
+  A --> B --> C --> D
+  D --> E --> F --> G --> H --> I --> J --> K
+  D --> M
+  K --> L
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 1 量深度 | 子深度等于父深度加一,超过 maxDepth 抛 SubagentDepthError,错误里带尝试深度与上限 | `subagent/subagent/src/child-agent.ts:49-58` |
+| 2 抓策略快照 | 只取父会话的显式 sandbox 覆盖,审批一律钉死 never;必须在第一个 await 之前完成 | `subagent/subagent/src/child-agent.ts:242-247` |
+| 3 策略落日志 | 以 source 为 delegation 写进子会话日志,位置在 fork seed 之后、发布之前 | `subagent/subagent/src/child-agent.ts:258-268` |
+| 4 加入组合 | 把子 Agent 的 scope 父键绑到父 preset 的 standing 组合上 | `preset/agent-presets/src/index.ts:477-486` |
+| 5 委派声明 | 写入"你的权限范围在启动时就固定了"这段运行时上下文,不改变 system prompt 的分段 | `subagent/subagent/src/child-agent.ts:171-175` |
+| 6 persona 遮蔽 | 段名与部署 persona 完全相同,而子的作用域在链上更近,所以近者胜 | `subagent/subagent/src/child-agent.ts:199-218` |
+| 7 工具掩码 | toolFilter 落成 tools.restrict;空过滤器、保留名、未知全局名都会被拒绝 | `core/tools/src/index.ts:1061-1088` |
+| 8 结构化输出 | 把 structured_output 工具注册进子自己的层,因此不会被 toolFilter 裁掉 | `subagent-in-process-driver/src/index.ts:122-132` |
+| 9 描述符 | 只挂一个 pre-step 监听,真正的 append 延迟到子的初始 turn | `subagent/subagent/src/child-agent.ts:199-218` |
+| 10 会话元数据 | 六个持久字段:cwd、agentPreset、parentSession、isSeeded、origin、delegationDepth | `subagent/subagent/src/child-agent.ts:138-156` |
+| 11 读取 preset | agentPreset 读父的 live scope 链而不是会话头,因为父可能在空会话期间换过 preset | `preset/agent-presets/src/index.ts:497-499` |
+| 12 失败回滚 | setup 内任何一步抛错都落到创建事务的回滚上,子 Agent 不会被发布 | `agent-loop/src/index.ts:826` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 host composition (root realm)
   └─ preset standing scope  key = { agentPreset: 'standard' }        ← mount.ts:243 standingMountFor 找的就是它
@@ -20,6 +69,8 @@ host composition (root realm)
        ├─ 子 agent B 的 scope key
        └─ 子 agent C 的 scope key
 ```
+
+</details>
 
 ---
 
@@ -298,11 +349,7 @@ ACP 路径对每台服务器做 `agentCtx.plugin(McpClient, config)`(`packages/a
 
 ### 5.5 后果四:事件方向只向上
 
-```text
-scopeTarget 只允许事件沿链向上;tag 在 dispatch key 之下的监听器被排除
-packages/core/scope/src/index.ts:158-180
-```
-
+一句话:事件只能沿作用域链往上走——子 Agent 看不见祖先层上的监听器,而父级的组合能看见它下面每一个 Agent。机制是 `scopeTarget` 只允许事件沿链向上,排在 dispatch key 之下的监听器会被直接排除(`packages/core/scope/src/index.ts:158-180`)。
 所以一份 preset standing composition **能观察它下面的每个 agent**,反之不行。委派生命周期事件正是靠这个性质分发的:carrier 由**委派父**决定,故父级监听器只看到自己的委派(`subagent/src/lifecycle.ts:86-90,134-163`;`subagent/src/index.ts:151-170` 的事件注释)。
 
 ![流程图：03-child-agent-composition](../assets/diagrams/multi-agent__03-child-agent-composition-308.svg)

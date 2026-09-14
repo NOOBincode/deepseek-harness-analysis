@@ -10,6 +10,56 @@
 
 `AgentRegistry` 本身**不创建任何东西**:它只做四件事——持有工厂槽(`setFactory`)、把创建委派给工厂(`create`/`resume`)、维护活体表(`enter`/`announce`/`get`)、把"当前是谁在异步链上发起操作"存进两条 `AsyncLocalStorage`(`withInitiator`)。**"活"的定义是 `enter` + `announce` 都完成**:`enter` 之后已在表里但外部看不见,`announce` 同步派发 `agent/created` 之后才算发布。创建的全部风险落在"未发布窗口"内,回滚只需撤销一个 scope。
 
+### 人话版:一个 Agent 怎么从无到有,又怎么被拆掉
+
+这段讲的是 Agent(模型循环的运行实例,自带一份会话日志)从创建到销毁的全过程。注册表自己不造 Agent,它只当一本册子:存着工厂、把创建委托给工厂、维护活体表,并记录"当前是谁在异步链上发起操作";真正动手造 Agent 的是 agent-loop 里的工厂。工厂先准备会话边界,再在一次 `setup` 里把子世界(会话、作用域、工具面)装好——装好之前这个 Agent 对外完全不可见,这段就叫"未发布窗口",窗口里任何一步抛错都会整体回滚,不留半成品。发布之后,谁能拆掉它只看一件事:谁拿到了 `dispose` 句柄;拆卸严格反序——先取消并停掉驱动,等所有活动收敛,再撤销作用域上的注册,关掉写句柄让收尾事件落盘,最后才从表里移除并发销毁事件。
+
+![流程图：01-agent-registry-and-lifecycle](../assets/diagrams/multi-agent__01-agent-registry-and-lifecycle-17.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart LR
+  A["有人请求创建一个 Agent"]
+  B["工厂先准备会话边界"]
+  C["在未发布窗口里装好子世界"]
+  D["提交:这次装配生效"]
+  E["插入活体表,外部还看不见"]
+  F["同步广播事件,这才算发布"]
+  G["交回句柄:谁持有谁能拆"]
+  H["拆卸:先取消,停掉驱动"]
+  I["等所有活动收敛"]
+  J["撤销作用域上的注册"]
+  K["关写句柄,收尾事件落盘"]
+  L["从表里移除,发销毁事件"]
+  M["任一步抛错就整体回滚,不发布"]
+
+  A --> B --> C --> D --> E --> F --> G
+  G --> H --> I --> J --> K --> L
+  C --> M
+  D --> M
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 1 取出工厂 | 从工厂槽拿到目标;没有工厂就直接抛"请先加载 agent-loop 插件" | `core/agent/src/index.ts:374-377` |
+| 2 所有权跟随调用者 | 用调用者的 fiber 与作用域当 owner,而不是工厂自己的注册上下文 | `core/agent/src/index.ts:388-398` |
+| 3 会话边界校验 | seed 必须自 seq 0 连续、是纯无损 JSON、没有开放 turn 或悬空 tool call | `agent-loop/src/index.ts:730-738` |
+| 4 建驱动与作用域 | 建 ReactLoopAgent、建 scope,并在任何资源之前登记反向 teardown | `agent-loop/src/index.ts:530-687` |
+| 5 未发布窗口 | `await setup(...)` 被 raceAbort 包住,caller signal、owner 卸载、工厂 teardown 三路任一触发都会中断它 | `agent-loop/src/index.ts:826` |
+| 6 提交点 | 所有 setup await 都已 settle、即将发布的那一瞬同步执行 commit | `agent-loop/src/index.ts:827` |
+| 7 冲写未存后缀 | 把创建窗口里 append 的事件在活事件开始路由之前写进句柄 | `agent-loop/src/index.ts:749-757` |
+| 8 enter | 插入活体表但不广播;Agent id 必须等于 session id,重复 id 直接抛错 | `core/agent/src/index.ts:458-493` |
+| 9 announce | 同步派发 `agent/created`;同步抛错的监听者会否决发布并触发回滚 | `core/agent/src/index.ts:533-560` |
+| 10 发布顺序 | 会话先可见、Agent 后可见,最后发 session-start 作为"可以开始注入上下文"的时机 | `agent-loop/src/index.ts:662-677` |
+| 11 拆卸 | 取消 → 等闲 → 撤销作用域 → 关写句柄 → 离表,失败全部收集而不是吞掉 | `agent-loop/src/index.ts:576-619` |
+| 12 解绑逆序 | 先摘 Agent 再摘会话;销毁事件发生在驱动收敛之后、会话解绑之前 | `agent-loop/src/index.ts:609-610` |
+| 13 因果归属 | withInitiator 只做归属不授权;关闭时先把发起本次卸载的那条链从自己的 drain 里排除 | `core/agent/src/index.ts:672-678` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 AgentRegistry          只做册子:工厂槽 · 活体表 · initiator 归属        (agent/src/index.ts)
     │ create(options)                                                  :388
@@ -25,6 +75,8 @@ publish(source)  sessions.enter → agents.enter → sessions.announce → agent
     ▼
 dispose()  cancel(disposed) → whenIdle → scope.dispose → handle.close → detach → untrack
 ```
+
+</details>
 
 ---
 
@@ -273,6 +325,43 @@ const dispose = (ownerTriggered = false): Promise<void> => (disposing ??= (async
 })())
 ```
 
+这七步的顺序本身就是契约:先让循环停止接纳新工作,再等所有活动收敛,然后才拆作用域;写句柄要留到作用域拆完之后再关,因为它的错误往往是第一个暴露持久化失败的地方;最后才把 Agent 与会话从两张表里摘掉并发销毁事件。顺序颠倒会出真问题——作用域先拆会让"等收敛"失去意义,表先摘则会让监听者在半拆状态下看见还活着的 Agent。失败也不会中断这条链:每一步的错误都被收集起来,等整条链跑完再用同一个 Promise reject 出去。
+
+![流程图：01-agent-registry-and-lifecycle](../assets/diagrams/multi-agent__01-agent-registry-and-lifecycle-324.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart LR
+  A["开始拆卸"]
+  B["取消:循环停止接纳新工作"]
+  C["等所有活动收敛"]
+  D["撤销作用域上的注册"]
+  E["关写句柄,收尾事件落盘"]
+  F["摘掉 Agent,发销毁事件"]
+  G["摘掉会话,发销毁事件"]
+  H["解除工厂与 owner 的跟踪"]
+  I["失败被收集,最后一起抛出"]
+
+  A --> B --> C --> D --> E --> F --> G --> H --> I
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 1 取消 | 以 disposed 为因取消循环,并摘掉两个 abort 监听 | `agent-loop/src/index.ts:576-619` |
+| 2 等收敛 | 等驱动与维护任务全部闲下来 | `agent-loop/src/index.ts:583-585` |
+| 3 拆作用域 | 撤销 agentCtx 上的全部注册 | `agent-loop/src/index.ts:586` |
+| 4 关写句柄 | 让收尾事件耐久落盘;这里常常是第一个暴露持久化失败的地方 | `agent-loop/src/index.ts:599-602` |
+| 5 摘 Agent | 从 agents 表移除并同步发 `agent/disposed` | `agent-loop/src/index.ts:609-610` |
+| 6 摘会话 | 从 sessions 表移除并同步发 `session/disposed` | `agent-loop/src/index.ts:609-610` |
+| 7 解除跟踪 | untrack 解除工厂跟踪;owner 触发的拆卸会跳过 unfollowOwner | `agent-loop/src/index.ts:613` |
+| 8 失败处理 | 收集所有失败:只有一个就抛它,多个合成 AggregateError | `agent-loop/src/index.ts:580-582` |
+| 9 幂等 | dispose 是 memoized 闭包,多个 owner 同时触发拿到的是同一个 Promise | `agent-loop/src/index.ts:576-619` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 abort(所有取消源 fuse 到一根,reason 带 Error)
    ├─ 1  machine.cancel({kind:'disposed'})   循环停止接纳新工作
@@ -283,6 +372,8 @@ abort(所有取消源 fuse 到一根,reason 带 Error)
    ├─ 6  detachSession()                     sessions 表移除 → 发 session/disposed
    └─ 7  untrack() + unfollowOwner()         解除工厂与 owner effect 的跟踪
 ```
+
+</details>
 
 易踩的细节:
 
@@ -385,6 +476,10 @@ private releaseReentrantInitiatorRuns(): void {
 
 触发时机两处(`:271-279`):`internal/status` 里当卸载的 fiber 是本服务的祖先时关边界(`hasLifecycleAncestor`,`:657-665` 沿 `fiber.parent.fiber` 上行直到自父);effect 里两个 yield 按反序转出,先 `closeInitiators()` 再 `disposeInitiators()`。
 
+![流程图：01-agent-registry-and-lifecycle](../assets/diagrams/multi-agent__01-agent-registry-and-lifecycle-467.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 graph TD
   A["turn 驱动器<br/>agent.ts:207 withInitiator(this, () => this.kick())"] --> B["run1(agent=P)<br/>activeInitiatorRuns = 1"]
@@ -398,6 +493,8 @@ graph TD
   I --> J["initiatorDrain.resolve()"]
   J --> K["initiators.disable() / initiatorRuns.disable()"]
 ```
+
+</details>
 
 **why**:这条归属链不是授权,而是**日志 / 追踪 / 指标归属**。真正跨边界的主体一律显式传:
 

@@ -245,6 +245,10 @@ while (true) {
 }
 ```
 
+![状态图：02-provider-registry](../assets/diagrams/skills__02-provider-registry-248.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 stateDiagram-v2
   [*] --> 计算键
@@ -255,6 +259,8 @@ stateDiagram-v2
   重试 --> 计算键
   全量收集 --> 返回不缓存: rev 变了 且 attempt = 2
 ```
+
+</details>
 
 1. **缓存键显式携带 scope 链**:`JSON.stringify({ cwd, scopes: chain.map(scopeId), revision })`(`:643-645`),scope key 是身份比较的不透明对象,`scopeId` 用 WeakMap 发稳定序号(`:633-641`)。注释(`:524-526`)说明原因:blank-session 重组合会给既有 scope **换父**(`rebind`),注册表看不到这次变化,只有把链写进键里下一次读才会看到新 preset。测试 `skill.spec.ts:1173`。
 2. **在途失效只重试一次**,第二次仍变则返回 `cacheable: false`——结果可用但不许缓存。测试 `:793`(重试成功)与 `:826`(反复失效后不缓存)。

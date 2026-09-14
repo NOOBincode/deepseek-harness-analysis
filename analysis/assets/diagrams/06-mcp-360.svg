@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980.332 520" width="980.332" height="520" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line class="lifeline" data-actor="M" x1="70" y1="70" x2="70" y2="490" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="L" x1="210" y1="70" x2="210" y2="490" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="P" x1="372.87" y1="70" x2="372.87" y2="490" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="T" x1="535.74" y1="70" x2="535.74" y2="490" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="B" x1="699.351" y1="70" x2="699.351" y2="490" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="S" x1="879.6345" y1="70" x2="879.6345" y2="490" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="M" data-to="L" data-label="返回带工具调用的消息" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="70" y1="90" x2="210" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="140" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">返回带工具调用的消息</text>
+</g>
+<g class="message" data-from="L" data-to="T" data-label="解析参数并按名字取出工具" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="210" y1="130" x2="535.74" y2="130" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="372.87" y="120" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">解析参数并按名字取出工具</text>
+</g>
+<g class="message" data-from="T" data-to="P" data-label="前置瀑布与审批守卫" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="535.74" y1="170" x2="372.87" y2="170" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="454.305" y="160" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">前置瀑布与审批守卫</text>
+</g>
+<g class="message" data-from="P" data-to="T" data-label="放行或拒绝" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="372.87" y1="210" x2="535.74" y2="210" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="454.305" y="200" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">放行或拒绝</text>
+</g>
+<g class="message" data-from="T" data-to="B" data-label="派发执行并透传取消信号" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="535.74" y1="250" x2="699.351" y2="250" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="617.5455" y="240" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">派发执行并透传取消信号</text>
+</g>
+<g class="message" data-from="B" data-to="S" data-label="以服务器原始工具名发起调用" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="699.351" y1="290" x2="879.6345" y2="290" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="789.49275" y="280" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">以服务器原始工具名发起调用</text>
+</g>
+<g class="message" data-from="S" data-to="B" data-label="返回内容块或错误标记" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="879.6345" y1="330" x2="699.351" y2="330" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="789.49275" y="320" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">返回内容块或错误标记</text>
+</g>
+<g class="message" data-from="B" data-to="T" data-label="归一为内容数组并处理图片" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="699.351" y1="370" x2="535.74" y2="370" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="617.5455" y="360" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">归一为内容数组并处理图片</text>
+</g>
+<g class="message" data-from="T" data-to="L" data-label="按模型给出的顺序提交结果" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="535.74" y1="410" x2="210" y2="410" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="372.87" y="400" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">按模型给出的顺序提交结果</text>
+</g>
+<g class="message" data-from="L" data-to="M" data-label="结果作为下一步上下文回流" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="210" y1="450" x2="70" y2="450" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="140" y="440" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">结果作为下一步上下文回流</text>
+</g>
+<g class="actor" data-id="M" data-label="模型" data-type="participant">
+  <rect x="30" y="30" width="80" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="70" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">模型</text>
+</g>
+<g class="actor" data-id="L" data-label="主循环步进" data-type="participant">
+  <rect x="155.975" y="30" width="108.05" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="210" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">主循环步进</text>
+</g>
+<g class="actor" data-id="P" data-label="策略与审批管道" data-type="participant">
+  <rect x="304.025" y="30" width="137.69" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="372.87" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">策略与审批管道</text>
+</g>
+<g class="actor" data-id="T" data-label="工具注册表" data-type="participant">
+  <rect x="481.71500000000003" y="30" width="108.05" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="535.74" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">工具注册表</text>
+</g>
+<g class="actor" data-id="B" data-label="MCP 桥接执行器" data-type="participant">
+  <rect x="629.765" y="30" width="139.172" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="699.351" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">MCP 桥接执行器</text>
+</g>
+<g class="actor" data-id="S" data-label="外部 MCP 服务器" data-type="participant">
+  <rect x="808.937" y="30" width="141.39499999999998" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="879.6345" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">外部 MCP 服务器</text>
+</g>
+</svg>

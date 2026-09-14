@@ -14,6 +14,52 @@
 2. **挂载是并发且由依赖驱动的**:`EntryGroup.update` 对同层所有条目 `Promise.allSettled(config.map(create))`(`vendor/loader/src/config/group.ts:71`);`inject` 不齐者停 PENDING,由 `ReflectService.notify` 级联唤醒。**行序不产生加载语义**。
 3. **改动是事务性的**:条目级、组级、文件级、模块级各有一层回滚;失败一律 fail-loud,绝不静默降级。
 
+读之前先对齐六个词,后面反复用到。**Cordis** 是 dsh 底下那套插件框架(被源码级 vendor 进仓库);**fiber** 是一个插件实例的运行时载体,拥有自己的 context 与状态机;**effect** 是一次可逆注册,卸载时按逆序自动回收;**epoch** 是 fiber 用来判断"我依赖的服务这一代是否齐备"的标记,少一个就置为 INACTIVE;**HMR** 是模块热替换,改文件不重启就换掉插件实现;**patch 层叠** 指 bundle、profile、home、命令行各写一层配置,按顺序叠成一棵条目树的组合方式。
+
+这条链路是本篇的总纲,先看清"谁在什么时候动了什么",再往下读细节。前半段是**纯数据合成**:五个来源的 patch 被摊平成一个有序列表,对一张空条目表跑一次补丁算法,全程不执行任何用户代码,也不把结果固化到磁盘;后半段才是**把数据变成活插件**:同层条目一起发起,服务依赖先齐备的当场激活,不齐的停在等待态,等某个 provider 上线时被级联唤醒。也就是说,行序在这里不产生加载语义;任何一步失败都整层回滚并带栈报错,不会留下一棵半挂的树。
+
+![流程图：02-loader-and-composition](../assets/diagrams/plugin-system__02-loader-and-composition-21.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+    BUNDLE["bundle 层:出厂 patch 文件"] --> FLAT["摊平成单个有序补丁列表"]
+    PROFILE["profile 用户层"] --> FLAT
+    HOME["home 用户层"] --> FLAT
+    OVERLAY["命令行叠加层"] --> FLAT
+    TELEMETRY["遥测派生层"] --> FLAT
+    FLAT --> COMPOSE["对空条目表跑一次补丁算法"]
+    COMPOSE --> ROWS["得到最终条目表"]
+    ROWS --> INCLUDE["Include 读入空的根配置文件"]
+    INCLUDE --> TREE["条目树:根条目组"]
+    TREE --> CREATE["同层条目并发挂载"]
+    CREATE --> ACTIVE["依赖齐备者当场激活"]
+    CREATE --> PENDING["依赖不齐者停在等待态"]
+    PENDING -->|服务上线后通知| ACTIVE
+    ACTIVE --> READY["整树就绪:注入 loader 的插件被唤醒"]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 收集 bundle 层 | 从 bundle 包声明的 patch 文件读出补丁行 | `packages/boot/app-boot/src/profile.ts:787-797` |
+| 收集 home 层与叠加层 | home 级 patch、命令行 `--patch` 依次入列,遥测开关再派生一层追加在后 | `apps/cli/src/profile-boot.ts:231-242` |
+| 摊平 | 五层补丁被 `flat()` 成一个有序列表,列表顺序就是层叠顺序 | `packages/boot/app-boot/src/profile.ts:841-848` |
+| 合成 | 对空条目表 `[]` 跑补丁算法;先 `structuredClone` 脱离调用方缓存,再顺序应用每个 patch | `packages/boot/app-boot/src/profile.ts:841-848`、`vendor/include/src/index.ts:58-128` |
+| 产出 | 得到 `EntryOptions[]`——纯数据,没有任何代码被执行 | `vendor/include/src/index.ts:110-124` |
+| 锚定 | Include 读入始终为空的根 `cordis.yml`,它只用于提供 `baseUrl` 这个真实文件锚点 | `apps/cli/src/profile-boot.ts:83-91`、`packages/boot/app-boot/src/index.ts:799` |
+| 建树 | Include 把补丁列表应用到根条目组,得到 `EntryTree.root` | `vendor/include/src/index.ts:174-214`、`:316` |
+| 并发挂载 | 同层所有条目一起 `create()`,用 `Promise.allSettled` 收齐结果 | `vendor/loader/src/config/group.ts:71` |
+| 条目启动 | 每个条目导入插件模块、按差异打上下文补丁、注册插件、建立 fiber | `vendor/loader/src/config/entry.ts:291-302` |
+| 依赖判定 | 注入服务不齐的 fiber 停在 PENDING,且不阻塞同层其他条目 | `vendor/cordis/src/fiber.ts:611-623` |
+| 级联唤醒 | 服务上线触发 `notify`,等待中的 fiber 重算 epoch 并激活 | `vendor/loader/src/config/group.ts:71-84` |
+| 整树收敛 | 等全部条目任务与 fiber settle,再唤醒注入 `loader` 的插件 | `vendor/loader/src/config/tree.ts:46-64` |
+| 失败回滚 | 新增行逆序移除、原有行按原序重建;启动期失败先处置半成品上下文再抛错 | `vendor/loader/src/config/group.ts:85-105`、`packages/boot/app-boot/src/index.ts:816-833` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
  bundle 层  profile 层  home 层  --patch 层  telemetry 派生层
      └──────────┴─────────┴─────────┴─────────────┘  flat()
@@ -25,6 +71,8 @@
    每个 Entry: import → _patchContext → registry.plugin → fiber.await
                           ▼ fiber PENDING ──(服务就绪 notify)──► ACTIVE
 ```
+
+</details>
 
 ---
 
@@ -99,7 +147,7 @@ for (const [key, value] of Object.entries(overrides)) { if (key === 'id') contin
 
 ### 3.1 文件型条目树
 
-`Include extends EntryTree`(`vendor/include/src/index.ts:174`),`static inject = ['loader']`(`:175`)。构造(`:194-214`)做四件事:由 `config.path` 相对 `ctx.baseUrl` 解析出绝对 `filename`;校验扩展名属于 `.json/.yaml/.yml`(否则抛 `extension "<ext>" not supported`);把 `this.ctx.baseUrl` **切到配置文件所在目录**(`new URL('.', pathToFileURL(this.filename)).href`),使子树里的相对 specifier 相对配置文件解析;注册 `internal/update` 监听,经 `enqueue` 串行地把新 patches 重应用到 `root`。
+`Include` 继承 `EntryTree`,只注入 `loader` 一个服务(vendor/include/src/index.ts:174-175)。它的构造函数做四件事(:194-214):先把 `config.path` 相对 `ctx.baseUrl` 解析成绝对 `filename`;再校验扩展名属于 `.json/.yaml/.yml`,不属于就抛 `extension "<ext>" not supported`;然后把 `this.ctx.baseUrl` **切到配置文件所在目录**(`new URL('.', pathToFileURL(this.filename)).href`),让子树里的相对 specifier 相对配置文件解析;最后注册 `internal/update` 监听,经 `enqueue` 串行地把新 patches 重应用到 `root`。
 
 `[Service.init]`(`:273-289`)是激活过程:**先读文件,ENOENT 且有 `initial` 就写初值再读**(`:275-285`),然后 `yield () => this.stop()`(`:287`,登记卸载),最后 `await this.apply(candidate)`(`:288`)。
 
@@ -139,6 +187,41 @@ private enqueue<T>(task: () => Promise<T>): Promise<T> {
 
 ### 4.1 树结构
 
+条目树就是"配置文件里那些行"在内存里的样子:树本身只定义读的接口(枚举、按 id 查找),真正的落盘写回交给子类(CLI 场景下是 Include)。每个条目是一个独立单元,拥有自己的 context 和可选的三样东西——运行时载体 fiber、嵌套子组、嵌套子树,所以同一棵树可以同时容纳 group 行与"另一个配置文件"构成的子树。
+
+![流程图：02-loader-and-composition](../assets/diagrams/plugin-system__02-loader-and-composition-186.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+    TREE["条目树:只定义读接口"] --> ROOT["根条目组:整棵树的入口"]
+    TREE --> STORE["条目字典:按 id 索引全部条目"]
+    ROOT --> ENTRY["条目:配置文件里的一行"]
+    ENTRY --> CTX["条目自己的 context"]
+    ENTRY --> FIBER["运行时载体:插件实例 fiber"]
+    ENTRY --> OPTS["选项:id、名称、配置、禁用标志、注入依赖"]
+    ENTRY --> NEST["可嵌套:group 行挂子组,Include 行挂子树"]
+    ROOT --> RESOLVE["按冒号路径逐级下钻查找条目"]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 抽象基类 | 条目树只声明接口,持久化与写回由子类提供 | `vendor/loader/src/config/tree.ts:7` |
+| 层级分隔符 | 固定用 `:` 表示条目 id 的层级 | `tree.ts:8` |
+| 继承 context | 树把 `baseUrl` 扩展进自己的 context,让相对 specifier 可解析 | `tree.ts:16` |
+| 根节点 | 根条目组是整棵树的入口,所有顶层行挂在它下面 | `tree.ts:17` |
+| 条目存储 | 以 id 为键的条目字典,供快速定位 | `tree.ts:13` |
+| 条目身份 | 条目 id 可含 `:`,写成从根出发的路径 | `entry.ts:52`、`:75-81` |
+| 条目 context | 每个条目扩展出自己的 context,并把 `Entry.key` 指回条目自身 | `entry.ts:67` |
+| 运行时载体 | 条目持有一个 fiber,即它的插件实例 | `entry.ts:56` |
+| 嵌套形态 | group 行持子条目组,Include 行持子树 | `entry.ts:60-61` |
+| 路径解析 | 按 `:` 拆分 id,沿子树逐级下钻 | `tree.ts:76-87` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 EntryTree(抽象,write() 由子类提供)   tree.ts:7
 ├─ ctx = ctx.extend({ baseUrl }) :16   ├─ root: EntryGroup :17   └─ store: Dict<Entry> :13
@@ -146,6 +229,8 @@ EntryTree(抽象,write() 由子类提供)   tree.ts:7
    ├─ parent: EntryGroup   ├─ options: {id,name,config,group,disabled,inject}
    ├─ fiber? :56   ├─ subgroup?(group 行) :60   └─ subtree?(Include 行) :61
 ```
+
+</details>
 
 `Entry.ctx = loader.ctx.extend({ [Entry.key]: this })`(`entry.ts:67`)——**每个条目有自己的 context**;`EntryTree.sep = ':'`(`tree.ts:8`),`Entry.id` 会拼上祖先 id(`entry.ts:75-81`),`resolve(id)` 按 `:` 拆分沿 `subtree` 下钻(`tree.ts:76-87`)。
 
@@ -167,7 +252,7 @@ for (const id of Object.keys(oldMap)) { if (!newMap[id]) await this.remove(id, t
 this.data = config
 ```
 
-**"依赖序激活"不是这里排序排出来的**。`config.map(create)` **同时发起**:`create` → `entry.update(options, true, true)`(`:30`)→ 无 fiber 分支(`entry.ts:168-179`)→ `init()` → `_start()` → `ctx.registry.plugin(...)` + `await fiber.await()`(`entry.ts:291-302`)。`fiber.await()` 等到 `inertia` 清空,而**依赖不齐的 fiber 根本没进入 `_reload`,`inertia` 是 `undefined`,`await()` 立即返回**。于是:依赖已满足者**当场** ACTIVE;未满足者**停在 PENDING 且 `init()` 返回**;后续 provider 上线 → `notify` → `_refresh` → `_setEpoch` → `_reload` → ACTIVE。
+**"依赖序激活"不是这里排序排出来的**。同层条目确实是一起发起的:`config.map(create)` 对每个条目并行调用,而每个条目的挂载都是一次 `create` 触发的 `entry.update(options, true, true)`(group.ts:30),它走无 fiber 分支(entry.ts:168-179)依次做 `init()` 与 `_start()`,后者调用 `ctx.registry.plugin(...)` 并 `await fiber.await()`(entry.ts:291-302)。关键在 `fiber.await()` 等的是 `inertia` 清空,而**依赖不齐的 fiber 根本没进入 `_reload`,`inertia` 是 `undefined`,`await()` 立即返回**,于是它停在 PENDING,却不拖住同层其他人。于是结果分成两类:依赖已满足的当场进入 ACTIVE;依赖未满足的停在 PENDING,并让 `init()` 就此返回;等后续 provider 上线,一次 `notify` 会沿着 `_refresh` → `_setEpoch` → `_reload` 把它推到 ACTIVE。
 
 整树就绪由 `EntryTree.await()`(`tree.ts:46-64`)收敛:循环条件是 `getTasks()`(收集 `entry._initTask || entry.fiber?.inertia`,`:36-40`)为空且所有 `entry._await()` 成功;`_await()`(`entry.ts:269-275`)把 fiber 错误包成 `failed to apply loader entry <id> (<name>)`;多个失败合成 `AggregateError(failures, 'loader fibers failed')`。循环尾部那句 `this.ctx.reflect.notify(['loader'])`(`:61`)是**关键一步**:它重新唤醒所有 inject 了 `loader` 的 fiber——那是"等整棵树就绪"的插件的挂载信号。
 
@@ -201,6 +286,48 @@ Loader 用 `internal/plugin` 把 fiber 生死接到条目树上(`loader/src/inde
 
 ### 5.1 条目级:`Entry.update` 的分支
 
+一次条目更新走的是"先算差异、再按差异选分支"的事务:算完候选配置与差异键集合后,如果什么都没变就直接返回(幂等);否则看差异落在哪些字段上,分成四类处理——没有运行时载体的只做初始化,被禁用的处置旧实例,只改了配置的重打上下文补丁,动了名称或依赖的必须重挂模块。每个分支都自带回滚:能退的退回去,退不动的抛聚合错误,并且原始错误永远排第一项,不掩盖根因。
+
+![流程图：02-loader-and-composition](../assets/diagrams/plugin-system__02-loader-and-composition-279.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+    START["条目更新请求"] --> DIFF["算出候选配置与差异键集合"]
+    DIFF -->|差异为空且非强制| NOOP["直接返回:幂等短路"]
+    DIFF -->|有差异| BRANCH{"差异落在哪些字段"}
+    BRANCH -->|还没有 fiber| A["分支 A:只做初始化"]
+    BRANCH -->|新候选被禁用| B["分支 B:处置旧插件实例"]
+    BRANCH -->|只改了配置| C["分支 C:只重打上下文补丁"]
+    BRANCH -->|名称或依赖需重挂| D["分支 D:导入新模块并重挂插件"]
+    A --> COMMIT["提交新状态"]
+    B --> COMMIT
+    C --> COMMIT
+    D --> COMMIT
+    A -->|失败| RB["选项回滚或抛聚合错误"]
+    B -->|失败| RB
+    C -->|失败| RB
+    D -->|失败| RB
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 候选生成 | 创建语义下直接用新选项;否则逐键合并,`null` 值视为删除,并对键排序 | `entry.ts:145-155` |
+| 幂等短路 | 与旧状态比对得到差异键集合;为空且非强制则直接返回 | `entry.ts:157-160` |
+| 分支 A | 条目还没有 fiber:只做初始化;失败则把选项回滚 | `entry.ts:168-179` |
+| 分支 B | 新候选被禁用:处置旧实例;失败记为 `dispose` 阶段 | `entry.ts:181-192` |
+| 分支 C | 差异不含重挂字段,等于只是配置变了:重打上下文补丁;失败先回滚选项,再补打旧上下文,补偿也失败则抛 `rollback` 聚合错误 | `entry.ts:194-212` |
+| 分支 D | 差异含重挂字段:导入新模块、处置旧实例、启动新插件 | `entry.ts:214-246` |
+| 分支 D 的失败链 | 导入失败记为 `import`,处置失败记为 `dispose`,启动失败则回滚选项并重启旧插件,回滚也失败抛 `rollback` 聚合错误 | `entry.ts:214-246` |
+| 提交 | 全部成功后才 `commit()`,把新状态落为当前代 | `entry.ts:246` |
+| 错误分级 | 失败阶段只有四个取值:`import`、`dispose`、`apply`、`rollback` | `entry.ts:24-27` |
+| 用户可见诊断 | 报错消息形如 `failed to apply loader entry <id> (<name>)`,启动失败的诊断链从这里开始拼 | `entry.ts:24-27` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 update(options, create, force)                                   entry.ts:142
 ├─ candidate:create ? options : 逐键合并(null 值视为删除);sortKeys  :145-155
@@ -215,6 +342,8 @@ update(options, create, force)                                   entry.ts:142
     → _start(plugin)(失败 → options 回滚 + _start(previousPlugin);
       回滚也失败 → 'rollback'/AggregateError)→ commit()
 ```
+
+</details>
 
 `updateError` 的 stage 是固定四值 `'import' | 'dispose' | 'apply' | 'rollback'`(`entry.ts:24-27`),消息形如 `failed to apply loader entry <id> (<name>): <detail>`——启动失败时用户看到的诊断链从这里开始拼。
 
@@ -236,6 +365,43 @@ update(options, create, force)                                   entry.ts:142
 
 `Hmr` 是服务插件(`static inject = ['loader', 'timer']`,`hmr/src/index.ts:87`),构造要求 `ctx.loader.internal` 存在(`:120-122`,即需 `--expose-internals`)。`registerConfig`(`:134-187`)的要点:
 
+`registerConfig` 要解决的问题很具体:用户改的是某一个文件,而监听整个目录会带来大量无关事件,所以这里做的是"一个路径一个 watcher"的精确监听。整段注册是一条直路——解析路径、上溯找到真实的监听根、拒绝重复注册、在监听根上建立监听,并**显式关掉全局 ignore 规则**,否则精确监听会被通用忽略规则吃掉。返回的 disposer 挂在当前 fiber 上,注销时不但关闭 watcher,还会等在途刷新跑完,因此调用方完全不需要自己管理 watcher 的生命周期。
+
+![流程图：02-loader-and-composition](../assets/diagrams/plugin-system__02-loader-and-composition-352.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart LR
+    A["传入配置文件路径"] --> B["解析为绝对路径并向上找监听根"]
+    B --> C["同一路径已注册就报错"]
+    C --> D["在监听根上建立精确监听"]
+    D --> E["显式关掉全局忽略规则"]
+    E --> F["已存在的文件立刻刷新一次"]
+    D --> G["事件按绝对路径比对"]
+    G -->|命中目标文件| H["交给串行化刷新"]
+    D --> I["就绪后返回可注销的 disposer"]
+    I --> J["注销时还要等在途刷新结束"]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 解析路径 | `filename` 先相对 `baseDir` 解析成绝对路径 | `vendor/hmr/src/index.ts:136` |
+| 上溯监听根 | 向上找第一个存在且可 `realpath` 的目录,得到规范化路径、监听根与深度 | `hmr/src/index.ts:137-138`、`:64-84` |
+| 拒绝重复 | 同一路径已注册就直接抛 `config path already registered` | `hmr/src/index.ts:139` |
+| 建立精确监听 | 在监听根上 `watch`,并把 `cwd` 与 `ignored` 显式置空以绕过全局 ignore 规则 | `hmr/src/index.ts:142-148` |
+| 首次即刷新 | `ignoreInitial: false` 让注册时对已存在文件立刻刷新一次(与主 watcher 相反) | `hmr/src/index.ts:147`、`:239` |
+| 事件过滤 | `add`、`change`、`unlink` 三类事件统一做绝对路径比对,只认目标文件 | `hmr/src/index.ts:151-158` |
+| 触发刷新 | 命中后交给 `refreshConfig`,由它负责串行化与脏标记 | `hmr/src/index.ts:154`、`:297-324` |
+| 等就绪 | 监听器 `ready` 之后才返回;就绪前报错则注册失败而非静默 | `hmr/src/index.ts:160-173` |
+| 返回 disposer | 返回挂在当前 fiber 上的 effect disposer:注销登记并关闭 watcher | `hmr/src/index.ts:177-181` |
+| 收尾等待 | disposer 还会 `await` 该注册正在跑的刷新,调用方无需自行管理 | `hmr/src/index.ts:180` |
+| 启动失败 | 就绪前出错时先撤销登记、关闭 watcher,再把错误抛出去 | `hmr/src/index.ts:182-186` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 1. filename 相对 baseDir 解析 → findWatchRoot(filename)(:64-84)
    向上找第一个存在且可 realpath 的目录,返回 { filename(规范化绝对路径), root, depth }
@@ -247,6 +413,8 @@ update(options, create, force)                                   entry.ts:142
 5. ready 后返回 this.ctx.effect(() => async () => { 注销 registration;await watcher.close();
    await this.configRefreshes.get(registration)?.running }, 'hmr.registerConfig()')
 ```
+
+</details>
 
 `ignoreInitial: false`(`:147`)保证注册时对已存在文件触发一次刷新(用户层可能早已写好);这与主 watcher 的 `ignoreInitial: true`(`:239`)相反,后者有注释解释原因:启动扫描重播的文件会与初次 apply 竞争,造成 teardown 死锁("a teardown deadlock that strands boot without a diagnostic",`:232-238`)。返回的 disposer 挂在当前 fiber 上,还会 await 在途刷新——调用方无需自行管理 watcher 生命周期。
 
@@ -301,6 +469,48 @@ sequenceDiagram
 
 ## 第七节 一次启动的完整数据流
 
+一次完整启动的顺序是"先备好环境、再合成配置、然后建上下文装 Loader、最后等树就绪"。值得注意的是合成发生在建上下文之前(纯数据阶段),而 `boot()` 里的每一步都是"失败就整体退出":宿主准备阶段出错与插件树挂载阶段出错分别对应两段不同的启动阶段名,用户看到的报错能立刻区分是环境问题还是配置问题。live 模式还会在树就绪后补装两个文件监听,把后续的用户改动变成对根 Include 的事务化更新。
+
+![流程图：02-loader-and-composition](../assets/diagrams/plugin-system__02-loader-and-composition-450.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+    RUN["runProfile:一次启动的总入口"] --> ENV["装入启动器事实:代理与环境快照"]
+    RUN --> COMPOSE["composeProfile:按层收集 patch 文件"]
+    COMPOSE --> ROWS["composeEntries:唯一合成点"]
+    COMPOSE --> TELEMETRY["遥测开关派生一层 patch"]
+    ROWS --> BOOT["boot:新建上下文并装入 Loader"]
+    TELEMETRY --> BOOT
+    BOOT --> BASEURL["设置 baseUrl 与 harness 家目录"]
+    BOOT --> PREPARE["宿主准备:注入环境快照与命令行服务"]
+    PREPARE --> MOUNT["挂载根 Include 与内建插件"]
+    MOUNT --> SETTLE["等整树 settle"]
+    SETTLE --> AUDIT["激活审计:点名失败与挂起条目"]
+    AUDIT --> LIVE["live 模式:补装定时器与热替换并监听两个用户层"]
+    LIVE --> READY["提交就绪:进程寿命交还插件"]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 启动入口 | 按冻结的环境快照装入 HTTP 代理,必须在任何请求发出前完成 | `apps/cli/src/profile-boot.ts:282`、`:287-290` |
+| 环境快照 | 继承环境 > 调用目录 `.env` > harness home `.env`,两份文件先各自解析校验再应用 | `packages/boot/app-boot/src/index.ts:195-216` |
+| 层叠收集 | 按 bundle 序取层,再依次并入 profile 层、home 层、命令行叠加层 | `apps/cli/src/profile-boot.ts:226-244` |
+| 唯一合成点 | 四层一次 `flat()` 后对空条目表应用,得到最终条目行 | `apps/cli/src/profile-boot.ts:237`、`packages/boot/app-boot/src/profile.ts:841-848` |
+| 遥测派生层 | 遥测开关非空即追加一层 patch,把遥测行置为禁用 | `apps/cli/src/profile-boot.ts:241-242` |
+| 建上下文 | `boot()` 新建 Context,把 `baseUrl` 指向 profile 目录,并提供 harness 家目录路径 | `packages/boot/app-boot/src/index.ts:794-800` |
+| 装入 Loader | `ctx.plugin(Loader)` 注册加载器服务 | `packages/boot/app-boot/src/index.ts:801` |
+| 宿主准备 | `prepare` 回调在任何条目挂载前注入环境快照与命令行服务 | `packages/boot/app-boot/src/index.ts:802`、`apps/cli/src/profile-boot.ts:336-348` |
+| 挂载根 Include | 注册内建 include/group,以固定 id `include` 建根条目并一次带入全部 patch | `packages/boot/app-boot/src/index.ts:804`、`:516-559` |
+| 等整树就绪 | `loader.await()` 收敛全部条目任务,随后做激活审计 | `packages/boot/app-boot/src/index.ts:812`、`:814` |
+| live 监听 | live profile 补装 timer/hmr,并对 profile 层与 home 层各装一个监听 | `apps/cli/src/profile-boot.ts:355-381` |
+| 交还控制 | `appReady.commit()` 宣布应用就绪,进程寿命交给插件 | `apps/cli/src/profile-boot.ts:389` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 runProfile(options)                                      profile-boot.ts:282
 ├─ installProxyFromEnvironment(env 快照)                 :287-290
@@ -316,6 +526,8 @@ runProfile(options)                                      profile-boot.ts:282
 ├─ live profile → 补 timer/hmr → watchUserPatches × 2       :355-381
 └─ appReady.commit()                                       :389
 ```
+
+</details>
 
 三层 patch 与最终条目树的关系可以这样记:**patch 列表是有序的"写入日志",条目表是它作用在空表上的结果**;bundle 层决定"存在哪些行",profile/home/overlay 层决定"这些行长什么样",而"哪些行真的跑起来"由 inject 依赖图与 `disabled` 求值决定。
 

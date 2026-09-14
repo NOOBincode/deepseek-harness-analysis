@@ -38,7 +38,7 @@
 
 以**原生模式**下一次模型工具调用为例(文件内行号均为 `dbbaa4a37`)。括号内是 `路径:行号`。
 
-先看这张图的两个基点——栈的入口,以及它下面那一层调度器接口:
+先看这棵树的两个基点——栈的入口,以及它下面那一层调度器接口:
 
 ```typescript
 // packages/core/agent-loop/src/tool-calls.ts:60-67
@@ -65,6 +65,62 @@ export interface ToolRuntimeScheduler {
   finish(exec: ToolRunContext, result: ToolExecutionResult): ToolExecutionResult
 }
 ```
+
+### 这一趟调用是怎么走完的
+
+一次工具调用从模型交出参数到结果写回日志,中间只有四个动作:模型给出若干工具调用,注册表判断这一批能不能并发,前置门(策略钩子、审批、守卫三道有序的检查)逐个放行或拦下,执行结果再按模型给出的顺序写回会话日志。之所以要拆成这么多层,是因为三种约束互相打架:策略钩子、审批和日志必须严格有序,只有真正干活的工具体可以并发,于是调度器把一次调用切成"准备 — 执行 — 收尾"三段,可并发的只剩中间那段。失败也按层次分别处理:前置门拒绝或参数不合法直接产出错误结果,工具体抛错被降级成结构化错误;取消与调度器自身故障则走两条完全不同的路——取消要补齐合成结果以保证会话可以重放,调度器故障反而保留现场,把错误抛到本轮 step 的边界。
+
+下面这张图只画主干,不写函数名:顺着箭头走一遍,就能知道每一层为什么存在。
+
+![流程图：README](../assets/diagrams/tool-call__README-75.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A["模型这一步产出若干工具调用"] --> B["解析参数 并给每个调用建立独立执行记录"]
+  B --> C{"注册表判断这一批能否并发"}
+  C -->|可以| D["整批进入滚动池"]
+  C -->|不可以| E["降级成单个调用独占执行"]
+  D --> F["前置门:策略钩子 审批 守卫"]
+  E --> F
+  F -->|放行| G["真正执行工具体"]
+  F -->|被拒或已取消| H["直接产出结果 不碰工具体"]
+  G --> I["结果物化与内容终结"]
+  H --> J["按模型给出的顺序写回会话日志"]
+  I --> J
+  J --> K["随附上下文回流到下一个 step 随即开始新一轮"]
+```
+
+</details>
+
+函数级细节见下表,第三列给出折叠调用树里每个跳点的出处。
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 检出调用并进入调度器 | `step()` 把 assistant 消息内容过滤出 `tool-call` 块;调度器向上下文索取发起本次调用的 agent 与其会话,并为每个块建一份独立 `exec`(它们只共享同一个 signal 引用与同一个 agent,因为 `tools/execute` wrapper 会原地改写 `exec.signal`) | `agent.ts:307`、`agent.ts:486`、`tool-calls.ts:60`、`tool-calls.ts:68`、`tool-calls.ts:71`、`tool-calls.ts:72` |
+| 参数解析容错 | 空串映射成 `{}`;合法 JSON 取解析值;解析抛错则保留原文,把报错权交给工具自己的 schema 校验 | `tool-calls.ts:105`、`tool-calls.ts:107`、`tool-calls.ts:109` |
+| 按并发模式分组 | 取首个未提交调用问注册表能否并发,据此决定整批进池还是单个独占;组实际消费了几个调用由 `GroupOutcome.consumed` 回报给外层循环 | `tool-calls.ts:85`、`tool-calls.ts:90`、`index.ts:1266` |
+| 解析要执行的定义 | `resolveExecution` 结合作用域与"是否嵌套子派发"这两个条件取出定义,`get` 是它只按名字查的简版 | `index.ts:1211`、`index.ts:1194` |
+| 可见性快照 | `view` 一次遍历同时算出可见集合、已知名字集合与可限制名字集合,后面所有读操作共用这一份结果 | `index.ts:1142` |
+| 层链顺序与继承面 | 层链按远祖到近祖排列,本层单独取;继承面先铺全局层再按远到近叠各祖先层,后写覆盖先写,于是近层遮蔽远层 | `store.ts:192`、`store.ts:180`、`index.ts:1151` |
+| 限制沿链取交 | 链上每一层都放行,这个名字才留在可见集里,所以任何一层都能为它内嵌的所有作用域屏蔽一个继承名 | `index.ts:1164` |
+| 本层注册不受限制过滤 | 本层自己注册的工具直接进可见集,以免把子 agent 赖以作答的机件一起剥掉 | `index.ts:1168` |
+| PTC 传输注入 | 当前作用域的模式不是 native 时,把 `run_code` 补进可见集 | `index.ts:1179` |
+| 折叠判定 | 判断这次调用是否属于"只能从程序里调用"的一类,`nested` 就是子派发凭据 | `index.ts:1314` |
+| 启动与补池 | 池在上限内反复启动下一个调用:先落 `tool/call` 事件,再等前置门,最后按前置结果分流 | `tool-calls.ts:199`、`tool-calls.ts:165`、`tool-calls.ts:263` |
+| 前置门入口 | 四段接口的 `prepare` 一节,负责定型执行身份、跑有序策略门、算出这一阶段该去哪里 | `index.ts:790`、`index.ts:1449`、`index.ts:1453` |
+| 定型执行身份 | 一次定下不透明的执行身份、冻结的参数快照,并把延迟上下文、内容终结器、取消状态三个表以执行对象为键登记好 | `index.ts:1354`、`index.ts:1370`、`index.ts:1402`、`index.ts:1406`、`index.ts:1407`、`index.ts:1408`、`index.ts:1409` |
+| 有序策略门 | 先查调用者是否已取消,再跑 `tools/pre-execute` 瀑布;`ask` 交给审批服务;拒绝理由用守卫取;全部通过才返回"去执行" | `index.ts:1460`、`index.ts:1465`、`index.ts:1469`、`index.ts:1679`、`index.ts:1109`、`index.ts:1493` |
+| 阶段分流 | 前置结果有三种:去执行;记为待后置(拒绝与取消走这条);记为无需后置(折叠与参数失败走这条) | `index.ts:791`、`tool-calls.ts:172`、`tool-calls.ts:188`、`tool-calls.ts:191` |
+| 执行阶段 | `tools/execute` 瀑布包住工具体:融合调用者与 wrapper 两路信号,再查取消、重新解析一次定义、置"已调用 body"标志,然后调用工具体 | `index.ts:1559`、`index.ts:1563`、`index.ts:1522`、`index.ts:1879`、`index.ts:1530`、`index.ts:1536`、`index.ts:1538`、`index.ts:1539` |
+| 成功结果物化 | 快照、按输出声明校验、冻结、投影出模型内容;只有顶层调用才算展示元信息 | `index.ts:1783`、`index.ts:537`、`index.ts:1785`、`index.ts:1787`、`index.ts:1790`、`index.ts:1794`、`index.ts:1796` |
+| 还原信号与结果归一化 | `finally` 里拆掉信号融合并把执行对象上的信号换回 wrapper 信号;不是本次执行铸造的结果要重新过一遍输出合同;延迟上下文并入结果 | `index.ts:1547`、`index.ts:1816`、`index.ts:1571` |
+| 按模型序提交 | 主循环等任一调用落定,提交游标只推进连续前缀;待后置的走 `finalize`,无需后置的走 `finish` | `tool-calls.ts:221`、`tool-calls.ts:147`、`index.ts:792`、`index.ts:793` |
+| 后置与内容终结 | `finalize` 先跑 post-execute,再按取消状态替换成功结果;`finish` 两次物化中间夹一次内容终结,最后冻结执行对象并派发结果通知 | `index.ts:1599`、`index.ts:1732`、`index.ts:1604`、`index.ts:1508`、`index.ts:1621`、`index.ts:1837`、`index.ts:1639`、`index.ts:1630`、`index.ts:1647` |
+| 落日志与收尾 | 追加 `tool/result` 并用事件序号精确引用它那条 `tool/call`;结果里的随附上下文逐条交给调用方回调;组回报已消费数与是否结束本轮,由 `step()` 决定本轮是否收工 | `tool-calls.ts:269`、`tool-calls.ts:157`、`tool-calls.ts:246`、`agent.ts:492` |
+
+<details><summary>完整调用树(供逐行核对)</summary>
 
 ```text
 ReactLoopAgent.step()                                        agent.ts:307 → :486
@@ -155,9 +211,11 @@ ReactLoopAgent.step()                                        agent.ts:307 → :4
 └─ concluded ? { kind: 'completed' } : null                             agent.ts:492
 ```
 
+</details>
+
 `acceptContext` 就是 `agent.ts:490` 传入的闭包,把上下文 `splice` 进 `inbox.nextStep` 尾部;它在**下一个 step 边界**随 `preClaim` 一起投给模型(`agent.ts:244-255`)。工具结果本身则走 `tool/result` 会话事件,由 `deriveMessages()` 变成消息序列的权威副本——两条通道互不替代。
 
-图中 `get(name, scope)` 取到的那个对象,其类型就是:
+上面那棵树里 `get(name, scope)` 取到的那个对象,其类型就是:
 
 ```typescript
 // packages/core/tools/src/index.ts:214-280(节选)
@@ -180,6 +238,44 @@ export interface ToolDefinition extends ToolSchema {
 
 `mode === 'ptc'` 时同一张图在 `dispatchToolBody` 处换成 `run_code` 工具体,再由它自己开一条有序 lane:
 
+换成 PTC 之后,模型不再直接点名工具,而是提交一段程序,由程序去调用工具。`run_code` 的工具体会把程序交给子运行时,运行时把每个可调工具包装成绑定函数喂给程序,于是程序里写 `await tools.grep(...)` 时走的正是这条桥。桥出去的每个子调用都要重新排一次队,进的是 `run_code` 自己开的一条有序通道——原文叫 lane,指的是"同一时刻只推进一步"的调度队列,这样嵌套调用看到的时序和原生循环一致:准备与提交严格按顺序,只有真正执行的那一段可以并发。程序跑完的收尾顺序是先中止运行控制器、再等所有已经发出的子派发落定(原文称这个状态为 quiescence,即"池与队列都空了"),保证每个子调用的日志都落在本轮 turn 之内。
+
+![流程图：README](../assets/diagrams/tool-call__README-237.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A["模型改成提交一段程序"] --> B["工具体启动子程序运行时并注入工具绑定"]
+  B --> C["程序里调用某个工具"]
+  C --> D["参数做兄弟解析 拆成日志副本与实发副本"]
+  D --> E["拼出子调用标识 并写入父调用凭据"]
+  E --> F["子调用进入待办队列 并唤醒有序通道"]
+  F --> G["通道每次只推进一步 优先提交已落定的"]
+  G --> H["轮到启动时 走与原生相同的三段管道"]
+  H --> I["结果先落一份日志副本 再交回给程序"]
+  I --> J["程序结束 中止运行时并排空剩余派发"]
+  J --> K["子结果按需摆渡给外层调用"]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 工具体入口 | `run_code` 的 body 本身就是 PTC 的入口,它先启动运行时再把工具绑定注入进去 | `ptc.ts:327`、`ptc.ts:619` |
+| 程序内调用 | 程序里的工具调用落到绑定函数上,由它接管成一次子派发 | `ptc.ts:463` |
+| 参数兄弟解析 | 同一份字节拆成实发值与日志值两个对象,工具即使改写自己的参数,日志也不会与实际收到的值脱节 | `ptc.ts:150`、`ptc.ts:467` |
+| 子调用标识 | 用父调用的标识拼出子调用的编号 | `ptc.ts:469` |
+| 折叠豁免 | 把父调用凭据写进子调用的输入,这是折叠规则唯一的豁免凭据 | `ptc.ts:476` |
+| 入队与唤醒 | 子调用进待办队列并唤醒有序通道,实际推进交给通道循环 | `ptc.ts:524`、`ptc.ts:585` |
+| 通道推进 | 队首已落定就先提交,提交用的是与原生相同的收尾两段 | `ptc.ts:392`、`ptc.ts:401` |
+| 容量判定 | 队首按当前并发模式与在飞数量判断能否启动,独占调用要求池先空 | `ptc.ts:410` 至 `ptc.ts:421` |
+| 启动子派发 | 落开始事件并跑前置门,只有执行段落进池并发 | `ptc.ts:533` |
+| 静默返回 | 队列与池都空即 quiescence,通道循环返回 | `ptc.ts:437` |
+| 收尾排空 | 先中止运行控制器,再等所有子派发落定,然后才关闭本轮 | `ptc.ts:632`、`ptc.ts:633` |
+
+<details><summary>完整调用树(供逐行核对)</summary>
+
 ```text
 tool.execute = run_code body                              ptc.ts:327
 ├─ runtime.run({ program: args.code, bindings: [tools] }) ptc.ts:619
@@ -197,11 +293,13 @@ tool.execute = run_code body                              ptc.ts:327
      → await drainDispatches()                            ptc.ts:632-633
 ```
 
+</details>
+
 详见 [05-ptc-mode.md](./05-ptc-mode.md)。
 
 ### 四段在 `ToolRuntime` 上的真实签名
 
-栈图里 `prepare` / `dispatch` / `finalize` 三个节点的方法签名(均为节选):
+调用树里 `prepare` / `dispatch` / `finalize` 三个节点的方法签名(均为节选):
 
 ```typescript
 // packages/core/tools/src/index.ts:1453-1459

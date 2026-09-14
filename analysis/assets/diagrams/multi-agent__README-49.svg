@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2208.12 299.6" width="2208.12" height="299.6" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="194.582,149.8 234.582,149.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="424.73199999999997,149.8 464.73199999999997,149.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="637.098,149.8 677.098,149.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="852.4279999999999,149.8 892.4279999999999,149.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1029.9669999999999,149.8 1069.9669999999999,149.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1307.541,149.8 1347.5409999999997,149.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1493.2309999999998,149.8 1509.2309999999998,149.8 1509.2309999999998,58.45 1525.231,58.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1493.2309999999998,149.8 1509.2309999999998,149.8 1509.2309999999998,119.35000000000001 1525.231,119.35000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1493.2309999999998,149.8 1509.2309999999998,149.8 1509.2309999999998,180.25 1525.231,180.25" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1688.705,119.35000000000001 1736.7049999999997,119.35000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1912.0349999999996,119.35000000000001 1952.0349999999996,119.35000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1493.2309999999998,149.8 1509.2309999999998,149.8 1509.2309999999998,241.15000000000003 1525.231,241.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="J" data-to="N" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1804.301,180.25 1852.301,180.25" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="A" data-label="父 Agent 发出委派" data-shape="rectangle">
+  <rect x="40" y="131.35000000000002" width="154.582" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="117.291" y="149.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">父 Agent 发出委派</text>
+</g>
+<g class="node" data-id="B" data-label="工具层确认调用者身份" data-shape="rectangle">
+  <rect x="234.582" y="131.35000000000002" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="329.657" y="149.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">工具层确认调用者身份</text>
+</g>
+<g class="node" data-id="C" data-label="挑一个 provider 后端" data-shape="rectangle">
+  <rect x="464.73199999999997" y="131.35000000000002" width="172.36599999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="550.915" y="149.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">挑一个 provider 后端</text>
+</g>
+<g class="node" data-id="D" data-label="校验它声明过的能力" data-shape="rectangle">
+  <rect x="677.098" y="131.35000000000002" width="175.32999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="764.7629999999999" y="149.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">校验它声明过的能力</text>
+</g>
+<g class="node" data-id="E" data-label="创建真子 Agent" data-shape="rectangle">
+  <rect x="892.4279999999999" y="131.35000000000002" width="137.539" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="961.1974999999999" y="149.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">创建真子 Agent</text>
+</g>
+<g class="node" data-id="F" data-label="子 Agent 在自己的 Session 里跑" data-shape="rectangle">
+  <rect x="1069.9669999999999" y="131.35000000000002" width="237.57399999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1188.754" y="149.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">子 Agent 在自己的 Session 里跑</text>
+</g>
+<g class="node" data-id="G" data-label="读回输出与停因" data-shape="rectangle">
+  <rect x="1347.5409999999997" y="131.35000000000002" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1420.3859999999997" y="149.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">读回输出与停因</text>
+</g>
+<g class="node" data-id="H" data-label="前台:直接当成工具结果" data-shape="rectangle">
+  <rect x="1525.231" y="40" width="193.11399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1621.788" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">前台:直接当成工具结果</text>
+</g>
+<g class="node" data-id="I" data-label="后台:包成一条作业" data-shape="rectangle">
+  <rect x="1525.231" y="100.9" width="163.474" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1606.968" y="119.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">后台:包成一条作业</text>
+</g>
+<g class="node" data-id="J" data-label="续存:子 Agent 常驻,之后还能再发消息" data-shape="rectangle">
+  <rect x="1525.231" y="161.8" width="279.06999999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1664.766" y="180.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">续存:子 Agent 常驻,之后还能再发消息</text>
+</g>
+<g class="node" data-id="K" data-label="作业完成发一条通知" data-shape="rectangle">
+  <rect x="1736.7049999999997" y="100.9" width="175.32999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1824.3699999999997" y="119.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">作业完成发一条通知</text>
+</g>
+<g class="node" data-id="L" data-label="通知按状态注入或新开 turn" data-shape="rectangle">
+  <rect x="1952.0349999999996" y="100.9" width="216.08499999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="2060.0774999999994" y="119.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">通知按状态注入或新开 turn</text>
+</g>
+<g class="node" data-id="M" data-label="停因不是 completed 就转成错误结果" data-shape="rectangle">
+  <rect x="1525.231" y="222.70000000000002" width="268.69599999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1659.579" y="241.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">停因不是 completed 就转成错误结果</text>
+</g>
+<g class="node" data-id="N" data-label="释放子 Agent" data-shape="rectangle">
+  <rect x="1852.301" y="161.8" width="122.71900000000001" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1913.6605" y="180.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">释放子 Agent</text>
+</g>
+</svg>

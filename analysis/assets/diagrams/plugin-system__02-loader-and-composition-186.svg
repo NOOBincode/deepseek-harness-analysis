@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1136.382 347.6" width="1136.382" height="347.6" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="TREE" data-to="ROOT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="708.05575,76.9 708.05575,96.9 592.0887499999999,96.9 592.0887499999999,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="TREE" data-to="STORE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="708.05575,76.9 708.05575,96.9 824.0227499999999,96.9 824.0227499999999,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ROOT" data-to="ENTRY" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="592.0887499999999,153.8 592.0887499999999,173.8 473.15774999999996,173.8 473.15774999999996,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ENTRY" data-to="CTX" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="473.15774999999996,230.70000000000002 473.15774999999996,246.70000000000005 120.6255,246.70000000000005 120.6255,262.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ENTRY" data-to="FIBER" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="473.15774999999996,230.70000000000002 473.15774999999996,246.70000000000005 328.84749999999997,246.70000000000005 328.84749999999997,262.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ENTRY" data-to="OPTS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="473.15774999999996,230.70000000000002 473.15774999999996,246.70000000000005 617.4679999999998,246.70000000000005 617.4679999999998,262.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ENTRY" data-to="NEST" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="473.15774999999996,230.70000000000002 473.15774999999996,246.70000000000005 949.4369999999999,246.70000000000005 949.4369999999999,262.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ROOT" data-to="RESOLVE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="592.0887499999999,153.8 592.0887499999999,173.8 711.0197499999998,173.8 711.0197499999998,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="TREE" data-label="条目树:只定义读接口" data-shape="rectangle">
+  <rect x="618.90875" y="40" width="178.29399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="708.05575" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">条目树:只定义读接口</text>
+</g>
+<g class="node" data-id="ROOT" data-label="根条目组:整棵树的入口" data-shape="rectangle">
+  <rect x="495.53174999999993" y="116.9" width="193.11399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="592.0887499999999" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">根条目组:整棵树的入口</text>
+</g>
+<g class="node" data-id="STORE" data-label="条目字典:按 id 索引全部条目" data-shape="rectangle">
+  <rect x="712.6457499999999" y="116.9" width="222.754" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="824.0227499999999" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">条目字典:按 id 索引全部条目</text>
+</g>
+<g class="node" data-id="ENTRY" data-label="条目:配置文件里的一行" data-shape="rectangle">
+  <rect x="376.60074999999995" y="193.8" width="193.11399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="473.15774999999996" y="212.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">条目:配置文件里的一行</text>
+</g>
+<g class="node" data-id="CTX" data-label="条目自己的 context" data-shape="rectangle">
+  <rect x="40" y="262.70000000000005" width="161.251" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="120.6255" y="281.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">条目自己的 context</text>
+</g>
+<g class="node" data-id="FIBER" data-label="运行时载体:插件实例 fiber" data-shape="rectangle">
+  <rect x="225.25099999999998" y="262.70000000000005" width="207.19299999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="328.84749999999997" y="281.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">运行时载体:插件实例 fiber</text>
+</g>
+<g class="node" data-id="OPTS" data-label="选项:id、名称、配置、禁用标志、注入依赖" data-shape="rectangle">
+  <rect x="456.4439999999999" y="262.70000000000005" width="322.04799999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="617.4679999999998" y="281.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">选项:id、名称、配置、禁用标志、注入依赖</text>
+</g>
+<g class="node" data-id="NEST" data-label="可嵌套:group 行挂子组,Include 行挂子树" data-shape="rectangle">
+  <rect x="802.492" y="262.70000000000005" width="293.89" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="949.4369999999999" y="281.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">可嵌套:group 行挂子组,Include 行挂子树</text>
+</g>
+<g class="node" data-id="RESOLVE" data-label="按冒号路径逐级下钻查找条目" data-shape="rectangle">
+  <rect x="593.7147499999999" y="193.8" width="234.60999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="711.0197499999998" y="212.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">按冒号路径逐级下钻查找条目</text>
+</g>
+</svg>

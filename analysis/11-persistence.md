@@ -19,6 +19,50 @@ DSH 的持久化是**一个 seam + 一条"世代只增不改"的物理规则**:`
 6. **UI / transcript 只有一个数据源**:事件日志。热会话走 `session/event` firehose,冷会话走 `sessionQuery.observeSession()`。
 7. **resume = 拿写锁 open → 冷读 → 补边界 → 造 seed → 写 `request/header{reason:'resume'}`**(`core/agent-loop/src/index.ts:879-916`、`agent.ts:571`)。
 
+这一段把**同一次会话的两条路径**放在一起看:一侧是正常写入怎么落到磁盘,另一侧是 resume 时怎么把磁盘上的东西读回来。两条路径的严谨程度并不对称——写入侧可以攒够 200 毫秒再落盘,读回侧却必须假设文件尾巴可能是半截的,于是它先抢下写所有权、只认完整行,碰到撕裂处就截断重写。先记住两个要点:200 毫秒是批量写入的延迟上限;修复顺序(先截断撕裂字节、再把捞回的完整记录写回)不可交换,颠倒就会写出重复序号。
+
+![流程图：11-persistence](./assets/diagrams/11-persistence-24.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A["会话在内存里产生事件"] --> B["按会话路由进 200ms 批量窗口"]
+  B --> C["连续性校验与撕裂尾巴修复"]
+  C --> D["写入并落盘 fsync"]
+  D --> E["目录中的世代文件"]
+  E --> F["resume 请求到达"]
+  F --> G["先取跨进程写所有权"]
+  G --> H["选出数值最高的合法世代"]
+  H --> I{"源版本与当前版本比较"}
+  I -->|源版本更低| J["自动迁移并发布新世代"]
+  I -->|源版本更高| K["拒绝并提示升级 harness"]
+  I -->|版本相同| L["读取完整行前缀"]
+  J --> L
+  L --> M["补齐中断的回合边界"]
+  M --> N["用事件重建投影并写入 resume 锚点"]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 写入侧 · 事件入队 | 活会话事件由后端订阅事件流按会话 id 路由;入队时先深拷贝一份持久化自有的副本 | `jsonl/src/storage.ts:534`、`:274` |
+| 写入侧 · 批量窗口 | 事件在有界 200 毫秒窗口里攒批,窗口空闲时才起定时器;drain 失败就把整批按序塞回缓冲,置为暂停等下次重试 | `jsonl/src/storage.ts:36`、`:288`、`:311` |
+| 写入侧 · 连续性校验 | 要求本批事件的首个 seq 正好接上已存的游标,不连续就拒绝整批 | `jsonl/src/storage.ts:319` |
+| 写入侧 · 撕裂修复 | 首次新追加前先截断撕裂字节,再把上一轮捞回的完整记录重新落盘,最后才写本批 | `jsonl/src/storage.ts:319`、`:329` |
+| 写入侧 · 落盘 | 写入并 fsync;默认开启压缩时每批事件一个独立可解的 zstd 帧,写或同步失败会截断回原长度再抛错 | `jsonl/src/index.ts:1246` |
+| 写入侧 · 目录布局 | 一个会话一个目录,每个格式世代一个文件,外加一个 POSIX 锁文件 | `jsonl/src/format.ts:57` |
+| 读回侧 · 取写所有权 | resume 打开会话时先拿写所有权,把同一会话的并发 resume 挡在门外 | `core/agent-loop/src/index.ts:853`、`jsonl/src/lease.ts:70` |
+| 读回侧 · 选世代 | 目录里选数值最大的合法世代;压缩后缀与当前配置不符就直接报错 | `jsonl/src/index.ts:1369` |
+| 读回侧 · 版本判别 | 源版本低于当前版本就迁移并发布新世代;高于当前版本则拒绝读取,提示升级 harness | `session-format/src/chain.ts:79` |
+| 读回侧 · 扫描完整行 | 只交出由完整行构成的连续前缀,撕裂的尾巴丢弃;zstd 模式下还能把最后一个不完整帧里已 flush 的完整记录捞回来 | `jsonl/src/format.ts:385`、`jsonl/src/zstd.ts:154` |
+| 读回侧 · 补回合边界 | 停写但没关 turn 的日志在这里被补成平衡 transcript | `core/session/src/repair.ts:29` |
+| 读回侧 · 重建投影 | 用事件重建会话投影,没有任何一份状态是单独从磁盘读出来的 | `core/session/src/preparation.ts:20` |
+| 读回侧 · 写 resume 锚点 | 本 loop 实例的第一次请求写入 `request/header`;日志里已有锚点即标为 resume | `core/agent-loop/src/agent.ts:571` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
       写入路径                                   resume 读回路径
  ┌───────────────────────────┐          ┌────────────────────────────────────────┐
@@ -56,6 +100,8 @@ DSH 的持久化是**一个 seam + 一条"世代只增不改"的物理规则**:`
  └───────────────────────────┘                  │  → agent.ts:571 reason:'resume'   │
                                                 └───────────────────────────────────┘
 ```
+
+</details>
 
 ---
 
@@ -376,7 +422,7 @@ private async ensureLease(): Promise<void> {
 
 ### 4.2 读侧:撕裂尾巴永不返回
 
-核心不变式:**只有落在换行符之后的字节才算已提交**。`SessionLogScanner`(`format.ts:385`)在原始 Buffer 上找 `0x0A`,只对完整记录解码,且**跨 write 的残片要拷贝**——解码器可能在 `write()` 返回后复用输出缓冲(`format.ts:416-442`)。每解出一行就推进 `committedBytes = endByte`(`format.ts:518`),`finish()` 只交出连续前缀与可安全追加的偏移。纯文本模式下撕裂尾巴就是一条不完整 JSONL 行,里面**没有**完整记录可回收,故 `recoveredTail: []`(`index.ts:736-740`)。
+核心不变式:**只有落在换行符之后的字节才算已提交**。扫描器 `SessionLogScanner` 直接在原始 Buffer 字节里找换行符 `0x0A`,只对完整记录做解码;跨 `write` 调用残留的半个记录必须先拷贝出来,因为解码器可能在 `write()` 返回后复用输出缓冲(`format.ts:385`、`:416-442`)。每解出一行就推进 `committedBytes = endByte`(`format.ts:518`),`finish()` 只交出连续前缀与可安全追加的偏移。纯文本模式下撕裂尾巴就是一条不完整 JSONL 行,里面**没有**完整记录可回收,故 `recoveredTail: []`(`index.ts:736-740`)。
 
 "无法解码的已提交行抑制后续行"的抑制点也在读侧,它在解出坏行后**直接 return**,于是 `committedBytes` 不再前进(`format.ts:476-486`):
 
@@ -443,7 +489,7 @@ private async persistContiguous(batch: readonly SessionEvent[]): Promise<void> {
 
 ### 4.4 稳定读取快照与原子创建
 
-读者不持锁,必须容忍"读到一半有人在追加"。`readStableSnapshot()`(`generation.ts:258-278`)比较 `stat → read → stat` 的身份(`dev:ino:size:mtimeNs:ctimeNs`,`generation.ts:239-241`):相等即返回;不等就把 `before` 换成新 `after` 再试一轮;第二轮仍不等,则把已读字节**按当前 `before.size` 截断**返回——宁可少给一个已提交前缀,也不给撕裂内容,更不无限期饿死在持续写入者后面(`generation.ts:243-250`)。
+读者不持锁,必须容忍"读到一半有人在追加"。稳定快照读取(`readStableSnapshot()`)的做法是用前后两次 `stat` 夹住一次 `read`,比对文件身份(`dev:ino:size:mtimeNs:ctimeNs`)是否一致(`generation.ts:258-278`、`:239-241`):一致即返回;不一致就把 `before` 换成新的 `after` 再试一轮;第二轮仍不一致,则把已读字节**按当前 `before.size` 截断**返回——宁可少给一个已提交前缀,也不给撕裂内容,更不无限期饿死在持续写入者后面(`generation.ts:243-250`)。
 
 临时文件一律"随机名 + `O_EXCL` + owner-only"(`writeSyncedTempFile()`,`index.ts:1194-1204`;`writeSyncedTemp()`,`generation.ts:722-731`),写完 `fsync` 再发布,POSIX 发布后额外 fsync 目录,Windows 直接用 write-through 命名空间操作(`generation.ts:650-659`)。`rejectExistingLog()`(`index.ts:1182-1192`)作为 TOCTOU 兜底:物化路径上发现任何已存在代际就拒绝——注释原话 "Never publish over an existing committed log"。
 

@@ -126,6 +126,10 @@ export function scrubbedParentEnv(): Record<string, string> {
 
 ### 2.3 三层叠加总览
 
+![流程图：05-transport-and-security](../assets/diagrams/mcp__05-transport-and-security-129.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["process.env(父进程环境)"] --> B["第一层:清洗<br/>subprocess/src/index.ts:64-78<br/>剔除 /KEY 或 PASSWORD 或 SECRET 或 TOKEN/i<br/>剔除 DSH_ 前缀(先 toUpperCase)"]
@@ -136,6 +140,8 @@ flowchart TD
   style B fill:#fee,stroke:#a88
   style D fill:#efe,stroke:#8a8
 ```
+
+</details>
 
 ---
 

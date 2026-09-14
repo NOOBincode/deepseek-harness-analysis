@@ -12,6 +12,56 @@ workflow 引擎把**模型写的脚本**放进一个一次性 worker 线程里�
 
 **隔离不是安全边界**:`realm.ts:1-8` 的模块注释原文是 *the vm is not a security boundary*——worker 提供的是 **host-loop isolation and forced termination**,而不是对敌意值的容纳。真正的保护来自"值一律物化成纯 JSON"与"钩子参数严格校验"。
 
+### 人话版:脚本跑在哪,子 Agent 又从哪来
+
+这一节讲 workflow 这条派生方式:模型写的脚本在哪里跑,它又是怎么起子 Agent 的。脚本先被送进一个一次性的 worker 线程(独立的执行线程,脚本写下死循环也阻塞不了宿主),在线程内的 vm 沙箱里执行;脚本自己没有造 Agent 的能力,每个 `agent()` 都通过线程间 RPC 反向打到宿主上的 subagent seam,所以子 Agent 始终活在宿主进程里。这里的隔离**不是安全边界**:worker 只提供"宿主循环不被阻塞 + 可以强制终止",真正的保护来自"跨线程的值一律物化成纯 JSON"和"钩子参数严格校验"。取消时宿主先通知 worker,给一个宽限期,然后无条件终止线程。
+
+![流程图：05-workflow-worker-thread](../assets/diagrams/multi-agent__05-workflow-worker-thread-19.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart LR
+  M["模型写出一段脚本"]
+  S["start 先做同步校验"]
+  L["解析限额与 provider"]
+  W["起一个一次性 worker 线程"]
+  V["脚本在 vm 沙箱里执行"]
+  H["用五个钩子与外界说话"]
+  R["起子 Agent 的请求经 RPC 回到宿主"]
+  P["宿主用同一个 provider 起子 Agent"]
+  C["子 Agent 始终活在宿主进程里"]
+  X["取消:宽限期后强制终止线程"]
+  D["跨线程的值先物化成纯 JSON"]
+  E["普通失败该项变 null,致命失败整脚本死"]
+
+  M --> S --> L --> W --> V
+  V --> H
+  H --> R --> P --> C
+  V --> D
+  W --> X
+  H --> E
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 1 校验 meta | meta 当数据校验,绝不用 vm 求值,并返回一份 normalized 副本 | `workflow-worker-thread/src/meta.ts:76-82` |
+| 2 解析脚本 | 宿主先编译一次,让语法错误在 start 里同步抛出;`export const meta` 有专门文案 | `workflow-worker-thread/src/index.ts:64-74` |
+| 3 解析 provider | 在发布任何工作之前确认 provider(真正负责造 Agent 的那个后端)已注册,否则抛 AGENT_START | `workflow-worker-thread/src/index.ts:77-89` |
+| 4 解析限额 | 请求值只能调小、不能越过部署天花板;并发上限 0 表示按核数算 | `workflow-worker-thread/src/index.ts:143-157` |
+| 5 捕获依赖 | start 期间就把 subagents 句柄抓下来,让 run 活得比引擎插件更久 | `workflow-worker-thread/src/index.ts:164-171` |
+| 6 起 worker | 清洗 worker 环境后起线程,先 Ready 再 Go | `workflow-worker-thread/src/host.ts:48-60`、`:278-280` |
+| 7 注入钩子 | 五个 hook 挂进 vm context 并冻结,每个 hook 的 Promise 都挂一个空 rejection consumer | `workflow-worker-thread/src/runtime.ts:91-114` |
+| 8 起子 Agent | agent() 走九步:查取消 → 校验参数 → 总量闸门 → 抢并发槽 → 取到槽后再查一次取消 | `workflow-worker-thread/src/runtime.ts:251-275` |
+| 9 结果解释 | 有 schema 且完成就取结构化值,无 schema 取文本拼接,非 completed 得 null | `workflow-worker-thread/src/runtime.ts:318-339` |
+| 10 失败分级 | 致命错误上抛杀死脚本,普通失败只把该项降级成 null | `workflow-worker-thread/src/runtime.ts:414-425` |
+| 11 值物化 | 出边界的值必须是纯 JSON;非有限数、函数、symbol、循环引用等一律拒绝并报路径 | `workflow-worker-thread/src/realm.ts:66-151` |
+| 12 取消 | 双通道取消 + 宽限计时器 + 无条件终止线程 | `workflow-worker-thread/src/host.ts:183-207`、`:224-255` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 宿主线程(Host)                                     worker 线程
 WorkflowEngine.start(request)                       ┌─────────────────────────────┐
@@ -24,6 +74,8 @@ WorkflowEngine.start(request)                       ┌────────�
       ▼                                             └─────────────────────────────┘
   ctx.subagents.start(provider, {... parent, signal: controller.signal})
 ```
+
+</details>
 
 ---
 
@@ -315,6 +367,49 @@ worker 起来后先发 `Ready`,宿主回 `Go` 才真正执行脚本(`host.ts:278
 
 ### 4.3 子 agent RPC 的四个往返
 
+这一节讲脚本起一个子 Agent 时,线程之间来回走了几条消息。脚本侧只发一条 ChildStart,宿主先做准入检查:能起就用同一个 subagent seam 起,起不来就回一条启动失败;子 Agent 结算后,结果要先快照成纯 JSON 才能回给脚本,不可序列化就直接改报 ChildFailed。释放是单独的一条往返,而且必须回确认——即使宿主早就释放过也要回,因为脚本侧在等这个 ack。
+
+![时序图：05-workflow-worker-thread](../assets/diagrams/multi-agent__05-workflow-worker-thread-366.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+sequenceDiagram
+  participant W as 脚本 worker 线程
+  participant H as 宿主侧 run
+  participant S as subagent 能力缝
+
+  W->>H: 起一个子 Agent
+  H->>H: 准入检查 —— 已取消或已终局就拒绝
+  alt 可以起
+    H->>S: 用 provider 起子 Agent
+    S-->>H: 子 Agent 已发布
+    H-->>W: 子 Agent 句柄已就绪
+    S-->>H: 跑完并带回结果
+    H->>H: 结果快照成纯 JSON
+    H-->>W: 结果
+  else 不能起
+    H-->>W: 启动失败
+  end
+  W->>H: 释放这个子 Agent
+  H->>H: 按请求编号记忆化释放
+  H-->>W: 释放确认
+  W->>H: 脚本结束并交回最终结果
+  H->>H: 收掉残留子 Agent 再结算
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 起子 Agent | 脚本发 ChildStart,宿主先做准入检查,通过后才走 subagents.start | `workflow-worker-thread/src/host.ts:319-330`、`:352-368` |
+| 公布句柄 | 先把 result 转发挂上,再向脚本公布子 Agent 句柄 | `workflow-worker-thread/src/host.ts:388-414` |
+| 交回结果 | 结果先快照成纯 JSON;不可序列化就改回一条 ChildFailed | `workflow-worker-thread/src/host.ts:393-411` |
+| 释放 | 按请求编号记忆化释放,重复请求照样回 ack | `workflow-worker-thread/src/host.ts:441-450`、`:417-427` |
+| 结算 run | 认领终局 → 收掉残留子 Agent → 结算 | `workflow-worker-thread/src/host.ts:489-519` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 worker                                   host(WorkerRun)                        subagent seam
 ChildStart{callId, request} ───────────▶ childAdmissionFailure()?                (host.ts:319-330)
@@ -329,6 +424,8 @@ ChildDispose{callId} ───────────────────�
 ◀ ChildDisposed{callId} ───────────────── ack(记录已不在也照样回)                  (:417-427)
 Result{result} ─────────────────────────▶ onResult():claim → reapChildren → settle (:489-519)
 ```
+
+</details>
 
 三处顺序上的讲究:
 
@@ -370,8 +467,10 @@ Result{result} ─────────────────────�
 
 ### 5.2 背压:三层
 
+脚本能同时压给系统多少压力,被三道闸门分别挡住:worker 侧限并发、宿主侧要看 run 是不是真安静了、结果本身还必须能无损序列化。
+
 1. **worker 侧并发槽**:FIFO,先到先服务,取消即清空队列。
-2. **宿主侧 `pendingStarts` / `children`**:两者共同决定 quiescence(`host.ts:464-474`)——只有"没有未结算的启动、也没有已发布的子"时才算静默。
+2. **宿主侧的静默判据**:宿主用两组记录一起判断这个 run 有没有安静下来——既没有还没结算的启动,也没有活着的子 Agent,两个条件都满足才算结束(`host.ts:464-474`)。
 3. **结果封顶**:`WorkflowResult` 的值本身要过 `materializeResult`(worker 侧,`runtime.ts:209-221`,失败抛 `RESULT_UNSERIALIZABLE`),`ChildResult` 再过一次 `snapshotJsonValue`(宿主侧)。模型可见的渲染由工具层截断:`tool-workflow` 的 `maxResultChars` 默认 50 000(`tool-workflow/src/index.ts:41`)。
 
 ### 5.3 `result` 永不 reject

@@ -153,6 +153,10 @@ export const enum FiberState {
 
 ### 3.2 状态转换图
 
+![状态图：01-cordis-runtime-internals](../assets/diagrams/plugin-system__01-cordis-runtime-internals-156.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 stateDiagram-v2
     [*] --> PENDING: new Fiber(fiber.ts:194 初值)
@@ -166,6 +170,8 @@ stateDiagram-v2
     ACTIVE --> DISPOSED: uid=null (dispose effect) fiber.ts:268
     DISPOSED --> [*]: assertActive 抛 INACTIVE_EFFECT
 ```
+
+</details>
 
 ### 3.3 依赖齐备判定:`_checkImpl` → `_refresh` → `_setEpoch`
 

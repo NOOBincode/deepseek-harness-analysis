@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1410.9797499999997 501.4" width="1410.9797499999997" height="501.4" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="CLI" data-to="BOOT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="989.4504999999998,76.9 989.4504999999999,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BOOT" data-to="LOADER" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="989.4504999999999,153.8 989.4504999999999,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="LOADER" data-to="BASE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="989.4504999999999,230.70000000000002 989.4504999999999,250.70000000000005 371.1407499999999,250.70000000000005 371.1407499999999,270.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="LOADER" data-to="WEB" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="989.4504999999999,230.70000000000002 989.4504999999999,250.70000000000005 706.8147499999999,250.70000000000005 706.8147499999999,270.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="LOADER" data-to="SDK" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="989.4504999999999,230.70000000000002 989.4504999999999,250.70000000000005 1025.4457499999999,250.70000000000005 1025.4457499999999,270.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="LOADER" data-to="USER" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="989.4504999999999,230.70000000000002 989.4504999999999,250.70000000000005 1275.90475,250.70000000000005 1275.90475,270.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BASE" data-to="SEAM" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="371.1407499999999,307.6 371.1407499999999,331.6 173.60699999999997,331.6 173.60699999999997,355.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BASE" data-to="SPINE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="371.1407499999999,307.6 371.1407499999999,331.6 494.4609999999999,331.6 494.4609999999999,355.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BASE" data-to="TYPERT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="371.1407499999999,307.6 371.1407499999999,331.6 851.9944999999999,331.6 851.9944999999999,355.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SEAM" data-to="EFFECT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="173.60699999999997,392.5 173.60699999999997,408.5 489.3666249999999,408.5 489.3666249999999,424.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SPINE" data-to="EFFECT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="494.4609999999999,392.5 494.4609999999999,408.5 489.3666249999999,408.5 489.3666249999999,424.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="TYPERT" data-to="EFFECT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="851.9944999999999,392.5 851.9944999999999,408.5 489.3666249999999,408.5 489.3666249999999,424.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="CLI" data-label="dsh 命令行:唯一启动器" data-shape="rectangle">
+  <rect x="895.4869999999999" y="40" width="187.927" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="989.4504999999998" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">dsh 命令行:唯一启动器</text>
+</g>
+<g class="node" data-id="BOOT" data-label="启动胶:合成分层配置并装配运行时" data-shape="rectangle">
+  <rect x="855.8435" y="116.9" width="267.21399999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="989.4504999999999" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">启动胶:合成分层配置并装配运行时</text>
+</g>
+<g class="node" data-id="LOADER" data-label="Cordis 加载器:把配置变成插件树" data-shape="rectangle">
+  <rect x="864.3649999999999" y="193.8" width="250.17099999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="989.4504999999999" y="212.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Cordis 加载器:把配置变成插件树</text>
+</g>
+<g class="node" data-id="BASE" data-label="基础层:模型适配器、工具、会话、沙箱" data-shape="rectangle">
+  <rect x="222.71374999999995" y="270.70000000000005" width="296.854" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="371.1407499999999" y="289.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">基础层:模型适配器、工具、会话、沙箱</text>
+</g>
+<g class="node" data-id="WEB" data-label="Web 应用层:HTTP 服务、API 网关、远程调用" data-shape="rectangle">
+  <rect x="543.5677499999999" y="270.70000000000005" width="326.4939999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="706.8147499999999" y="289.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Web 应用层:HTTP 服务、API 网关、远程调用</text>
+</g>
+<g class="node" data-id="SDK" data-label="SDK 应用层:进程外 JSON-RPC 服务" data-shape="rectangle">
+  <rect x="894.0617499999998" y="270.70000000000005" width="262.7679999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1025.4457499999999" y="289.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">SDK 应用层:进程外 JSON-RPC 服务</text>
+</g>
+<g class="node" data-id="USER" data-label="用户补丁层与热替换层" data-shape="rectangle">
+  <rect x="1180.8297499999999" y="270.70000000000005" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1275.90475" y="289.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">用户补丁层与热替换层</text>
+</g>
+<g class="node" data-id="SEAM" data-label="能力缝:定义、实现、消费三包分离" data-shape="rectangle">
+  <rect x="40" y="355.6" width="267.21399999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="173.60699999999997" y="374.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">能力缝:定义、实现、消费三包分离</text>
+</g>
+<g class="node" data-id="SPINE" data-label="核心脊柱:会话事件溯源、工具管道、主循环" data-shape="rectangle">
+  <rect x="331.21399999999994" y="355.6" width="326.49399999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="494.4609999999999" y="374.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">核心脊柱:会话事件溯源、工具管道、主循环</text>
+</g>
+<g class="node" data-id="TYPERT" data-label="类型平面:构建期生成、运行期注册、RPC 分发" data-shape="rectangle">
+  <rect x="681.7079999999999" y="355.6" width="340.57300000000004" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="851.9944999999999" y="374.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">类型平面:构建期生成、运行期注册、RPC 分发</text>
+</g>
+<g class="node" data-id="EFFECT" data-label="共同地基:所有注册都是可逆 effect" data-shape="rectangle">
+  <rect x="361.3171249999999" y="424.5" width="256.09899999999993" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="489.3666249999999" y="442.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">共同地基:所有注册都是可逆 effect</text>
+</g>
+</svg>

@@ -16,6 +16,48 @@ DeepSeek Harness(DSH)的程序架构是**"一切皆插件"的 Cordis 微内核**
 3. **Typert 类型图**:把 TypeScript 编译期类型在构建时转成编译器无关的运行时模型,同时驱动 RPC 网关、Zod 校验、JSON Schema 投影与文档生成——类型是 API 的唯一真源;
 4. **质量工程即架构**:per-file 100% 覆盖率门、无密钥 snapshot 回放、30+ 项 doc-sync 静态门、Agent Notes 即 RFC,把"文档与代码同步"从纪律变成编译错误。
 
+先对齐四个词,这一节和后面各节都反复用到。**Cordis** 是 dsh 内嵌的插件框架(不是 npm 依赖,而是源码级 vendor 进仓库);**effect** 是一次可逆注册,插件卸载时按逆序自动回收;**HMR** 是模块热替换,改文件不重启就能换掉插件实现;**patch 层叠** 指 bundle、用户 profile、家目录、命令行各写一层配置,按顺序叠成一棵插件树的组合方式。
+
+这张总览要分两半读。上半部分是"谁启动了谁":只有一条启动链——唯一启动器 → 启动胶 → Cordis 加载器 → 运行时插件树,树上的每一行(基础层、Web 应用层、SDK 应用层、用户补丁层)都是普通插件,包括模型适配器、工具、会话日志乃至主循环本身,没有任何一行是"特权内核"。下半部分是从同一条服务定位机制(`ctx.<key>` 加类型化事件)长出来的三根柱子:横向铺开的能力缝、纵向贯通的会话与主循环脊柱、以及支撑 RPC 与文档的类型平面。这几根柱子最后都汇到同一格,那一格是全章的地基:**所有注册都是可逆 effect**。
+
+![流程图：12-architecture-highlights](./assets/diagrams/12-architecture-highlights-23.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+    CLI["dsh 命令行:唯一启动器"] --> BOOT["启动胶:合成分层配置并装配运行时"]
+    BOOT --> LOADER["Cordis 加载器:把配置变成插件树"]
+    LOADER --> BASE["基础层:模型适配器、工具、会话、沙箱"]
+    LOADER --> WEB["Web 应用层:HTTP 服务、API 网关、远程调用"]
+    LOADER --> SDK["SDK 应用层:进程外 JSON-RPC 服务"]
+    LOADER --> USER["用户补丁层与热替换层"]
+    BASE --> SEAM["能力缝:定义、实现、消费三包分离"]
+    BASE --> SPINE["核心脊柱:会话事件溯源、工具管道、主循环"]
+    BASE --> TYPERT["类型平面:构建期生成、运行期注册、RPC 分发"]
+    SEAM --> EFFECT["共同地基:所有注册都是可逆 effect"]
+    SPINE --> EFFECT
+    TYPERT --> EFFECT
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 启动 | 唯一启动器解析命令行,按模式分发到 profile 启动路径 | `apps/cli/src/bin.ts:28-62` |
+| 装配 | 启动胶合成分层配置,建上下文、装入 Cordis 加载器与宿主服务 | `packages/boot/app-boot/src/index.ts:787-834` |
+| 建树 | 加载器读空根配置与各层 patch,合成出运行时插件树 | `vendor/include/src/index.ts:58-128` |
+| 基础层 | `dsh-base` 挂载模型适配器、工具、会话日志、沙箱与设置等核心行 | `packages/bundle/base/cordis.patch.yml` |
+| Web 应用层 | `dsh-web-app` 挂载 Web 启动服务、HTTP 服务与 API 网关 | `packages/bundle/web-app/cordis.patch.yml` |
+| SDK 应用层 | `dsh-sdk-app` 在基础层之上挂 JSON-RPC 服务器 | `packages/sdk/README.md` |
+| 用户补丁层 | 用户 patch 与 HMR 热替换层可覆盖或插入任意一行 | `docs/architecture.md:27-29` |
+| 能力缝 | shell、fs、web、subagent 等能力按定义、实现、消费三个角色拆包 | `docs/glossary.md:9` |
+| 核心脊柱 | 会话事件的追加日志、工具管道、主循环与适配器注册表 | `packages/core/README.md:26-38` |
+| 类型平面 | 构建期把类型转成编译器无关模型,运行期注册并驱动 RPC 与文档 | `packages/typert/README.md:25-30` |
+| 共同地基 | 一切注册走 `ctx.effect()`;事件用声明合并扩展,有五种派发语义 | `docs/architecture.md:13`、`vendor/cordis/src/events.ts:32` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
                 cordis.yml / profile / bundle 分层组合(运行时插件树)
    +-----------------------------------------------------------------------+
@@ -39,13 +81,15 @@ DeepSeek Harness(DSH)的程序架构是**"一切皆插件"的 Cordis 微内核**
         所有注册 = ctx.effect() 可逆 effect;事件经声明合并扩展,五种派发语义
 ```
 
+</details>
+
 ---
 
 ## 第一节 "一切皆插件"的 Cordis 架构
 
 ### 1.1 内嵌框架:vendor/ 而非 npm 依赖
 
-DSH 没有从 npm 依赖 Cordis,而是把 Cordis 及其基础库**源码内嵌**在 `vendor/` 下,统一重定名为 `@deepseek-ai/*` 作用域:`vendor/README.md:3` 明言动机是"the harness fully owns its framework layer (auditable, patchable, pinned)",清单(`vendor/README.md:13-23`)钉住每个包的上游 commit SHA。这不是简单的"锁版本":`vendor/README.md:29-51` 记录了 19 条**本地修改日志**,包括 `cordis/src/fiber.ts` 生命周期加固(重入处置、UNLOADING 期拒绝新建 effect)、Loader/Include 事务化配置对账、HMR 精确配置监视等——每一条都有覆盖测试。框架层的缺陷在 DSH 手里是"修源头"而不是"绕过去"。
+DSH 没有从 npm 依赖 Cordis,而是把 Cordis 及其基础库**源码内嵌**在 `vendor/` 下,统一重定名为 `@deepseek-ai/*` 作用域:`vendor/README.md:3` 明言动机是"the harness fully owns its framework layer (auditable, patchable, pinned)",清单(`vendor/README.md:13-23`)钉住每个包的上游 commit SHA。这不是简单的"锁版本":官方在 `vendor/README.md` 里记了 19 条**本地修改日志**(第 29–51 行),包括 `cordis/src/fiber.ts` 生命周期加固(重入处置、UNLOADING 期拒绝新建 effect)、Loader/Include 事务化配置对账、HMR 精确配置监视等——每一条都有覆盖测试。框架层的缺陷在 DSH 手里是"修源头"而不是"绕过去"。
 
 ### 1.2 注册即 effect:可逆性是加载语义,不是纪律
 
@@ -276,7 +320,7 @@ export const inject = ['tools', 'shell', 'systemPrompt', 'shellEnv']
 
 ### 3.2 LlmAdapter:一个抽象方法,一代际绑定
 
-`packages/llm/llm/src/index.ts:200` 的 `LlmAdapter` 是全仓 provider 插拔点。唯一必须实现的是 `stream`(`index.ts:281`):
+全仓的 provider 插拔点是 `LlmAdapter`(packages/llm/llm/src/index.ts:200),它只要求子类实现一个方法 `stream`(:281):
 
 ```typescript
 // packages/llm/llm/src/index.ts:269-281(节选)
@@ -346,7 +390,7 @@ Web Client / SDK / 文档生成需要 Host 侧服务的类型、Zod schema 与 R
 
 ### 4.2 四包数据流
 
-`packages/typert/README.md:25-30` 给出分工:
+四个包的分工写得很干脆(`packages/typert/README.md:25-30`):
 
 | 包 | 角色 |
 |---|---|
@@ -354,6 +398,41 @@ Web Client / SDK / 文档生成需要 Host 侧服务的类型、Zod schema 与 R
 | `loader/` | 在 Loader 组合中把生成的 artifact 自动注册进运行时注册表 |
 | `protocol/` | Host/Client 共享的 `@Remote` 装饰器、wire 描述符、codec |
 | `registry/` | 运行时存储(`ctx.typert`),供查询与解析 |
+
+这条链路要按"时间轴 + 消费面"两段看。时间轴那段:类型信息只在构建期算一次——业务源码里的 `@Remote` 方法先被分析成编译器无关的模型,再由发射器写成运行时工件与类型声明;消费面那段:工件在插件树挂载时被注册进运行期注册表,之后宿主网关、客户端代理、文档生成器各自取用同一份调用描述符。收益是"RPC 描述符或文档另写一份"在结构上不可能发生,代价是生成失败即构建失败,不会把类型悄悄弱化。
+
+![流程图：12-architecture-highlights](./assets/diagrams/12-architecture-highlights-398.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+    SRC["业务服务源码:带远程方法标记"] --> GEN["构建期分析:提取类型"]
+    GEN --> MODEL["编译器无关的类型模型"]
+    MODEL --> ART["生成产物:运行时工件与类型声明"]
+    ART --> LDR["加载器:随插件树挂载自动注册"]
+    LDR --> REG["运行期注册表:同一份调用描述符"]
+    REG --> GW["宿主网关:解参、选接收者、调用、编码结果"]
+    REG --> REMOTE["客户端代理:物化同名方法桩"]
+    REG --> DOC["文档与目录生成器:同一模型的下游"]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 标记 | 业务服务继承远程服务基类,需要暴露的方法加 `@Remote` | `packages/llm/llm/src/index.ts:333`、`:468-469` |
+| 分析 | 构建期分析源码类型,产出反射、Zod schema 与远程描述符 | `packages/typert/README.md:25-30` |
+| 隔离带 | 提取与发射通过编译器无关模型解耦,发射器只消费模型、不接触编译器节点 | `packages/typert/generator/README.md:66` |
+| 失败面 | 声明缺失即构建失败;无法无损投影时点名具体构造,而不是把类型扁平化 | `packages/typert/generator/README.md:44` |
+| 产物落地 | 生成 `lib/typert.host.js` 与 `.d.ts`,以及 `/remote` 投影 | `packages/typert/README.md:25-30` |
+| 自动注册 | 加载器跟随条目生命周期,标脏条目并用微任务合并同一轮变动 | `packages/typert/loader/src/index.ts:411-422` |
+| 原子提交 | 先整批校验,再在 effect 内提交;撤销时比对 owner 身份而不是按 key 删 | `packages/typert/registry/src/service.ts:499-520` |
+| 宿主分发 | 网关解参、解析接收者、调用、编码结果,不依赖任何业务实现 | `packages/api/gateway/src/index.ts:1-6` |
+| 客户端 | 客户端消费同一份本地生成的调用描述符,物化命名空间方法桩 | `2026-08-02-typert-remote-method-calls.md:23` |
+| 文档 | 同一模型驱动目录文档与静态 API 目录,工具侧不给运行期加 `ctx.typert` 依赖 | `2026-07-27-compiler-independent-typert-model.md:27` |
+
+<details><summary>原图(供逐行核对)</summary>
 
 ```text
  业务 Service 源码(TypertRemoteService + @Remote 方法)
@@ -372,6 +451,8 @@ Web Client / SDK / 文档生成需要 Host 侧服务的类型、Zod schema 与 R
         ├─► Client 面 ctx.remote:同一份 InvocationDescriptor 物化命名空间 stub
         └─► 文档/目录生成器(cordis-catalog.ts、toJSONSchema → JSON Schema)
 ```
+
+</details>
 
 两个关键设计:
 

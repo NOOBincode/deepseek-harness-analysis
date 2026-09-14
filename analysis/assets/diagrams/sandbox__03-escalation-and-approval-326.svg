@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 746.752 367.20000000000005" width="746.752" height="367.20000000000005" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="311.87949999999995,66.9 321.69075,66.9 321.69075,105.80000000000001 331.50199999999995,105.80000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="290.3905,144.70000000000002 321.69075,144.70000000000002 321.69075,105.80000000000001 331.50199999999995,105.80000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="T" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="292.61349999999993,222.50000000000003 331.50199999999995,222.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="R" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="336.5519999999999,300.3 376.5519999999999,300.3" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="M" data-to="X" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="494.97599999999994,105.80000000000001 519.4219999999999,105.80000000000001 519.4219999999999,222.50000000000003 531.4219999999999,222.50000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="T" data-to="X" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="503.86799999999994,222.5 519.4219999999999,222.5 519.4219999999999,222.50000000000003 531.4219999999999,222.50000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="R" data-to="X" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="507.4219999999999,300.3 519.4219999999999,300.3 519.4219999999999,222.50000000000003 531.4219999999999,222.50000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="A" data-label="sandbox-policy renderPolicyContext
+sandbox-policy/src/index.ts:41" data-shape="rectangle">
+  <rect x="53.55749999999999" y="40" width="258.32199999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="182.71849999999995" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="182.71849999999995" dy="-3.9000000000000012">sandbox-policy renderPolicyContext</tspan><tspan x="182.71849999999995" dy="16.900000000000002">sandbox-policy/src/index.ts:41</tspan></text>
+</g>
+<g class="node" data-id="M" data-label="runtime-context 快照" data-shape="rectangle">
+  <rect x="331.50199999999995" y="87.35000000000001" width="163.474" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="413.2389999999999" y="105.80000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">runtime-context 快照</text>
+</g>
+<g class="node" data-id="E" data-label="审批策略渲染
+user-approval/src/index.ts:66,68" data-shape="rectangle">
+  <rect x="53.55749999999999" y="117.80000000000001" width="236.83299999999997" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="171.974" y="144.70000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="171.974" dy="-3.9000000000000012">审批策略渲染</tspan><tspan x="171.974" dy="16.900000000000002">user-approval/src/index.ts:66,68</tspan></text>
+</g>
+<g class="node" data-id="B" data-label="bashDescription + schema enum
+tool-bash/src/index.ts:69,258-268" data-shape="rectangle">
+  <rect x="53.55749999999999" y="195.60000000000002" width="239.05599999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="173.08549999999997" y="222.50000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="173.08549999999997" dy="-3.9000000000000012">bashDescription + schema enum</tspan><tspan x="173.08549999999997" dy="16.900000000000002">tool-bash/src/index.ts:69,258-268</tspan></text>
+</g>
+<g class="node" data-id="T" data-label="bash 工具 description" data-shape="rectangle">
+  <rect x="331.50199999999995" y="204.05" width="172.36599999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="417.68499999999995" y="222.5" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">bash 工具 description</text>
+</g>
+<g class="node" data-id="D" data-label="拒绝标记 + 升级提示
+render.ts / mapError" data-shape="rectangle">
+  <rect x="164.18599999999995" y="273.40000000000003" width="172.36599999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="250.36899999999994" y="300.3" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="250.36899999999994" dy="-3.9000000000000012">拒绝标记 + 升级提示</tspan><tspan x="250.36899999999994" dy="16.900000000000002">render.ts / mapError</tspan></text>
+</g>
+<g class="node" data-id="R" data-label="工具结果文本" data-shape="rectangle">
+  <rect x="376.5519999999999" y="281.85" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="441.9869999999999" y="300.3" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">工具结果文本</text>
+</g>
+<g class="node" data-id="X" data-label="模型看到:
+文件策略 + 审批策略
+不盘点挂了哪些能力" data-shape="rectangle">
+  <rect x="531.4219999999999" y="187.15000000000003" width="175.32999999999998" height="70.7" rx="0" ry="0" fill="#efe" stroke="#8a8" stroke-width="0.75" />
+  <text x="619.0869999999999" y="222.50000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="619.0869999999999" dy="-12.350000000000001">模型看到:</tspan><tspan x="619.0869999999999" dy="16.900000000000002">文件策略 + 审批策略</tspan><tspan x="619.0869999999999" dy="16.900000000000002">不盘点挂了哪些能力</tspan></text>
+</g>
+</svg>

@@ -18,9 +18,43 @@ const DEFAULT_CATALOG_DESCRIPTION_MAX_LENGTH = 500
 
 `inject` 三项各有实职:`agents`(拿 `Agent` 与其 `session`)、`tools`(注册 `skill` 工具 + 可见性查询)、`skills`(注册表只读)。
 
-`apply()`(`:77-252`)按固定顺序装四样东西:1) `skill` 工具的 `defineTool` 定义(`:81-160`);2) `ctx.tools.register(skillTool)`(`:161`);3) 手势监听器(`:177-204`);4) 目录监听器(`:213-251`)。
+`apply()` 按固定顺序装四样东西:`skill` 工具的定义、工具注册、手势监听器、目录监听器。每一件的具体位置见下表。
 
-**3 在 4 之前**是有意的,因为 Cordis waterfall 的嵌套由注册顺序决定:
+先装手势监听器、后装目录监听器,这个顺序是有意的。Cordis 的 waterfall 里,监听器的嵌套关系由注册顺序决定:先注册的在最外层,后注册的在里层。外层先调用 `next()` 把控制权交给内层,等内层返回后再对结果做最后加工——所以先注册的手势监听器反而最后落笔。这条规则直接决定了注入位置:背景信息在前,模型真正要执行的材料在最后。
+
+![时序图：03-catalog-and-loading](../assets/diagrams/skills__03-catalog-and-loading-25.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+sequenceDiagram
+  participant W as 瀑布调度
+  participant G as 手势监听器 先注册
+  participant C as 目录监听器 后注册
+  participant D as 默认末端
+  W->>G: 进入 agent/pre-step
+  G->>C: 先调用 next 走到内层
+  C->>D: 再调用 next 走到末端
+  D-->>C: 已认领消息加运行时上下文
+  C-->>G: 追加或原地替换目录消息
+  G-->>W: 把显式调用的指令体追加到最后
+  Note over W,G: 先注册的在外面 因此最后落笔
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 装配顺序 | `apply()` 依次装四样:工具定义、注册工具、手势监听器、目录监听器 | `apply()`(`packages/skill/tool-skill/src/index.ts:77-252`) |
+| 注册工具 | 工具注册排在监听器之前,这样反向拆卸时先拆监听器、再注销工具,不会留下"工具没了但指引还在"的中间态 | `ctx.tools.register(skillTool)`(`index.ts:161`、`206-207` 注释) |
+| 注册手势监听器 | 先注册 = 瀑布里更外层,拿到对结果的最后写权 | `index.ts:177-204` |
+| 注册目录监听器 | 后注册 = 内层,先产出目录消息 | `index.ts:213-251` |
+| 默认末端 | 产出 `{ kind: 'enter', messages: [claimed, context?] }`,即工作区规则与运行时策略 | 末端回调(`core/agent-loop/src/agent.ts:249-255`) |
+| 目录居中 | 目录消息接在上下文之后,是"本步有什么能力"的清单 | `index.ts:242-250` |
+| 注入最后 | `/name` 加载出来的指令体追加到本步全部注入的最后 | `index.ts:186-203` |
+| 最终顺序 | 消息等于已认领消息、上下文、目录、显式注入,依次排列 | 三条注册顺序共同决定(`index.ts:163-170` 注释) |
+
+<details><summary>原图(供逐行核对)</summary>
 
 ```text
 agent/pre-step waterfall 的调用栈(由外到内)
@@ -32,6 +66,8 @@ agent/pre-step waterfall 的调用栈(由外到内)
 │   └─ 返回:把 /name 注入 append 到目录之后
 └─ 最终 decision.messages = [ ...claimed, context?, 目录?, ...注入? ]
 ```
+
+</details>
 
 这就是 `:163-170` 注释所说的"background first, the material the model must act on last":工作区规则与运行时策略(默认末端产出)在前,目录居中,用户显式要求的指令体**在最后**,离模型的回答最近。若注册顺序反过来,注入会落在目录之前,位置就不再确定。
 
@@ -236,7 +272,44 @@ return {
       }
 ```
 
-落日志只在**首次尝试**发生,`firstAttempt` 在同一 step 内第一次构建请求时为真、重试请求时不再追加——否则 SDK 重试会把同一份目录写进日志多次。这满足仓库"模型可见 ⟺ 已落日志"的不变式:**目录与注入都是可重放的 `user/message` 事件,不是瞬态提示文本**。整条路径为:
+落日志只在**首次尝试**发生,`firstAttempt` 在同一 step 内第一次构建请求时为真、重试请求时不再追加——否则 SDK 重试会把同一份目录写进日志多次。这满足仓库"模型可见 ⟺ 已落日志"的不变式:**目录与注入都是可重放的 `user/message` 事件,不是瞬态提示文本**。整条路径可以概括成一句话:主循环先备好提示和上下文,再让瀑布的两层监听器依次加料,最后由 `step()` 把这一批消息落成会话事件。落日志只在首次尝试时执行,否则 SDK 重试会把同一份目录反复写进日志。这正是仓库"模型可见 ⟺ 已落日志"不变式的要求:目录和注入都是可重放的 `user/message` 事件,不是瞬态提示文本。
+
+![流程图：03-catalog-and-loading](../assets/diagrams/skills__03-catalog-and-loading-271.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A[主循环进入 preStep] --> B[认领收件箱并组装提示]
+  B --> C[投影运行时上下文快照]
+  C --> D[进入 agent/pre-step 瀑布]
+  D --> E[默认末端给出已认领消息加上下文]
+  E --> F[目录监听器确认 skill 工具还是自己那个]
+  F --> G[取快照 过滤 截断 算指纹]
+  G --> H[和历史比对 决定追加还是原地替换]
+  H --> I[手势监听器扫描本步用户消息里的斜杠名字]
+  I --> J[逐个加载并渲染成指令体]
+  J --> K[按顺序追加到本步消息末尾]
+  K --> L[首次尝试时逐条落成 user 消息事件]
+  L --> M[模型请求从日志派生]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 认领收件箱 | 取出本步要处理的用户输入 | `inbox.claim()`(`core/agent-loop/src/agent.ts:240-259`) |
+| 组装系统提示 | 按本 agent 的 scope 组装一次,含工具 schema | `systemPrompt.assemble()`(`agent.ts:241`) |
+| 上下文快照 | 渲染具名上下文段落,再投影成一条消息 | `renderContextSections()` / `runtimeContext.project()`(`agent.ts:242-243`) |
+| 进入瀑布 | 把已认领消息交给 `agent/pre-step`,附带 turn、step、signal | `dispatch.waterfall()`(`agent.ts:244`) |
+| 默认末端 | 产出"已认领消息 + 上下文"这个初始批次 | 末端回调(`agent.ts:245`) |
+| 目录监听器 | 查工具可见性、取快照、过滤、截断、算指纹,再决定追加还是替换 | `tool-skill/src/index.ts:213-251` |
+| 手势监听器 | 扫描本步用户消息里的 `/name`,逐个加载、过滤、渲染 | `tool-skill/src/index.ts:177-204` |
+| 追加注入 | 把渲染好的指令体追加到本步消息列表最后 | `tool-skill/src/index.ts:186-203` |
+| 落日志 | 首次尝试时把 `decision.messages` 逐条写成 `user/message` 事件 | `session.append()`(`core/agent-loop/src/agent.ts:373-377`) |
+| 派生请求 | 消息历史从日志派生,模型看到的就是刚落下的这批事件 | `deriveMessages()`(`core/agent-loop/src/agent.ts:603`) |
+
+<details><summary>原图(供逐行核对)</summary>
 
 ```text
 preStep(agent.ts:240)
@@ -252,6 +325,8 @@ preStep(agent.ts:240)
   → step(decision)(agent.ts:352)
   → for (m of decision.messages) session.append('user/message', m, { surfaceOp: 'append' })
 ```
+
+</details>
 
 ---
 

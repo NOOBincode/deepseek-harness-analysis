@@ -9,7 +9,9 @@
 
 ## 第〇节 一句话结论与总览
 
-DSH 的"系统提示"不是一段模板字符串,而是**一个按作用域分层的注册表服务 `ctx.systemPrompt`**:插件把各自拥有的提示事实(`section` / `context` / `tools` / `variable`)注册进去,**注册动作本身就是 Cordis effect**;每个 step 由 agent-loop 调用一次 `assemble()` 组装,渲染成纯文本后**作为一条 `system/message` 事件落进会话日志**,模型请求再从日志派生消息历史。提示从不作为请求的 `system` 字段发出。
+DSH 的"系统提示"不是一段模板字符串,而是一个按作用域分层的注册表服务 `ctx.systemPrompt`。插件把自己拥有的提示事实注册进去,一共四类:`section`(提示正文的段落)、`context`(附在 user 角色消息里的运行时上下文)、`tools`(模型可见的工具 schema)、`variable`(供 `{{name}}` 插值的变量)。注册这个动作本身就是 Cordis 的 effect,插件走了注册随之撤销。
+
+组装由主循环驱动。每个 step 调用一次 `assemble()`,结果渲染成纯文本后,作为一条 `system/message` 事件落进会话日志;模型请求再从日志派生消息历史。提示因此从不作为请求的 `system` 字段发出。
 
 四条关键事实:
 
@@ -17,6 +19,45 @@ DSH 的"系统提示"不是一段模板字符串,而是**一个按作用域分�
 2. **组装与渲染分两阶段**:`assemble()` 返回"文本已解析但未插值"的结果,`renderPrompt()` 才插值 `{{variable}}`、丢弃空段落并拼接(`index.ts:273-278`)。
 3. **提示是日志事实**:每步先 `project()` 提交 `system/message`,再由 `deriveMessages()` 派生请求(`agent-loop/src/agent.ts:364-379`、`552-617`);开发期不变式重算该派生结果并拒绝带 `system` 字段的循环请求(`agent-loop/src/invariant.ts:40-51`)。
 4. **重投时机 = 请求序列 + 路由能力 + 工具集变化**,而非"每步重发"(`agent.ts:363-369`)。
+
+这一段先给整条链的骨架。插件只做一件事:把提示事实登记进注册表,而"登记"这个动作本身就是可撤销的副作用——插件被卸载,它登记的段落就跟着消失。每个 step 由主循环调用一次组装,组装结果渲染成纯文本后,作为一条会话事件写进日志;模型请求再从日志派生消息历史。这样设计是为了守住一条约定:凡是模型能看到的内容,都必须能从会话日志重建——所以提示从来不走请求的 `system` 字段。
+
+![流程图：09-prompt](./assets/diagrams/09-prompt-25.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A[插件登记提示事实] --> B[登记动作本身即可撤销]
+  B --> C[按作用域分层存放]
+  C --> D[每个 step 组装一次]
+  D --> E[求值变量并合并段落]
+  E --> F[聚合工具清单并排序]
+  F --> G[瀑布扩展点可改写结果]
+  G --> H[插值丢空段再拼成文本]
+  H --> I[投影判断这次怎么投]
+  I --> J[作为会话事件写进日志]
+  J --> K[模型请求从日志派生]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 登记贡献 | 插件把 `section`、`context`、`tools`、`variable` 四类提示事实登记进注册表 | `section()` / `context()` / `tools()` / `variable()`(`packages/core/system-prompt/src/index.ts:448-540`) |
+| 落到作用域层 | 按注册上下文的 scope 选层或惰性建层;**注册顺序不影响最终位置** | `ScopedLayers.effect()`(`packages/core/scope/src/store.ts:226-266`) |
+| 撤销 | 插件卸载时执行 undo;某一层彻底空了就把这层从表里删掉 | `store.ts:257-261` |
+| 广播变更 | 任意层变化都发一次**不经 scope 过滤**的变更事件,因为全局变化影响所有 scope | `system-prompt/change`(`system-prompt/src/index.ts:409-412`) |
+| 组装 | 每个 step 调用一次,返回"文本已解析但尚未插值"的结果 | `assemble()`(`system-prompt/src/index.ts:552-627`) |
+| 合并 | 作用域链从最远祖先排到最近 scope,按这个顺序写入,于是近者覆盖远者的同名条目 | `chainLayers()` / `merge()`(`store.ts:192-217`) |
+| 瀑布 | 扩展点可改写段落、上下文、工具、变量;瀑布的返回值才算权威 | `system-prompt/assemble`(`system-prompt/src/index.ts:617-620`) |
+| 渲染 | 插值 `{{variable}}`、丢弃空段落、用空行拼接 | `renderPrompt()`(`system-prompt/src/index.ts:273-278`) |
+| 上下文快照 | 运行时上下文走另一条路,渲染成带名字的快照 | `renderContextSections()`(`system-prompt/src/index.ts:312-316`) |
+| 投影 | 判断这次该追加新节点、原地改写,还是什么都不做 | `SystemPromptProjection.project()`(`packages/core/agent-loop/src/runtime-context.ts:83-98`) |
+| 落日志 | 提交成 `system/message` 事件,成为 surface 上的一个节点 | `session.append()`(`agent-loop/src/agent.ts:370-372`) |
+| 派生请求 | 消息历史从日志派生,所以刚落的节点必然出现在本次请求里 | `deriveMessages()` / `buildRequest()`(`agent-loop/src/agent.ts:603`、`379`) |
+
+<details><summary>原图(供逐行核对)</summary>
 
 ```text
 插件 fiber ──ctx.systemPrompt.section/context/tools/variable──> ScopedLayers<PromptLayer>
@@ -40,6 +81,8 @@ DSH 的"系统提示"不是一段模板字符串,而是**一个按作用域分�
                                                                         v
    buildRequest() → llm.stream(request)   消息历史里含刚落的节点
 ```
+
+</details>
 
 ---
 
@@ -81,7 +124,7 @@ class PromptLayer implements ScopeLayer {
     )
 ```
 
-`ScopedLayers.effect()` 负责三件事(`packages/core/scope/src/store.ts:226-266`):按注册上下文的 scope 选择或惰性创建层 → 执行原子变更拿到同步 undo → 以 `ctx.effect()` 注册;处置时先 undo,再在**层彻底为空**时删除该 scope 层(`store.ts:257-261`):
+`ScopedLayers.effect()` 负责三件事(`packages/core/scope/src/store.ts:226-266`)。第一,按注册上下文的 scope 选中已有层,没有就惰性创建一层。第二,执行一次原子变更,同时拿到同步的 undo 函数。第三,把 undo 交给 `ctx.effect()` 托管。处置时先跑 undo,再检查这一层是否**彻底为空**;空了就把这个 scope 层从表里删掉(`store.ts:257-261`):
 
 ```typescript
       yield () => {
@@ -92,7 +135,7 @@ class PromptLayer implements ScopeLayer {
       if (notify) this.onChange()
 ```
 
-`onChange` 是构造参数里的一行——发射**不经 scope 过滤**的 `system-prompt/change`,因为全局变化影响所有 scope(`index.ts:409-412`)。两个后果:HMR / fiber 卸载天然安全(插件走了段落就没了,连空层一起回收);重复注册是显式错误,且诊断区分全局与 scoped——全局重复会提示"用 `agent.ctx` 做 per-agent override",scoped 重复只说"already registered in this scope"(`index.ts:376-386`)。
+变更事件由构造参数里的一行发出,而且**不按 scope 过滤**——因为全局层的变化会影响所有 scope(`index.ts:409-412`)。由此得到两个后果。其一,热替换和 fiber 卸载天然安全:插件走了,它登记的段落跟着没了,连空层一起回收。其二,重复注册是显式错误,诊断信息还会区分全局与 scoped 两种情况——全局重复时提示改用 `agent.ctx` 做 per-agent override,scoped 重复只说 already registered in this scope(`index.ts:376-386`)。
 
 ### 1.3 位置由服务集中分配,不由注册顺序决定
 
@@ -149,7 +192,42 @@ context 有独立表(`index.ts:159-163`):`SANDBOX_POLICY: 110`、`APPROVAL_POLIC
 
 ### 2.1 流水线(伪代码改写)
 
-`assemble()`(`index.ts:552-627`)按固定顺序执行:
+`assemble()` 是一次编排:先把本次该看的层都取出来,再按固定顺序合并变量、段落、上下文和工具,最后交给瀑布扩展点。顺序本身就是契约——变量和段落都遵循"近者胜",工具则要经过一个独立的排序函数。段落文本在这一步只求值、不插值,插值留到渲染阶段,这样瀑布监听器拿到的是结构化结果,而不是最终字符串。
+
+![流程图：09-prompt](./assets/diagrams/09-prompt-191.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  A[取出作用域链上的层] --> B[先求全局变量再逐层覆盖]
+  B --> C[合并同名段落与上下文]
+  C --> D[逐个求值工具提供者]
+  D --> E[深拷贝参数防止改坏缓存]
+  E --> F[按 order 给段落排序]
+  F --> G[函数式段落此刻求值但不插值]
+  G --> H[检查 complete 段落是否超过一个]
+  H --> I[交给组装瀑布让插件改写]
+  I --> J[按需恢复被遮盖的正文]
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 取层 | 拿到作用域链上的全部层,祖先在前、最近 scope 在最后 | `layers.chainLayers()`(`system-prompt/src/index.ts:556`) |
+| 抑制判定 | 全局抑制器非空,或链上任意一层有抑制器,本次的运行时上下文就被抑制 | `system-prompt/src/index.ts:555-556` |
+| 变量求值 | 先求全局,再按"最远祖先 → 最近 scope"逐层覆盖同名变量,近者胜 | `system-prompt/src/index.ts:558-567` |
+| 合并段落 | 用 `merge()` 得到按名字索引的段落表和上下文表,最近 scope 赢同名 | `packages/core/scope/src/store.ts:192-217` |
+| 工具聚合 | 全局加链上 provider 逐个求值,每个只保留 `name` / `description` / `parameters` 三个字段 | `system-prompt/src/index.ts:576-588` |
+| 参数深拷贝 | `parameters` 走结构化克隆,瀑布监听器改 schema 就不会污染下一次组装 | `system-prompt/src/index.ts:576-588`、`packages/core/tools/src/index.ts:972-993` |
+| 段落排序 | 按 `order` 升序、同序号按名字码元序;**生效的 `complete` 段落多于一个就直接抛错** | `comparePromptSections`(`system-prompt/src/index.ts:590-593`) |
+| 函数式段落 | `text(context)` 是函数的话此刻求值,但结果**不插值** | `system-prompt/src/index.ts:621-626` |
+| 工具排序 | 按配置的 `toolOrder` 重排,未列出的工具插到保留的 rest 位置 | `orderTools()`(`system-prompt/src/index.ts:210-224`) |
+| 瀑布 | 带 scope 派发,监听器可以改写全部四类输入;不调用 `next()` 即短路整条链 | `system-prompt/assemble`(`system-prompt/src/index.ts:617-620`) |
+| 恢复 | 若存在 `complete` 段落或上下文被抑制,用瀑布结果叠加恢复后的段落与上下文 | `system-prompt/src/index.ts:621-626` |
+
+<details><summary>原图(供逐行核对)</summary>
 
 ```text
 assemble(context = {})
@@ -165,6 +243,8 @@ assemble(context = {})
   ├─ await ctx.waterfall(scopeTarget(this, scope), 'system-prompt/assemble', …)
   └─ 若有 complete 段落或 context 被抑制 → 瀑布结果 + 恢复后的 sections/contexts
 ```
+
+</details>
 
 tools 聚合与去引用(`index.ts:576-588`,紧凑改写):
 
@@ -305,6 +385,10 @@ function orderTools(tools: ToolSchema[], toolOrder: string[] | undefined, knownN
 
 判决输入只有两个字段(`runtime-context.ts:34-44`):`inHistory`(本次已准备调用的路由是否"读 messages 靠后的 system 消息为生效提示")与 `startsSeries`(本步是否开启新的模型消息序列)。
 
+![流程图：09-prompt](./assets/diagrams/09-prompt-376.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["project(rendered, {inHistory, startsSeries})"] --> B{"存在 head 节点?"}
@@ -315,6 +399,8 @@ flowchart TD
   F -- 是 --> G["无事件,零开销"]
   F -- 否 --> H["append:新版追加在缓存历史之后,保住前缀复用"]
 ```
+
+</details>
 
 | 情形 | 提交动作 | 模型侧结果 |
 |---|---|---|
@@ -356,6 +442,43 @@ flowchart TD
 
 ### 4.4 一次 step 内的时序与重试
 
+一次 step 分两段。入口 `preStep` 负责组装提示、准备上下文快照,再把本步认领的消息交给瀑布;`step()` 负责渲染、提交和发起请求。渲染每步只做一次,重试时复用同一份文本——所以重试前发生的压缩或替换能生效,却不会重复组装,也不会重新接纳用户消息。
+
+![时序图：09-prompt](./assets/diagrams/09-prompt-429.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+sequenceDiagram
+  participant L as 主循环
+  participant P as 提示服务
+  participant S as 会话日志
+  participant M as 模型接口
+  L->>P: 这一步组装一次
+  P-->>L: 段落 上下文 工具清单
+  L->>L: 渲染成提示文本
+  L->>S: 提交系统提示节点
+  Note over L,S: 只在首次尝试提交 重试复用同一份文本
+  L->>S: 派生消息历史
+  L->>M: 发起流式请求
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| preStep 入口 | 认领收件箱、组装系统提示、准备运行时上下文、过 pre-step 瀑布 | `preStep()`(`packages/core/agent-loop/src/agent.ts:240-259`) |
+| 组装 | 按本 agent 的 scope 组装一次提示,含工具 schema | `assembleContextFor()` / `assemble()`(`agent-loop/src/agent.ts:361`) |
+| 上下文快照 | 渲染具名上下文段落,再投影成一条 user 消息 | `renderContextSections()` / `runtimeContext.project()`(`agent-loop/src/agent.ts:362-363`) |
+| pre-step 瀑布 | 把"已认领消息 + 上下文"交给插件扩写,返回 `enter` 分支 | `agent/pre-step`(`agent-loop/src/agent.ts:364`) |
+| 渲染提示 | 每步渲染一次纯文本;重试复用,不重新组装也不重新渲染 | `renderPrompt()`(`agent-loop/src/agent.ts:367`) |
+| 每次尝试 | 准备请求,再投影提示,有变化才提交 | `prepareRequest()` / `project()`(`agent-loop/src/agent.ts:368`) |
+| 首次尝试 | 把 `decision.messages` 全部落成 `user/message` 事件 | `session.append()`(`agent-loop/src/agent.ts:373-377`) |
+| 构建请求 | 从日志派生消息历史,拼出本次请求 | `buildRequest()`(`agent-loop/src/agent.ts:379`) |
+| 发起调用 | 请求发给模型,消息历史里已经含刚落的提示节点 | `llm.stream()`(`agent-loop/src/agent.ts:390`) |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 preStep(target, {turn, step})                                   agent.ts:240-259
   ├─ assembly = ctx.systemPrompt.assemble(assembleContextFor(this, signal))
@@ -368,6 +491,8 @@ step(decision)                                                   agent.ts:352-39
   └─ 每次尝试:prepareRequest() → project() → 有变化才 append
               → 首次尝试才提交 user/message 批次 → buildRequest() → llm.stream()
 ```
+
+</details>
 
 重试会重新跑提示协调(所以重试前发生的压缩/替换能生效),但不会重复组装或重新接纳用户消息。
 

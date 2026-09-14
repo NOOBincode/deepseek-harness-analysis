@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 866.6589999999999 869.2999999999998" width="866.6589999999999" height="869.2999999999998" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="BUNDLE" data-to="FLAT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="139.1505,84.9 139.1505,100.9 471.8615,100.9 471.8615,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PROFILE" data-to="FLAT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="325.1425,84.9 325.1425,100.9 471.8615,100.9 471.8615,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="HOME" data-to="FLAT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="471.8615,84.9 471.8615,100.9 471.8615,100.9 471.8615,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="OVERLAY" data-to="FLAT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="621.174,84.9 621.174,100.9 471.8615,100.9 471.8615,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="TELEMETRY" data-to="FLAT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="768.6339999999999,84.9 768.6339999999999,100.9 471.8615,100.9 471.8615,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="FLAT" data-to="COMPOSE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="471.86150000000004,153.8 471.8615,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="COMPOSE" data-to="ROWS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="471.8615,230.70000000000002 471.86150000000004,270.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ROWS" data-to="INCLUDE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="471.86150000000004,307.6 471.8614999999999,347.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="INCLUDE" data-to="TREE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="471.8614999999999,384.5 471.8615,424.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="TREE" data-to="CREATE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="471.8615,461.4 471.8615,501.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CREATE" data-to="ACTIVE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="471.8615,538.3 471.8615,558.3 471.8615,558.3 471.8615,715.4999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CREATE" data-to="PENDING" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="471.8615,538.3 471.8615,558.3 524.8989999999999,558.3 524.8989999999999,578.3" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PENDING" data-to="ACTIVE" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="服务上线后通知" points="524.8989999999999,615.1999999999999 524.8989999999999,703.4999999999999 501.08316666666667,703.4999999999999 501.08316666666667,715.4999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ACTIVE" data-to="READY" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="471.86150000000004,752.3999999999999 471.8615,792.3999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="PENDING" data-to="ACTIVE" data-label="服务上线后通知">
+  <rect x="474.39899999999994" y="650.1999999999999" width="100.81000000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="524.804" y="665.3499999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">服务上线后通知</text>
+</g>
+<g class="node" data-id="BUNDLE" data-label="bundle 层:出厂 patch 文件" data-shape="rectangle">
+  <rect x="40" y="48" width="198.301" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="139.1505" y="66.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">bundle 层:出厂 patch 文件</text>
+</g>
+<g class="node" data-id="FLAT" data-label="摊平成单个有序补丁列表" data-shape="rectangle">
+  <rect x="369.3765" y="116.9" width="204.96999999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="471.8615" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">摊平成单个有序补丁列表</text>
+</g>
+<g class="node" data-id="PROFILE" data-label="profile 用户层" data-shape="rectangle">
+  <rect x="262.301" y="48" width="125.68299999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="325.1425" y="66.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">profile 用户层</text>
+</g>
+<g class="node" data-id="HOME" data-label="home 用户层" data-shape="rectangle">
+  <rect x="411.984" y="48" width="119.755" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="471.8615" y="66.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">home 用户层</text>
+</g>
+<g class="node" data-id="OVERLAY" data-label="命令行叠加层" data-shape="rectangle">
+  <rect x="555.739" y="48" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="621.174" y="66.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">命令行叠加层</text>
+</g>
+<g class="node" data-id="TELEMETRY" data-label="遥测派生层" data-shape="rectangle">
+  <rect x="710.6089999999999" y="48" width="116.05" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="768.6339999999999" y="66.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">遥测派生层</text>
+</g>
+<g class="node" data-id="COMPOSE" data-label="对空条目表跑一次补丁算法" data-shape="rectangle">
+  <rect x="361.9665" y="193.8" width="219.78999999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="471.8615" y="212.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">对空条目表跑一次补丁算法</text>
+</g>
+<g class="node" data-id="ROWS" data-label="得到最终条目表" data-shape="rectangle">
+  <rect x="399.0165" y="270.70000000000005" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="471.8615" y="289.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">得到最终条目表</text>
+</g>
+<g class="node" data-id="INCLUDE" data-label="Include 读入空的根配置文件" data-shape="rectangle">
+  <rect x="361.59599999999995" y="347.6" width="220.53099999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="471.8614999999999" y="366.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Include 读入空的根配置文件</text>
+</g>
+<g class="node" data-id="TREE" data-label="条目树:根条目组" data-shape="rectangle">
+  <rect x="397.5345" y="424.5" width="148.654" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="471.8615" y="442.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">条目树:根条目组</text>
+</g>
+<g class="node" data-id="CREATE" data-label="同层条目并发挂载" data-shape="rectangle">
+  <rect x="391.6065" y="501.4" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="471.8615" y="519.85" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">同层条目并发挂载</text>
+</g>
+<g class="node" data-id="ACTIVE" data-label="依赖齐备者当场激活" data-shape="rectangle">
+  <rect x="384.1965" y="715.4999999999999" width="175.32999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="471.8615" y="733.9499999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">依赖齐备者当场激活</text>
+</g>
+<g class="node" data-id="PENDING" data-label="依赖不齐者停在等待态" data-shape="rectangle">
+  <rect x="429.82399999999996" y="578.3" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="524.8989999999999" y="596.75" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">依赖不齐者停在等待态</text>
+</g>
+<g class="node" data-id="READY" data-label="整树就绪:注入 loader 的插件被唤醒" data-shape="rectangle">
+  <rect x="338.9955" y="792.3999999999999" width="265.73199999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="471.8615" y="810.8499999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">整树就绪:注入 loader 的插件被唤醒</text>
+</g>
+</svg>

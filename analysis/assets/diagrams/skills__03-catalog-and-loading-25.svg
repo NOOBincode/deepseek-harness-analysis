@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 675.9259999999999 375" width="675.9259999999999" height="375" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line class="lifeline" data-actor="W" x1="76.615" y1="70" x2="76.615" y2="345" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="G" x1="240.5965" y1="70" x2="240.5965" y2="345" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="C" x1="435.3295" y1="70" x2="435.3295" y2="345" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="D" x1="599.3109999999999" y1="70" x2="599.3109999999999" y2="345" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="W" data-to="G" data-label="进入 agent/pre-step" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="76.615" y1="90" x2="240.5965" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="158.60575" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">进入 agent/pre-step</text>
+</g>
+<g class="message" data-from="G" data-to="C" data-label="先调用 next 走到内层" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="240.5965" y1="130" x2="435.3295" y2="130" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="337.96299999999997" y="120" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">先调用 next 走到内层</text>
+</g>
+<g class="message" data-from="C" data-to="D" data-label="再调用 next 走到末端" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="435.3295" y1="170" x2="599.3109999999999" y2="170" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="517.32025" y="160" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">再调用 next 走到末端</text>
+</g>
+<g class="message" data-from="D" data-to="C" data-label="已认领消息加运行时上下文" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="599.3109999999999" y1="210" x2="435.3295" y2="210" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="517.32025" y="200" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">已认领消息加运行时上下文</text>
+</g>
+<g class="message" data-from="C" data-to="G" data-label="追加或原地替换目录消息" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="435.3295" y1="250" x2="240.5965" y2="250" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="337.96299999999997" y="240" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">追加或原地替换目录消息</text>
+</g>
+<g class="message" data-from="G" data-to="W" data-label="把显式调用的指令体追加到最后" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="240.5965" y1="290" x2="76.615" y2="290" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="158.60575" y="280" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">把显式调用的指令体追加到最后</text>
+</g>
+<g class="note" data-position="over" data-actors="W,G">
+  <polygon points="67.66975,298 243.54175,298 249.54175,304 249.54175,321 67.66975,321" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="243.54175,298 249.54175,304 243.54175,304" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="158.60575" y="309.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">先注册的在外面 因此最后落笔</text>
+</g>
+<g class="actor" data-id="W" data-label="瀑布调度" data-type="participant">
+  <rect x="30" y="30" width="93.22999999999999" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="76.615" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">瀑布调度</text>
+</g>
+<g class="actor" data-id="G" data-label="手势监听器 先注册" data-type="participant">
+  <rect x="163.23" y="30" width="154.733" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="240.5965" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">手势监听器 先注册</text>
+</g>
+<g class="actor" data-id="C" data-label="目录监听器 后注册" data-type="participant">
+  <rect x="357.96299999999997" y="30" width="154.733" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="435.3295" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">目录监听器 后注册</text>
+</g>
+<g class="actor" data-id="D" data-label="默认末端" data-type="participant">
+  <rect x="552.6959999999999" y="30" width="93.22999999999999" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="599.3109999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">默认末端</text>
+</g>
+</svg>

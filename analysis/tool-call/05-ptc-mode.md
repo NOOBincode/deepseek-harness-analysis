@@ -89,6 +89,10 @@ Object.defineProperty(definition, 'parameters', {
 })
 ```
 
+![流程图：05-ptc-mode](../assets/diagrams/tool-call__05-ptc-mode-92.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart LR
   A["定义铸造 ptc.ts:295<br/>description/parameters = TS 占位"] --> B["ToolDefinition"]
@@ -101,6 +105,8 @@ flowchart LR
   G -->|否| H["抛错:no run_code schema flavor :126"]
   G -->|是| I["该语言的 description + codeDescription"]
 ```
+
+</details>
 
 用的是 `Object.hasOwn`(`ptc.ts:124`)而不是 `RUN_CODE_FLAVORS[lang] !== undefined`:注释 `:121-122` 说明,一个叫 `toString`/`constructor` 的语言会解析到 `Object.prototype` 的继承成员。同一个防护在 `index.ts:1014` 的 `SDK_RENDERERS` 上重复出现。两张表的键集都被 `satisfies Record<CodeSdkLanguage, …>` 钉住(`ptc.ts:82-85`、`index.ts:53-56`),`CodeSdkLanguage = 'typescript' | 'python'`(`ptc.ts:79`),所以新增语言漏改一张表是 **typecheck 失败**,而不是等运行时报告。
 

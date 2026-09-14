@@ -11,6 +11,58 @@
 
 DSH 的多 agent **不是**一个多智能体框架,而是**一条 capability seam + 三种派生方式**:`ctx.subagents` 是命名 provider 注册表,`subagent` 工具是它的模型侧 Consumer;每次委派都由 provider 经 `ctx.agents.create()` 造出一个**真 Agent**——自己的 `Session`、自己的 scope、自己的工具面与系统提示。`workflow` 把脚本化扇出放进 worker 线程,再用 `agent()` 反向 RPC 复用**同一个** subagent seam;`jobs` 只提供后台执行外壳与回收。三者共享同一套词汇:`AgentHandle`(所有权)、`SubagentRun`(一次委派)、`SubagentResult`(回流值)。
 
+### 人话版:一次委派从头到尾
+
+这段讲的是 DSH 的"多 agent"到底多在哪。父 Agent(正在跑模型循环的那个 agent,自带一份会话日志和一个作用域)通过一次工具调用发起委派:注册表按名字挑出一个 provider,也就是"提供创建能力的后端",由它造出一个真子 Agent。子 Agent 有自己的 Session(会话日志,可持久化、可恢复)、自己的 scope(作用域链,决定它能看见哪些工具与服务)和一套独立的系统提示,它还会加入父 Agent 所在的 preset(一份可挂载的组合配置,写明这个会话里装配哪些能力行),所以它不是父 Agent 进程里的一个函数调用,而是另一个完整的 Agent。子 Agent 跑完后,结果作为**一次性值**回流:前台路线把它直接变成工具结果交回父 Agent;后台路线先把它变成一条作业,完成后用一条通知决定是注入上下文还是新开一个 turn。失败与取消都是分级的——子 Agent 没正常收尾,前台就转成错误结果但保留部分输出;`interrupt_agent` 只停它的当前 turn,`job_kill` 停掉整条后台作业,已经发布的子 Agent 不会被顺手删掉。`workflow` 是另一条派生方式:模型写的脚本先进入一条 worker 线程(独立的执行线程,脚本写死循环也阻塞不了宿主),脚本里的每个 `agent()` 再经线程间 RPC 反向回到宿主的同一个 subagent seam 上。
+
+![流程图：10-multi-agent](./assets/diagrams/10-multi-agent-18.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart LR
+  P["父 Agent 发出委派"]
+  T["模型可用的工具面"]
+  R["命名 provider 注册表"]
+  N["provider 造出一个真子 Agent"]
+  S["子 Agent 在自己的 Session 里跑"]
+  V["结果值回流"]
+  F["前台:当成工具结果交回父 Agent"]
+  B["后台:作业外壳,完成后再通知"]
+  W["workflow:脚本站进 worker 线程扇出"]
+  J["jobs:只管后台执行与回收"]
+  I["隔离不靠进程,而靠 scope 链与能力声明"]
+  X["失败与取消:非 completed 即报错"]
+
+  P --> T --> R --> N --> S --> V
+  V --> F
+  V --> B
+  T --> W --> R
+  T --> J --> R
+  N --> I
+  S --> X
+```
+
+</details>
+
+### 一次委派的阶段明细
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 1 模型发出工具调用 | 父 Agent 的工具面里有 `subagent`、`subagent_fork`、`send_message`、`interrupt_agent`、`workflow`、`job_output`、`job_kill`,模型选中其中一个 | `tool-subagent/src/index.ts:471` |
+| 2 能力缝校验 | 按 provider 名字取出后端,逐项核对它声明过的能力位:agentOptions、outputSchema、深度上限、工具过滤、persona;任一项不满足立即抛错,不"接受后忽略" | `subagent/subagent/src/index.ts:556-586` |
+| 3 委派策略快照 | 在第一个 await 之前抓住父会话的显式 sandbox 覆盖,并把审批策略钉死为 never | `subagent/subagent/src/child-agent.ts:242-247` |
+| 4 创建真 Agent | provider 调 `parent.ctx.agents.create()`,在"未发布窗口"里把子世界装好 | `subagent/subagent-in-process-driver/src/index.ts:104-152` |
+| 5 发布与启动 | setup → enter → announce 三步发布,然后给子 Agent 送第一条 prompt,等它闲下来 | `core/agent-loop/src/index.ts:659-677` |
+| 6 结果读取 | 取最后一条非空 assistant 消息作为输出,再取本轮 turn 的停因,合成一次委派的结果值 | `subagent/subagent/src/assistant-output.ts:67`、`subagent-in-process-driver/src/index.ts:50-67` |
+| 7 前台回流 | 停因不是 completed 就转成 throw,变成 isError 工具结果,同时保留已经产出的部分输出 | `tool-subagent/src/index.ts:207-237` |
+| 8 后台回流 | one-shot 后台委派被包成一条作业,作业完成后按 owner 状态选择注入或新开 turn | `tool-subagent/src/index.ts:544-560`、`tool-jobs/src/index.ts:278-299` |
+| 9 workflow 扇出 | 脚本在 worker 线程里跑,每个 `agent()` 经 ChildStart RPC 复用宿主上同一个 subagent seam | `workflow/workflow-worker-thread/src/host.ts:352-368` |
+| 10 jobs 外壳 | 只负责后台执行、游标读取、取消与回收,不参与造 Agent | `jobs/jobs/src/index.ts:82-143` |
+| 11 取消与失败 | interrupt 只停当前 turn;job_kill 停整条作业;workflow 里普通失败降级成 null,致命失败上抛杀死脚本 | `subagent/subagent/src/index.ts:280-297`、`workflow/workflow-worker-thread/src/runtime.ts:414-425` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 父 Agent(session + scope + 自己的工具面)
  │ tool-call: subagent/subagent_fork/send_message/interrupt_agent · workflow · job_output/job_kill
@@ -28,6 +80,8 @@ DSH 的多 agent **不是**一个多智能体框架,而是**一条 capability se
       ├ 前台:非 completed 转 throw → isError 工具结果;后台:JobOutcome → onJobDone → inject/followup
       └ workflow:ChildSettled RPC → 脚本 item 值,或 null
 ```
+
+</details>
 
 **派生是"造 Agent + 独立 Session + 独立 scope",回流是"一次性结果值 + 生命周期事件",隔离靠 scope 链与 provider 能力声明,不靠进程边界。**
 
@@ -102,6 +156,48 @@ export interface SubagentProvider {
 
 ### 2.2 从工具调用到子 Agent
 
+这一节跟一次 `subagent` 工具调用走到底:模型给出 prompt 与可选参数,工具层先把调用者认出来,再组装一个请求对象,然后按配置决定走前台、后台还是续存。三条路线最后都落到同一处——provider 调 `parent.ctx.agents.create()` 造出子 Agent,区别只在结果怎么回来。任何环节缺要件(拿不到调用者、provider 没注册)都是当场抛错,不会带着半个请求继续往下走。
+
+![流程图：10-multi-agent](./assets/diagrams/10-multi-agent-155.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart LR
+  M["模型发出 subagent 工具调用"]
+  E["工具层取出调用者,缺失即抛"]
+  P["路由预检与策略校验"]
+  R["组装请求:prompt 与父 Agent"]
+  C1["续存:交给续存管理器"]
+  C2["one-shot 后台:包成一条作业"]
+  C3["前台:直接调能力缝"]
+  S["provider 创建子 Agent"]
+  U["未发布窗口里装好子世界"]
+  A["发布并起循环"]
+
+  M --> E --> P --> R
+  R --> C1 --> S
+  R --> C2 --> S
+  R --> C3 --> S
+  S --> U --> A
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 1 认调用者 | 工具层要求 `exec.agent` 存在;拿不到就抛错,不去猜调用者是谁 | `tool-subagent/src/index.ts:472-476` |
+| 2 路由与策略 | 做路由预检与策略校验,并复查 provider 是否被改动过 | `tool-subagent/src/index.ts:478-512` |
+| 3 组装请求 | 把 label、prompt、父 Agent 与 persona、toolFilter、maxDepth 等可选参数拼成请求 | `tool-subagent/src/index.ts:515-523` |
+| 4 续存路线 | 交给续存管理器,子 inbox(它收消息的队列)收下初始 prompt 就返回,不等它跑完 | `tool-subagent/src/index.ts:530`、`subagent/src/continuation.ts:102-190` |
+| 5 后台路线 | 包成一条 kind 为 subagent 的作业,owner 记成父 Agent | `tool-subagent/src/index.ts:544` |
+| 6 前台路线 | 直接调能力缝,并把 signal 一起传下去 | `tool-subagent/src/index.ts:563` |
+| 7 provider 启动 | spawn provider 进入 in-process driver,这是唯一的发布与所有权转移边界 | `subagent-spawn-in-process/src/index.ts:54` |
+| 8 创建事务 | driver 调 `parent.ctx.agents.create()` 造出真子 Agent | `subagent-in-process-driver/src/index.ts:130-134` |
+| 9 未发布窗口 | setup 装配子世界,enter 入表,announce 广播,然后起循环 | `core/agent-loop/src/index.ts:659-677` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 模型 tool-call: subagent{description, prompt, run_in_background?, provider?, model?}
  └─ tool-subagent execute(args, exec)                              (tool-subagent/src/index.ts:471)
@@ -113,6 +209,8 @@ export interface SubagentProvider {
       └─ SpawnInProcessProvider.start → startInProcessRun(request, {})  (spawn/src/index.ts:54)
            └─ parent.ctx.agents.create(...) → factory:未发布 setup → enter → announce → 起 loop
 ```
+
+</details>
 
 in-process driver 是全部 in-process 后端共用的创建事务(`packages/subagent/subagent-in-process-driver/src/index.ts:104-152`):
 
@@ -205,6 +303,51 @@ function completedTurnPrefix(parent: Agent): SessionEvent[] {
 
 前台一次性委派之外还有第二条生命周期:**可续存子 agent**。开关在工具 Config(`tool-subagent/src/index.ts:66-72`),调度解析为 `run_in_background ?? continuable`(`:287-305`)——one-shot 默认前台,continuable 默认后台。`startContinuable` 在**子 inbox 接受初始 prompt 时**即返回,不等待子跑完(`packages/subagent/subagent/src/continuation.ts:102-190`),工具只回一个 `subagentId`(`tool-subagent/src/index.ts:530-536`)。冷启所需的组合落在描述符 v3 的 continuable 分支(`packages/subagent/subagent/src/descriptor.ts:48,72-86`):`label` + `agentProvider`/`agentModel`/`agentReasoningEffort` + `persona` + `toolFilter`;刻意不存 `subagentDepth`(以持久 header 为单调下界)与 `outputSchema`(只属于某次 activation,`descriptor.ts:8-19`)。
 
+这一段把两个管控工具的内部走向摊开:`send_message` 给子 Agent 追加消息,`interrupt_agent` 停掉它的当前 turn。`send_message` 先确认发送者确实是注册表里的活实例;如果目标恰好是常驻续存子 Agent 的直接父,就直接以 steer 投递给父的"下一 step",否则转进通用投递路径——目标还在内存里就当场投递,已经被回收就按描述符把会话冷恢复出来再投。`interrupt_agent` 只停目标当前这个 turn:没被认领的 inbox 工作、正在进行的 activation、以及它已经发布的后代全部保留。
+
+![流程图：10-multi-agent](./assets/diagrams/10-multi-agent-296.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart LR
+  M["模型调用 send_message"]
+  V["校验发送者是不是活实例"]
+  D{"目标是常驻子的直接父吗"}
+  SP["以 steer 投给父的下一 step"]
+  DC["转进通用投递路径"]
+  L{"目标还在内存里吗"}
+  AD["当场投递:steer 或排队"]
+  CR["按描述符冷恢复会话后再投"]
+  I["模型调用 interrupt_agent"]
+  T["只停目标当前这个 turn"]
+  K["未认领的 inbox 工作与后代保留"]
+
+  M --> V --> D
+  D --> SP
+  D --> DC --> L
+  L --> AD
+  L --> CR
+  I --> T --> K
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 1 入口 | send_message 工具取出 agent_id 与 message | `tool-subagent-control/src/index.ts:28` |
+| 2 校验发送者 | 发送者必须是注册表里的精确实例,不能是随便一个同 id 的 Agent | `subagent/subagent/src/index.ts:246` |
+| 3 发给父 | 目标是常驻续存子的直接父时走 sendToParent,以 steer 投给父的 next-step | `subagent/subagent/src/continuation.ts:337-360` |
+| 4 通用投递 | 其余情况走 deliverToChild,统一用 steer 语义 | `subagent/subagent/src/index.ts:273-323` |
+| 5 目标常驻 | 断言图像能力后提交准入,按 steer 或排队处理 | `subagent/subagent/src/continuation.ts:243-270` |
+| 6 目标已卸载 | 先读会话日志折出描述符,再冷恢复出子 Agent | `subagent/subagent/src/continuation.ts:404-454` |
+| 7 interrupt 入口 | interrupt_agent 以 ancestor 身份声明调用者 | `tool-subagent-control/src/index.ts:76` |
+| 8 停什么 | 只停当前 turn;未认领的 inbox 工作、activation、已发布后代全部保留 | `subagent/subagent/src/index.ts:280-297` |
+| 9 粒度对照 | queuePrompt 对应下一个 turn,steerPrompt 对应下一个 step | `subagent/subagent/src/continuation.ts:243-270` |
+| 10 发现侧 | list_agents 走会话投影,不加载也不唤醒 Agent | `subagent/subagent/src/index.ts:349-370` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 send_message(agent_id, message)                       tool-subagent-control/src/index.ts:28
  └─ ctx.subagents.sendMessage(sender, targetId, content, {signal})    (subagent/src/index.ts:246)
@@ -218,6 +361,8 @@ interrupt_agent(agent_id)                             tool-subagent-control/src/
  └─ ctx.subagents.interrupt(target, { kind:'ancestor', agent: caller })  (subagent/src/index.ts:295)
       └─ 只停当前 turn:未认领的 inbox 工作、Activation、已发布后代全部保留 (:280-297 契约)
 ```
+
+</details>
 
 `queuePrompt`/`steerPrompt` 的差别就是 `Agent.followup`(下一 turn)与 `Agent.steer`(下一 step)的差别(`continuation.ts:243-270` 对照 `packages/core/agent-loop/src/agent.ts:137-147`)。发现侧由 `list_agents` 提供:`listChildren`/`listDescendants` 走 Session query 投影,不加载也不唤醒 Agent(`subagent/src/index.ts:349-370`),状态由 live 注册表补成 `running | idle | ready`(`tool-subagent-control/src/list-agents.ts:59-63`)。生命周期事件以**委派父**为 scope carrier 分发,故父级监听器只看到自己的委派(`packages/subagent/subagent/src/lifecycle.ts:86-90,134-163`)。
 
@@ -271,6 +416,52 @@ return Promise.all(thunks.map(async (thunk) => {
 
 ### 5.4 宿主侧与工具侧
 
+这一节讲"脚本要起子 Agent 时,消息怎么走一个来回"。脚本跑在 worker 线程里,自己没能力造 Agent,所以每次 `agent()` 都通过线程间 RPC 向宿主发一条请求;宿主用自己的 subagent seam 造出子 Agent,把结果快照成纯 JSON 再回给脚本。失败不会让脚本卡住:起不来就回一条启动失败,结果不可序列化也回失败;脚本被取消时,宿主在宽限期后直接终止线程。
+
+![流程图：10-multi-agent](./assets/diagrams/10-multi-agent-403.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart LR
+  S["脚本在 worker 线程里调用 agent"]
+  Q["向宿主发一条起子 Agent 的请求"]
+  A{"宿主做准入检查"}
+  R["拒绝: 回一条启动失败"]
+  C["宿主用同一个 provider 起子 Agent"]
+  P["子 Agent 活在宿主进程里"]
+  J["结果快照成纯 JSON"]
+  B["回给脚本: 结果或失败"]
+  D["脚本请求释放这个子 Agent"]
+  M["宿主按请求编号记忆化释放,重复请求也回确认"]
+  E["脚本跑完,交回最终结果"]
+  Z["宿主收掉残留子 Agent 再结算"]
+  G["取消: 宽限期后强制终止线程"]
+
+  S --> Q --> A
+  A --> R
+  A --> C --> P --> J --> B
+  B --> D --> M --> E --> Z
+  C --> G
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 起子 Agent | 脚本发 ChildStart,宿主先做准入检查,过了才走同一个 `subagents.start` | `workflow-worker-thread/src/host.ts:319-330`、`:352-368` |
+| 公布句柄 | 先把 `run.result` 的转发挂上,再向脚本公布子 Agent 句柄 | `workflow-worker-thread/src/host.ts:388-414` |
+| 交回结果 | 结果先快照成纯 JSON,不可序列化就改回一条失败消息 | `workflow-worker-thread/src/host.ts:393-411` |
+| 释放子 Agent | 按请求编号记忆化释放,重复的释放请求照样回确认 | `workflow-worker-thread/src/host.ts:417-450` |
+| 结算整个 run | 认领终局 → 收掉残留子 Agent → 结算结果 | `workflow-worker-thread/src/host.ts:489-519` |
+| 判断真静默 | 没有未结算的启动、也没有活着的子 Agent,两个条件都满足才算静默 | `workflow-worker-thread/src/host.ts:464-474` |
+| 死亡屏障 | 第一条死亡信号之后到达的消息不得再建子 Agent、也不得在 workflow/end 之后叙事 | `workflow-worker-thread/src/host.ts:271-276`、`:521-554` |
+| 事件恰好一对 | 配对账本保证 `agent-start` 与 `agent-end` 一对一,worker 说不了话时宿主合成 cancelled | `workflow-worker-thread/src/host.ts:563-585` |
+| 取消后抑制叙事 | 宿主侧直接压掉 `phase`/`log`,seam 只剩 `workflow/*` 六个事件 | `workflow/workflow/src/index.ts:36-100` |
+| 工具侧记录与桥接 | 记录四个 `tool-workflow/*` 事件、把 `exec.signal` 桥到 `run.cancel`、`finally` 里释放 run | `tool-workflow/src/index.ts:72-130`、`:296-299`、`:315-329` |
+
+<details><summary>原图(供逐行核对)</summary>
+
 ```text
 Worker(脚本)                       Host(WorkerRun)                          Subagent seam
  ChildStart{callId, request} ────▶ childAdmissionFailure()? 拒绝;否则          ctx.subagents.start(provider,{
@@ -281,7 +472,11 @@ Worker(脚本)                       Host(WorkerRun)                          Su
  Result{result} ──────────────────▶ onResult():claim → reapChildren → settle
 ```
 
-`pendingStarts` 与 `children` 共同决定 quiescence(`host.ts:464-474`);首个死亡信号是逻辑投递屏障,其后的排队消息不得再建子或叙事(`host.ts:271-276,521-554`);`agent-start`/`agent-end` 由 ledger 保证**恰好一对**——worker 能说话就转发,不能则宿主合成 `cancelled`(`host.ts:563-585`)。取消后 `phase`/`log` 被宿主抑制,`workflow/*` 六个事件是 seam 公开的全部信号(`workflow/src/index.ts:36-100`)。`tool-workflow` 把四个 `tool-workflow/*` 事件记进父会话(记录失败只停记录,`:72-130`),把 `exec.signal` 桥到 `run.cancel`(`:296-299`),并在 `finally` 中 `await run.dispose()`(`:315-329`);渲染受 `maxResultChars`(默认 50000 字符)截断(`:195-202`)。`tool-ralph` 是固定脚本形态:模型只给 `objective`,脚本每轮用 `agent(prompt,{schema})` 起全新 spawn 子,轮间只传有界结构化 handoff(`packages/workflow/tool-ralph/src/index.ts:88-175`)。
+</details>
+
+宿主怎么判断一次 run 真的结束了?标准叫"静默"(quiescence):既没有还没结算的启动,也没有活着的子 Agent,两个条件都满足才算结束(`workflow-worker-thread/src/host.ts:464-474`)。worker 死亡时,`error`、已排队但尚未投递的消息、`exit` 三类信号可能乱序到达,所以第一条死亡信号被当成一条逻辑屏障:它之后到达的消息一律不准再建子 Agent,也不准在 `workflow/end` 之后继续叙事(`host.ts:271-276`、`:521-554`)。`agent-start` 与 `agent-end` 则靠一本按序号记的配对账本保证恰好一对一——worker 还能说话就转发它自己的结束事件,说不了话时由宿主合成一条 `cancelled`(`host.ts:563-585`)。取消之后,`phase` 与 `log` 在宿主侧被直接抑制,seam 对外公开的信号只剩 `workflow/*` 这六个事件(`workflow/workflow/src/index.ts:36-100`)。
+
+工具侧只做三件事:把四个 `tool-workflow/*` 事件记进父会话,而且记录失败只停下记录、不影响本次工具执行;把 `exec.signal` 桥接到 `run.cancel`;在 `finally` 里释放 run(`tool-workflow/src/index.ts:72-130`、`:296-299`、`:315-329`)。模型看到的渲染结果还会按 `maxResultChars` 截断,默认 50000 字符(`:195-202`)。`tool-ralph` 是固定脚本形态:模型只给一个 `objective`,脚本每轮用 `agent(prompt,{schema})` 起一个全新的 spawn 子 Agent,轮与轮之间只传一份有界的结构化 handoff(`packages/workflow/tool-ralph/src/index.ts:88-175`)。
 
 ---
 

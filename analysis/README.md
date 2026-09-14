@@ -31,42 +31,38 @@ DSH 的系统特征一句话:**"一切皆插件"**——从工具注册表、系
 9. 程序架构亮点(能力缝三角色、Typert 类型图、质量工程体系)。
 10. 扩展生态(Hooks、ACP、Webhook、Web/Desktop、双 SDK)。
 
-> **关于图**:文档集共 62 张 Mermaid 图,全部经渲染器逐张验证(可解析即语法有效)。其中 48 张主流程图/时序图/状态图以**主题化 SVG** 嵌入正文(SVG 存放在 `assets/diagrams/`,每个图下方折叠着 *Mermaid 源码*,可直接修改后重渲染);其余 14 张简短内联图保留原生 Mermaid,由 GitHub 直接渲染。
+> **关于图**:文档集共 97 张 Mermaid 图,全部经渲染器逐张验证(可解析即语法有效)。其中 95 张(所有流程图、时序图、状态图)以**主题化 SVG** 嵌入正文(SVG 存放在 `assets/diagrams/`,每个图下方折叠着 *Mermaid 源码*,可直接修改后重渲染);其余 2 张极短图保留原生 Mermaid,由 GitHub 直接渲染。
+>
+> **图怎么读**:图里只有中文短语,不放函数名与行号——先顺着箭头理解"发生了什么";要知道"具体调用了哪个函数",看每张图下面的 `阶段 | 做了什么 | 关键调用(文件:行)` 表;要逐行核对,展开再下面的折叠块(原始调用树/时序轨迹一字未删)。
 
 ## 一图总览
 
-```text
-+----------------------------------------------+
-| 入口:dsh CLI / Web / Desktop / ACP / SDK      |
-+----------------------+-----------------------+
-                       v
-+----------------------------------------------+
-| boot:profile 解析 → cordis.yml 层叠            |
-| Cordis Loader:依赖序并发激活插件,失败回滚       |
-+----------------------+-----------------------+
-                       v
-+----------------------------------------------+
-| 核心服务(core):tools / system-prompt /       |
-| agent / agent-loop / session / scope          |
-+------+------+------+------+------+------+----+
-       v      v      v      v      v      v
-    llm    shell   skill   mcp   sandbox  ...(能力缝 = Service
- providers  fs   subagent hooks  webhook     Definition / Provider
-       \_____|______|______|______|______|__/  / Consumer 三角色)
-                    v
-+----------------------------------------------+
-| ReactLoopAgent:assemble → stream →            |
-| executeToolCalls → session.append(事件溯源)    |
-+----------------------+-----------------------+
-                       v
-+----------------------------------------------+
-| session-persistence:世代文件落盘 / resume      |
-+----------------------------------------------+
-```
+**一句话读法**:这张图从左到右、从上到下就是一次运行的完整分层——最上面是"用户怎么进来",中间是"启动时把哪些插件装进一棵树",再往下是"具备哪些核心服务",然后是"挂在核心服务上的各类能力插件",最后是"主循环每次干活时经过哪几步、状态落到哪里"。
 
-端到端生命周期(渲染版,每环标注深挖章节):
+**端到端生命周期**(每环标注深入章节):
 
 ![端到端请求生命周期](./assets/diagrams/14-final-summary-27.svg)
+
+**分层速览**:入口 → 启动组装 → 核心服务 → 能力缝插件 → 主循环 → 持久化:
+
+<details><summary>展开文字版分层图(与上图互补,便于复制到别处)</summary>
+
+```text
+入口          dsh CLI / Web / Desktop / ACP / SDK
+                    ↓
+启动组装      profile 解析 → cordis.yml 层叠 → Loader 按依赖并发激活(失败回滚)
+                    ↓
+核心服务      tools / system-prompt / agent / agent-loop / session / scope
+                    ↓
+能力缝插件    llm  shell  skill  mcp  sandbox  fs  subagent  hooks  webhook …
+              (每条能力 = Service Definition / Provider / Consumer 三角色)
+                    ↓
+主循环        ReactLoopAgent:组装提示 → 流式请求 → 调度工具 → 落会话日志
+                    ↓
+持久化        session-persistence:世代文件落盘 / resume 回读
+```
+
+</details>
 
 ## 分章目录
 

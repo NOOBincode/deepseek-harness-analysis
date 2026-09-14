@@ -253,6 +253,10 @@ async getSandbox(): Promise<Sandbox> {
 
 ### 3.5 句柄状态机
 
+![状态图：05-e2b-remote](../assets/diagrams/sandbox__05-e2b-remote-256.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 stateDiagram-v2
   [*] --> Connecting: this.ready = this.open()
@@ -264,6 +268,8 @@ stateDiagram-v2
   Failed --> Disposing: 置 disposed 后直接返回
   Disposing --> Killed: sandbox.kill()
 ```
+
+</details>
 
 ---
 
@@ -360,6 +366,10 @@ readFrom(fromByte: number): SubprocessOutputRead {
 
 ### 4.4 环境边界:三段式
 
+![流程图：05-e2b-remote](../assets/diagrams/sandbox__05-e2b-remote-363.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart LR
   A["readRemoteEnvironment<br/>environment.ts:28<br/>passwd home + env -0 → base64"] --> B["scrubRemoteEnvironment<br/>:62<br/>丢弃 DSH_* 与 SENSITIVE_ENV_PATTERN"]
@@ -371,6 +381,8 @@ flowchart LR
   style B fill:#ffe,stroke:#aa8
   style E fill:#ffe,stroke:#aa8
 ```
+
+</details>
 
 | 阶段 | 函数 | 关键点 |
 |---|---|---|

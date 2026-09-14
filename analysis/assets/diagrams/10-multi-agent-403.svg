@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2912.057 249.69" width="2912.057" height="249.69" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="S" data-to="Q" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="282.76099999999997,124.845 322.76099999999997,124.845" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Q" data-to="A" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="566.2629999999999,124.845 606.2629999999999,124.845" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A" data-to="R" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="775.953,124.845 795.953,124.845 795.953,94.395 888.5710000000003,94.395" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="775.953,124.845 795.953,124.845 795.953,155.29500000000002 815.953,155.29500000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="P" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1069.088,155.29500000000002 1089.088,155.29500000000002 1089.088,124.845 1109.0880000000002,124.845" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1308.13,124.845 1348.13,124.845" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="J" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1516.7910000000002,124.845 1556.7910000000002,124.845" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1737.3080000000002,124.845 1777.3080000000002,124.845" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1988.9470000000001,124.845 2028.9470000000001,124.845" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="M" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="2370.261,124.845 2410.261,124.845" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="Z" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="2603.375,124.845 2643.375,124.845" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1069.088,155.29500000000002 1089.088,155.29500000000002 1089.088,185.745 1109.088,185.745" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="S" data-label="脚本在 worker 线程里调用 agent" data-shape="rectangle">
+  <rect x="40" y="106.395" width="242.76099999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="161.38049999999998" y="124.845" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">脚本在 worker 线程里调用 agent</text>
+</g>
+<g class="node" data-id="Q" data-label="向宿主发一条起子 Agent 的请求" data-shape="rectangle">
+  <rect x="322.76099999999997" y="106.395" width="243.50199999999995" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="444.51199999999994" y="124.845" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">向宿主发一条起子 Agent 的请求</text>
+</g>
+<g class="node" data-id="A" data-label="宿主做准入检查" data-shape="diamond">
+  <polygon points="691.108,40 775.953,124.845 691.108,209.69 606.2629999999999,124.845" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="691.108" y="124.845" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">宿主做准入检查</text>
+</g>
+<g class="node" data-id="R" data-label="拒绝: 回一条启动失败" data-shape="rectangle">
+  <rect x="888.5710000000003" y="75.945" width="180.51699999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="978.8295000000003" y="94.395" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">拒绝: 回一条启动失败</text>
+</g>
+<g class="node" data-id="C" data-label="宿主用同一个 provider 起子 Agent" data-shape="rectangle">
+  <rect x="815.953" y="136.845" width="253.13499999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="942.5205" y="155.29500000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">宿主用同一个 provider 起子 Agent</text>
+</g>
+<g class="node" data-id="P" data-label="子 Agent 活在宿主进程里" data-shape="rectangle">
+  <rect x="1109.0880000000002" y="106.395" width="199.04199999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1208.6090000000002" y="124.845" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">子 Agent 活在宿主进程里</text>
+</g>
+<g class="node" data-id="J" data-label="结果快照成纯 JSON" data-shape="rectangle">
+  <rect x="1348.13" y="106.395" width="168.66099999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1432.4605000000001" y="124.845" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">结果快照成纯 JSON</text>
+</g>
+<g class="node" data-id="B" data-label="回给脚本: 结果或失败" data-shape="rectangle">
+  <rect x="1556.7910000000002" y="106.395" width="180.517" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1647.0495" y="124.845" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">回给脚本: 结果或失败</text>
+</g>
+<g class="node" data-id="D" data-label="脚本请求释放这个子 Agent" data-shape="rectangle">
+  <rect x="1777.3080000000002" y="106.395" width="211.63899999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1883.1275000000003" y="124.845" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">脚本请求释放这个子 Agent</text>
+</g>
+<g class="node" data-id="M" data-label="宿主按请求编号记忆化释放,重复请求也回确认" data-shape="rectangle">
+  <rect x="2028.9470000000001" y="106.395" width="341.3139999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="2199.6040000000003" y="124.845" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">宿主按请求编号记忆化释放,重复请求也回确认</text>
+</g>
+<g class="node" data-id="E" data-label="脚本跑完,交回最终结果" data-shape="rectangle">
+  <rect x="2410.261" y="106.395" width="193.11399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="2506.8179999999998" y="124.845" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">脚本跑完,交回最终结果</text>
+</g>
+<g class="node" data-id="Z" data-label="宿主收掉残留子 Agent 再结算" data-shape="rectangle">
+  <rect x="2643.375" y="106.395" width="228.68199999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="2757.716" y="124.845" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">宿主收掉残留子 Agent 再结算</text>
+</g>
+<g class="node" data-id="G" data-label="取消: 宽限期后强制终止线程" data-shape="rectangle">
+  <rect x="1109.088" y="167.295" width="224.97699999999995" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1221.5765" y="185.745" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">取消: 宽限期后强制终止线程</text>
+</g>
+</svg>

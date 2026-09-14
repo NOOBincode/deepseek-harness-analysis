@@ -73,6 +73,10 @@ export function publicToolName(serverName: string, rawName: string): string {
 
 ### 2.4 决策流程图
 
+![流程图：02-naming-algorithm](../assets/diagrams/mcp__02-naming-algorithm-76.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   S["输入 (serverName, rawName)"] --> A["joined = 'mcp__' + serverName + '__' + rawName"]
@@ -85,6 +89,8 @@ flowchart TD
   style D fill:#efe,stroke:#8a8
   style G fill:#ffe,stroke:#aa8
 ```
+
+</details>
 
 ---
 

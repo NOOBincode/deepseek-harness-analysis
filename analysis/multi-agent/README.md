@@ -44,6 +44,61 @@
 
 ## 三、父 Agent → 派生子 Agent → 结果回流:函数级调用栈
 
+本节把"父 Agent 派生子 Agent"这条链路按时间顺序摊开。父 Agent(正在跑模型循环的那个 agent)发一次 `subagent` 工具调用,工具层先确认调用者身份,再把请求交给注册表里按名字选出的 provider——也就是真正负责造 Agent 的那个后端。provider 通过 `ctx.agents.create()` 造出一个带独立 Session(会话日志)与独立 scope(作用域链,决定它能看见哪些工具)的子 Agent,送第一条 prompt,等它闲下来,再把它最后一条 assistant 输出与本轮停因包成一次委派的结果值。结果回流只有两条路:前台直接变成工具结果,后台变成一条作业完成通知;两条路线共享的,只有开头"造 Agent"这一步。
+
+![流程图：README](../assets/diagrams/multi-agent__README-49.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart LR
+  A["父 Agent 发出委派"]
+  B["工具层确认调用者身份"]
+  C["挑一个 provider 后端"]
+  D["校验它声明过的能力"]
+  E["创建真子 Agent"]
+  F["子 Agent 在自己的 Session 里跑"]
+  G["读回输出与停因"]
+  H["前台:直接当成工具结果"]
+  I["后台:包成一条作业"]
+  J["续存:子 Agent 常驻,之后还能再发消息"]
+  K["作业完成发一条通知"]
+  L["通知按状态注入或新开 turn"]
+  M["停因不是 completed 就转成错误结果"]
+  N["释放子 Agent"]
+
+  A --> B --> C --> D --> E --> F --> G
+  G --> H
+  G --> I
+  G --> J
+  I --> K --> L
+  G --> M
+  J --> N
+```
+
+</details>
+
+| 阶段 | 做了什么 | 关键调用(文件:行) |
+|---|---|---|
+| 1 确认调用者 | 工具层要求 `exec.agent` 存在,缺失就直接抛错,不去猜调用者是谁 | `tool-subagent/src/index.ts:472-476` |
+| 2 选路线 | 按 `run_in_background` 与 continuable 配置解析出前台、one-shot 后台或续存三条路线 | `tool-subagent/src/index.ts:287-305` |
+| 3 能力缝校验 | 取出 provider 后逐项核对能力位,再把请求参数与父 Agent 组装成 resolved request | `subagent/subagent/src/index.ts:556-586` |
+| 4 深度与策略 | 子深度等于父深度加一,超过上限直接抛错;委派策略必须在第一个 await 之前抓到 | `subagent-in-process-driver/src/index.ts:111-120` |
+| 5 未发布窗口 | setup 里依次完成策略落日志、join 父 preset、persona 与工具掩码、描述符挂载 | `subagent-in-process-driver/src/index.ts:122-132` |
+| 6 创建 | 经工厂建会话与驱动,setup 结束后提交并发布 | `agent-loop/src/index.ts:826-835` |
+| 7 发布五步 | 会话入表 → Agent 入表 → 广播会话 → 广播 Agent → 发 session-start | `agent-loop/src/index.ts:662-677` |
+| 8 驱动一轮 | 给子 Agent 送第一条 prompt,然后等它闲下来 | `subagent-in-process-driver/src/index.ts:178-182` |
+| 9 读结果 | 取最后一条非空 assistant 消息作为输出,并映射出本轮停因 | `subagent-in-process-driver/src/index.ts:212-238` |
+| 10 前台回流 | 停因不是 completed 就抛错,变成 isError 工具结果,但保留部分输出 | `tool-subagent/src/index.ts:207-237` |
+| 11 后台回流 | one-shot 后台委派被包成一条作业,启动异常折成 killed 或 failed | `tool-subagent/src/index.ts:544-560`、`:143-153` |
+| 12 完成通知 | owner 空闲且唤醒预算没用完就新开一个 turn,否则注入上下文 | `tool-jobs/src/index.ts:278-299` |
+| 13 续存路线 | 子 Agent 的 inbox(它收消息的队列)接受初始 prompt 就立即返回,只回一个 subagentId,不等它跑完 | `subagent/subagent/src/continuation.ts:102-190` |
+| 14 释放 | 结果失败优先于释放失败,两者都失败才合成一个 AggregateError | `tool-subagent/src/index.ts:207-237` |
+
+详细到函数与行号的版本收在下面两个折叠块里,供逐行核对。
+
+<details><summary>原图(供逐行核对):函数级调用栈</summary>
+
 ![时序图：README](../assets/diagrams/multi-agent__README-47.svg)
 
 <details><summary>Mermaid 源码</summary>
@@ -88,7 +143,13 @@ sequenceDiagram
 
 </details>
 
-同一份调用栈在**后台/续存路线**上的分叉点(详见 [04](./04-continuation-and-control.md) 与 [06](./06-jobs-and-notifications.md)):
+</details>
+
+### 三条路线的分叉点
+
+同一次委派,前台、one-shot 后台、续存三条路线在工具层就分开了:前台会一直等到子 Agent 跑完再拿结果;one-shot 后台把这次委派包成一条作业,先把 jobId 交还给模型;续存路线则让子 Agent 常驻下来,只回一个 subagentId,之后还能用 `send_message` 追加消息。三者的共同点是"造 Agent"这一步完全一样,差别只在结果怎么回去、以及要不要保留这个子 Agent。展开见 [04](./04-continuation-and-control.md) 与 [06](./06-jobs-and-notifications.md)。
+
+<details><summary>原图(供逐行核对):三条路线的分叉树</summary>
 
 ```text
 tool-subagent.execute                                       (tool-subagent/src/index.ts:471)
@@ -102,7 +163,9 @@ tool-subagent.execute                                       (tool-subagent/src/i
  └─ 前台       → ctx.subagents.start(provider, {...request, signal})      (:563)
 ```
 
-**回流只有两条路**:前台是 `SubagentRun.result` → 工具结果;后台是 `JobHooks.done` → `onJobDone` → `owner.followup`/`owner.inject`(`tool-jobs/src/index.ts:278-299`)。两者不共享代码路径,共享的只是"造 Agent"这一步。
+</details>
+
+结果回流只有两条路:前台把委派结果直接交回工具调用者;后台走作业完成通知,由通知自己决定是给 owner 注入一条消息,还是新开一个 turn(`tool-jobs/src/index.ts:278-299`)。这两条路的代码完全不共用,唯一的共同点是开头那一步——都得先造出一个真 Agent。
 
 ---
 

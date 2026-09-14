@@ -323,6 +323,10 @@ private apply(session: Session, name: string, setApproval: (policy: ApprovalPoli
 
 ### 5.3 三处模型可见文本的分工
 
+![流程图：03-escalation-and-approval](../assets/diagrams/sandbox__03-escalation-and-approval-326.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart LR
   A["sandbox-policy renderPolicyContext<br/>sandbox-policy/src/index.ts:41"] --> M["runtime-context 快照"]
@@ -335,6 +339,8 @@ flowchart LR
 
   style X fill:#efe,stroke:#8a8
 ```
+
+</details>
 
 三处各管一件事:**策略快照**说"现在的文件边界是什么"(三个 case 的 `renderPolicyContext`,`sandbox-policy/src/index.ts:41-55`);**工具描述**说"遇到拒绝该怎么办"(仅广告时追加);**结果文本**说"这一次被拒了,可以怎么恢复"。审批策略文本由审批包贡献到同一份快照(见[第二章](../02-security-analysis.md))。
 

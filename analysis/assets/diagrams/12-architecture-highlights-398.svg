@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 944.4619999999999 578.3" width="944.4619999999999" height="578.3" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="SRC" data-to="GEN" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="501.871,76.9 501.871,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="GEN" data-to="MODEL" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="501.871,153.8 501.871,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MODEL" data-to="ART" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="501.871,230.70000000000002 501.871,270.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ART" data-to="LDR" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="501.871,307.6 501.871,347.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="LDR" data-to="REG" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="501.871,384.5 501.871,424.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REG" data-to="GW" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="501.871,461.4 501.871,481.4 203.24699999999999,481.4 203.24699999999999,501.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REG" data-to="REMOTE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="501.871,461.4 501.871,481.4 501.871,481.4 501.871,501.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REG" data-to="DOC" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="501.871,461.4 501.871,481.4 770.8549999999999,481.4 770.8549999999999,501.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="SRC" data-label="业务服务源码:带远程方法标记" data-shape="rectangle">
+  <rect x="383.084" y="40" width="237.57399999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="501.871" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">业务服务源码:带远程方法标记</text>
+</g>
+<g class="node" data-id="GEN" data-label="构建期分析:提取类型" data-shape="rectangle">
+  <rect x="412.724" y="116.9" width="178.29399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="501.871" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">构建期分析:提取类型</text>
+</g>
+<g class="node" data-id="MODEL" data-label="编译器无关的类型模型" data-shape="rectangle">
+  <rect x="406.796" y="193.8" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="501.871" y="212.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">编译器无关的类型模型</text>
+</g>
+<g class="node" data-id="ART" data-label="生成产物:运行时工件与类型声明" data-shape="rectangle">
+  <rect x="375.674" y="270.70000000000005" width="252.39399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="501.871" y="289.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">生成产物:运行时工件与类型声明</text>
+</g>
+<g class="node" data-id="LDR" data-label="加载器:随插件树挂载自动注册" data-shape="rectangle">
+  <rect x="383.084" y="347.6" width="237.57399999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="501.871" y="366.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">加载器:随插件树挂载自动注册</text>
+</g>
+<g class="node" data-id="REG" data-label="运行期注册表:同一份调用描述符" data-shape="rectangle">
+  <rect x="375.674" y="424.5" width="252.39399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="501.871" y="442.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">运行期注册表:同一份调用描述符</text>
+</g>
+<g class="node" data-id="GW" data-label="宿主网关:解参、选接收者、调用、编码结果" data-shape="rectangle">
+  <rect x="40" y="501.4" width="326.49399999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="203.24699999999999" y="519.85" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">宿主网关:解参、选接收者、调用、编码结果</text>
+</g>
+<g class="node" data-id="REMOTE" data-label="客户端代理:物化同名方法桩" data-shape="rectangle">
+  <rect x="390.49399999999997" y="501.4" width="222.75399999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="501.871" y="519.85" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">客户端代理:物化同名方法桩</text>
+</g>
+<g class="node" data-id="DOC" data-label="文档与目录生成器:同一模型的下游" data-shape="rectangle">
+  <rect x="637.2479999999999" y="501.4" width="267.21399999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="770.8549999999999" y="519.85" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">文档与目录生成器:同一模型的下游</text>
+</g>
+</svg>

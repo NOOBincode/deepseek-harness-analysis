@@ -391,6 +391,10 @@ ctx.on('agent/created', ({ agent }) => {
 
 ## 第六节 可见性规则:preset 层 vs 全局层
 
+![流程图：07-preset-composition](../assets/diagrams/multi-agent__07-preset-composition-394.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 graph TD
   HOST["HOST composition(root realm + global layer)<br/>subagents 注册表 · spawn/fork provider · web/search provider<br/>sandbox · approval · session persistence …"]
@@ -402,6 +406,8 @@ graph TD
   HOST -.->|"global layer 对链上每个人可见"| A1
   ST -->|"preset 层的 restrict 对该 preset 下所有 agent 生效"| C1
 ```
+
+</details>
 
 规则三条(推导见 [03 第五节](./03-child-agent-composition.md)):
 
