@@ -1,7 +1,6 @@
 # 第一章:软件架构与程序入口(DeepSeek Harness 源码分析)
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
-> 核心源码:`apps/cli/src/`(启动器)+ `packages/boot/`(app-boot / cmdline 启动胶)+ `vendor/`(vendored Cordis:core / loader / include / hmr)+ `packages/core/`(产品 API 主干)
 > **深入阅读(函数级)**:[`plugin-system/`](./plugin-system/README.md) —— Cordis 运行时对象关系、Context 代理与 fiber 六状态机、Loader 事务回滚与 HMR、能力缝三列解剖、全仓扩展点目录、插件编写指南
 > 设计依据:`docs/architecture.md`、`docs/cordis-primer.md`、`packages/README.md`、`vendor/README.md`、各 bundle 的 `cordis.patch.yml`
 

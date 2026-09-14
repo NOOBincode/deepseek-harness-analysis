@@ -2,7 +2,7 @@
 
 > 源码:`packages/subagent/subagent/src/child-agent.ts`(280 行)、`depth.ts`、`descriptor.ts`
 > 装配点:`packages/subagent/subagent-in-process-driver/src/index.ts:122-132`(一次性)与 `packages/subagent/subagent/src/continuation-activation.ts`(续存,同一批函数)
-> 本章展开[第十章第 2.3 节](../10-multi-agent.md);preset 侧的两道硬门见 [07](./07-preset-composition.md)。
+> 对应[第十章第 2.3 节](../10-multi-agent.md);preset 侧的两道硬门见 [07](./07-preset-composition.md)。
 
 ---
 
@@ -59,7 +59,7 @@ flowchart LR
 | 11 读取 preset | agentPreset 读父的 live scope 链而不是会话头,因为父可能在空会话期间换过 preset | `preset/agent-presets/src/index.ts:497-499` |
 | 12 失败回滚 | setup 内任何一步抛错都落到创建事务的回滚上,子 Agent 不会被发布 | `agent-loop/src/index.ts:826` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 host composition (root realm)

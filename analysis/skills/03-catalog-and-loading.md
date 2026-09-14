@@ -2,7 +2,6 @@
 
 > 上游:[第四章 · 第四节](../04-skills.md#第四节-catalog-与-loader模型如何按需拿到完整指令)
 > 主源码:`packages/skill/tool-skill/src/index.ts`(431 行)
-> 本篇回答:目录条目是怎么从注册表摘要变成会话消息的、`agent/pre-step` 的嵌套顺序如何决定注入位置、`skill` 工具逐行的四道闸门、`/name` 手势的正则边界、以及 digest 四个返回分支各自的确切条件。
 
 ---
 
@@ -54,7 +53,7 @@ sequenceDiagram
 | 注入最后 | `/name` 加载出来的指令体追加到本步全部注入的最后 | `index.ts:186-203` |
 | 最终顺序 | 消息等于已认领消息、上下文、目录、显式注入,依次排列 | 三条注册顺序共同决定(`index.ts:163-170` 注释) |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 agent/pre-step waterfall 的调用栈(由外到内)
@@ -309,7 +308,7 @@ flowchart TD
 | 落日志 | 首次尝试时把 `decision.messages` 逐条写成 `user/message` 事件 | `session.append()`(`core/agent-loop/src/agent.ts:373-377`) |
 | 派生请求 | 消息历史从日志派生,模型看到的就是刚落下的这批事件 | `deriveMessages()`(`core/agent-loop/src/agent.ts:603`) |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 preStep(agent.ts:240)

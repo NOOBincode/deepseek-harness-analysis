@@ -2,9 +2,7 @@
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
 > **深入阅读(函数级)**:[`sandbox/`](./sandbox/README.md) —— 缝隙与策略逐字段、平台后端真实 argv、升级的八条失败点、五个消费方走查、E2B 证据链、20 条 fail-closed 抛点与边界清单
-> 核心源码：`packages/sandbox/`(seam / policy / local / windows-acl 四包)+ `packages/fs/fs-sandbox`、`packages/shell/bash-sandbox`、`packages/shell/pwsh-sandbox`、`packages/terminal/terminal-bash`、`packages/e2b/`(三包)
 > 设计依据：官方 Agent Note [`.agents/notes/implemented/feature/2026-07-06-sandbox.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-06-sandbox.md)、[`2026-07-14-cross-family-fs-sandbox.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-14-cross-family-fs-sandbox.md)、[`2026-08-08-windows-acl-restricted-token-sandbox.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-08-08-windows-acl-restricted-token-sandbox.md)
-> 与第二章的关系：第二章覆盖安全总论与审批防线(含 MCP)；本章只讲沙箱机制本身,审批部分只讲它与升级的衔接。
 
 ---
 

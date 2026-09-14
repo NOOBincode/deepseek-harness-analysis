@@ -2,7 +2,7 @@
 
 > 源码:`packages/subagent/subagent/src/index.ts`(660 行,Service Definition)、`packages/subagent/subagent/src/types.ts`(390 行,全部契约)
 > 三个 in-process 后端:`subagent-in-process-driver/src/index.ts`、`subagent-spawn-in-process/src/index.ts`、`subagent-fork-in-process/src/index.ts`
-> 本章只讲 seam 与 provider 这一层;子 agent 内部怎么被组装见 [03](./03-child-agent-composition.md),续存路线见 [04](./04-continuation-and-control.md)。
+> 子 agent 内部怎么被组装见 [03](./03-child-agent-composition.md),续存路线见 [04](./04-continuation-and-control.md)。
 
 ---
 

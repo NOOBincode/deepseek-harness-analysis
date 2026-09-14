@@ -2,7 +2,6 @@
 
 > 上游:[第四章 · 第三节](../04-skills.md#第三节-本地-provider监视与失效闭环)、[第六节第 4 条](../04-skills.md#第六节-作用域行为agent--preset-分层)
 > 主源码:`packages/skill/skill-filesystem/src/index.ts:134-147, 288-707`、`packages/api/session-controller/src/skill-catalog.ts`、`packages/client/ui-skill/src/client/index.ts`
-> 本篇回答:改一次磁盘到模型看见新目录之间有几个环节、chokidar 每一项配置的作用、失效怎么汇聚到注册表 rev、浏览器 `/` 补全如何在不开 Agent 的前提下拿到目录。
 
 ---
 

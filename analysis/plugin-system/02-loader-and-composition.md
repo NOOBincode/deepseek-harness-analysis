@@ -58,7 +58,7 @@ flowchart TD
 | 整树收敛 | 等全部条目任务与 fiber settle,再唤醒注入 `loader` 的插件 | `vendor/loader/src/config/tree.ts:46-64` |
 | 失败回滚 | 新增行逆序移除、原有行按原序重建;启动期失败先处置半成品上下文再抛错 | `vendor/loader/src/config/group.ts:85-105`、`packages/boot/app-boot/src/index.ts:816-833` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
  bundle 层  profile 层  home 层  --patch 层  telemetry 派生层
@@ -220,7 +220,7 @@ flowchart TD
 | 嵌套形态 | group 行持子条目组,Include 行持子树 | `entry.ts:60-61` |
 | 路径解析 | 按 `:` 拆分 id,沿子树逐级下钻 | `tree.ts:76-87` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 EntryTree(抽象,write() 由子类提供)   tree.ts:7
@@ -326,7 +326,7 @@ flowchart TD
 | 错误分级 | 失败阶段只有四个取值:`import`、`dispose`、`apply`、`rollback` | `entry.ts:24-27` |
 | 用户可见诊断 | 报错消息形如 `failed to apply loader entry <id> (<name>)`,启动失败的诊断链从这里开始拼 | `entry.ts:24-27` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 update(options, create, force)                                   entry.ts:142
@@ -400,7 +400,7 @@ flowchart LR
 | 收尾等待 | disposer 还会 `await` 该注册正在跑的刷新,调用方无需自行管理 | `hmr/src/index.ts:180` |
 | 启动失败 | 就绪前出错时先撤销登记、关闭 watcher,再把错误抛出去 | `hmr/src/index.ts:182-186` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 1. filename 相对 baseDir 解析 → findWatchRoot(filename)(:64-84)
@@ -509,7 +509,7 @@ flowchart TD
 | live 监听 | live profile 补装 timer/hmr,并对 profile 层与 home 层各装一个监听 | `apps/cli/src/profile-boot.ts:355-381` |
 | 交还控制 | `appReady.commit()` 宣布应用就绪,进程寿命交给插件 | `apps/cli/src/profile-boot.ts:389` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 runProfile(options)                                      profile-boot.ts:282

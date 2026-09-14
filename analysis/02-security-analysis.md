@@ -1,7 +1,6 @@
 # 第二章 · 安全分析(DeepSeek Harness 源码分析)
 
 > 分析对象:DeepSeek Harness @ `dbbaa4a37`,pnpm monorepo,仓库根 `D:\.vscode\deepseek-harness`
-> 本章只处理安全面。MCP 的协议与发现机制见[第六章:MCP 技术架构与原理](./06-mcp.md),本章仅在"受信面"一节交叉引用其结论。
 > 项目自身的安全声明见 `SAFETY.md:7`(未做安全审计、不得当作生产可用)与 `SAFETY.md:11`(沙箱与审批降低风险,但不保证隔离)。
 
 ---
@@ -71,7 +70,7 @@ export function scrubbedParentEnv(): Record<string, string> {
 }
 ```
 
-即:**凭据形状的名字与全部 `DSH_*` 默认不外泄,显式 `env` 在清洗之后合并才放行**(`packages/subprocess/subprocess-local/src/spawn.ts:46`,Windows 上按环境名大小写不敏感做去重覆盖)。上面代码块中省略的尾段(代理重放与返回)同样逐字来自源文件:
+即:**凭据形状的名字与全部 `DSH_*` 默认不外泄,显式 `env` 在清洗之后合并才放行**(`packages/subprocess/subprocess-local/src/spawn.ts:46`,Windows 上按环境名大小写不敏感做去重覆盖)。上面代码块中省略的尾段(代理重放与返回):
 
 ```ts
 // packages/subprocess/subprocess/src/index.ts:69-77
@@ -144,7 +143,7 @@ function renderPolicyContext(policy: SandboxExecutionPolicy): string {
 
 ### 2.1 沙箱之外仍是受信代码:三条"配置即执行"的路径
 
-**MCP 服务器命令。** stdio 传输直接 spawn 配置里的 `command`/`args`(`packages/mcp/mcp-client/src/transport.ts:31`),环境经过同一套清洗后再合并配置显式 `env`(README 的 "Environment scrubbing (stdio)" 一节:`packages/mcp/mcp-client/README.md:132`)。清洗是**唯一**的边界:进程本身以完整用户权限运行,不受 `ctx.sandbox` 约束。协议、命名空间预订与工具同步的完整分析见 [`06-mcp.md`](./06-mcp.md) 第一、二节,此处不复述。清洗后合并显式 `env` 的动作就是一次对象展开:
+**MCP 服务器命令。** stdio 传输直接 spawn 配置里的 `command`/`args`(`packages/mcp/mcp-client/src/transport.ts:31`),环境经过同一套清洗后再合并配置显式 `env`(README 的 "Environment scrubbing (stdio)" 一节:`packages/mcp/mcp-client/README.md:132`)。清洗是**唯一**的边界:进程本身以完整用户权限运行,不受 `ctx.sandbox` 约束。协议、命名空间预订与工具同步的完整分析见 [`06-mcp.md`](./06-mcp.md) 第一、二节。清洗后合并显式 `env` 的动作就是一次对象展开:
 
 ```ts
 // packages/mcp/mcp-client/src/transport.ts:21-39

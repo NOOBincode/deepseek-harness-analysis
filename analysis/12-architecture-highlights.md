@@ -1,9 +1,8 @@
 # 第十二章 · 程序架构及亮点(DeepSeek Harness 源码分析)
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> **深入阅读(函数级)**:[`plugin-system/`](./plugin-system/README.md) —— effect 逆序回收、invariant 伴随插件、四条真实能力缝对照、扩展点目录、postmortem 0001 复盘
 > 分析依据:`docs/architecture.md`、`docs/cordis-primer.md`、`docs/glossary.md`、`packages/AGENTS.md`、`vendor/`(Cordis 源码内嵌副本)、`packages/{typert,llm,sdk,api}` 顶层源码,以及 `.agents/notes/implemented/architecture/` 下的官方决策记录(Agent Notes)
-> **深入阅读(函数级)**:[`plugin-system/`](./plugin-system/README.md) —— 本章"一切皆插件""能力缝""防御性模式"三节的实现级展开(effect 逆序回收、invariant 伴随插件、四种真实能力缝对照、postmortem 0001 复盘)
-> 前置章节:MCP 桥接插件分析(第六章)——本章不复述其内容,仅在"防御性并发"一节把 `mcp-client/src/connection.ts` 作为通用范式的范例引用。
 
 ---
 
@@ -56,7 +55,7 @@ flowchart TD
 | 类型平面 | 构建期把类型转成编译器无关模型,运行期注册并驱动 RPC 与文档 | `packages/typert/README.md:25-30` |
 | 共同地基 | 一切注册走 `ctx.effect()`;事件用声明合并扩展,有五种派发语义 | `docs/architecture.md:13`、`vendor/cordis/src/events.ts:32` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
                 cordis.yml / profile / bundle 分层组合(运行时插件树)
@@ -432,7 +431,7 @@ flowchart TD
 | 客户端 | 客户端消费同一份本地生成的调用描述符,物化命名空间方法桩 | `2026-08-02-typert-remote-method-calls.md:23` |
 | 文档 | 同一模型驱动目录文档与静态 API 目录,工具侧不给运行期加 `ctx.typert` 依赖 | `2026-07-27-compiler-independent-typert-model.md:27` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
  业务 Service 源码(TypertRemoteService + @Remote 方法)
@@ -590,7 +589,7 @@ DSH 的质量体系不是 CI 附属品,而是架构决策的一部分。`docs/te
 
 ### 6.2 dispose 必须到达 quiescence,而非发出请求
 
-`docs/defensive-patterns.md:19-21`:"A teardown that issues kills/aborts but returns before the work stops leaves orphans."范例是 MCP 连接监管器 `packages/mcp/mcp-client/src/connection.ts`(详见第六章,此处只取模式):
+`docs/defensive-patterns.md:19-21`:"A teardown that issues kills/aborts but returns before the work stops leaves orphans."范例是 MCP 连接监管器 `packages/mcp/mcp-client/src/connection.ts`(详见第六章):
 
 ```typescript
 // connection.ts:327-349(节选)

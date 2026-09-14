@@ -1,7 +1,7 @@
 # 01 · 注册表内部:ScopedLayers 分层、遮蔽、回收与 view() 可见性解析
 
 > 分析对象 `dbbaa4a37`。核心源码:`packages/core/scope/src/store.ts`(267 行)、`packages/core/scope/src/index.ts`(204 行)、`packages/core/tools/src/index.ts:707-1183`。
-> 第五章第二节给出了四条可见性结论;本篇把它们拆到"哪一行实现、为什么这一行必须这样写、改坏了会怎样"。
+> 第五章第二节给出了四条可见性结论。
 
 ---
 

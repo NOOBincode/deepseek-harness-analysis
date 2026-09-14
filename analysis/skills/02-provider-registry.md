@@ -2,7 +2,6 @@
 
 > 上游:[第四章 · 第二节](../04-skills.md#第二节-provider-registry注册合并与裁决)
 > 主源码:`packages/skill/skill/src/index.ts`(868 行)
-> 本篇回答:provider 怎么进层、同名怎么排、缓存键里到底有什么、失效有哪三条路、`get()` 每一道校验拦的是什么。
 
 ---
 

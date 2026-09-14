@@ -1,8 +1,6 @@
 # 第十三章:扩展生态——Hooks、ACP、Web/Desktop 与 SDK(DeepSeek Harness 源码分析)
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
-> 核心源码:`packages/hooks/`、`packages/acp/acp/src/`、`packages/webhook/`、`packages/api/{gateway,remotes,session-controller}/src/`、`packages/sdk/`、`apps/{cli,web,desktop,desktop-host}/`、`python/`
-> 前置:第一章第三节(启动链)、第一章第四节(三端形态)、第二章(信任边界)。第六章已覆盖 ACP 侧的 MCP 挂载(`mcp.ts`),本章只做协议面概述。
 
 ---
 

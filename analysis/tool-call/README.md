@@ -1,23 +1,8 @@
 # Tool Call 模块 · 函数级深度展开
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
-> 本目录是 [第五章 · Tool Call 机制实现细节](../05-tool-call.md) 的子模块文档集,把总览中每一个"一句话结论"落回到具体函数、具体分支、具体 `路径:行号`。
-> 分析过程未修改仓库任何文件。
 
 ---
-
-## 本模块与第五章的分工
-
-第五章回答**"是什么、为什么这样设计"**;本目录回答**"这一行代码怎么走的、失败时走到哪一支"**。
-
-| 维度 | 第五章(`../05-tool-call.md`) | 本目录 |
-|---|---|---|
-| 粒度 | 契约与机制总览,函数名 + 结论 | 函数级走查:进入条件、分支、产出对象形态 |
-| 覆盖 | `ToolDefinition` 契约、分层注册表、四段式管道、并发调度、PTC、取消六节 | 同上六节各自展开成一篇,每篇 200–450 行 |
-| 引用 | 关键结论标注行号 | 每段代码块、每个分支都标注行号;附"关键文件/符号索引表" |
-| 图表 | 1 张总览流程图 | 每篇 ≥1 张 mermaid / ASCII 图(分层图、时序图、状态机、泳道图) |
-
-**不重复的部分**:第五章第零节的总览结论、第一节 `ToolDefinition` 契约的四条语义、第三节 `schemaOf` 白名单投影的动机、第六节 `run_code` 的定位说明,本目录只在必要处引用,不重写。**新增的部分**:`ScopedLayers` 的回收时序、`view()` 一次遍历的完整数据流、`prepare/dispatch/finalize/finish` 每一段的失败分支矩阵、`fillPool`/`commitReady`/`drive` 的并发时序约束、`fuseToolSignals` 的监听器生命周期、`run_code` 的 lane 状态机与背压、Web 卡片的派生链。
 
 ## 篇目索引
 
@@ -36,7 +21,7 @@
 
 ## 一次工具调用的完整函数级调用栈
 
-以**原生模式**下一次模型工具调用为例(文件内行号均为 `dbbaa4a37`)。括号内是 `路径:行号`。
+以**原生模式**下一次模型工具调用为例。
 
 先看这棵树的两个基点——栈的入口,以及它下面那一层调度器接口:
 
@@ -120,7 +105,7 @@ flowchart TD
 | 后置与内容终结 | `finalize` 先跑 post-execute,再按取消状态替换成功结果;`finish` 两次物化中间夹一次内容终结,最后冻结执行对象并派发结果通知 | `index.ts:1599`、`index.ts:1732`、`index.ts:1604`、`index.ts:1508`、`index.ts:1621`、`index.ts:1837`、`index.ts:1639`、`index.ts:1630`、`index.ts:1647` |
 | 落日志与收尾 | 追加 `tool/result` 并用事件序号精确引用它那条 `tool/call`;结果里的随附上下文逐条交给调用方回调;组回报已消费数与是否结束本轮,由 `step()` 决定本轮是否收工 | `tool-calls.ts:269`、`tool-calls.ts:157`、`tool-calls.ts:246`、`agent.ts:492` |
 
-<details><summary>完整调用树(供逐行核对)</summary>
+<details><summary>完整调用树</summary>
 
 ```text
 ReactLoopAgent.step()                                        agent.ts:307 → :486
@@ -274,7 +259,7 @@ flowchart TD
 | 静默返回 | 队列与池都空即 quiescence,通道循环返回 | `ptc.ts:437` |
 | 收尾排空 | 先中止运行控制器,再等所有子派发落定,然后才关闭本轮 | `ptc.ts:632`、`ptc.ts:633` |
 
-<details><summary>完整调用树(供逐行核对)</summary>
+<details><summary>完整调用树</summary>
 
 ```text
 tool.execute = run_code body                              ptc.ts:327
@@ -354,9 +339,3 @@ tool.execute = run_code body                              ptc.ts:327
 | `packages/guard/timeout-policy/src/index.ts` | 81 | `apply`(`:55`)、`TOOL_TIMEOUT`(`:25`)、`toolTimeoutResult`(`:41`) |
 | `packages/util/timeout/src/index.ts` | 190 | `TimeoutReason`(`:12`)、`deadline`(`:91`)、`timeoutOf`(`:184`) |
 | `packages/core/agent-tool-presentation/src/index.ts` | 72 | `apply`(`:59`)——agent 面 `presentAs` 选择器 |
-
----
-
-## 声明
-
-> 本文档集为对公开源码仓库的静态阅读分析,所有结论均来自对 `packages/` 的实际阅读并标注 `路径:行号` 供核对。DeepSeek Harness 的所有权利归其原权利人所有;分析中的任何错漏以仓库源码与官方文档为准。

@@ -1,14 +1,10 @@
 # Multi-Agent 模块 · 深度展开文档集
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
-> 本目录是[第十章 · Multi-Agent 机制与实现细节](../10-multi-agent.md)的**函数级展开**,不重复其结论,只补函数体、行号与失败语义。
-> 所有引用均为 `仓库相对路径:行号`,未修改仓库任何文件。
 
 ---
 
-## 一、本目录解决什么问题
-
-第十章回答了"DSH 的多 agent 是什么、怎么分层";本目录回答**打开源码时仍会卡住的那些问题**:
+## 一、按卡点索引
 
 | 卡点 | 去哪一篇 |
 |---|---|
@@ -25,6 +21,8 @@
 | 后台 job 完成的通知为什么会"自己"开一个 turn?会不会无限自激? | [06](./06-jobs-and-notifications.md) |
 | `job_kill` 返回 `requested` 之后,进程保证做了什么? | [06](./06-jobs-and-notifications.md) |
 | 编辑 preset 的 `agent.cordis.yml`,对正在跑的会话和已经 spawn 的子 agent 各有什么影响? | [07](./07-preset-composition.md) |
+
+读法建议:**先读第十章建立心智模型,再用本目录下钻到你要改/要调试的那个函数。**
 
 ---
 
@@ -95,9 +93,7 @@ flowchart LR
 | 13 续存路线 | 子 Agent 的 inbox(它收消息的队列)接受初始 prompt 就立即返回,只回一个 subagentId,不等它跑完 | `subagent/subagent/src/continuation.ts:102-190` |
 | 14 释放 | 结果失败优先于释放失败,两者都失败才合成一个 AggregateError | `tool-subagent/src/index.ts:207-237` |
 
-详细到函数与行号的版本收在下面两个折叠块里,供逐行核对。
-
-<details><summary>原图(供逐行核对):函数级调用栈</summary>
+<details><summary>原图:函数级调用栈</summary>
 
 ![时序图：README](../assets/diagrams/multi-agent__README-47.svg)
 
@@ -149,7 +145,7 @@ sequenceDiagram
 
 同一次委派,前台、one-shot 后台、续存三条路线在工具层就分开了:前台会一直等到子 Agent 跑完再拿结果;one-shot 后台把这次委派包成一条作业,先把 jobId 交还给模型;续存路线则让子 Agent 常驻下来,只回一个 subagentId,之后还能用 `send_message` 追加消息。三者的共同点是"造 Agent"这一步完全一样,差别只在结果怎么回去、以及要不要保留这个子 Agent。展开见 [04](./04-continuation-and-control.md) 与 [06](./06-jobs-and-notifications.md)。
 
-<details><summary>原图(供逐行核对):三条路线的分叉树</summary>
+<details><summary>原图:三条路线的分叉树</summary>
 
 ```text
 tool-subagent.execute                                       (tool-subagent/src/index.ts:471)
@@ -169,23 +165,13 @@ tool-subagent.execute                                       (tool-subagent/src/i
 
 ---
 
-## 四、与第十章的分工
+## 四、额外覆盖的机制
 
-| 维度 | 第十章(`10-multi-agent.md`) | 本目录 |
-|---|---|---|
-| 粒度 | 分节综述 + 关键片段摘录 | 逐函数走查,细到错误码与失败分支 |
-| 视角 | "为什么这样设计"(设计意图、取舍、对比) | "代码怎么走"(调用序、校验序、回滚序) |
-| 图 | 1 张总览 ASCII 图 | 每篇 ≥1 张 mermaid/ASCII 图,共 7 张以上 |
-| 重复处理 | — | 本章已有的结论**只引用不复述**;凡是第十章已给出的代码块,本目录只在需要展开其内部时重贴 |
-| 新增覆盖 | — | `enter`/`announce` 的 reentrancy 规则、`agent/disposed` 配对、`detachRequested`;provider 能力位逐项;`scope 父链 → preset standing key` 的后果推演;`coldResume` 的授权阶梯;worker 的 slot/waiter/terminate 三态;`jobs` 的 `servesOwner` 与 layer 化监听;preset 的两道硬门逐行 |
-
-读法建议:**先读第十章建立心智模型,再用本目录下钻到你要改/要调试的那个函数。**
+`enter`/`announce` 的 reentrancy 规则、`agent/disposed` 配对、`detachRequested`;provider 能力位逐项;`scope 父链 → preset standing key` 的后果推演;`coldResume` 的授权阶梯;worker 的 slot/waiter/terminate 三态;`jobs` 的 `servesOwner` 与 layer 化监听;preset 的两道硬门逐行。
 
 ---
 
 ## 五、全模块不变量速查
-
-这七篇展开后反复出现的不变量,先列在这里:
 
 1. **创建即事务**:`setup` 期间 agent/session 都未发布;`setup` 抛错、commit 抛错、owner 销毁三者任一发生,都回滚且不发布任何 id(`packages/core/agent/src/index.ts:100-118`)。
 2. **所有权是能力**:`AgentHandle.dispose` 只交给创建者;`ctx.agents.get(id)` 只返回裸 `Agent`(`packages/core/agent/src/index.ts:146-163`)。

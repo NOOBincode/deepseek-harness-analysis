@@ -1,8 +1,7 @@
-# 第三部分 · 新增章：MCP 技术架构与原理(DeepSeek Harness 源码分析)
+# 第六章:MCP 技术架构与原理(DeepSeek Harness 源码分析)
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
 > **深入阅读(函数级)**:[`mcp/`](./mcp/README.md) —— 发现与同步、命名算法实测表、执行与结果映射、连接监管器九变量状态、传输与安全、测试与 23 条失败模式清单
-> 核心源码:`packages/mcp/mcp-client/src/`(全包仅 4 个源文件,约 50 KB)+ `packages/core/`(tools / agent-loop / system-prompt)
 > 设计依据:官方 Agent Note [`.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md)
 
 ---
@@ -18,7 +17,7 @@ DSH 的 MCP 集成是**一个 Cordis 桥接插件**(`@deepseek-ai/dsh-mcp-client
 3. **发现是配置驱动 + 协议驱动两层**:静态层由 `cordis.yml` 声明服务器;动态层由 MCP 协议的 `tools/list`(含分页)和 `notifications/tools/list_changed` 驱动。
 4. **主循环零感知**:MCP 工具经 `ctx.tools.register()` 进入 `ToolRuntime` 后,对 agent-loop 而言与内置工具无异——同一套 schema 投影、同一套并行调度、同一套审批/守卫管道。
 
-这一段讲的是**一个外部 MCP 工具从配置声明到被模型调用的完整生命周期**,也是全文的路线图。上半段是"发现与注册":把外部服务器上的工具变成注册表里一件普通工具;下半段是"使用":模型发出的调用怎么绕回外部服务器,结果又怎么回流成下一步的上下文。之所以要拉出这么长一条链,是因为 DSH 刻意不把 MCP 写进主循环——工具注册完之后与内置工具完全同构,主循环根本不知道 MCP 的存在。异常因此只影响链条的局部:服务器掉线由插件自己重连,工具列表变了由插件自己重新同步,主循环始终只看到一份稳定的工具表。
+DSH 刻意不把 MCP 写进主循环——工具注册完之后与内置工具完全同构,主循环根本不知道 MCP 的存在。异常因此只影响链条的局部:服务器掉线由插件自己重连,工具列表变了由插件自己重新同步,主循环始终只看到一份稳定的工具表。
 
 ![流程图：06-mcp](./assets/diagrams/06-mcp-23.svg)
 
@@ -54,7 +53,7 @@ flowchart TD
 | 回到服务器 | 执行器用服务器原始工具名发 `tools/call`,取消信号与默认 60 秒超时一路透传 | `mcp-client/src/tools.ts:81`、`:91`、`:93` |
 | 结果回流 | 结果按模型给出的顺序提交,落 `tool/result` 事件,再作为下一步上下文回流 | `core/agent-loop/src/tool-calls.ts:60`、`:312` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 +-------------------------+        spawn / HTTP        +----------------------+
@@ -234,7 +233,7 @@ flowchart TD
 | 第二阶段 · 冲突回滚 | 命名空间被外部注册抢占时,撤销本次已注册的全部工具,回到零工具并响亮报错 | `mcp-client/src/tools.ts:197` |
 | 同步串行化 | 初始同步与通知触发的重同步全部挂在同一条 promise 链上,避免两次换代的撤旧与注册交错 | `mcp-client/src/connection.ts:161` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 阶段一 fetch(不触碰注册表)
@@ -367,7 +366,7 @@ flowchart LR
 
 主循环 `ReactLoopAgent.step()`(`agent-loop/src/agent.ts:352`)在 assistant 消息中检出 tool-call 块后,交给 `executeToolCalls`(`agent-loop/src/tool-calls.ts:60`)。全链路伪代码改写如下:
 
-这一段是**模型发出一次工具调用之后真正发生的事**:调用先被解析并落日志,再过策略管道(插件可以在这里改写或拦截)、审批和守卫,然后才派发到 MCP 桥的执行器。执行器用服务器的原始工具名发 `tools/call`,把结果归一成内容数组后,按模型给出的顺序提交回会话。对 MCP 而言最要紧的一点是管道全程没有特例:审批规则看到的只是 `mcp__github__create_issue` 这样的普通名字,取消信号和超时也照常一路透传下去。
+**模型发出一次工具调用之后真正发生的事**:调用先被解析并落日志,再过策略管道(插件可以在这里改写或拦截)、审批和守卫,然后才派发到 MCP 桥的执行器。执行器用服务器的原始工具名发 `tools/call`,把结果归一成内容数组后,按模型给出的顺序提交回会话。对 MCP 而言最要紧的一点是管道全程没有特例:审批规则看到的只是 `mcp__github__create_issue` 这样的普通名字,取消信号和超时也照常一路透传下去。
 
 ![时序图：06-mcp](./assets/diagrams/06-mcp-360.svg)
 
@@ -411,7 +410,7 @@ sequenceDiagram
 | 按序提交 | 结果按模型给出的顺序提交,逐个落 `tool/result` 会话事件 | `core/agent-loop/src/tool-calls.ts:147` |
 | 上下文回流 | 结果消息进下一步的收件箱,下一个 step 随上下文回到模型 | `core/agent-loop/src/agent.ts:490` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 ReactLoopAgent.step()
@@ -496,7 +495,7 @@ flowchart TD
 | 存储失败 | 落盘失败同样整批降级为诊断文本 | `mcp-client/src/tools.ts:492` |
 | 富投影交接 | 执行器把富投影暂存起来,注册表事后比对"值仍是原规范值且回退内容未变"才安装 | `mcp-client/src/tools.ts:272`、`:277` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 execute 返回含 image 块
@@ -568,7 +567,7 @@ flowchart TD
 | 同步串行化 | 所有世代的同步共用一条 promise 链,避免两次换代的撤旧与注册交错 | `mcp-client/src/connection.ts:161` |
 | 平息式终止 | 先清重连定时器,关当前世代并等它关闭,再等在途连接与排队同步收敛,最后才注销工具 | `mcp-client/src/connection.ts:327`、`:345`、`:347` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 connectGeneration(startup)

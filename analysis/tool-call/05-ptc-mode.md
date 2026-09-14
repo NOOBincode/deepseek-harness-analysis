@@ -1,6 +1,6 @@
 # 05 · PTC(`run_code`)模式:契约、SDK 投影、调度 lane、背压与折叠
 
-> 分析对象 `dbbaa4a37`。核心源码:`packages/core/tools/src/ptc.ts`(678 行)、`ts-types.ts:297`、`py-types.ts:763`、`types.ts`、`index.ts:847-993`(prompt 侧)与 `index.ts:1298-1434`(折叠判定)。代码块均为**核心截取**。
+> 分析对象 `dbbaa4a37`。核心源码:`packages/core/tools/src/ptc.ts`(678 行)、`ts-types.ts:297`、`py-types.ts:763`、`types.ts`、`index.ts:847-993`(prompt 侧)与 `index.ts:1298-1434`(折叠判定)。
 
 ---
 

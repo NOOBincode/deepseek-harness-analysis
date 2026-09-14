@@ -1,22 +1,11 @@
 # 插件设计(plugin-system)模块
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
-> 本模块是[文档集](../README.md)的深度展开子模块,深入到**函数级**:每一条结论都指向 `路径:行号`,关键函数贴真实代码。
 > 与第一章、第十二章的分工见文末[分工说明](#与第一十二章的分工)。
 
 ---
 
 ## 一、这个模块回答什么
-
-第一章讲了"`dsh --profile` 怎么把一个进程拉起来",第十二章讲了"这套架构的亮点是什么"。两者都停在**概念与模式层**:Context 是服务仓库、注册即 effect、能力缝三角色、五种派发语义——都给出了名字和一两行源码,但没有走完实现。
-
-本模块补的就是那一段:**把这些名字背后的函数一个一个读完**。
-
-```text
-第一章        : 启动链是什么形状        ── 概念/地图
-第十二章      : 这套架构好在哪          ── 模式/评价
-plugin-system : 这些机制如何实现、约束如何被强制、写错会怎样 ── 函数/契约
-```
 
 四类问题在本模块得到闭式回答:
 
@@ -101,8 +90,6 @@ flowchart TB
 
 ## 四、与第一、十二章的分工
 
-本模块**刻意不重复**已有内容,遇到重叠只给指针。
-
 | 主题 | 第一章(已覆盖) | 第十二章(已覆盖) | 本模块新增 |
 |---|---|---|---|
 | 启动链 | `bin.ts` → `loadLayeredEnv` → `composeProfile` → `boot()` 全流程、profile 模板表、三个应用形态 | — | **函数级**:`mountRootInclude` 里 builtins 注入与固定 id 的取舍、`composeEntries` = 一次 `applyEntryPatches([], layers.flat())`、`watchUserPatches` 的闭包与 `INACTIVE_EFFECT` 容忍 |
@@ -150,7 +137,3 @@ flowchart TB
 | `packages/bundle/*/cordis.patch.yml` | 三层合成里的 bundle 层真实内容 |
 | `docs/event-producer-consumer.md` | 生成的事件生产者/消费者矩阵(04 的数据底座) |
 | `docs/postmortem/0001-acp-default-export-drops-inject.md` | 插件导出规则的来源事故 |
-
----
-
-> **声明**:本模块为对公开源码仓库的静态阅读分析,未修改仓库内任何文件。所有 `路径:行号` 均对 commit `dbbaa4a37` 有效。DeepSeek Harness 的所有权利归其原权利人所有。

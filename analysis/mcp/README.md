@@ -2,27 +2,20 @@
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
 > 范围:`packages/mcp/mcp-client/src/`(4 个源文件,共 1018 行)+ `packages/acp/acp/src/mcp.ts` + 相关测试与上游契约
-> 定位:**第六章的深水区补充**,不是重写
 
 ---
 
-## 一、本模块是什么
-
-第六章 [`../06-mcp.md`](../06-mcp.md) 已经完整交代了 MCP 的**发现 / 命名 / 两阶段同步 / 主循环使用 / 重连**这五件事的**总览与设计动机**。本模块不再复述那些结论,只做一件事:**把结论落到函数体,逐行走查**(逐分支、逐字段、逐校验、逐测试断言)。
-
-一句话分工:
+## 一、怎么读
 
 | 想知道 | 读 |
 |---|---|
 | MCP 在 DSH 里是什么、为什么这么设计、与 Claude Code 的差异 | [第六章](../06-mcp.md) |
-| `syncTools()` 的每一行在防什么、`registrationFailure` 两个值分别谁在用 | 本模块 [`01`](./01-discovery-and-sync.md) |
-| 输入 `('srv', 'admin.reset')` 到底算出什么字符串、哈希是多少 | 本模块 [`02`](./02-naming-algorithm.md) |
-| `isError` 为什么必须 throw、图片准入链每一步拒了会怎样 | 本模块 [`03`](./03-execution-and-result-mapping.md) |
-| 崩溃循环第几次放弃、`dispose()` 等谁先等谁 | 本模块 [`04`](./04-connection-supervisor.md) |
-| 哪些环境变量被剔除、HTTP 出口走不走代理 | 本模块 [`05`](./05-transport-and-security.md) |
-| 每个 spec 文件覆盖了什么行为 | 本模块 [`06`](./06-testing-and-failure-modes.md) |
-
-**本模块引用的行号全部来自 `packages/mcp/mcp-client/src/*.ts` 与同包 `tests/*.ts`,引用格式为 `文件:行号`,可直接跳转核对。**
+| `syncTools()` 的每一行在防什么、`registrationFailure` 两个值分别谁在用 | [`01`](./01-discovery-and-sync.md) |
+| 输入 `('srv', 'admin.reset')` 到底算出什么字符串、哈希是多少 | [`02`](./02-naming-algorithm.md) |
+| `isError` 为什么必须 throw、图片准入链每一步拒了会怎样 | [`03`](./03-execution-and-result-mapping.md) |
+| 崩溃循环第几次放弃、`dispose()` 等谁先等谁 | [`04`](./04-connection-supervisor.md) |
+| 哪些环境变量被剔除、HTTP 出口走不走代理 | [`05`](./05-transport-and-security.md) |
+| 每个 spec 文件覆盖了什么行为 | [`06`](./06-testing-and-failure-modes.md) |
 
 ---
 
@@ -107,7 +100,7 @@ flowchart TD
 
 ---
 
-## 四、源文件与测试清单(行数为实测)
+## 四、源文件与测试清单
 
 | 文件 | 行数 | 职责 |
 |---|---|---|
@@ -126,7 +119,7 @@ flowchart TD
 
 ---
 
-## 五、术语约定(与第六章一致,后续各册直接使用)
+## 五、术语约定
 
 | 术语 | 含义 | 首次定义位置 |
 |---|---|---|
@@ -142,4 +135,4 @@ flowchart TD
 
 ## 声明
 
-本文档集为对公开源码仓库的静态阅读分析,所有结论标注 `文件:行号` 供核对;分析过程未修改仓库任何文件。DeepSeek Harness 的所有权利归其原权利人所有,任何错漏以仓库源码与官方文档为准。
+DeepSeek Harness 的所有权利归其原权利人所有,任何错漏以仓库源码与官方文档为准。

@@ -1,7 +1,7 @@
 # 06 · 边界与失败模式
 
 > 对应第七章 [第六节](../07-sandbox.md#第六节-已知限制)。
-> 本篇全部内容来自源码注释与各包 README 的 `## Known Limitations and Deferred Work` 段落,**不做推测、不补外部知识**;每条都给出记录位置。
+> 来源:源码注释与各包 README 的 `## Known Limitations and Deferred Work` 段落。
 
 ---
 

@@ -1,14 +1,12 @@
 # Skills 模块 · 深度展开文档集
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
-> 上游章节:[第四章:Skills 的技术实现与运行方式](../04-skills.md)(总览层)
+> 上游章节:[第四章:Skills 的技术实现与运行方式](../04-skills.md)
 > 代码面:`packages/skill/`(registry / filesystem provider / badge provider / tool-skill consumer)、`packages/api/session-controller/src/skill-catalog.ts`、`packages/client/ui-skill/`
-
-本子目录是第四章的**下钻层**。第四章回答"skill 是什么、有哪些部件、彼此如何咬合";本目录回答"每一行代码在什么条件下跑、比较函数怎么写、失效如何传播、边界条件落在哪一行"。
 
 ---
 
-## 与第四章的分工
+## 主题覆盖对照
 
 | 主题 | 第四章(总览) | 本目录(展开) |
 |---|---|---|
@@ -22,8 +20,6 @@
 | watcher | 两路失效输入的一句话概述 | [04](./04-watcher-and-invalidation.md):chokidar 全配置项、`resolveRootWatchMode` 的两态机、事件过滤谓词逐行 |
 | 冷会话目录 | 一段列举 | [04](./04-watcher-and-invalidation.md):`SessionSkillCatalog` 的三级回退、`ui-skill` 的会话级缓存与单飞 |
 | 作用域 | 5 条列举 | [05](./05-scope-and-composition.md):与 tools 注册表的同构对比表、真实 yml 片段、子 agent 继承链 |
-
-**不重复原则**:凡第四章已给出完整代码块与结论的段落,本目录只做引用,不再复述;每篇结尾的"关键文件/符号索引表"给出该篇真正新读的行号。
 
 ---
 
@@ -109,12 +105,3 @@ flowchart TD
 | 子 agent 能不能用父 agent 的 skill? | [05](./05-scope-and-composition.md) 的继承规则 |
 | 浏览器 `/` 补全从哪来? | [04](./04-watcher-and-invalidation.md) 的 `SessionSkillCatalog` + `ui-skill` |
 
----
-
-## 体例
-
-- 中文,结论落到 `路径:行号`,行号以 commit `dbbaa4a37` 为准,可直接在仓库中跳转核对。
-- 关键函数贴真实代码块(截取核心片段,不整段搬运)。
-- 每篇含至少一张 mermaid 或 ASCII 图。
-- 每篇结尾附"关键文件/符号索引表"。
-- 分析过程未修改 `deepseek-harness` 仓库任何文件。

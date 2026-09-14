@@ -1,8 +1,8 @@
 # 04 · 全仓扩展点目录(按内核阶段分类)
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
-> 数据底座:生成物 `docs/event-producer-consumer.md`(生产者/消费者矩阵)+ 对内核源码的逐点核对
-> 前置:[第十二章第一节](../12-architecture-highlights.md)给出声明合并与五种派发语义;[01](./01-cordis-runtime-internals.md)第六节给出五种分发的实现;本篇只做**目录**:每项给模式、声明处、发起方、消费者与行号。
+> 数据底座:生成物 `docs/event-producer-consumer.md`(生产者/消费者矩阵)
+> 前置:[第十二章第一节](../12-architecture-highlights.md)给出声明合并与五种派发语义;[01](./01-cordis-runtime-internals.md)第六节给出五种分发的实现。
 
 ---
 
@@ -505,7 +505,7 @@ hook 名白名单在 `packages/hooks/hooks-claude-code/src/config.ts:12-18`(含 
     'subagent/end'(this: Scoped<SubagentRuntime>, info: SubagentRunEndInfo): void
 ```
 
-> 完整清单与逐事件的生产者/消费者边,以生成物 `docs/event-producer-consumer.md` 为准(本篇只补它的内核阶段归类与语义)。该文件由 `scripts/gen-doc-graphs.ts` 从 TypeScript Program 解析产生,并由 `verify-*` 门控新鲜度。
+> 完整清单与逐事件的生产者/消费者边,以生成物 `docs/event-producer-consumer.md` 为准。该文件由 `scripts/gen-doc-graphs.ts` 从 TypeScript Program 解析产生,并由 `verify-*` 门控新鲜度。
 
 ---
 

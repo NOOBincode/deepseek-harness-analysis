@@ -1,15 +1,15 @@
 # DeepSeek Harness 源码分析
 
-> 对 [DeepSeek Harness](https://github.com/innokria/deepseek-harness)(DSH)——一个"一切皆插件"的 Cordis agent harness——的**全量源码静态阅读分析**。
-> 分析基线:upstream commit [`dbbaa4a3`](https://github.com/innokria/deepseek-harness/commit/dbbaa4a37fb9098aba814c97d2956f7b2f105f46) · 体例参照 [liuup/claude-code-analysis](https://github.com/liuup/claude-code-analysis)
+> 对 [DeepSeek Harness](https://github.com/innokria/deepseek-harness)(DSH)——一个"一切皆插件"的 Cordis agent harness——的源码分析。
+> 分析基线:upstream commit [`dbbaa4a3`](https://github.com/innokria/deepseek-harness/commit/dbbaa4a37fb9098aba814c97d2956f7b2f105f46)
 
-**56 个文档 / 21,510 行**,14 章正文 + 6 个模块的函数级深度展开。每条结论都带 `文件:行号` 锚点,可直接回到源码核对。
+14 章正文 + 6 个模块的函数级深度展开。
 
 ---
 
 ## 这是什么
 
-不是导读、不是 API 手册,而是一份**可以逐条核对的源码分析**:把 DSH 从"程序怎么启动"一路拆到"一次工具调用内部发生了什么",并在关键处贴出真实代码、伪代码改写与流程图。
+不是导读、也不是 API 手册,而是一份贴着源码写的分析:把 DSH 从"程序怎么启动"一路拆到"一次工具调用内部发生了什么",关键处直接给出真实代码、控制流与示意图。
 
 它回答三类问题:
 
@@ -79,17 +79,11 @@ DSH 的四个贯穿性判据(全套文档反复用到):
 
 完整导航(一图总览 + 分部分目录 + 阅读地图)见 **[`analysis/README.md`](./analysis/README.md)**。
 
-## 方法与可信度
+## 怎么读图
 
-- **只读分析**:全过程未修改 upstream 仓库任何文件;所有行号对 commit `dbbaa4a3` 有效。
-- **可核对**:1,323 处 `路径:行号` 引用全部经脚本校验(文件存在 + 行号在界内);321 个内部链接全部解析成功。
-- **交叉验证**:关键章节做了独立复核——例如第三章 90 处引用逐条回读、第十二章全量行号核对、第十三章 151 处引用解析并对 87 行代码逐字回查源文件。
-- **记录偏差**:分析中发现并标注了源码注释与实现不一致之处(例如 `restrictableNames` 的 JSDoc 措辞、`tool-skill` 的 `/name` 手势边界),以代码与测试为准。
-- **不推测**:能力缺口、限制与"没有实现的部分"一律引自源码或包 README 的 *Known Limitations*,不做猜测性描述。
-- **图示可复现**:全部 97 张 Mermaid 图经渲染器逐张验证通过;其中 95 张以主题化 SVG 形式嵌入正文,源码折叠在图下方,可继续编辑。图只画主干(纯中文标签、不放函数名),函数级细节放在图下的 `阶段 | 做了什么 | 关键调用` 表里,原始调用树折叠保留供逐行核对。
-- **为人类阅读而写**:所有"机器味"的 ASCII 调用树已改写为「一段人话 → 一张主干图 → 一张细节表 → 折叠原图」四段式;术语首次出现给解释,行号不作主语,引用只在句末或表格里出现。
-
-> 文档中的 `packages/...:123` 这类引用指向 upstream 仓库在 commit `dbbaa4a3` 的文件与行号,可按此在本地克隆中定位。
+- 图只画主干:节点是中文短语,不放函数名与行号——先顺着箭头看懂"发生了什么"。
+- 要知道"具体调用了哪个函数",看每张图下面的 `阶段 | 做了什么 | 关键调用(文件:行)` 表。
+- 要逐行核对,展开再下面的折叠块:原始调用树、时序轨迹与 Mermaid 源码都在那里。
 
 ## 仓库结构
 
@@ -115,4 +109,4 @@ DSH 的四个贯穿性判据(全套文档反复用到):
 
 ## 声明
 
-> 本项目仅供学术研究与技术学习使用,为对公开源码仓库的静态阅读整理。DeepSeek Harness 的所有权利归其原权利人所有;本文档集与 upstream 项目无隶属关系。分析中的任何错漏以 upstream 源码与官方文档为准。
+> 本仓库内容仅供技术学习与研究使用。DeepSeek Harness 的所有权利归其原权利人所有,本仓库与 upstream 项目无隶属关系。

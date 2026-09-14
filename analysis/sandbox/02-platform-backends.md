@@ -1,7 +1,7 @@
 # 02 · 平台后端:函数级走查
 
 > 对应第七章 [第三节](../07-sandbox.md#第三节-平台实现差异posix-runner-与-windows-acl)。
-> 本篇拆开 `sandbox-local`(567 行)与 `sandbox-windows-acl` 的核心函数:选链、探针、argv 拼接、方言表、受限令牌、SID 派生、授权生命周期。
+> 涉及 `sandbox-local`(567 行)与 `sandbox-windows-acl` 的核心函数:选链、探针、argv 拼接、方言表、受限令牌、SID 派生、授权生命周期。
 
 ---
 

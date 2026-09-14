@@ -2,7 +2,7 @@
 
 > 源码:`packages/workflow/workflow-worker-thread/src/`(index 205 / runtime 488 / host 625 / realm 151 / protocol 101 / meta 82 / session 201 / types 94 行)、`packages/workflow/workflow/src/index.ts`(203 行)
 > 模型侧:`packages/workflow/tool-workflow/src/index.ts`(334 行)、`tool-ralph/src/index.ts`(477 行)
-> 本章展开[第十章第 5.1–5.4 节](../10-multi-agent.md)的代码内部。
+> 对应[第十章第 5.1–5.4 节](../10-multi-agent.md)。
 
 ---
 
@@ -60,7 +60,7 @@ flowchart LR
 | 11 值物化 | 出边界的值必须是纯 JSON;非有限数、函数、symbol、循环引用等一律拒绝并报路径 | `workflow-worker-thread/src/realm.ts:66-151` |
 | 12 取消 | 双通道取消 + 宽限计时器 + 无条件终止线程 | `workflow-worker-thread/src/host.ts:183-207`、`:224-255` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 宿主线程(Host)                                     worker 线程
@@ -408,7 +408,7 @@ sequenceDiagram
 | 释放 | 按请求编号记忆化释放,重复请求照样回 ack | `workflow-worker-thread/src/host.ts:441-450`、`:417-427` |
 | 结算 run | 认领终局 → 收掉残留子 Agent → 结算 | `workflow-worker-thread/src/host.ts:489-519` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 worker                                   host(WorkerRun)                        subagent seam

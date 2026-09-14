@@ -1,9 +1,7 @@
 # 第八章:Context 上下文管理实现细节
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
-> 核心源码:`packages/core/agent-loop`(每步组装)+ `packages/core/system-prompt`(sections/contexts 注册表)+ `packages/llm/token-meter`(计量)+ `packages/compaction/*`(压缩)+ `packages/context/*`(请求上下文插件)+ `packages/spill/spill-policy`(结果溢写)
 > 设计依据:官方 Agent Note [`.agents/notes/implemented/architecture/2026-07-20-routed-model-context-and-compaction-policy.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/architecture/2026-07-20-routed-model-context-and-compaction-policy.md)
-> 分工:会话事件日志与 surface 语义归第三章(Session/Memory);系统提示的渲染、section 归属与 persona 归第九章(Prompt)。本章只讲上下文窗口、token 预算与每步组装。
 
 ---
 
@@ -627,5 +625,3 @@ target = 'next-step'
 | `packages/sandbox/sandbox-policy/src/index.ts` | `sandbox:policy` 动态 context | 1.2 |
 | `packages/interaction/user-approval/src/index.ts` | `approval:policy` 动态 context | 1.2 |
 | `packages/spill/spill-policy/src/index.ts` | 工具结果溢写与预算内通知 | 1.4/4.6 |
-
-**未在本章展开的相邻主题**:会话事件日志、surface 替换语义与 `deriveMessages()` 的投影规则见第三章;系统提示的 section 内容、persona 与工具指引文本见第九章。

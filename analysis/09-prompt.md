@@ -1,8 +1,7 @@
 # 第九章:Prompt 管理机制与实现细节(DeepSeek Harness 源码分析)
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
-> 核心源码:`packages/core/system-prompt/src/index.ts`(630 行:注册表服务与组装流水线)、`packages/core/agent-loop/src/runtime-context.ts`(159 行:提示的持久化投影)、`packages/core/agent-loop/src/agent.ts`(619 行:投递时机)
-> 交叉引用:工具 schema 的可见性与调度见第五章,上下文注入细节见第八章;本章只讲"提示如何组装、何时重投"
+> 交叉引用:工具 schema 的可见性与调度见第五章,上下文注入细节见第八章
 > 相关文档:[`docs/subsystems/system-prompt.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/subsystems/system-prompt.md)、[`packages/core/system-prompt/README.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/README.md)
 
 ---
@@ -57,7 +56,7 @@ flowchart TD
 | 落日志 | 提交成 `system/message` 事件,成为 surface 上的一个节点 | `session.append()`(`agent-loop/src/agent.ts:370-372`) |
 | 派生请求 | 消息历史从日志派生,所以刚落的节点必然出现在本次请求里 | `deriveMessages()` / `buildRequest()`(`agent-loop/src/agent.ts:603`、`379`) |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 插件 fiber ──ctx.systemPrompt.section/context/tools/variable──> ScopedLayers<PromptLayer>
@@ -227,7 +226,7 @@ flowchart TD
 | 瀑布 | 带 scope 派发,监听器可以改写全部四类输入;不调用 `next()` 即短路整条链 | `system-prompt/assemble`(`system-prompt/src/index.ts:617-620`) |
 | 恢复 | 若存在 `complete` 段落或上下文被抑制,用瀑布结果叠加恢复后的段落与上下文 | `system-prompt/src/index.ts:621-626` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 assemble(context = {})
@@ -477,7 +476,7 @@ sequenceDiagram
 | 构建请求 | 从日志派生消息历史,拼出本次请求 | `buildRequest()`(`agent-loop/src/agent.ts:379`) |
 | 发起调用 | 请求发给模型,消息历史里已经含刚落的提示节点 | `llm.stream()`(`agent-loop/src/agent.ts:390`) |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 preStep(target, {turn, step})                                   agent.ts:240-259

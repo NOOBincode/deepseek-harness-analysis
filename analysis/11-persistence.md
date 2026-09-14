@@ -1,9 +1,7 @@
 # 第十一章 · Session Storage / Transcript / Resume 持久化机制(DeepSeek Harness 源码分析)
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`(pnpm monorepo)
-> 核心源码:`packages/session/session-persistence/src/`(seam:服务定义 + handle + 存储契约)、`packages/session/session-persistence-jsonl/src/`(唯一发布的物理后端)、`packages/session/session-format/` 与 `session-format-{catalog,v0-to-v1,v1-to-v2,v2-to-v3}/`(编解码 + 相邻迁移链)、`packages/session-query/`(冷读 + 派生读模型)、`packages/storage/`(KV / SQLite / Domain 设施)、`packages/session/session-checkpoint-policy/`(落盘时机)
 > 版本权威:[`docs/session-format-status.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/session-format-status.md:28)(`latestReleasedVersion: 3`,`evidenceTag: dsh-v0.1.5-alpha.1`)
-> **第三章已覆盖内存态**(事件溯源、`SurfaceManager`、`deriveMessages()`、`request/header` 折叠、compaction)。本章只讲物理持久化、格式版本、冷读、恢复;凡涉及内存日志与 surface,一律交叉引用第三章。
 
 ---
 
@@ -61,7 +59,7 @@ flowchart TD
 | 读回侧 · 重建投影 | 用事件重建会话投影,没有任何一份状态是单独从磁盘读出来的 | `core/session/src/preparation.ts:20` |
 | 读回侧 · 写 resume 锚点 | 本 loop 实例的第一次请求写入 `request/header`;日志里已有锚点即标为 resume | `core/agent-loop/src/agent.ts:571` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
       写入路径                                   resume 读回路径

@@ -1,7 +1,7 @@
 # 04 · 取消与超时:双信号融合、两个规范码与协作式超时
 
 > 分析对象 `dbbaa4a37`。核心源码:`packages/core/tools/src/index.ts:1500-1549`、`:1870-1934`、`:756-765`、`:800-803`;超时插件 `packages/guard/timeout-policy/src/index.ts`(81 行);共享超时算术 `packages/util/timeout/src/index.ts`(190 行);调度器侧 `packages/core/agent-loop/src/tool-calls.ts:199-260`。
-> 第五章第七节给了结论;本篇给出信号对象的生命周期、每一个取消检查点的进入条件,以及"模型看到的到底是哪一条错误"的完整判定链。
+> 第五章第七节给了结论。
 
 ---
 

@@ -2,7 +2,7 @@
 
 > 源码:`packages/mcp/mcp-client/src/transport.ts`(50 行)、`packages/acp/acp/src/mcp.ts`(143 行)
 > 依赖:`packages/subprocess/subprocess/src/index.ts`(环境清洗)、`packages/util/http-proxy/src/install.ts`(代理出口)
-> 上游:第六章 [§1.3](../06-mcp.md) 与 [§四 安全边界表](../06-mcp.md);本文补齐规则细节与校验清单
+> 上游:第六章 [§1.3](../06-mcp.md) 与 [§四 安全边界表](../06-mcp.md)
 
 ---
 

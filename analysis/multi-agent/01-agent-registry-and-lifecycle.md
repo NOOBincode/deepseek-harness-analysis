@@ -2,7 +2,6 @@
 
 > 源码:`packages/core/agent/src/index.ts`(690 行)、`packages/core/agent/src/runtime-types.ts`(405 行)
 > 配套:`packages/core/agent-loop/src/index.ts`(930 行,创建事务的真实实现)、`packages/core/agent-loop/src/agent.ts`、`packages/core/session/src/index.ts`
-> 本章不复述[第十章第 1.1/1.3 节](../10-multi-agent.md)的结论,只走"注册表怎么把 agent 变成活的、谁能拆掉它、拆的顺序是什么"。
 
 ---
 
@@ -58,7 +57,7 @@ flowchart LR
 | 12 解绑逆序 | 先摘 Agent 再摘会话;销毁事件发生在驱动收敛之后、会话解绑之前 | `agent-loop/src/index.ts:609-610` |
 | 13 因果归属 | withInitiator 只做归属不授权;关闭时先把发起本次卸载的那条链从自己的 drain 里排除 | `core/agent/src/index.ts:672-678` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 AgentRegistry          只做册子:工厂槽 · 活体表 · initiator 归属        (agent/src/index.ts)
@@ -360,7 +359,7 @@ flowchart LR
 | 8 失败处理 | 收集所有失败:只有一个就抛它,多个合成 AggregateError | `agent-loop/src/index.ts:580-582` |
 | 9 幂等 | dispose 是 memoized 闭包,多个 owner 同时触发拿到的是同一个 Promise | `agent-loop/src/index.ts:576-619` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 abort(所有取消源 fuse 到一根,reason 带 Error)

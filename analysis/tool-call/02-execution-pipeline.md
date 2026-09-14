@@ -1,6 +1,6 @@
 # 02 · 执行管道函数级走查:createExecution → prepare → dispatch → finalize/finish
 
-> 分析对象 `dbbaa4a37`。覆盖 `packages/core/tools/src/index.ts:1332-1852` 与调用侧 `packages/core/agent-loop/src/tool-calls.ts:122-247`。代码块均为**核心截取**,省略处以 `// …` 标注。
+> 分析对象 `dbbaa4a37`。覆盖 `packages/core/tools/src/index.ts:1332-1852` 与调用侧 `packages/core/agent-loop/src/tool-calls.ts:122-247`。
 
 ---
 

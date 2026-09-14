@@ -2,7 +2,7 @@
 
 > 源码:`packages/subagent/subagent/src/continuation.ts`(550 行)、`continuation-activation.ts`(854 行)、`control.ts`、`control-types.ts`、`list-children.ts`(408 行)、`assistant-output.ts`(75 行)、`continuation-messages.ts`、`internal.ts`
 > 模型侧:`packages/subagent/tool-subagent-control/src/index.ts`(117 行)、`src/list-agents.ts`
-> 本章展开[第十章第 2.3/2.4 与第四节](../10-multi-agent.md);一次性前台路线见 [02](./02-subagent-seam-and-providers.md)。
+> 对应[第十章第 2.3/2.4 与第四节](../10-multi-agent.md);一次性前台路线见 [02](./02-subagent-seam-and-providers.md)。
 
 ---
 

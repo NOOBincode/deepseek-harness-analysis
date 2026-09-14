@@ -1,7 +1,6 @@
 # 第四章 · Skills 的技术实现与运行方式(DeepSeek Harness 源码分析)
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
-> 核心源码:`packages/skill/`(四个包:`skill` / `skill-filesystem` / `skill-badge` / `tool-skill`,合计约 2000 行 src)+ `packages/core/agent-loop/`(pre-step 瀑布)+ `packages/core/scope/`(ScopedLayers)
 > **深入阅读(函数级)**:[`skills/`](./skills/README.md) —— SKILL.md 契约与六档根、provider 注册表裁决与 rev 缓存、目录五分支与按需加载四道闸门、watcher 失效全景、作用域与出货方式
 > 设计依据:子系统参考 [`docs/subsystems/skills.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/subsystems/skills.md)、Agent Note [`.agents/notes/implemented/feature/2026-07-28-skill-invocation-policy.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-28-skill-invocation-policy.md)
 
@@ -341,7 +340,7 @@ flowchart TD
 | 分支:从未发布且为空 | 没有模型可见的 skill,且历史上从未发布过目录 → 保持沉默 | `index.ts:237-241` |
 | 分支:发布 | 发布过就用整表替换模板,首次发布用首版模板;已有候选则原地替换以保住消息位置 | `renderCatalogUpdate()` / `renderCatalogMessage()`(`index.ts:242-250`、`254-311`) |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 catalog listener(agent, signal):

@@ -2,7 +2,7 @@
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
 > 样本:`ctx.sandbox`、`ctx.llm`、`ctx.subagents`、`ctx.sessionPersistence` 四条真实能力缝
-> 前置:[第十二章第二节](../12-architecture-highlights.md)给三角色的定义与模式论证(不再重复);本篇只做**契约方法 → Provider 实现 → Consumer 调用点**的逐行对照,并给出 `./invariant` 伴随插件的判定与写法。
+> 前置:[第十二章第二节](../12-architecture-highlights.md)给三角色的定义与模式论证。
 
 ---
 

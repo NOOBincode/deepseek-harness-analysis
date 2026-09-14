@@ -4,7 +4,7 @@
 > 实现:`packages/jobs/jobs-local/src/index.ts`(534 行,进程内注册表)
 > 消费者:`packages/jobs/tool-jobs/src/index.ts`(401 行,`job_output`/`job_list`/`job_kill`)
 > 后台 subagent 的产生方:`packages/subagent/tool-subagent/src/index.ts:544-560`
-> 本章展开[第十章第 6 节](../10-multi-agent.md);子 agent 本身见 [02](./02-subagent-seam-and-providers.md)/[04](./04-continuation-and-control.md)。
+> 对应[第十章第 6 节](../10-multi-agent.md);子 agent 本身见 [02](./02-subagent-seam-and-providers.md)/[04](./04-continuation-and-control.md)。
 
 ---
 
@@ -41,7 +41,7 @@ constructor(ctx: Context) {
 }
 ```
 
-类 JSDoc(`:41-60`)逐条列出实现必须遵守的语义,这些就是本章的骨架:
+类 JSDoc(`:41-60`)逐条列出实现必须遵守的语义:
 
 | # | 语义 | 关键点 |
 |---|---|---|

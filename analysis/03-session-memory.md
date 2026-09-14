@@ -1,7 +1,6 @@
 # 第三章 · Session 与 Memory 机制(DeepSeek Harness 源码分析)
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`(pnpm monorepo)
-> 核心源码:`packages/core/session/src/`(约 12.7 万字节,事件溯源核心)+ `packages/session/`(持久化、投影、标题、遥测等 18 个包)+ `packages/compaction/`(压缩)+ `packages/storage/`(底层 KV 存储)+ `packages/core/agent-loop/`(衔接面)
 > 版本权威:`docs/session-format-status.md`(当前写者格式 v3,已随 `dsh-v0.1.5-alpha.1` 发布)
 
 ---
@@ -478,8 +477,6 @@ options.flush?.()                           # 人工路径的持久化检查点
 ---
 
 ## 第五节 多层级存储:内存投影 → 持久化 → 派生读模型
-
-> 本节只写清**分层关系与会话侧的接缝**(`Session` 看到什么、谁在什么时候 flush)。JSONL 物理格式、世代文件、zstd、跨进程租约、`storage` KV 栈与格式迁移链(v0→v3)的完整细节归**第十一章:持久化与存储格式**,此处仅作交叉指引。
 
 ### 5.1 第 0 层:内存即真相的工作集
 

@@ -2,7 +2,6 @@
 
 > 上游:[第四章 · 第六节](../04-skills.md#第六节-作用域行为agent--preset-分层)、[第十章:Multi-Agent](../10-multi-agent.md)
 > 主源码:`packages/core/scope/src/{index,store}.ts`、`packages/core/tools/src/index.ts:686-747,1120-1200`、`packages/preset/agent-presets/src/index.ts`、`packages/bundle/*/cordis.patch.yml`、`packages/preset/agent-presets/presets/*/agent.cordis.yml`
-> 本篇回答:`ctx.skills` 的分层底座、它和 tools 注册表同构到什么程度、preset 层具体怎么挂 provider、一个 agent 最终读到哪几层、子 agent 怎么继承、打包 skill 的四种出货路径。
 
 ---
 

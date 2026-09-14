@@ -1,20 +1,17 @@
 # DeepSeek Harness 源码分析
 
-> **先读这一页。** 本目录是对 DeepSeek Harness(DSH)全部源码的静态阅读分析文档集:14 章正文 + 6 个模块的函数级深度展开子目录。若只想拿结论,直接看 **[第十四章:总结结论](./14-final-summary.md)**;要钻实现细节,进[模块深度展开](#模块深度展开函数级);按关注点跳读见[阅读地图](#阅读地图)。
+> **先读这一页。** 本目录是 DeepSeek Harness(DSH)的源码分析:14 章正文 + 6 个模块的函数级深度展开。若只想拿结论,直接看 **[第十四章:总结结论](./14-final-summary.md)**;要钻实现细节,进[模块深度展开](#模块深度展开函数级);按关注点跳读见[阅读地图](#阅读地图)。
 
 ## 分析对象
 
 | 项 | 值 |
 |---|---|
 | 仓库 | [innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) |
-| commit | `dbbaa4a37` |
-| 本地源码 | `../deepseek-harness/`(仅供分析跳转引用,分析过程未修改仓库任何文件) |
+| commit | `dbbaa4a37`(文中 `文件:行号` 均以此版本为准) |
+| 本地源码 | `../deepseek-harness/` |
 | 形态 | pnpm monorepo:全插件 Cordis agent harness,`packages/` 约 50 个包,`apps/` 四端(cli/web/desktop/desktop-host),另有 Python SDK |
-| 体例参照 | [liuup/claude-code-analysis](https://github.com/liuup/claude-code-analysis) |
 
 ## 总述
-
-每章基于 `packages/`、`apps/`、`docs/`、`.agents/notes/` 的真实源码与文档整理,结论均标注 `文件:行号`,可直接跳转核对;全部外部路径引用已做存在性校验。
 
 DSH 的系统特征一句话:**"一切皆插件"**——从工具注册表、系统提示、LLM 提供方到 MCP 桥接,能力全部是 Cordis 插件,经 `ctx.effect()` 注册、由 `cordis.yml` 层叠组合、支持 HMR 热替换;agent 主循环只做"组装提示 → 流式请求 → 调度工具 → 落会话日志"这一件事,且状态真源只有一条 append-only 会话事件日志。
 
@@ -31,9 +28,7 @@ DSH 的系统特征一句话:**"一切皆插件"**——从工具注册表、系
 9. 程序架构亮点(能力缝三角色、Typert 类型图、质量工程体系)。
 10. 扩展生态(Hooks、ACP、Webhook、Web/Desktop、双 SDK)。
 
-> **关于图**:文档集共 97 张 Mermaid 图,全部经渲染器逐张验证(可解析即语法有效)。其中 95 张(所有流程图、时序图、状态图)以**主题化 SVG** 嵌入正文(SVG 存放在 `assets/diagrams/`,每个图下方折叠着 *Mermaid 源码*,可直接修改后重渲染);其余 2 张极短图保留原生 Mermaid,由 GitHub 直接渲染。
->
-> **图怎么读**:图里只有中文短语,不放函数名与行号——先顺着箭头理解"发生了什么";要知道"具体调用了哪个函数",看每张图下面的 `阶段 | 做了什么 | 关键调用(文件:行)` 表;要逐行核对,展开再下面的折叠块(原始调用树/时序轨迹一字未删)。
+> **图怎么读**:图里只有中文短语,不放函数名与行号——先顺着箭头理解"发生了什么";要知道"具体调用了哪个函数",看每张图下面的 `阶段 | 做了什么 | 关键调用(文件:行)` 表;再往下的折叠块里是图的 Mermaid 源码与原始调用树。
 
 ## 一图总览
 
@@ -45,7 +40,7 @@ DSH 的系统特征一句话:**"一切皆插件"**——从工具注册表、系
 
 **分层速览**:入口 → 启动组装 → 核心服务 → 能力缝插件 → 主循环 → 持久化:
 
-<details><summary>展开文字版分层图(与上图互补,便于复制到别处)</summary>
+<details><summary>文字版分层图</summary>
 
 ```text
 入口          dsh CLI / Web / Desktop / ACP / SDK
@@ -136,4 +131,4 @@ DSH 的系统特征一句话:**"一切皆插件"**——从工具注册表、系
 
 > **本项目仅供学术研究与技术学习使用。**
 >
-> 本文档集为对公开源码仓库的静态阅读分析,所有结论均来自对 `packages/`、`apps/`、`docs/`、`.agents/notes/` 的实际阅读,并标注 `文件:行号` 供核对。DeepSeek Harness 的所有权利归其原权利人所有;分析中的任何错漏以仓库源码与官方文档为准。
+> DeepSeek Harness 的所有权利归其原权利人所有;文中任何错漏以仓库源码与官方文档为准。

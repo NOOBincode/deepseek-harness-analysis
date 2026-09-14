@@ -2,7 +2,7 @@
 
 > 源码:`packages/preset/agent-presets/src/preset.ts`(70 行)、`index.ts`(855 行)、`mount.ts`(433 行)、`discovery.ts`(343 行)
 > 出货组合:`packages/preset/agent-presets/presets/standard/agent.cordis.yml`(255 行)
-> 本章展开[第十章第七节](../10-multi-agent.md);preset 层与父链对子 agent 的后果见 [03](./03-child-agent-composition.md)。
+> 对应[第十章第七节](../10-multi-agent.md);preset 层与父链对子 agent 的后果见 [03](./03-child-agent-composition.md)。
 
 ---
 

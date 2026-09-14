@@ -1,7 +1,7 @@
 # 03 · 升级机制:严格更宽阶梯与有序失败封闭
 
-> 对应第七章 [第五节](../07-sandbox.md#第五节升级escalation与审批衔接),并把它展开到逐条失败点。
-> 覆盖 `packages/sandbox/sandbox/src/escalation.ts`(189 行)全部导出符号,以及两个工具族的广告闸门与错误映射。
+> 对应第七章 [第五节](../07-sandbox.md#第五节升级escalation与审批衔接)。
+> 涉及 `packages/sandbox/sandbox/src/escalation.ts`(189 行)的导出符号,以及两个工具族的广告闸门与错误映射。
 
 ---
 

@@ -1,7 +1,7 @@
 # 03 · agent-loop 侧调度器:分组、滚动池、模型序提交与并发时序
 
 > 分析对象 `dbbaa4a37`。核心源码:`packages/core/agent-loop/src/tool-calls.ts`(290 行,调度器全部实现)、`packages/core/tools/src/index.ts:1266`(分类器)、`packages/core/agent-loop/src/constants.ts`(默认并发上限)、`packages/core/agent-loop/src/agent.ts:486-492`(调用方与回流)。
-> 第五章第五节给了 `fillPool` 的一段摘录;本篇覆盖三个函数的完整状态机、每一次 `await` 之后的语义,以及四段式接口在并发下的时序约束。
+> 第五章第五节给了 `fillPool` 的一段摘录。
 
 ---
 
@@ -42,7 +42,7 @@ flowchart TD
 | 主循环 | 等任一次执行落定 → 删掉槽位 → 提交 → 复查取消 → 再补池 | `tool-calls.ts:221`、`:222`、`:223`、`:225`、`:230` |
 | 组间屏障 | 组返回前池必然排空、每个已启动调用都已提交,外层才继续分类下一组;正常完成按实际启动数回报,取消则跳过整组 | `tool-calls.ts:238`、`:242`、`:246` |
 
-<details><summary>完整调用树(供逐行核对)</summary>
+<details><summary>完整调用树</summary>
 
 ```text
 executeToolCalls()                                   tool-calls.ts:60
@@ -353,7 +353,7 @@ sequenceDiagram
 | 复查取消并补池 | 取消标志在 await 之后重读,腾出来的池位立刻补上 | `tool-calls.ts:229`、`:230` |
 | 池排空后收尾 | 主循环退出时在飞表为空,组按实际启动数回报给外层 | `tool-calls.ts:221`、`:246` |
 
-<details><summary>完整调用树(供逐行核对)</summary>
+<details><summary>完整调用树</summary>
 
 ```text
 startCall#0  P0──────────┐

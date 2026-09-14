@@ -1,7 +1,7 @@
 # 06 · 测试体系与失败模式
 
 > 源码:`packages/mcp/mcp-client/tests/`(7 个文件)+ `apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts`
-> 上游:第六章无对应小节;官方注记的 Testing 段见 `.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md:206-212`
+> 官方注记的 Testing 段见 `.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md:206-212`
 
 ---
 

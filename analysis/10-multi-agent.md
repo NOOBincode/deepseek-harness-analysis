@@ -3,7 +3,6 @@
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
 > **深入阅读(函数级)**:[`multi-agent/`](./multi-agent/README.md) —— Agent 注册表与生命周期、能力缝与 provider、子 Agent 组装、续存与管控、workflow 引擎、jobs、preset 组合
 > 核心源码:`packages/subagent/*`(capability seam:Service Definition + providers + delegation Consumers)、`packages/workflow/*`(worker-thread 编排引擎 + tool Consumer)、`packages/jobs/*`、`packages/core/agent/src/*`、`packages/preset/agent-presets/*`
-> 说明:本章不复述 MCP 结论,凡引用仅取其"作用域挂载点"。
 
 ---
 
@@ -61,7 +60,7 @@ flowchart LR
 | 10 jobs 外壳 | 只负责后台执行、游标读取、取消与回收,不参与造 Agent | `jobs/jobs/src/index.ts:82-143` |
 | 11 取消与失败 | interrupt 只停当前 turn;job_kill 停整条作业;workflow 里普通失败降级成 null,致命失败上抛杀死脚本 | `subagent/subagent/src/index.ts:280-297`、`workflow/workflow-worker-thread/src/runtime.ts:414-425` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 父 Agent(session + scope + 自己的工具面)
@@ -196,7 +195,7 @@ flowchart LR
 | 8 创建事务 | driver 调 `parent.ctx.agents.create()` 造出真子 Agent | `subagent-in-process-driver/src/index.ts:130-134` |
 | 9 未发布窗口 | setup 装配子世界,enter 入表,announce 广播,然后起循环 | `core/agent-loop/src/index.ts:659-677` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 模型 tool-call: subagent{description, prompt, run_in_background?, provider?, model?}
@@ -346,7 +345,7 @@ flowchart LR
 | 9 粒度对照 | queuePrompt 对应下一个 turn,steerPrompt 对应下一个 step | `subagent/subagent/src/continuation.ts:243-270` |
 | 10 发现侧 | list_agents 走会话投影,不加载也不唤醒 Agent | `subagent/subagent/src/index.ts:349-370` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 send_message(agent_id, message)                       tool-subagent-control/src/index.ts:28
@@ -460,7 +459,7 @@ flowchart LR
 | 取消后抑制叙事 | 宿主侧直接压掉 `phase`/`log`,seam 只剩 `workflow/*` 六个事件 | `workflow/workflow/src/index.ts:36-100` |
 | 工具侧记录与桥接 | 记录四个 `tool-workflow/*` 事件、把 `exec.signal` 桥到 `run.cancel`、`finally` 里释放 run | `tool-workflow/src/index.ts:72-130`、`:296-299`、`:315-329` |
 
-<details><summary>原图(供逐行核对)</summary>
+<details><summary>原图</summary>
 
 ```text
 Worker(脚本)                       Host(WorkerRun)                          Subagent seam

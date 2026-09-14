@@ -2,15 +2,10 @@
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
 > 范围:`packages/sandbox/*`(4 包 12 个源文件)+ 消费方 `packages/shell/{bash-sandbox,pwsh-sandbox,tool-bash}`、`packages/fs/{fs-sandbox,tool-fs,tool-str-replace-editor,fs-observation-policy}`、`packages/terminal/terminal-bash`、`packages/interaction/permission-presets` + `packages/e2b/*`(3 包 12 个源文件)
-> 定位:**第七章的深水区补充**,不是重写
 
 ---
 
-## 一、本模块做什么
-
-第七章 [`../07-sandbox.md`](../07-sandbox.md) 已经交代了沙箱的**能力缝构成、策略模型、平台差异、E2B 定位、升级审批总览**。本模块只做一件事:**把那些结论落到函数体**,逐分支、逐字段、逐抛点走查,并补上第七章因篇幅未展开的部分(升级的失败封闭序列、Windows 授权生命周期、E2B 输出捕获、词表外边界)。
-
-一句话分工:
+## 一、按问题索引
 
 | 想知道 | 读 |
 |---|---|
@@ -22,8 +17,6 @@
 | 五个消费方各自在哪一行取策略、在哪一行围栏 | 本模块 [`04-consumers.md`](./04-consumers.md) |
 | E2B 为什么"替换能力缝"、句柄与输出怎么走 | 本模块 [`05-e2b-remote.md`](./05-e2b-remote.md) |
 | 沙箱**做不到**什么、哪些拒绝会被漏判 | 本模块 [`06-limits-and-failure-modes.md`](./06-limits-and-failure-modes.md) |
-
-**本模块引用的行号全部来自上述源文件,格式为 `文件:行号`,可直接跳转核对。**
 
 ---
 
@@ -161,7 +154,7 @@ export interface ConfinedArgv {
 
 ---
 
-## 四、模块清单(行数为实测)
+## 四、模块清单
 
 | 包 / 文件 | 行数 | 角色 |
 |---|---|---|
@@ -187,7 +180,7 @@ export interface ConfinedArgv {
 
 ---
 
-## 五、术语约定(与第七章一致,后续各册直接使用)
+## 五、术语约定
 
 | 术语 | 含义 | 首次定义位置 |
 |---|---|---|
@@ -238,4 +231,4 @@ export async function approveEscalation<A, C>(request: EscalationRequest, approv
 
 ## 声明
 
-本文档集为对公开源码仓库的静态阅读分析,所有结论标注 `文件:行号` 供核对;分析过程未修改仓库任何文件。DeepSeek Harness 的所有权利归其原权利人所有,任何错漏以仓库源码与官方文档为准。
+DeepSeek Harness 的所有权利归其原权利人所有,任何错漏以仓库源码与官方文档为准。

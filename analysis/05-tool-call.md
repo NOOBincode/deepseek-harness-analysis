@@ -2,9 +2,6 @@
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
 > **深入阅读(函数级)**:[`tool-call/`](./tool-call/README.md) —— 注册表与可见性解析、执行管道逐段走查、调度器并发语义、取消与超时、PTC(`run_code`)模式、结果展示层
-> 核心源码:`packages/core/tools/src/`(`index.ts` 1936 行 + `schema.ts` / `json-schema.ts` / `ptc.ts` / `types.ts`)+ `packages/core/agent-loop/src/`(`tool-calls.ts` / `agent.ts`)+ `packages/core/scope/src/store.ts`
-> 扩展点样例:`packages/guard/timeout-policy/src/index.ts`、`packages/guard/repeat-tool-reminder/src/index.ts`
-> 说明:MCP 工具的桥接细节由第六章覆盖,本章只讨论工具机制本身。
 
 ---
 
@@ -187,7 +184,7 @@ flowchart TD
 | 物化与内容终结 | 先物化一次,跑定义自带的内容终结,再物化第二次 | `index.ts:1837`、`index.ts:1639`、`index.ts:1630` |
 | 结果通知 | 冻结执行对象后派发结果通知;通知没有通往结果变更或错误的通道,监听器出错只记一条 warn | `index.ts:1647` |
 
-<details><summary>完整调用树(供逐行核对)</summary>
+<details><summary>完整调用树</summary>
 
 ```text
 createExecution(index.ts:1354)  token / args deepFreeze / 三个 WeakMap 登记
@@ -371,7 +368,7 @@ flowchart TD
 | 等待唤醒 | 条件都不满足就挂起,等新提交或某次执行落定把它叫醒 | `ptc.ts:438` |
 | 收尾复用 | 排空子派发时直接复用同一个通道循环,连正在进行的那次提交也一并等完 | `ptc.ts:448`、`ptc.ts:452` |
 
-<details><summary>完整调用树(供逐行核对)</summary>
+<details><summary>完整调用树</summary>
 
 ```text
 drive() 有序 lane:
