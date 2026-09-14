@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 898.9249999999998 1012" width="898.9249999999998" height="1012" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<g class="block" data-type="alt" data-label="超时">
+  <rect x="140" y="443" width="373.17099999999994" height="264" rx="0" ry="0" fill="none" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="140" y="443" width="64.50999999999999" height="18" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="146" y="452" font-size="11" font-weight="600" fill="var(--_text-sec)" dy="3.8499999999999996">alt [超时]</text>
+  <line x1="140" y1="519" x2="513.1709999999999" y2="519" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+  <text x="148" y="533" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">[结算]</text>
+</g>
+<line class="lifeline" data-actor="M" x1="70" y1="70" x2="70" y2="982" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="T" x1="235.51749999999998" y1="70" x2="235.51749999999998" y2="982" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="J" x1="432.10299999999995" y1="70" x2="432.10299999999995" y2="982" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="P" x1="632.3934999999999" y1="70" x2="632.3934999999999" y2="982" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="O" x1="815.2704999999999" y1="70" x2="815.2704999999999" y2="982" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="M" data-to="T" data-label="subagent{run_in_background: true}" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="70" y1="90" x2="235.51749999999998" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="152.75875" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">subagent{run_in_background: true}</text>
+</g>
+<g class="message" data-from="T" data-to="J" data-label="start({kind:'subagent', owner, run})" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="235.51749999999998" y1="130" x2="432.10299999999995" y2="130" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="333.81025" y="120" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">start({kind:&#39;subagent&#39;, owner, run})</text>
+</g>
+<g class="message" data-from="J" data-to="J" data-label="servesOwner → 参数校验 → ensureOwnerCleanup → 限额" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="432.10299999999995,170 462.10299999999995,170 462.10299999999995,190 432.10299999999995,190" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="470.10299999999995" y="180" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">servesOwner → 参数校验 → ensureOwnerCleanup → 限额</text>
+</g>
+<g class="message" data-from="J" data-to="P" data-label="spec.run() 同步返回 hooks" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="432.10299999999995" y1="240" x2="632.3934999999999" y2="240" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="532.2482499999999" y="230" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">spec.run() 同步返回 hooks</text>
+</g>
+<g class="message" data-from="J" data-to="T" data-label="JobId 'subagent-1'" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="432.10299999999995" y1="280" x2="235.51749999999998" y2="280" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="333.81025" y="270" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">JobId &#39;subagent-1&#39;</text>
+</g>
+<g class="message" data-from="T" data-to="M" data-label="{kind:'background', jobId}" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="235.51749999999998" y1="320" x2="70" y2="320" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="152.75875" y="310" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">{kind:&#39;background&#39;, jobId}</text>
+</g>
+<g class="message" data-from="M" data-to="T" data-label="job_output(job_id, wait:true, timeout_ms)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="70" y1="375" x2="235.51749999999998" y2="375" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="152.75875" y="365" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">job_output(job_id, wait:true, timeout_ms)</text>
+</g>
+<g class="message" data-from="T" data-to="J" data-label="wait(id, min(timeout, cap))" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="235.51749999999998" y1="415" x2="432.10299999999995" y2="415" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="333.81025" y="405" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">wait(id, min(timeout, cap))</text>
+</g>
+<g class="message" data-from="J" data-to="T" data-label="快照(status: running) → 作业仍存活" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="432.10299999999995" y1="483" x2="235.51749999999998" y2="483" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="333.81025" y="473" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">快照(status: running) → 作业仍存活</text>
+</g>
+<g class="message" data-from="J" data-to="J" data-label="settle():first-wins → 释放 waiter → markSettled" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="432.10299999999995,547 462.10299999999995,547 462.10299999999995,567 432.10299999999995,567" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="470.10299999999995" y="557" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">settle():first-wins → 释放 waiter → markSettled</text>
+</g>
+<g class="message" data-from="J" data-to="J" data-label="notifyChanged → listenersFor(owner) → onJobDone" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="432.10299999999995,617 462.10299999999995,617 462.10299999999995,637 432.10299999999995,637" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="470.10299999999995" y="627" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">notifyChanged → listenersFor(owner) → onJobDone</text>
+</g>
+<g class="message" data-from="J" data-to="T" data-label="终态快照" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="432.10299999999995" y1="687" x2="235.51749999999998" y2="687" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="333.81025" y="677" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">终态快照</text>
+</g>
+<g class="message" data-from="T" data-to="J" data-label="read(id) → 增量或最终输出;终态读标记 reported" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="235.51749999999998" y1="727" x2="432.10299999999995" y2="727" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="333.81025" y="717" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">read(id) → 增量或最终输出;终态读标记 reported</text>
+</g>
+<g class="message" data-from="M" data-to="T" data-label="job_kill(job_id)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="70" y1="782" x2="235.51749999999998" y2="782" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="152.75875" y="772" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">job_kill(job_id)</text>
+</g>
+<g class="message" data-from="T" data-to="J" data-label="kill(id)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="235.51749999999998" y1="822" x2="432.10299999999995" y2="822" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="333.81025" y="812" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">kill(id)</text>
+</g>
+<g class="message" data-from="J" data-to="P" data-label="cancel(reason)  ← 同步;抛错则状态不变" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="432.10299999999995" y1="862" x2="632.3934999999999" y2="862" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="532.2482499999999" y="852" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">cancel(reason)  ← 同步;抛错则状态不变</text>
+</g>
+<g class="message" data-from="J" data-to="T" data-label="'requested'(status 已为 stopping,reported=true)" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="432.10299999999995" y1="902" x2="235.51749999999998" y2="902" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="333.81025" y="892" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">&#39;requested&#39;(status 已为 stopping,reported=true)</text>
+</g>
+<g class="message" data-from="P" data-to="J" data-label="done.resolve({status:'killed'})  ← 真正的终态" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="632.3934999999999" y1="942" x2="432.10299999999995" y2="942" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="532.2482499999999" y="932" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">done.resolve({status:&#39;killed&#39;})  ← 真正的终态</text>
+</g>
+<g class="note" data-position="over" data-actors="P">
+  <polygon points="551.2584999999999,328 707.5284999999999,328 713.5284999999999,334 713.5284999999999,351 551.2584999999999,351" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="707.5284999999999,328 713.5284999999999,334 707.5284999999999,334" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="632.3934999999999" y="339.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">执行中(资源由生产者拥有)</text>
+</g>
+<g class="note" data-position="over" data-actors="J,O">
+  <polygon points="381.5777499999999,735 859.7957499999998,735 865.7957499999998,741 865.7957499999998,758 381.5777499999999,758" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="859.7957499999998,735 865.7957499999998,741 859.7957499999998,741" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="623.6867499999998" y="746.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">onJobDone:busy→inject / idle 且预算内→followup(预算重置只在 kind===&#39;user&#39; 的输入被认领时)</text>
+</g>
+<g class="actor" data-id="M" data-label="模型" data-type="participant">
+  <rect x="30" y="30" width="80" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="70" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">模型</text>
+</g>
+<g class="actor" data-id="T" data-label="tool-jobs / tool-subagent" data-type="participant">
+  <rect x="150" y="30" width="171.03499999999997" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="235.51749999999998" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">tool-jobs / tool-subagent</text>
+</g>
+<g class="actor" data-id="J" data-label="LocalJobRegistry" data-type="participant">
+  <rect x="361.03499999999997" y="30" width="142.136" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="432.10299999999995" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">LocalJobRegistry</text>
+</g>
+<g class="actor" data-id="P" data-label="生产者(subagent / bash)" data-type="participant">
+  <rect x="543.1709999999999" y="30" width="178.44499999999996" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="632.3934999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">生产者(subagent / bash)</text>
+</g>
+<g class="actor" data-id="O" data-label="owner Agent" data-type="participant">
+  <rect x="761.6159999999999" y="30" width="107.30900000000001" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="815.2704999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">owner Agent</text>
+</g>
+</svg>

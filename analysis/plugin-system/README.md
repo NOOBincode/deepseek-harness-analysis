@@ -46,6 +46,10 @@ plugin-system : 这些机制如何实现、约束如何被强制、写错会怎�
 
 下面这张图是本模块的总纲:每个框里的名字都在 `vendor/` 里有对应类或函数,括号内是定义位置。
 
+![流程图：README](../assets/diagrams/plugin-system__README-49.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TB
     subgraph CTX["ctx:Context(被代理的对象) —— context.ts:42"]
@@ -84,6 +88,8 @@ flowchart TB
     ST -->|"_unload()"| DISP
     ROOT --> CTX
 ```
+
+</details>
 
 三条读图要点,后续各篇反复用到:
 

@@ -38,6 +38,10 @@ private async prepareScheduledExecution(input: ToolExecutionInput): Promise<Sche
 }
 ```
 
+![时序图：02-execution-pipeline](../assets/diagrams/tool-call__02-execution-pipeline-41.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
   autonumber
@@ -63,6 +67,8 @@ sequenceDiagram
   R-->>S: 冻结的最终结果
   Note over S: commitReady() 按模型序 appendToolResult tool-calls.ts:156
 ```
+
+</details>
 
 **唯一允许重叠的是 `tools/execute` 与 body**;`pre-execute`/`ask`/guard 与 `post-execute`/物化/通知都在调用方的有序槽位里执行(见 [03-scheduler-and-concurrency.md](./03-scheduler-and-concurrency.md) §6.1)。
 

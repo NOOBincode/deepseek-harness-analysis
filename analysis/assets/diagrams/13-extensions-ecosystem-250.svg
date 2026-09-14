@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 690.0049999999999 580" width="690.0049999999999" height="580" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line class="lifeline" data-actor="C" x1="77.7265" y1="70" x2="77.7265" y2="550" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="S" x1="247.63599999999997" y1="70" x2="247.63599999999997" y2="550" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="A" x1="440.51649999999995" y1="70" x2="440.51649999999995" y2="550" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="L" x1="605.6094999999999" y1="70" x2="605.6094999999999" y2="550" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="C" data-to="S" data-label="session/prompt(contentBlocks)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="77.7265" y1="90" x2="247.63599999999997" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="162.68124999999998" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">session/prompt(contentBlocks)</text>
+</g>
+<g class="message" data-from="S" data-to="S" data-label="admitAcpPrompt(校验能力/入参)" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="247.63599999999997,130 277.63599999999997,130 277.63599999999997,150 247.63599999999997,150" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="285.63599999999997" y="140" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">admitAcpPrompt(校验能力/入参)</text>
+</g>
+<g class="message" data-from="S" data-to="A" data-label="agent.followup(userMessage)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="247.63599999999997" y1="200" x2="440.51649999999995" y2="200" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="344.07624999999996" y="190" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">agent.followup(userMessage)</text>
+</g>
+<g class="message" data-from="A" data-to="L" data-label="agent/inbox/spliced" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="440.51649999999995" y1="240" x2="605.6094999999999" y2="240" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="523.0629999999999" y="230" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">agent/inbox/spliced</text>
+</g>
+<g class="message" data-from="A" data-to="S" data-label="agent/inbox/claimed(message, turn) → 绑定 turn" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="440.51649999999995" y1="280" x2="247.63599999999997" y2="280" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="344.07624999999996" y="270" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">agent/inbox/claimed(message, turn) → 绑定 turn</text>
+</g>
+<g class="message" data-from="L" data-to="S" data-label="assistant/message、tool/call、tool/result → session/update" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="605.6094999999999" y1="320" x2="247.63599999999997" y2="320" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="426.62274999999994" y="310" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">assistant/message、tool/call、tool/result → session/update</text>
+</g>
+<g class="message" data-from="L" data-to="S" data-label="turn/end(reason) → 记 endReason" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="605.6094999999999" y1="360" x2="247.63599999999997" y2="360" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="426.62274999999994" y="350" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">turn/end(reason) → 记 endReason</text>
+</g>
+<g class="message" data-from="S" data-to="C" data-label="流式 session/update 通知" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="247.63599999999997" y1="400" x2="77.7265" y2="400" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="162.68124999999998" y="390" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">流式 session/update 通知</text>
+</g>
+<g class="message" data-from="S" data-to="S" data-label="whenIdle + outputTail 排空后结算" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="247.63599999999997,440 277.63599999999997,440 277.63599999999997,460 247.63599999999997,460" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="285.63599999999997" y="450" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">whenIdle + outputTail 排空后结算</text>
+</g>
+<g class="message" data-from="S" data-to="C" data-label="{ stopReason }" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="247.63599999999997" y1="510" x2="77.7265" y2="510" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="162.68124999999998" y="500" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">{ stopReason }</text>
+</g>
+<g class="actor" data-id="C" data-label="ACP Client" data-type="participant">
+  <rect x="30" y="30" width="95.453" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="77.7265" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">ACP Client</text>
+</g>
+<g class="actor" data-id="S" data-label="dsh-acp (AcpSession)" data-type="participant">
+  <rect x="165.45299999999997" y="30" width="164.36599999999999" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="247.63599999999997" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">dsh-acp (AcpSession)</text>
+</g>
+<g class="actor" data-id="A" data-label="Agent / AgentLoop" data-type="participant">
+  <rect x="369.81899999999996" y="30" width="141.39499999999998" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="440.51649999999995" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Agent / AgentLoop</text>
+</g>
+<g class="actor" data-id="L" data-label="Session Log" data-type="participant">
+  <rect x="551.2139999999999" y="30" width="108.79099999999998" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="605.6094999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Session Log</text>
+</g>
+</svg>

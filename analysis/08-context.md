@@ -17,6 +17,10 @@
 
 因此上下文窗口不是全局常量,而是"路由级事实 + 消费者策略"两段式:`contextWindow` 由 LLM adapter 拥有并校验,阈值/保留量/摘要模型/重试次数由 `compaction-basic` 的配置拥有。模型可见 ⟺ 已落日志——`packages/core/agent-loop/src/invariant.ts:40-51` 用可执行断言钉死了这一点。
 
+![流程图：08-context](./assets/diagrams/08-context-20.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   START["turn(): phase.step = 0"] --> CLAIM["inbox.claim(target, turn)<br/>agent.ts:244"]
@@ -55,6 +59,8 @@ flowchart TD
   STOP --> TURNEND["turn/end(turnEnds)<br/>agent.ts:339"]
 ```
 
+</details>
+
 ---
 
 ## 第一节 上下文来源分层
@@ -66,6 +72,19 @@ flowchart TD
 `SystemPrompt` 是一个 Cordis Service(`packages/core/system-prompt/src/index.ts:399`),`section()` / `context()` / `tools()` / `variable()` 四种注册全部走 `ctx.effect()` 语义,注册即返回 disposer。
 
 section 的排序位置**不是插件自选的数字**,而是一张集中持有的表 `SECTION_ORDERS`(`index.ts:121-154`):`HARNESS_IDENTITY: -1000`、工具指引 `TOOL_BASH: 1000` … `TOOL_REPORT: 2900`、`HARNESS_SOURCE: 10000`、`DEPLOYMENT_PERSONA_SUFFIX: 10200`。插件通过 `getSectionOrder('FILE_REFERENCE')` 取值(`context/file-reference-local/src/index.ts:69-73`),仓库因此能插入新序号而不让第一方顺序互相踩踏。渲染按 `order` 升序、同序按名字的**码元序**确定(`index.ts:232-234`),结果与 locale 无关。
+
+```typescript
+// packages/core/system-prompt/src/index.ts:226-234
+/** Code-unit name comparison — locale-independent, so the order is identical on every machine. */
+function compareNames(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0
+}
+
+/** Order prompt sections by their explicit placement, then deterministically by name. */
+function comparePromptSections(a: PromptSection, b: PromptSection): number {
+  return a.order - b.order || compareNames(a.name, b.name)
+}
+```
 
 `renderPrompt()` 逐 section 插值 `{{variable}}`、丢掉空文本、用空行连接(`index.ts:273-278`)。插值是**严格**的:未知变量名、未定义值、`{{}}` 全部抛错(`index.ts:319-356`)——部署写错 persona 模板会当场失败,而不是静默输出残缺提示。
 
@@ -93,6 +112,22 @@ export function renderContextSections(assembly: PromptAssembly): ContextSnapshot
 ### 1.3 层 C:会话消息(唯一真源)
 
 wire 请求的 `messages` **不来自 assembly**,而来自 `session.deriveMessages()`(`agent.ts:603`)。assembly 只是"决定要往日志写什么"的中间产物;真正让文本模型可见的动作是 `session.append('system/message', …)` 与 `session.append('user/message', …)`。`invariant.ts` 用可执行断言把它钉死:每次 `llm/stream` 都要求循环构造的请求 `JSON.stringify(options.messages)` 等于 `session.deriveMessages()`,不等即报 `log-reconstruction desync`(`invariant.ts:40-43`);同时要求 `options.system === undefined`——系统提示只能作为 surface 节点 0 随 `messages` 走(`invariant.ts:45-51`)。
+
+```typescript
+// packages/core/agent-loop/src/invariant.ts:40-54
+const expected = session.deriveMessages()
+if (JSON.stringify(options.messages) !== JSON.stringify(expected)) {
+  fail(`llm request for session "${String(session.id)}" diverges from the dispatch-time durable derivation (log-reconstruction desync)`)
+}
+
+// The system prompt travels inside `messages` as surface node 0, never as `system`.
+const headerMatches = options.model === header.config.model
+  && options.system === undefined
+  // ...(略): 48-51 行继续比对 temperature / maxTokens / stop / tools
+if (!headerMatches) {
+  fail(`llm request for session "${String(session.id)}" diverges from the folded request header`)
+}
+```
 
 ### 1.4 层 D:工具结果追加的 `additionalContexts`
 
@@ -160,6 +195,19 @@ private async preStep(target: InboxTarget, position: { turn: number; step: numbe
 4. **complete section 裁决**——标记 `complete: true` 的 section 多于一个即抛错;若存在,assembly 先跑完瀑布,再把该 section 恢复为**唯一条目**(`index.ts:590-603, 621-626`),瀑布无法增删一个 scope 的完整提示。
 5. **`system-prompt/assemble` 瀑布**——返回的 assembly 是权威值(`index.ts:617-620`)。
 
+第 4 条的"complete section 裁决"就是下面这段:多于一个即抛,物化时记住那唯一一个:
+
+```typescript
+// packages/core/system-prompt/src/index.ts:589-594
+const sectionDefinitions = [...sectionByName.values()].sort(comparePromptSections)
+const completeSections = sectionDefinitions.filter(section => section.complete === true)
+if (completeSections.length > 1) {
+  throw new Error(`multiple complete prompt sections are active: ${completeSections.map(section => JSON.stringify(section.name)).join(', ')}`)
+}
+let completeSection: AssembledSection | undefined
+// ...(略): 595-603 行物化每个 section 的 text,并记住唯一的 complete section
+```
+
 `assembleContextFor()` 是 agent 与 scope 一起设置的唯一入口,避免 agent 级贡献被静默漏掉——它就是 `{ agent, scope: agent, ...signal === undefined ? {} : { signal } }`(`packages/core/agent/src/dispatch.ts:174-176`)。
 
 ### 2.3 runtimeContext.project:去重与失效
@@ -184,6 +232,20 @@ project(current: string, sections: readonly ContextSnapshotSection[]): UserMessa
 
 三个细节:`retained === undefined` 表示"从未有过快照",`null` 表示"有过但当前不保留";构造期从最新事件向前扫描一次恢复该状态,且只认仍在 surface 上的节点(`runtime-context.ts:118-127`)。快照被压缩/裁剪掉时,`isReplacementSurfaceEvent` 且 `sourceEventSeqs` 命中该 seq 就把 `retained` 置回 `null`(`runtime-context.ts:133-137`),下次渲染重新追加。清空的哨兵文本是常量 `CLEARED`:`'Current runtime context: none. Earlier runtime-context snapshots no longer apply.'`(`runtime-context.ts:15`),保证模型不把失效旧快照当成仍有效。
 
+```typescript
+// packages/core/agent-loop/src/runtime-context.ts:129-138
+ctx.on('session/event', (subject, event) => {
+  if (subject !== session) return
+  if (event.type === 'user/message' && isOwned(event.data)) {
+    this.retained = { seq: event.seq, text: textOf(event.data) }
+  } else if (this.retained
+    && isReplacementSurfaceEvent(event)
+    && event.sourceEventSeqs?.includes(this.retained.seq) === true) {
+    this.retained = null
+  }
+})
+```
+
 ### 2.4 agent/pre-step 瀑布
 
 默认实现(链尾)把 claimed 与 context 拼接:`{ kind: 'enter', messages: context === undefined ? claimed : [...claimed, context] }`(`agent.ts:251-254`)。**context 排在 claimed 之后**——用户直接输入在前、系统动态快照在后。
@@ -198,6 +260,23 @@ project(current: string, sections: readonly ContextSnapshotSection[]): UserMessa
 
 `assembly` 随 `PreparedStep` 一起进入 `step()`(`agent.ts:53-60, 358`),这是**一次组装、多次尝试**的实现方式:重试循环里 `renderPrompt(assembly)` 只算一次(`agent.ts:359`),`assemble()` 与 `agent/pre-step` 都不会因一次重试而重跑。
 
+```typescript
+// packages/core/agent-loop/src/agent.ts:358-378
+const { assembly } = decision
+const renderedPrompt = renderPrompt(assembly)
+let firstAttempt = true
+while (true) {
+  const { config, preparedCall } = await this.prepareRequest(turn, step, signal)
+  const startsRequestSeries = firstAttempt && decision.startsRequestSeries === true
+  // ...(略): 366-372 行由 project() 的提交决定 system/message 的新增或替换
+  if (firstAttempt) {
+    for (const message of decision.messages) {
+      this.session.append('user/message', message, { surfaceOp: 'append' })
+    }
+  }
+  firstAttempt = false
+```
+
 ---
 
 ## 第三节 token 预算与 contextWindow 感知
@@ -206,15 +285,50 @@ project(current: string, sections: readonly ContextSnapshotSection[]): UserMessa
 
 `token-meter` 是**无配置**服务——构造时校验配置对象必须为空,任何键都抛错(`packages/llm/token-meter/src/index.ts:86-91`)。计量启发式集中在一个纯函数模块里:`CHARS_PER_TOKEN = 4`(文本密度)、`BLOCK_OVERHEAD = 4`(每块的 JSON 结构开销)、`ROLE_OVERHEAD = 4`(每条消息的 role 框架开销,导出供其他消费者复用)(`packages/llm/token-meter/src/estimate.ts:12-19`)。
 
+```typescript
+// packages/llm/token-meter/src/estimate.ts:12-19
+/** Fixed text-density estimate used until exact tokenization is needed. */
+const CHARS_PER_TOKEN = 4
+
+/** Per-block structural overhead for JSON framing and type tags. */
+const BLOCK_OVERHEAD = 4
+
+/** Role-field framing overhead added to every priced message. */
+export const ROLE_OVERHEAD = 4
+```
+
 `estimateContent()` 按 block 类型分支:文本与推理块收 `ceil(len/4) + 4`;工具调用收名字与参数字符数;工具结果递归;merge 扩展出的未知块(含图片引用)退化为 `BLOCK_OVERHEAD + ceil(JSON.stringify(block).length / 4)` 的结构价(`estimate.ts:37-61`)。工具 schema 有独立入口 `estimateToolsTokens()`(`estimate.ts:97-100`)。计量器**不知道** `contextWindow`,也不维护模型档案——Agent Note 的理由是:"Removing global capacity keeps measurement reusable when compaction-basic is absent"。
 
 ### 3.2 measure():anchor + 有符号增量
 
 `measure(session, requestHeader?)`(`token-meter/src/index.ts:145-190`)返回冻结的 `TokenMeasurement`,核心是三元组:`baseline` 是最近一次成功请求的锚点——若该请求报了 provider usage **且**其总量不低于同一路由下的完整启发式价,就用真实 usage(`{ kind: 'usage' }`),否则用启发式;`surfaceDeltaTokens` 是当前 surface 相对锚点 surface 的有符号差值;`totalTokens = max(0, baseline.tokens + surfaceDeltaTokens)`。锚点在折叠 `assistant/message` 时建立,记录**该消息落盘之前**的 surface 快照与本次输出价(`index.ts:279-308`),于是"provider 报的 prompt 用量"与"此后新增/替换的节点"能相加减——包括压缩造成的负增量。
 
+```typescript
+// packages/llm/token-meter/src/index.ts:182-189
+return deepFreeze(structuredClone({
+  logRevision: state.consumedEvents,
+  baseline,
+  surfaceDeltaTokens,
+  totalTokens: Math.max(0, baseline.tokens + surfaceDeltaTokens),
+  surfaceTokens: surface.surfaceTokens,
+  nodes: surface.nodes,
+}))
+```
+
 ### 3.3 contextWindow 的归属与消费
 
 `contextWindow` 的唯一权威来源是 LLM adapter:契约是 `LlmModelContext`(`packages/llm/llm/src/types.ts:314-318`),`resolveModelInfo()` 校验它必须是正整数,否则抛 `INVALID_MODEL_CONTEXT`(`packages/llm/llm/src/index.ts:767-773`)。查询独立于 `listModels()`,未列出的动态模型也可以有容量元数据。
+
+```typescript
+// packages/llm/llm/src/index.ts:767-773
+const context = resolved.context
+if (context !== undefined && (!Number.isInteger(context.contextWindow) || context.contextWindow <= 0)) {
+  throw new LlmError(
+    `adapter returned invalid context metadata for provider "${provider}" model "${model}"`,
+    'INVALID_MODEL_CONTEXT',
+  )
+}
+```
 
 | 消费者 | 位置 | 用途 |
 |---|---|---|
@@ -253,6 +367,20 @@ const previousContext = session.requestContext()
 
 `contextPressure` 投影(`usage-projection.ts:173-218`)的 JSDoc 解释了这个设计:`pressureTokens` 只含 prompt 侧,流式输出期间不动;因为只有请求才报 usage,它**看不见压缩**;所以折叠额外维护一个 surface 总量,发布 `projectedTokens = max(0, pressureTokens + surfaceTokens - sampledSurfaceTokens)`,回答的是"下一次请求的占用"而非"上一次的占用"。该总量走 `foldSurfaceProjection`,状态保持 O(1),替换会用已记录的 shadow price 直接冲减。
 
+```typescript
+// packages/llm/token-meter/src/usage-projection.ts:192-201
+const usage = usageOf(event)
+if (usage !== undefined) {
+  const pressureTokens = pressureFrom(usage)
+  if (pressureTokens !== next.pressureTokens || next.sampledSurfaceTokens !== next.surfaceTokens) {
+    next = { ...next, pressureTokens, sampledSurfaceTokens: next.surfaceTokens }
+  }
+}
+if (fold.deltaTokens !== 0) {
+  next = { ...next, surfaceTokens: next.surfaceTokens + fold.deltaTokens }
+}
+```
+
 ---
 
 ## 第四节 compaction:触发、执行与落日志
@@ -282,6 +410,20 @@ return next()
 
 **溢出触发器**挂在 `agent/request-error` 上,只在 provider 确认 `CONTEXT_WINDOW_EXCEEDED` 时介入(`index.ts:184`)。重试上限按目标策略解析(`policy.maxOverflowRetries`),并用 `surface.replaceGeneration` 做**进度证明**(`index.ts:218-223`):信号已中止、或 `agent.session.surface.replaceGeneration` 相对进入前的快照没有增长,就直接 `return next()`;否则记录溢出重试次数并返回 `{ kind: 'retry' }`。`replaceGeneration` 没涨说明本次压缩**没有产生任何持久缩减**,于是保留原始 provider 错误,而不是无限重试。异常路径同理:摘要阶段失败但此前已有落地的无模型裁剪,也算作进度并重试一次(`index.ts:196-209`)。
 
+```typescript
+// packages/compaction/compaction-basic/src/index.ts:184-223
+if (failure.code !== CONTEXT_WINDOW_EXCEEDED_CODE || signal.aborted) return next()
+// ...(略): 185-190 行记录 overflowAgents、解析路由目标与 maxOverflowRetries 上限
+const generation = agent.session.surface.replaceGeneration
+let result: CompactionResult | null
+// ...(略): 194-217 行调用 compactIfNeeded,异常路径用 replaceGeneration 增长证明进度
+// oxlint-disable-next-line typescript/no-unnecessary-condition -- the signal can abort while compaction is awaited.
+if (signal.aborted
+  || agent.session.surface.replaceGeneration <= generation) return next()
+this.overflowRetries.set(agent, retries + 1)
+return { kind: 'retry' }
+```
+
 ### 4.2 阈值解析:每次检查都重算
 
 `resolveCompactSpec()` 把比例折算成绝对 token 预算(`compaction-basic/src/config.ts:133-167`):
@@ -308,6 +450,20 @@ if (retainTokens >= thresholdTokens) {
 ### 4.3 区间选择:保留尾部 + 不切断工具对
 
 `selectCompactableRange()`(`compaction-basic/src/region.ts:117-155`)做三件事:先对齐 surface(计量节点序列必须与 `session.surface.nodes` 逐位相同,否则抛错,防止用过期计量裁当前历史);再从尾部倒推累加节点价,直到累计 ≥ `retainTokens` 得到 `keepFromIdx`;最后在左移边界时要求工具对平衡。
+
+```typescript
+// packages/compaction/compaction-basic/src/region.ts:122-131
+const pricedNodes = measurement.nodes
+if (pricedNodes.length === 0) return null
+
+const surfaceNodes = session.surface.nodes
+if (surfaceNodes.length !== pricedNodes.length
+  || surfaceNodes.some((seq, index) => seq !== pricedNodes[index]?.seq)) {
+  throw new Error('compaction: token-meter surface does not match the current session surface')
+}
+// oxlint-disable-next-line typescript/no-non-null-assertion
+const firstIdx = systemHead(session, surfaceNodes[0]!) === undefined ? 0 : 1
+```
 
 ```typescript
 // packages/compaction/compaction-basic/src/region.ts:143-148
@@ -351,6 +507,21 @@ session.append('user/message', checkpointMessage, {
 
 `shadowedSeqs` 把被遮蔽的每个 seq 写进 `sourceEventSeqs`,于是重放、UI、引用投影都能追溯"这条摘要吞掉了什么";checkpoint 的 source 由 `compactCheckpointSource(compactionId, sourceCommandId)` 构造(`region.ts:395-398`),跨 backend 可识别。计量侧靠同一套协议:每条事件在 `planSurfaceTokens` 算出 `deltaTokens`(append 为 `+价`,replace 为 `新价 − 被替换区间价`),再由 `commitSurfaceTokens` 原地应用(`token-meter/src/surface-fold.ts:112-147`)——**计划先于提交,提交不可失败**,所以不存在"半应用"的 surface。
 
+```typescript
+// packages/llm/token-meter/src/surface-fold.ts:122-132
+const startIdx = nodes.findIndex(candidate => candidate.seq === op.startSeq)
+const endIdx = nodes.findIndex(candidate => candidate.seq === op.endSeq)
+if (startIdx === -1 || endIdx === -1 || startIdx > endIdx) {
+  throw new Error(
+    `token surface: replace at seq ${event.seq} has invalid current range ${op.startSeq}-${op.endSeq}`,
+  )
+}
+const removed = nodes
+  .slice(startIdx, endIdx + 1)
+  .reduce((total, candidate) => total + candidate.heuristicTokens, 0)
+return { tokens, deltaTokens: tokens - removed, node, target: { startIdx, endIdx } }
+```
+
 `tool-result-pruner` 是这套协议的最佳示范:它不依赖 `compaction-basic`,自己在 `tool/result` 上做无模型裁剪,并严格遵守"定价事件与被替换节点同步相邻"的约定(`compaction/compaction-tool-result-pruner/src/index.ts:160-174`):
 
 ```typescript
@@ -383,6 +554,17 @@ if (turnEnds === null || turnEnds.kind !== 'max-tokens') turnEnds = stepEnd
 ```
 
 `step()` 的返回类型是 `StepEndReason | null`(`agent.ts:51`),只可能是 `completed`、`max-tokens` 或"还要继续"。判定点很直接:流结束时 `finish.kind === 'max-tokens'` 就返回 `{ kind: 'max-tokens' }`(`agent.ts:484`),而且**在**追加工具结果之前——被截断的输出不执行工具。
+
+```typescript
+// packages/core/agent-loop/src/agent.ts:481-487
+stream: live.stream,
+}, { surfaceOp: 'append' }).seq,
+)
+if (finish.kind === 'max-tokens') return { kind: 'max-tokens' }
+
+const toolCalls = message.content.filter(block => block.type === 'tool-call')
+if (toolCalls.length === 0) return { kind: 'completed' }
+```
 
 回合级结论另有三类:`blocked`(`preStep` 返回 reject,`agent.ts:290-292`)、`error`(`LlmError` 保留结构化 failure,其他错误压成 `errorChain` 文本 + `UNKNOWN`,`agent.ts:328-334`)、`aborted`(`agent.ts:323-325`)。
 

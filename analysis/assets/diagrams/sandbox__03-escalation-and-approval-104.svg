@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1230.1118333333332 1605.1239999999998" width="1230.1118333333332" height="1605.1239999999998" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="185.6108333333334,93.80000000000001 185.61083333333337,133.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="X1" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="143.6206666666667,343.7508333333333 143.6206666666667,862.1709999999999 125.81250000000003,862.1709999999999 125.8125,934.4709999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="227.60100000000003,343.75083333333333 227.60100000000003,397.741 354.18550000000005,397.741 354.18550000000005,470.041" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="X2" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="314.6653333333334,667.6418333333334 314.6653333333334,955.9709999999999 282.4969583333334,955.9709999999999 282.4969583333334,1028.271" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="393.70566666666673,667.6418333333332 393.70566666666673,719.1619999999999 548.6609583333334,719.1619999999999 548.6609583333334,791.462" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="X3" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="513.0927916666667,969.3028333333333 513.0927916666667,1077.1709999999998 363.9662083333334,1077.1709999999998 363.9662083333334,1298.1239999999996" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="584.229125,969.3028333333332 584.229125,1016.8709999999999 733.3557083333333,1016.8709999999999 733.3557083333332,1089.1709999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="X4" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="promise rejected" points="656.3395416666666,1126.071 656.3395416666666,1302.7239999999997 603.0524583333332,1302.7239999999997 603.0524583333332,1375.0239999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="resolve" points="810.3718749999998,1126.071 810.3718749999998,1154.071 863.6589583333332,1154.071 863.6589583333332,1226.3709999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="allowed-once" points="813.2707083333332,1377.5357499999998 813.2707083333332,1439.9239999999998 505.56933333333325,1439.9239999999998 505.56933333333325,1520.2239999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="X5" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="rejected / cancelled / unavailable" points="863.6589583333332,1427.9239999999998 863.6589583333332,1455.9239999999998 747.8773333333332,1455.9239999999998 747.8773333333332,1520.2239999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="X6" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="default" points="914.0472083333332,1377.5357499999998 914.0472083333332,1439.9239999999998 1029.828833333333,1439.9239999999998 1029.828833333333,1520.2239999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="B" data-to="X1" data-label="否">
+  <rect x="110.81250000000003" y="869.1709999999999" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="125.57750000000003" y="884.3209999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="edge-label" data-from="B" data-to="C" data-label="是">
+  <rect x="339.18550000000005" y="404.741" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="353.95050000000003" y="419.89099999999996" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="C" data-to="X2" data-label="是">
+  <rect x="267.4969583333334" y="962.9709999999999" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="282.2619583333334" y="978.1209999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="C" data-to="D" data-label="否">
+  <rect x="533.6609583333334" y="726.1619999999999" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="548.4259583333334" y="741.3119999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="edge-label" data-from="D" data-to="X3" data-label="是">
+  <rect x="348.9662083333334" y="1232.8239999999996" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="363.73120833333337" y="1247.9739999999997" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="D" data-to="E" data-label="否">
+  <rect x="718.3557083333333" y="1023.871" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="733.1207083333333" y="1039.021" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="edge-label" data-from="E" data-to="X4" data-label="promise rejected">
+  <rect x="554.5524583333332" y="1309.7239999999997" width="96.65200000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="602.8784583333332" y="1324.8739999999998" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">promise rejected</text>
+</g>
+<g class="edge-label" data-from="E" data-to="F" data-label="resolve">
+  <rect x="836.1589583333332" y="1161.071" width="54.478" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="863.3979583333332" y="1176.221" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">resolve</text>
+</g>
+<g class="edge-label" data-from="F" data-to="G" data-label="allowed-once">
+  <rect x="465.06933333333325" y="1446.9239999999998" width="80.02000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="505.07933333333324" y="1462.0739999999998" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">allowed-once</text>
+</g>
+<g class="edge-label" data-from="F" data-to="X5" data-label="rejected / cancelled / unavailable">
+  <rect x="662.3773333333332" y="1462.9239999999998" width="170.902" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="747.8283333333333" y="1478.0739999999998" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">rejected / cancelled / unavailable</text>
+</g>
+<g class="edge-label" data-from="F" data-to="X6" data-label="default">
+  <rect x="1005.3288333333333" y="1446.9239999999998" width="48.53800000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1029.5978333333333" y="1462.0739999999998" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">default</text>
+</g>
+<g class="node" data-id="A" data-label="approveEscalation(request, approval)
+escalation.ts:157" data-shape="rectangle">
+  <rect x="52.374333333333425" y="40" width="266.47299999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="185.6108333333334" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="185.6108333333334" dy="-3.9000000000000012">approveEscalation(request, approval)</tspan><tspan x="185.6108333333334" dy="16.900000000000002">escalation.ts:157</tspan></text>
+</g>
+<g class="node" data-id="B" data-label="(effectiveMode → mode) ∈ W? :162" data-shape="diamond">
+  <polygon points="185.61083333333337,133.79999999999998 311.58133333333336,259.77049999999997 185.61083333333337,385.741 59.64033333333339,259.77049999999997" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="185.61083333333337" y="259.77049999999997" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">(effectiveMode → mode) ∈ W? :162</text>
+</g>
+<g class="node" data-id="X1" data-label="throw not strictly wider
+★ 永不弹窗" data-shape="rectangle">
+  <rect x="40" y="934.4709999999999" width="171.625" height="53.800000000000004" rx="0" ry="0" fill="#fee" stroke="#a88" stroke-width="0.75" />
+  <text x="125.8125" y="961.3709999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="125.8125" dy="-3.9000000000000012">throw not strictly wider</tspan><tspan x="125.8125" dy="16.900000000000002">★ 永不弹窗</tspan></text>
+</g>
+<g class="node" data-id="C" data-label="approver === undefined? :165" data-shape="diamond">
+  <polygon points="354.18550000000005,470.041 472.74600000000004,588.6015 354.18550000000005,707.1619999999999 235.62500000000006,588.6015" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="354.18550000000005" y="588.6015" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">approver === undefined? :165</text>
+</g>
+<g class="node" data-id="X2" data-label="throw no approval service is composed" data-shape="rectangle">
+  <rect x="147.03745833333338" y="1028.271" width="270.919" height="36.900000000000006" rx="0" ry="0" fill="#fee" stroke="#a88" stroke-width="0.75" />
+  <text x="282.4969583333334" y="1046.721" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">throw no approval service is composed</text>
+</g>
+<g class="node" data-id="D" data-label="agent === undefined? :168" data-shape="diamond">
+  <polygon points="548.6609583333333,791.4619999999999 655.3654583333332,898.1664999999998 548.6609583333333,1004.8709999999998 441.9564583333333,898.1664999999998" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="548.6609583333333" y="898.1664999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">agent === undefined? :168</text>
+</g>
+<g class="node" data-id="X3" data-label="throw no agent to route it through" data-shape="rectangle">
+  <rect x="249.62520833333343" y="1298.1239999999996" width="228.68199999999996" height="36.900000000000006" rx="0" ry="0" fill="#fee" stroke="#a88" stroke-width="0.75" />
+  <text x="363.9662083333334" y="1316.5739999999996" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">throw no agent to route it through</text>
+</g>
+<g class="node" data-id="E" data-label="await approver.request({agent, toolName, callId, reason, signal?}) :173-179" data-shape="rectangle">
+  <rect x="502.30720833333334" y="1089.1709999999998" width="462.0969999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="733.3557083333332" y="1107.6209999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">await approver.request({agent, toolName, callId, reason, signal?}) :173-179</text>
+</g>
+<g class="node" data-id="X4" data-label="rejection 原样向上传播,不进入 switch" data-shape="rectangle">
+  <rect x="467.2224583333333" y="1375.0239999999997" width="271.65999999999997" height="36.900000000000006" rx="0" ry="0" fill="#fee" stroke="#a88" stroke-width="0.75" />
+  <text x="603.0524583333333" y="1393.4739999999997" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">rejection 原样向上传播,不进入 switch</text>
+</g>
+<g class="node" data-id="F" data-label="EscalationOutcome :180" data-shape="diamond">
+  <polygon points="863.6589583333332,1226.3709999999999 964.4354583333331,1327.1474999999998 863.6589583333332,1427.9239999999998 762.8824583333333,1327.1474999999998" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="863.6589583333332" y="1327.1474999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">EscalationOutcome :180</text>
+</g>
+<g class="node" data-id="G" data-label="return mode as SandboxMode :183" data-shape="rectangle">
+  <rect x="384.92983333333325" y="1520.2239999999997" width="241.27899999999997" height="36.900000000000006" rx="0" ry="0" fill="#efe" stroke="#8a8" stroke-width="0.75" />
+  <text x="505.56933333333325" y="1538.6739999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">return mode as SandboxMode :183</text>
+</g>
+<g class="node" data-id="X5" data-label="各自文案的 throw :184-186" data-shape="rectangle">
+  <rect x="650.2088333333332" y="1520.2239999999997" width="195.337" height="36.900000000000006" rx="0" ry="0" fill="#fee" stroke="#a88" stroke-width="0.75" />
+  <text x="747.8773333333332" y="1538.6739999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">各自文案的 throw :184-186</text>
+</g>
+<g class="node" data-id="X6" data-label="assertNever(outcome, 'EscalationOutcome') :187" data-shape="rectangle">
+  <rect x="869.5458333333332" y="1520.2239999999997" width="320.56599999999986" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1029.8288333333333" y="1538.6739999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">assertNever(outcome, &#39;EscalationOutcome&#39;) :187</text>
+</g>
+</svg>

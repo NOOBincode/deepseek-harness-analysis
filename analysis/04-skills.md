@@ -18,6 +18,10 @@ DSH 的 Skill 系统是**一条"提示级"能力缝(capability seam),而不是�
 3. **模型可见性走会话消息,不走 system prompt**。目录是 `agent/pre-step` 瀑布注入的 durable user 消息(source kind `skill-catalog`),随 step 落 `user/message` 会话事件——满足仓库"模型可见 ⟺ 已落日志"的不变式,但完全不经过 `systemPrompt.assemble()` 的 section 体系。
 4. **注册表是 host+per-scope 分层**(与 tools 注册表同构):preset 里挂载的 provider 落在该 preset 的层,agent 读的是全局层 + 自己作用域链的合并视图。
 
+![流程图：04-skills](./assets/diagrams/04-skills-21.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   subgraph 发现层
@@ -40,6 +44,8 @@ flowchart TD
     K --> L["文本回流模型(工具结果 / 注入消息)"]
   end
 ```
+
+</details>
 
 ---
 

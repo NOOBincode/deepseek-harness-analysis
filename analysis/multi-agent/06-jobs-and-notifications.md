@@ -383,6 +383,10 @@ async function settleStart(start: Promise<SubagentRun>, signal: AbortSignal): Pr
 
 调度判据是 `request.run_in_background ?? options.continuable`(`tool-subagent/src/index.ts:303`)——**one-shot 默认前台,continuable 默认后台**。续存路线**不**经过 jobs:它返回一个 `subagentId`,由 [04](./04-continuation-and-control.md) 的续存机制接管。
 
+![时序图：06-jobs-and-notifications](../assets/diagrams/multi-agent__06-jobs-and-notifications-386.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -416,6 +420,8 @@ sequenceDiagram
     J-->>T: 'requested'(status 已为 stopping,reported=true)
     P-->>J: done.resolve({status:'killed'})  ← 真正的终态
 ```
+
+</details>
 
 ---
 

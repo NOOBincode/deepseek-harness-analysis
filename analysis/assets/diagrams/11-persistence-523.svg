@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1071.096 742" width="1071.096" height="742" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<g class="block" data-type="alt" data-label="源版本 &lt; 当前版本">
+  <rect x="30" y="258" width="439.12" height="154" rx="0" ry="0" fill="none" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="30" y="258" width="141.07000000000002" height="18" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="36" y="267" font-size="11" font-weight="600" fill="var(--_text-sec)" dy="3.8499999999999996">alt [源版本 &lt; 当前版本]</text>
+  <line x1="30" y1="356" x2="469.12" y2="356" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+  <text x="38" y="370" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">[源版本 &gt; 当前版本]</text>
+</g>
+<line class="lifeline" data-actor="L" x1="125.51749999999998" y1="70" x2="125.51749999999998" y2="712" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="P" x1="355.0775" y1="70" x2="355.0775" y2="712" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="R" x1="595.0115" y1="70" x2="595.0115" y2="712" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="S" x1="799.3774999999999" y1="70" x2="799.3774999999999" y2="712" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="A" x1="974.4739999999999" y1="70" x2="974.4739999999999" y2="712" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="L" data-to="P" data-label="open(id,'write') —— 先取写所有权" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="125.51749999999998" y1="90" x2="355.0775" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="240.29749999999999" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">open(id,&#39;write&#39;) —— 先取写所有权</text>
+</g>
+<g class="message" data-from="P" data-to="P" data-label="SessionWriteLease.acquire() 内核租约" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="355.0775,130 385.0775,130 385.0775,150 355.0775,150" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="393.0775" y="140" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">SessionWriteLease.acquire() 内核租约</text>
+</g>
+<g class="message" data-from="P" data-to="P" data-label="findLog → 最高 canonical 世代" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="355.0775,200 385.0775,200 385.0775,220 355.0775,220" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="393.0775" y="210" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">findLog → 最高 canonical 世代</text>
+</g>
+<g class="message" data-from="P" data-to="P" data-label="迁移 → 隔离线程验证 → 原子发布新世代" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="355.0775,298 385.0775,298 385.0775,318 355.0775,318" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="393.0775" y="308" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">迁移 → 隔离线程验证 → 原子发布新世代</text>
+</g>
+<g class="message" data-from="P" data-to="L" data-label="SessionFormatUnsupportedError(提示升级)" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="355.0775" y1="392" x2="125.51749999999998" y2="392" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="240.29749999999999" y="382" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">SessionFormatUnsupportedError(提示升级)</text>
+</g>
+<g class="message" data-from="L" data-to="P" data-label="handle.read(0)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="125.51749999999998" y1="432" x2="355.0775" y2="432" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="240.29749999999999" y="422" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">handle.read(0)</text>
+</g>
+<g class="message" data-from="P" data-to="R" data-label="完整行扫描 / 拼接帧扫描" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="355.0775" y1="472" x2="595.0115" y2="472" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="475.04449999999997" y="462" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">完整行扫描 / 拼接帧扫描</text>
+</g>
+<g class="message" data-from="R" data-to="L" data-label="连续前缀 + tornTruncateTo + recoveredTail" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="595.0115" y1="512" x2="125.51749999999998" y2="512" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="360.2645" y="502" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">连续前缀 + tornTruncateTo + recoveredTail</text>
+</g>
+<g class="message" data-from="L" data-to="S" data-label="sessions.prepare(id,{seed,meta,…}) → Session.fromRestore" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="125.51749999999998" y1="552" x2="799.3774999999999" y2="552" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="462.4475" y="542" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">sessions.prepare(id,{seed,meta,…}) → Session.fromRestore</text>
+</g>
+<g class="message" data-from="L" data-to="P" data-label="handle.append(interruptedTurnClosers(events))" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="125.51749999999998" y1="592" x2="355.0775" y2="592" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="240.29749999999999" y="582" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">handle.append(interruptedTurnClosers(events))</text>
+</g>
+<g class="message" data-from="L" data-to="A" data-label="setupAndPublish(…,'resume')" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="125.51749999999998" y1="632" x2="974.4739999999999" y2="632" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="549.9957499999999" y="622" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">setupAndPublish(…,&#39;resume&#39;)</text>
+</g>
+<g class="message" data-from="A" data-to="S" data-label="append('request/header',{ reason:'resume' })" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="974.4739999999999" y1="672" x2="799.3774999999999" y2="672" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="886.9257499999999" y="662" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">append(&#39;request/header&#39;,{ reason:&#39;resume&#39; })</text>
+</g>
+<g class="actor" data-id="L" data-label="AgentLoop.resumeWith" data-type="participant">
+  <rect x="40" y="30" width="171.03499999999997" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="125.51749999999998" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">AgentLoop.resumeWith</text>
+</g>
+<g class="actor" data-id="P" data-label="sessionPersistence (JSONL)" data-type="participant">
+  <rect x="251.035" y="30" width="208.08499999999998" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="355.0775" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">sessionPersistence (JSONL)</text>
+</g>
+<g class="actor" data-id="R" data-label="SessionLogScanner / zstd" data-type="participant">
+  <rect x="499.11999999999995" y="30" width="191.783" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="595.0115" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">SessionLogScanner / zstd</text>
+</g>
+<g class="actor" data-id="S" data-label="Session (内存态)" data-type="participant">
+  <rect x="730.9029999999999" y="30" width="136.949" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="799.3774999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Session (内存态)</text>
+</g>
+<g class="actor" data-id="A" data-label="ReactLoopAgent" data-type="participant">
+  <rect x="907.852" y="30" width="133.244" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="974.4739999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">ReactLoopAgent</text>
+</g>
+</svg>

@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1047.4479999999999 491.654761904762" width="1047.4479999999999" height="491.654761904762" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="V" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="224.96299999999997,230.25476190476195 242.96299999999997,230.25476190476195 242.96299999999997,191.35476190476194 260.963,191.35476190476194" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="V" data-to="S" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="224.96299999999997,230.25476190476195 242.96299999999997,230.25476190476195 242.96299999999997,66.9 516.753,66.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="V" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="224.96299999999997,230.25476190476195 242.96299999999997,230.25476190476195 242.96299999999997,269.1547619047619 470.66,269.1547619047619" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="V" data-to="W" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="224.96299999999997,230.25476190476195 242.96299999999997,230.25476190476195 242.96299999999997,424.75476190476195 260.963,424.75476190476195" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="V" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="224.96299999999997,230.25476190476195 242.96299999999997,230.25476190476195 242.96299999999997,112.76666666666668 768.982,112.76666666666668" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="RE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="427.40100000000007,191.35476190476192 470.66,191.35476190476192" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="RE" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="728.241,191.35476190476194 748.6115,191.35476190476194 748.6115,112.76666666666668 768.982,112.76666666666668" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="RE" data-to="DB" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="728.241,191.35476190476194 748.6115,191.35476190476194 748.6115,191.35476190476194 768.982,191.35476190476194" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="RE" data-to="PE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="728.241,191.35476190476194 748.6115,191.35476190476194 748.6115,269.1547619047619 768.982,269.1547619047619" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="V" data-to="R" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="224.96299999999997,230.25476190476195 242.96299999999997,230.25476190476195 242.96299999999997,346.95476190476194 260.96299999999997,346.95476190476194" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="V" data-label="view(scope) index.ts:1142" data-shape="rectangle">
+  <rect x="40" y="211.80476190476196" width="184.96299999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="132.48149999999998" y="230.25476190476195" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">view(scope) index.ts:1142</text>
+</g>
+<g class="node" data-id="G" data-label="get(name, scope) :1194
+visible.get(name)" data-shape="rectangle">
+  <rect x="260.963" y="164.45476190476194" width="166.43800000000005" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="344.182" y="191.35476190476194" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="344.182" dy="-3.9000000000000012">get(name, scope) :1194</tspan><tspan x="344.182" dy="16.900000000000002">visible.get(name)</tspan></text>
+</g>
+<g class="node" data-id="S" data-label="schemas(scope) :1224
+visible → schemaOf(def, true)" data-shape="rectangle">
+  <rect x="516.753" y="40" width="204.22899999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="618.8675000000001" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="618.8675000000001" dy="-3.9000000000000012">schemas(scope) :1224</tspan><tspan x="618.8675000000001" dy="16.900000000000002">visible → schemaOf(def, true)</tspan></text>
+</g>
+<g class="node" data-id="K" data-label="sdkSchemas(scope) :1229
+visible(去 run_code) + output.schema" data-shape="rectangle">
+  <rect x="470.66" y="242.25476190476195" width="259.063" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="600.1915" y="269.1547619047619" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="600.1915" dy="-3.9000000000000012">sdkSchemas(scope) :1229</tspan><tspan x="600.1915" dy="16.900000000000002">visible(去 run_code) + output.schema</tspan></text>
+</g>
+<g class="node" data-id="W" data-label="wireSchemas(scope) :972
+native/ptc/both 三态投影" data-shape="rectangle">
+  <rect x="260.963" y="397.854761904762" width="193.855" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="357.89050000000003" y="424.75476190476195" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="357.89050000000003" dy="-3.9000000000000012">wireSchemas(scope) :972</tspan><tspan x="357.89050000000003" dy="16.900000000000002">native/ptc/both 三态投影</tspan></text>
+</g>
+<g class="node" data-id="E" data-label="executionMode(exec) :1266
+resolveExecution → get + collapses" data-shape="rectangle">
+  <rect x="768.982" y="85.86666666666667" width="246.46599999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="892.2149999999999" y="112.76666666666668" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="892.2149999999999" dy="-3.9000000000000012">executionMode(exec) :1266</tspan><tspan x="892.2149999999999" dy="16.900000000000002">resolveExecution → get + collapses</tspan></text>
+</g>
+<g class="node" data-id="RE" data-label="resolveExecution :1211
+再加 collapses(name, scope, nested)" data-shape="rectangle">
+  <rect x="470.66" y="164.45476190476194" width="257.5809999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="599.4504999999999" y="191.35476190476194" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="599.4504999999999" dy="-3.9000000000000012">resolveExecution :1211</tspan><tspan x="599.4504999999999" dy="16.900000000000002">再加 collapses(name, scope, nested)</tspan></text>
+</g>
+<g class="node" data-id="DB" data-label="dispatchToolBody :1536
+body 前的再解析" data-shape="rectangle">
+  <rect x="768.982" y="164.45476190476194" width="180.517" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="859.2405" y="191.35476190476194" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="859.2405" dy="-3.9000000000000012">dispatchToolBody :1536</tspan><tspan x="859.2405" dy="16.900000000000002">body 前的再解析</tspan></text>
+</g>
+<g class="node" data-id="PE" data-label="postExecute :1758
+value 替换时重解析" data-shape="rectangle">
+  <rect x="768.982" y="242.25476190476195" width="165.697" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="851.8305" y="269.1547619047619" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="851.8305" dy="-3.9000000000000012">postExecute :1758</tspan><tspan x="851.8305" dy="16.900000000000002">value 替换时重解析</tspan></text>
+</g>
+<g class="node" data-id="R" data-label="restrict(filter) :1078
+读 restrictableNames" data-shape="rectangle">
+  <rect x="260.96299999999997" y="320.05476190476196" width="167.17899999999997" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="344.55249999999995" y="346.95476190476194" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="344.55249999999995" dy="-3.9000000000000012">restrict(filter) :1078</tspan><tspan x="344.55249999999995" dy="16.900000000000002">读 restrictableNames</tspan></text>
+</g>
+</svg>

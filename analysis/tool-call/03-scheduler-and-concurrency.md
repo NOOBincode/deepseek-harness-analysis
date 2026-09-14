@@ -22,6 +22,10 @@ executeToolCalls()                                   tool-calls.ts:60
   └─ executionMode()                                 index.ts:1266  分类,只在注册表侧决定
 ```
 
+![流程图：03-scheduler-and-concurrency](../assets/diagrams/tool-call__03-scheduler-and-concurrency-25.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["executeToolCalls() :60"] --> B["mode = executionMode(planned[next]) :89"]
@@ -38,6 +42,8 @@ flowchart TD
   J -->|否| K["return { concluded } :101"]
   I --> K
 ```
+
+</details>
 
 ---
 
@@ -400,6 +406,10 @@ PTC 侧刻意复刻了这条时序,包括"屏障覆盖到 commit":`ptc.ts:405-40
 
 ### 6.3 一个端到端的时序图
 
+![时序图：03-scheduler-and-concurrency](../assets/diagrams/tool-call__03-scheduler-and-concurrency-403.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
   participant L as executeToolCalls
@@ -427,6 +437,8 @@ sequenceDiagram
   G-->>L: { consumed: 2, aborted: false }
   L->>G: runGroup([call2], 'exclusive')   %% 独占 + 栅栏
 ```
+
+</details>
 
 ---
 

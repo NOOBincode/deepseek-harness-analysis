@@ -394,6 +394,10 @@ Result{result} ─────────────────────�
 
 `tool-ralph` 是**固定脚本形态**:模型只给 `objective`,脚本每轮用 `agent(prompt, {schema})` 起全新 spawn 子,轮间只传有界结构化 handoff(`tool-ralph/src/index.ts:88-175`;出货 preset 里 `maxRounds: 64`,见 [07](./07-preset-composition.md))。
 
+![流程图：05-workflow-worker-thread](../assets/diagrams/multi-agent__05-workflow-worker-thread-397.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   S["ctx.workflowEngine.start(request)<br/>worker-thread/src/index.ts:143"] --> V{"同步校验"}
@@ -414,6 +418,8 @@ flowchart TD
   CO -->|"普通 stage 抛错"| N2["该 item → null,跳过剩余 stage"]
   CO -->|"isFatalWorkflowError"| F3["上抛,杀死脚本"]
 ```
+
+</details>
 
 ---
 

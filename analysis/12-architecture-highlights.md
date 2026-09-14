@@ -67,11 +67,35 @@ effect(execute: () => Effect, label = 'anonymous'): any {
 - 卸载(UNLOADING)进行中的 fiber 拒绝再注册新 effect(`fiber.ts:420-421`)——这是 vendor 本地加固之一,防止清理期注册逃逸出卸载快照(`vendor/README.md:38` 第 6 条);
 - 两次调用 disposer 是幂等 no-op(`fiber.ts:427-428`)。
 
+```typescript
+// vendor/cordis/src/fiber.ts:427-431(disposer 幂等:disposing 置位后返回同一任务;splice(0).reverse() 逆序回收)
+    const dispose = () => {
+      if (disposing) return disposalTask
+      disposing = true
+      let task!: void | Promise<void>
+      for (const disposable of disposables.splice(0).reverse()) {
+```
+
 由此,"插件的完整生命周期 = 其全部注册的反向回放",这在架构上消灭了"注册表残留"这一整类 bug。`packages/AGENTS.md:17` 把它落成测试要求:"Registry contributions prove disposal through the HMR-safety test: dispose the fiber and observe removal."
 
 ### 1.3 HMR 热替换:运行时重组插件树
 
 `vendor/hmr/src/index.ts` 提供生产级插件热替换:变更文件被分类为 accepted/declined(`index.ts:339-343` 的规则:依赖者全 declined 或属 external 则 declined),插件入口文件是原子重载单元(`index.ts:407`);重载过程先 dispose 旧 fiber 再挂载新 fiber(`index.ts:502-525`),完成后广播 `hmr/reload` 事件(`index.ts:22, 547`)。配置侧同样热:`cordis.yml` 的补丁层经 Include 插件事务化对账——候选应用失败时回滚并恢复原插件/配置(`vendor/README.md:40` 第 8 条)。由于一切注册都是 effect,热替换天然安全:旧代的所有贡献在 dispose 时退干净,新代从空注册表重建。ship 的 `web` profile 默认开启 live patch reload(`docs/architecture.md:29`)。
+
+```typescript
+// vendor/hmr/src/index.ts:516-525(重载单元:先 dispose 旧 fiber,再挂载新 fiber)
+        try {
+          this.ctx.registry.delete(plugin)
+        } catch (err) {
+          this.ctx.logger.warn('failed to dispose plugin at %C', path)
+          this.ctx.logger.warn(err)
+        }
+
+        try {
+          reload(attempts[filename], runtime)
+          this.ctx.logger.info('reload plugin at %C', path)
+        // ...(略 526-543:挂载失败的 warn 与上抛,以及整批回滚 —— 重新注册被删除的旧插件)
+```
 
 ### 1.4 声明合并扩展事件:类型安全的开放事件空间
 
@@ -96,6 +120,14 @@ declare module '@deepseek-ai/cordis' {
 
 任何包装本包的插件都获得强类型的 `ctx.llm` 与 `ctx.waterfall('llm/stream', …)` 补全;未挂载该服务时类型层面的注入声明(`inject: ['llm']`)又让 fiber 等待而非竞态启动(`docs/cordis-primer.md:11`)。持久化侧同理:`SessionEventMap`(`packages/core/session/src/types.ts:269`)是"merge-extensible, append-only source of truth",新增模型可见输入 = 向该映射合并新事件类型(根 AGENTS.md 公约:"a new model-visible input requires a session event")。
 
+```typescript
+// packages/core/session/src/types.ts:269-289(merge-extensible、append-only 的事件映射;节选)
+export interface SessionEventMap {
+  // ...(略 270-275:turn/start 的 JSDoc 契约)
+  'turn/start': { turn: number }
+  // ...(略 277-289:turn/end、step/start、step/end 等事件成员)
+```
+
 派发语义有五种且是事件公开契约的一部分(`vendor/cordis/src/events.ts:32`):
 
 | 模式 | 语义 | 典型用途(源码证据) |
@@ -108,9 +140,34 @@ declare module '@deepseek-ai/cordis' {
 
 waterfall 的关键陷阱被写成仓库级红线:"Waterfall listeners MUST call `next()` to delegate; returning without it short-circuits the chain"(根 AGENTS.md;语义见 `docs/cordis-primer.md:31`)。
 
+```typescript
+// vendor/cordis/src/events.ts:24-32(五种派发语义是事件公开契约的一部分)
+/**
+ * Event dispatch strategy used by the event service.
+ *
+ * `emit` runs synchronous listeners without awaiting them, `parallel` awaits
+ * all listeners together, `serial` awaits them in order until one bails,
+ * `bail` stops on the first synchronous bail value, and `waterfall` composes
+ * listeners around a final `next` callback.
+ */
+export type DispatchMode = 'emit' | 'parallel' | 'serial' | 'bail' | 'waterfall'
+```
+
 ### 1.5 组合而非继承:profile / bundle / patch
 
 一个运行中的 `dsh` 是从有序层组合出的插件树:bundle(dsh-base 等)是"config 行 + 代码"的分发格式,profile 叠加若干 bundle,再被 profile 级/家目录级/`--patch` 级 `cordis.patch.yml` 按行 id 整行替换或插入(`docs/architecture.md:17-27`)。`dsh --profile web --dump-config` 打印的每一行都可被用户补丁替换(`docs/architecture.md:34-37`)——**可替换性下沉到了发布物层面**,而非仅限源码贡献者。
+
+```typescript
+// vendor/include/src/index.ts:96-103(insert 的行立即入索引:同表靠后的 patch 可配置/禁用前一条 patch 插入的行)
+      // Index what this patch added so a LATER patch in the same list can
+      // target it. Patch lists compose one layer per source (each bundle
+      // layer, then the user's, then `--patch` overlays), and a layer must be
+      // able to configure or disable a row an earlier layer inserted; without
+      // this, inserted rows were silently unpatchable.
+      buildMap(insert)
+      continue
+    }
+```
 
 ---
 
@@ -125,6 +182,10 @@ waterfall 的关键陷阱被写成仓库级红线:"Waterfall listeners MUST call
 决策记录在 Agent Note `.agents/notes/implemented/architecture/2026-06-13-capability-seams.md`(以下简称 capability-seams 笔记):问题是一个能力的**契约、实现、消费面三者变化速率不同**,合在一个包里会导致"换一个沙箱执行器"也扰动模型可见的 tool schema(笔记:9)。拆分的收益直接写在结论里:"a sandboxed executor replaces `dsh-bash-local` without touching a tool schema"(笔记:23)。
 
 ### 2.2 三角色关系图与实例
+
+![流程图：12-architecture-highlights](./assets/diagrams/12-architecture-highlights-186.svg)
+
+<details><summary>Mermaid 源码</summary>
 
 ```mermaid
 flowchart LR
@@ -153,7 +214,48 @@ flowchart LR
     Web --> TW
 ```
 
+</details>
+
 - **Shell 缝(canonical 例子,glossary.md:9)**:`dsh-shell` 定义抽象执行器与词汇类型;`dsh-bash-local` / `dsh-bash-sandbox` 是实现;`dsh-tool-bash` 是面向模型的 Consumer。Filesystem 与 subprocess provider 共享"一个执行世界",指向远程沙箱时 Bash、PTY、LSP 整体迁移而无需 provider 分叉(`docs/architecture.md:129`)。
+
+```typescript
+// packages/shell/shell/src/index.ts:64-100(三角色之一:Service Definition —— 抽象执行器,占有 ctx.shell)
+export abstract class ShellExecutor extends Service {
+  constructor(ctx: Context) {
+    super(ctx, 'shell')
+  }
+  // ...(略 69-83:sandboxMode getter,默认 undefined 表示不沙箱)
+  abstract resolve(request: ShellExecRequest): ShellExecSpec
+  // ...(略 86-91:run 的 JSDoc —— 非零退出、超时、中止都 resolve 为描述性结果)
+  abstract run(spec: ShellExecSpec): Promise<ShellRunResult>
+  // ...(略 94-98:start 的 JSDoc —— 立即返回进程句柄)
+  abstract start(spec: ShellExecSpec): ShellProcess
+}
+```
+
+```typescript
+// packages/shell/bash-local/src/index.ts:102-112(三角色之二:Service Provider —— 本地子进程实现,自带 Config)
+export class LocalBashExecutor extends ShellExecutor {
+  static inject = ['subprocess']
+
+  static Config: z<Config> = z.object({
+    cwd: z.string(),
+    // ...(略 108-111:maxTimeoutMs / maxOutputBytes / maxSpillBytes / graceMs —— 类其余成员见 114 行起)
+  })
+```
+
+```typescript
+// packages/shell/tool-bash/src/index.ts:29-30,379-383(三角色之三:Consumer —— 模型可见的 bash 工具,只经 ctx.shell 执行)
+export const name = 'tool-bash'
+export const inject = ['tools', 'shell', 'systemPrompt', 'shellEnv']
+// ...(略 32-378:工具 schema、presenter 与 run_in_background 分支)
+      const result = await ctx.shell.run(ctx.shell.resolve({
+        ...request,
+        signal: exec.signal,
+      }))
+      if (result.aborted) {
+```
+
 - **LLM 缝是刻意折叠的变体**:Service Definition 与 Consumer 合在 `dsh-llm` 内,因为这里的 Consumer 是主循环本身而非可替换的 schema 面(capability-seams 笔记:25);provider 仍是独立包。
 - **合并是例外而非默认**:笔记明确"Don't split preemptively — a capability with one conceivable provider and one Consumer stays one package until a second appears"(笔记:25)。
 
@@ -213,6 +315,19 @@ const dispose = this.ctx.effect(function* (this: LlmRuntime) {
 - 候选路由集**先整体验证**(`prepareRoutes`,index.ts:423:"Nothing is mutated: a rejected candidate leaves the registry exactly as it was"),再在一个同步区段内完成交换(`commitRoutes`,index.ts:454-462)——任何请求都不可能观察到"注册到一半"的空窗;
 - 重复 provider 整批拒绝(`DUPLICATE_ADAPTER`,index.ts:428-429),all-or-nothing。
 
+```typescript
+// packages/llm/llm/src/index.ts:454-462(一条同步区段内完成清除+重设,任何请求都看不到"注册到一半"的空窗)
+  private commitRoutes(owned: Set<string>, registrations: readonly AdapterRegistration[]): void {
+    for (const provider of owned) this.adapters.delete(provider)
+    owned.clear()
+    for (const registration of registrations) {
+      this.adapters.set(registration.provider.id, registration)
+      owned.add(registration.provider.id)
+    }
+    this.emitAdaptersUpdated()
+  }
+```
+
 ### 3.4 拦截面:llm/stream waterfall
 
 每次流式调用都经 `llm/stream` waterfall(`index.ts:60-72`),重试、回放(replay)、路由插件以中间件形态挂载,不碰主循环。Loop 构造的请求深冻结到达("mutation throws"),因为请求内容是会话日志的纯函数(可重构性不变式,见第五节);监听器只读不改写(index.ts:64-67 的 JSDoc)。
@@ -263,9 +378,55 @@ Web Client / SDK / 文档生成需要 Host 侧服务的类型、Zod schema 与 R
 - **编译器无关模型是隔离带**:`generator/README.md:66`:"extraction and emission are decoupled through the compiler-independent model … `FaceModelEmitter` consumes only that model and never receives compiler nodes"。模型保留声明同一性、泛型、显式继承、条件/映射类型、JSDoc,排除构造器与非公开成员。生成失败即构建失败:"The generator fails the build when a declaration is missing … unsupported Zod projections fail with a `TypertEmitError` naming the construct instead of flattening or weakening the source type"(`generator/README.md:44`)。
 - **描述符不上网络**:Host gateway 与 Client remote 各自消费同一份本地生成的 `InvocationDescriptor`,"descriptors are not sent over the wire"(typert-remote 笔记:23);`.d.ts.map` 还把 consumer API 方法导航回 Host 业务实现(笔记:21)。
 
+```yaml
+# packages/bundle/base/cordis.patch.yml:39-46(dsh-base 里 Typert 链的三行:注册表 / 加载器 / 网关)
+    - id: typert
+      name: '@deepseek-ai/dsh-typert-registry'
+
+    - id: typert-loader
+      name: '@deepseek-ai/dsh-typert-loader'
+
+    - id: typert-gateway
+      name: '@deepseek-ai/dsh-api-gateway'
+```
+
+```typescript
+// packages/typert/loader/src/index.ts:411-422(跟随 Loader entry 生命周期:标脏 entry,queueMicrotask 合并同一轮变动)
+  ctx.on('internal/plugin', (fiber) => {
+    const entryName = fiber.entry?.options.name
+    if (entryName === undefined) return
+    dirty.add(entryName)
+    if (flushQueued) return
+    flushQueued = true
+    queueMicrotask(() => {
+      flushQueued = false
+      if (!active) return
+      for (const task of flush((err) => { ctx.logger.error(err) })) void task
+    })
+  })
+```
+
 ### 4.3 落地形态:业务侧零样板
 
 业务服务继承 `TypertRemoteService` 并用 `@Remote` 标记方法即可(笔记:19);`llm` 包自身即是范例——`LlmRuntime extends TypertRemoteService`(`llm/src/index.ts:333`),`listProviders()` 上直接挂着 `@Remote` 装饰器(`llm/src/index.ts:468-469`)。Gateway(`packages/api/gateway/src/index.ts:1-6`)则是纯分发器:"Live Typert Remote dispatch over Cordis Services and registered providers",Host gateway 不依赖 `ctx.agents`/`ctx.sessions` 的任何具体实现(typert-remote 笔记:41)。
+
+```typescript
+// packages/typert/registry/src/service.ts:499-520(原子注册:先整批校验,再在 ctx.effect 内提交,撤销时比对 owner)
+  register(contribution: TypertContribution): TypertDisposer {
+    const packageRecord = this.validatePackage(contribution)
+    const schemaRecords = this.validateSchemas(contribution)
+    const invocations = contribution.invocations
+    this.localStore.validate(invocations)
+    const owner = {}
+    const { schemas, packages, localStore } = this
+    return this.ctx.effect(function* () {
+      packages.set(packageRecord.key, packageRecord)
+      for (const record of schemaRecords) schemas.set(record.key, record)
+      localStore.commit(owner, invocations)
+      // ...(略 510-518:yield 的 disposer —— 仅当条目仍是本 effect 的那一份时才删除,并 localStore.withdraw(owner, invocations))
+    }, 'typert.register()')
+  }
+```
 
 ### 4.4 与 SDK 的衔接
 
@@ -307,6 +468,22 @@ DSH 的质量体系不是 CI 附属品,而是架构决策的一部分。`docs/te
 ### 5.4 doc-sync:30+ 项文档静态门
 
 `pnpm run doc-sync` 的叶子门清单在 `scripts/run-gates.ts:715-770` 的 `docSyncLeafGates()`:`doc-typecheck`(文档中 `ts` 代码块必须编译)、`verify-type-equiv`(文档粘贴的类型与源码逐字等价)、`verify-md-links`、`verify-mermaid`、`verify-cordis-catalog`/`verify-tool-catalog`/`verify-config-catalog`/`verify-persistence-catalog`(目录类文档由生成器产出、新鲜度门控)、`verify-export-jsdoc`、`verify-agent-note-format`、`verify-doc-budgets`(每篇文档有字数预算上限)等 30 余项。**文档漂移在 DSH 是编译错误**,这是"文档即真源"得以成立的机械保障。
+
+```typescript
+// scripts/run-gates.ts:730-741(docSyncLeafGates() 的叶子门清单节选:每项都是一个 pnpmScript 叶子门)
+    pnpmScript('docs-site-build', options.docsBuildScript ?? 'docs:build', { label: 'documentation build' }),
+    pnpmScript('doc-graphs', 'verify-doc-graphs', { label: 'doc graphs' }),
+    pnpmScript('markdown-links', 'verify-md-links', { label: 'markdown links', quick: true }),
+    pnpmScript('type-equivalence', 'verify-type-equiv', { label: 'type equivalence', quick: true }),
+    pnpmScript('cordis-catalog', 'verify-cordis-catalog', { label: 'cordis catalog' }),
+    pnpmScript('cordis-inspect-catalog', 'verify-cordis-inspect-catalog', { label: 'Cordis inspect catalog' }),
+    pnpmScript('mermaid', 'verify-mermaid'),
+    pnpmScript('scoped-events', 'verify-scoped-events', { label: 'scoped events' }),
+    pnpmScript('translation-pairing', 'verify-translation-pairing', { label: 'translation pairing', quick: true }),
+    pnpmScript('markdown-wrap', 'verify-md-wrap', { label: 'markdown wrap', quick: true }),
+    pnpmScript('client-catalog', 'verify-client-catalog', { label: 'client catalog' }),
+    // ...(略 741-767:export-jsdoc / tool-catalog / config-catalog / persistence-catalog / agent-note-format / doc-budgets 等其余叶子门)
+```
 
 ### 5.5 Agent Notes 即 RFC
 
@@ -373,6 +550,24 @@ async dispose(): Promise<void> {
 - **回调异常在派发器内收容**:`ChangeSource.emit` 逐个 listener `try/catch` 并上报,"a throwing listener is logged and does not stop later listeners"(`packages/typert/registry/src/service.ts:96-104`;`packages/typert/registry/README.md:71`)。
 - **微任务合并 + 幂等脏集合**:`dsh-typert-loader` 订阅 `internal/plugin` 标记脏 entry,用 `queueMicrotask` 合并同一轮内的多次变动,并靠 Set 幂等吸收"先订阅后播种"的重叠(`packages/typert/loader/src/index.ts:411-422`)。
 - **工件进运行期要逐字段校验**:`validateTypertManifest` 把构建产物当不可信输入逐字段检查——`TYPERT` 清单必须自述所属包、`face` 必须为 `host`、schema 必须是 zod v4 实例、invocation codec 必须 `mode: 'strict'`(`packages/typert/loader/src/index.ts:83-142`、`:264-276`)。这正是根 `AGENTS.md` "Trust TypeScript at typed same-process boundaries" 所列需要运行期校验的边界之一:模块/文件边界。
+
+```typescript
+// packages/typert/loader/src/index.ts:84-95(validateTypertManifest:把构建产物当不可信输入逐字段校验)
+  if (typeof exported !== 'object' || exported === null) {
+    throw new Error(`typert-loader: ${pkgName} exports "${TYPERT_HOST_EXPORT}" but its module has no TYPERT manifest object`)
+  }
+  const manifest = exported as Record<string, unknown>
+  if (manifest.package !== pkgName) {
+    throw new Error(
+      `typert-loader: ${pkgName} TYPERT manifest names package ${JSON.stringify(manifest.package)} — the manifest must be owned by the package that exports it`,
+    )
+  }
+  if (manifest.face !== 'host') {
+    throw new Error(`typert-loader: ${pkgName} exports "${TYPERT_HOST_EXPORT}" but TYPERT.face is not "host"`)
+  }
+```
+
+*(上为 `validateTypertManifest` 的主体,函数签名在源文件 83 行;zod v4 实例校验见 `:105-107`,严格 codec 校验见 `:264-276`。)*
 
 ---
 

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1213.8164999999997 288.5" width="1213.8164999999997" height="288.5" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="793.6407499999999,76.9 793.6407499999999,88.9 525.9535,88.9 525.9535,100.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="793.6407499999999,76.9 793.6407499999999,88.9 1061.3279999999997,88.9 1061.3279999999997,100.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="B1" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="525.9535,154.70000000000002 525.9535,170.70000000000002 188.05649999999997,170.70000000000002 188.05649999999997,186.70000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="B2" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="525.9535,154.70000000000002 525.9535,170.70000000000002 525.9535,170.70000000000002 525.9535,186.70000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="B3" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="525.9535,154.70000000000002 525.9535,170.70000000000002 825.3184999999999,170.70000000000002 825.3184999999999,186.70000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="C1" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1061.3279999999997,154.70000000000002 1061.328,186.70000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="A" data-label="enforcement: full | partial" data-shape="rectangle">
+  <rect x="703.3822499999999" y="40" width="180.51699999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="793.6407499999999" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">enforcement: full | partial</text>
+</g>
+<g class="node" data-id="B" data-label="windows-acl: 静态 partial
+sandbox-local/src/index.ts:186" data-shape="rectangle">
+  <rect x="415.688" y="100.9" width="220.53099999999995" height="53.800000000000004" rx="0" ry="0" fill="#ffe" stroke="#aa8" stroke-width="0.75" />
+  <text x="525.9535" y="127.80000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="525.9535" dy="-3.9000000000000012">windows-acl: 静态 partial</tspan><tspan x="525.9535" dy="16.900000000000002">sandbox-local/src/index.ts:186</tspan></text>
+</g>
+<g class="node" data-id="C" data-label="landlock: 探针报告 partial
+sandbox-local/src/index.ts:525" data-shape="rectangle">
+  <rect x="948.8394999999998" y="100.9" width="224.97699999999995" height="53.800000000000004" rx="0" ry="0" fill="#ffe" stroke="#aa8" stroke-width="0.75" />
+  <text x="1061.3279999999997" y="127.80000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1061.3279999999997" dy="-3.9000000000000012">landlock: 探针报告 partial</tspan><tspan x="1061.3279999999997" dy="16.900000000000002">sandbox-local/src/index.ts:525</tspan></text>
+</g>
+<g class="node" data-id="B1" data-label="WRITE_RESTRICTED 必须保留 Everyone
+→ 外部授予 Everyone 写的对象仍可写" data-shape="rectangle">
+  <rect x="40" y="186.70000000000002" width="296.11299999999994" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="188.05649999999997" y="213.60000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="188.05649999999997" dy="-3.9000000000000012">WRITE_RESTRICTED 必须保留 Everyone</tspan><tspan x="188.05649999999997" dy="16.900000000000002">→ 外部授予 Everyone 写的对象仍可写</tspan></text>
+</g>
+<g class="node" data-id="B2" data-label="NTFS 硬链接把同一文件对象别名到工作区外" data-shape="rectangle">
+  <rect x="360.11299999999994" y="186.70000000000002" width="331.681" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="525.9535" y="205.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">NTFS 硬链接把同一文件对象别名到工作区外</text>
+</g>
+<g class="node" data-id="B3" data-label="FAT 类目标没有安全描述符
+→ 两种受限模式下都可写" data-shape="rectangle">
+  <rect x="715.7939999999999" y="186.70000000000002" width="219.04899999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="825.3184999999999" y="213.60000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="825.3184999999999" dy="-3.9000000000000012">FAT 类目标没有安全描述符</tspan><tspan x="825.3184999999999" dy="16.900000000000002">→ 两种受限模式下都可写</tspan></text>
+</g>
+<g class="node" data-id="C1" data-label="较老的 Landlock ABI
+只约束它暴露的访问类别" data-shape="rectangle">
+  <rect x="958.8429999999998" y="186.70000000000002" width="204.96999999999997" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1061.3279999999997" y="213.60000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1061.3279999999997" dy="-3.9000000000000012">较老的 Landlock ABI</tspan><tspan x="1061.3279999999997" dy="16.900000000000002">只约束它暴露的访问类别</tspan></text>
+</g>
+</svg>

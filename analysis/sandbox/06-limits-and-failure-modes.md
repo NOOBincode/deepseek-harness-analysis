@@ -91,6 +91,10 @@ export type SandboxEnforcement = 'full' | 'partial'
 
 ### 2.2 当前的两个 partial 来源
 
+![流程图：06-limits-and-failure-modes](../assets/diagrams/sandbox__06-limits-and-failure-modes-94.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["enforcement: full | partial"] --> B["windows-acl: 静态 partial<br/>sandbox-local/src/index.ts:186"]
@@ -105,6 +109,8 @@ flowchart TD
   style B fill:#ffe,stroke:#aa8
   style C fill:#ffe,stroke:#aa8
 ```
+
+</details>
 
 | 来源 | 判定方式 | 记录位置 |
 |---|---|---|
@@ -267,6 +273,10 @@ Windows 的两条不可消除理由(`sandbox-local/src/index.ts:181-185`、`sand
 
 ## 第五节 边界总表
 
+![流程图：06-limits-and-failure-modes](../assets/diagrams/sandbox__06-limits-and-failure-modes-270.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   Q["一次受限执行"] --> A{"策略层:mode 表达了什么?"}
@@ -282,6 +292,8 @@ flowchart TD
   style B1 fill:#ffe,stroke:#aa8
   style C3 fill:#ffe,stroke:#aa8
 ```
+
+</details>
 
 | 边界 | 性质 | 记录位置 |
 |---|---|---|

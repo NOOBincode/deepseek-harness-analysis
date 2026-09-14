@@ -24,6 +24,10 @@ DSH 是**用"插件 + 能力缝 + 事件日志"三条机制替换掉传统 agent
 
 把十三章的结论叠在一起,一次用户输入到一次工具结果回流的主链路如下(每一环的深挖章节标注在节点上):
 
+![流程图：14-final-summary](./assets/diagrams/14-final-summary-27.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   U["用户输入 / SDK / ACP / webhook"] --> BOOT["第一章:profile 组装 → Cordis Loader 按服务可用性激活插件树"]
@@ -49,6 +53,8 @@ flowchart TD
   RES --> FEED["结果与 additionalContexts 进 next-step inbox"]
   FEED --> TURN
 ```
+
+</details>
 
 **这条链路里没有"第二套"任何东西**,这是 DSH 最值得学习的工程特征:
 

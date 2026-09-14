@@ -1,0 +1,202 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1416.476583333333 1847.2189999999998" width="1416.476583333333" height="1847.2189999999998" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="S" data-to="T" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="443.2243333333334,76.9 443.22433333333333,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="T" data-to="U" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="目录" points="417.47433333333333,194.15 417.47433333333333,247.9 255.3798333333334,247.9 255.3798333333334,320.20000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="T" data-to="V" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label=".md 文件" points="443.22433333333333,219.9 443.2243333333334,320.20000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="T" data-to="X1" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="其它" points="468.97433333333333,194.15 468.97433333333333,247.9 606.2453333333333,247.9 606.2453333333334,569.74" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="U" data-to="W" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="255.3798333333334,357.1 255.3798333333334,377.1 349.3020833333333,377.1 349.3020833333333,397.1" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="V" data-to="W" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="443.2243333333334,357.1 443.2243333333334,377.1 349.3020833333333,377.1 349.3020833333333,397.1" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="W" data-to="Y" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="349.30208333333337,434 349.30208333333326,474.00000000000006" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Y" data-to="X2" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="路径不存在" points="309.51008333333334,566.848 309.51008333333334,618.6400000000002 112.84500000000003,618.6400000000002 112.84500000000003,690.9400000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Y" data-to="X3" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="FS_NOT_TEXT 二进制" points="336.03808333333336,593.376 336.03808333333336,843.8740000000003 305.87649999999996,843.8740000000003 305.8765000000001,916.1740000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Y" data-to="X4" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="其它 I/O 错" points="362.5660833333334,593.3759999999999 362.5660833333334,783.5740000000003 576.713,783.5740000000003 576.713,855.8740000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Y" data-to="Z" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="成功" points="389.0940833333333,566.848 389.0940833333333,618.64 824.2079999999999,618.64 824.2079999999999,690.9399999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Z" data-to="Z1" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="824.2079999999999,727.8399999999999 824.208,767.8399999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Z1" data-to="X5" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="抛" points="784.7494999999999,886.2154999999999 784.7494999999999,937.6740000000002 485.4613333333334,937.6740000000002 485.4613333333334,1009.9740000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Z1" data-to="X6" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="非对象/无闭合/首行非 ---" points="824.208,925.674 824.208,1285.5189999999998 732.2153333333333,1285.5189999999998 732.2153333333333,1357.8189999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Z1" data-to="Z2" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="对象" points="863.6664999999999,886.2155 863.6664999999999,937.674 960.5883333333334,937.674 960.5883333333334,1009.9739999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Z2" data-to="X7" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="缺" points="930.0836666666667,1162.4973333333332 930.0836666666667,1422.7189999999998 833.2490833333334,1422.7189999999998 833.2490833333334,1499.0764999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Z2" data-to="Z3" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="有" points="991.093,1162.4973333333332 991.093,1205.002 1087.9275833333334,1205.002 1087.9275833333331,1277.3020000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Z3" data-to="X8" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="1064.3389166666666,1395.245333333333 1064.3389166666666,1559.9189999999999 990.7840833333332,1559.9189999999999 990.7840833333332,1632.2189999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Z3" data-to="Z4" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="1111.51625,1395.2453333333333 1111.51625,1430.8339999999998 1185.0710833333333,1430.8339999999998 1185.0710833333333,1499.0764999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Z4" data-to="X9" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="旧键/非法布尔" points="1157.4069166666666,1637.397333333333 1157.4069166666666,1697.119 1072.8090833333333,1697.119 1072.8090833333333,1761.4189999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Z4" data-to="OK" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="合法" points="1212.73525,1637.397333333333 1212.73525,1681.119 1297.3330833333332,1681.119 1297.3330833333332,1761.4189999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="T" data-to="U" data-label="目录">
+  <rect x="234.3798333333334" y="254.89999999999995" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="255.0848333333334" y="270.04999999999995" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">目录</text>
+</g>
+<g class="edge-label" data-from="T" data-to="V" data-label=".md 文件">
+  <rect x="413.72433333333333" y="254.89999999999995" width="58.636" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="443.0423333333333" y="270.04999999999995" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">.md 文件</text>
+</g>
+<g class="edge-label" data-from="T" data-to="X1" data-label="其它">
+  <rect x="585.2453333333333" y="504.43999999999994" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="605.9503333333333" y="519.5899999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">其它</text>
+</g>
+<g class="edge-label" data-from="Y" data-to="X2" data-label="路径不存在">
+  <rect x="73.84500000000003" y="625.6400000000002" width="77.05000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="112.37000000000003" y="640.7900000000002" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">路径不存在</text>
+</g>
+<g class="edge-label" data-from="Y" data-to="X3" data-label="FS_NOT_TEXT 二进制">
+  <rect x="239.8765" y="850.8740000000003" width="131.10399999999998" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="305.4285" y="866.0240000000002" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">FS_NOT_TEXT 二进制</text>
+</g>
+<g class="edge-label" data-from="Y" data-to="X4" data-label="其它 I/O 错">
+  <rect x="541.713" y="790.5740000000003" width="69.328" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="576.377" y="805.7240000000003" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">其它 I/O 错</text>
+</g>
+<g class="edge-label" data-from="Y" data-to="Z" data-label="成功">
+  <rect x="803.2079999999999" y="625.64" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="823.9129999999999" y="640.79" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">成功</text>
+</g>
+<g class="edge-label" data-from="Z1" data-to="X5" data-label="抛">
+  <rect x="470.4613333333334" y="944.6740000000002" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="485.2263333333334" y="959.8240000000002" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">抛</text>
+</g>
+<g class="edge-label" data-from="Z1" data-to="X6" data-label="非对象/无闭合/首行非 ---">
+  <rect x="661.2153333333333" y="1292.5189999999998" width="141.20200000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="731.8163333333333" y="1307.6689999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">非对象/无闭合/首行非 ---</text>
+</g>
+<g class="edge-label" data-from="Z1" data-to="Z2" data-label="对象">
+  <rect x="939.5883333333334" y="944.674" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="960.2933333333334" y="959.824" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">对象</text>
+</g>
+<g class="edge-label" data-from="Z2" data-to="X7" data-label="缺">
+  <rect x="818.2490833333334" y="1429.7189999999998" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="833.0140833333334" y="1444.869" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">缺</text>
+</g>
+<g class="edge-label" data-from="Z2" data-to="Z3" data-label="有">
+  <rect x="1072.9275833333334" y="1212.002" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1087.6925833333335" y="1227.152" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">有</text>
+</g>
+<g class="edge-label" data-from="Z3" data-to="X8" data-label="否">
+  <rect x="975.7840833333332" y="1566.9189999999999" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="990.5490833333332" y="1582.069" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="edge-label" data-from="Z3" data-to="Z4" data-label="是">
+  <rect x="1170.0710833333333" y="1437.8339999999998" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1184.8360833333334" y="1452.984" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="Z4" data-to="X9" data-label="旧键/非法布尔">
+  <rect x="1026.8090833333333" y="1704.119" width="91.9" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1072.7590833333334" y="1719.269" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">旧键/非法布尔</text>
+</g>
+<g class="edge-label" data-from="Z4" data-to="OK" data-label="合法">
+  <rect x="1276.3330833333332" y="1688.119" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1297.0380833333331" y="1703.269" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">合法</text>
+</g>
+<g class="node" data-id="S" data-label="根的直接子项" data-shape="rectangle">
+  <rect x="377.7893333333334" y="40" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="443.2243333333334" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">根的直接子项</text>
+</g>
+<g class="node" data-id="T" data-label="类型?" data-shape="diamond">
+  <polygon points="443.22433333333333,116.9 494.72433333333333,168.4 443.22433333333333,219.9 391.72433333333333,168.4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="443.22433333333333" y="168.4" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">类型?</text>
+</g>
+<g class="node" data-id="U" data-label="locator = dir/SKILL.md" data-shape="rectangle">
+  <rect x="168.82633333333342" y="320.20000000000005" width="173.10699999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="255.3798333333334" y="338.65000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">locator = dir/SKILL.md</text>
+</g>
+<g class="node" data-id="V" data-label="locator = 文件自身" data-shape="rectangle">
+  <rect x="365.9333333333334" y="320.20000000000005" width="154.582" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="443.2243333333334" y="338.65000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">locator = 文件自身</text>
+</g>
+<g class="node" data-id="X1" data-label="跳过(无日志)" data-shape="rectangle">
+  <rect x="544.5153333333334" y="569.74" width="123.46" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="606.2453333333334" y="588.19" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">跳过(无日志)</text>
+</g>
+<g class="node" data-id="W" data-label="readSkillText" data-shape="rectangle">
+  <rect x="288.31308333333334" y="397.1" width="121.978" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="349.3020833333333" y="415.55" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">readSkillText</text>
+</g>
+<g class="node" data-id="Y" data-label="读到文本?" data-shape="diamond">
+  <polygon points="349.3020833333333,473.99999999999994 415.6220833333333,540.3199999999999 349.3020833333333,606.6399999999999 282.9820833333333,540.3199999999999" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="349.3020833333333" y="540.3199999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">读到文本?</text>
+</g>
+<g class="node" data-id="X2" data-label="返回 undefined
+该条目静默丢弃" data-shape="rectangle">
+  <rect x="40" y="690.9400000000002" width="145.69" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="112.845" y="717.8400000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="112.845" dy="-3.9000000000000012">返回 undefined</tspan><tspan x="112.845" dy="16.900000000000002">该条目静默丢弃</tspan></text>
+</g>
+<g class="node" data-id="X3" data-label="warn: failed to read text file
+丢弃该条目" data-shape="rectangle">
+  <rect x="209.69000000000005" y="916.1740000000002" width="192.373" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="305.8765000000001" y="943.0740000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="305.8765000000001" dy="-3.9000000000000012">warn: failed to read text file</tspan><tspan x="305.8765000000001" dy="16.900000000000002">丢弃该条目</tspan></text>
+</g>
+<g class="node" data-id="X4" data-label="抛出 → list() 穿出
+→ 注册表:provider 本轮零贡献 + incomplete" data-shape="rectangle">
+  <rect x="426.063" y="855.8740000000003" width="301.29999999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="576.713" y="882.7740000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="576.713" dy="-3.9000000000000012">抛出 → list() 穿出</tspan><tspan x="576.713" dy="16.900000000000002">→ 注册表:provider 本轮零贡献 + incomplete</tspan></text>
+</g>
+<g class="node" data-id="Z" data-label="parseFrontmatter" data-shape="rectangle">
+  <rect x="751.3629999999998" y="690.9399999999999" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="824.2079999999999" y="709.39" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">parseFrontmatter</text>
+</g>
+<g class="node" data-id="Z1" data-label="YAML 可解析?" data-shape="diamond">
+  <polygon points="824.208,767.8399999999999 903.125,846.757 824.208,925.674 745.2909999999999,846.757" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="824.208" y="846.757" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">YAML 可解析?</text>
+</g>
+<g class="node" data-id="X5" data-label="warn: invalid YAML frontmatter" data-shape="rectangle">
+  <rect x="375.56633333333343" y="1009.9740000000002" width="219.78999999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="485.4613333333334" y="1028.4240000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">warn: invalid YAML frontmatter</text>
+</g>
+<g class="node" data-id="X6" data-label="warn: missing YAML frontmatter" data-shape="rectangle">
+  <rect x="619.3563333333334" y="1357.8189999999997" width="225.71799999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="732.2153333333333" y="1376.2689999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">warn: missing YAML frontmatter</text>
+</g>
+<g class="node" data-id="Z2" data-label="name + description?" data-shape="diamond">
+  <polygon points="960.5883333333334,1009.9739999999998 1052.1023333333333,1101.4879999999998 960.5883333333334,1193.002 869.0743333333334,1101.4879999999998" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="960.5883333333334" y="1101.4879999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">name + description?</text>
+</g>
+<g class="node" data-id="X7" data-label="warn: frontmatter requires name and description" data-shape="rectangle">
+  <rect x="673.3365833333335" y="1499.0764999999997" width="319.8249999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="833.2490833333334" y="1517.5264999999997" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">warn: frontmatter requires name and description</text>
+</g>
+<g class="node" data-id="Z3" data-label="isSkillName?" data-shape="diamond">
+  <polygon points="1087.9275833333334,1277.302 1158.6935833333334,1348.068 1087.9275833333334,1418.834 1017.1615833333334,1348.068" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1087.9275833333334" y="1348.068" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">isSkillName?</text>
+</g>
+<g class="node" data-id="X8" data-label="warn: invalid skill name" data-shape="rectangle">
+  <rect x="903.4895833333333" y="1632.2189999999998" width="174.58900000000003" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="990.7840833333332" y="1650.6689999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">warn: invalid skill name</text>
+</g>
+<g class="node" data-id="Z4" data-label="invocation 合法?" data-shape="diamond">
+  <polygon points="1185.0710833333333,1499.0764999999997 1268.0635833333333,1582.0689999999997 1185.0710833333333,1665.0614999999998 1102.0785833333332,1582.0689999999997" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1185.0710833333333" y="1582.0689999999997" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">invocation 合法?</text>
+</g>
+<g class="node" data-id="X9" data-label="warn: invalid invocation frontmatter" data-shape="rectangle">
+  <rect x="951.4285833333333" y="1761.4189999999999" width="242.76099999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1072.8090833333333" y="1779.869" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">warn: invalid invocation frontmatter</text>
+</g>
+<g class="node" data-id="OK" data-label="产出 SkillCandidate
+content = body.trim()" data-shape="rectangle">
+  <rect x="1218.1895833333333" y="1761.4189999999999" width="158.287" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1297.3330833333332" y="1788.319" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1297.3330833333332" dy="-3.9000000000000012">产出 SkillCandidate</tspan><tspan x="1297.3330833333332" dy="16.900000000000002">content = body.trim()</tspan></text>
+</g>
+</svg>

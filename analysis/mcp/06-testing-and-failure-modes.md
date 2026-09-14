@@ -202,6 +202,10 @@ Error: mcp-client(pagination-cycle): server repeated a tools/list continuation c
 
 失败发生在哪个阶段,决定了它的语义与可恢复性。下图的分类是后面那张 23 行清单的索引:
 
+![流程图：06-testing-and-failure-modes](../assets/diagrams/mcp__06-testing-and-failure-modes-205.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["一次 MCP 失败"] --> B{"发生在哪个阶段 ?"}
@@ -216,6 +220,8 @@ flowchart TD
   style F fill:#efe,stroke:#8a8
   style G fill:#eef,stroke:#88a
 ```
+
+</details>
 
 下表是 MCP 桥接的全部分支终态。**"显式语义"一列描述的是调用方/用户可依赖的行为**,不是实现细节。
 

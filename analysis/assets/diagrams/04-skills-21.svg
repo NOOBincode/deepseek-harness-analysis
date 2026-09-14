@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 893.4699999999999 1062" width="893.4699999999999" height="1062" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<g class="subgraph" data-id="" data-label="发现层">
+  <rect x="40" y="40" width="813.4699999999999" height="335.2" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="40" y="40" width="813.4699999999999" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="52" y="54" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">发现层</text>
+</g>
+<g class="subgraph" data-id="" data-label="发现层">
+  <rect x="177.82650000000007" y="427.2" width="546.7089999999998" height="241.4" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="177.82650000000007" y="427.2" width="546.7089999999998" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="189.82650000000007" y="441.2" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">发现层</text>
+</g>
+<g class="subgraph" data-id="" data-label="发现层">
+  <rect x="200.05650000000003" y="720.5999999999999" width="493.3569999999999" height="301.4" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="200.05650000000003" y="720.5999999999999" width="493.3569999999999" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="212.05650000000003" y="734.5999999999999" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">发现层</text>
+</g>
+<polyline class="edge" data-from="A" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="433.397,163.15 433.397,178.925 433.39699999999993,178.925 433.39699999999993,194.7" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="703.4925,146.25 703.4925,178.925 433.39699999999993,178.925 433.39699999999993,194.7" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="176.6395,146.25 176.6395,178.925 433.39699999999993,178.925 433.39699999999993,194.7" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="393.39699999999993,208.5 393.39700000000005,248.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="433.39700000000005,359.2 433.39700000000005,417.3125 299.2755000000001,417.3125 299.2755000000001,475.42499999999995" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="433.39700000000005,359.2 433.39700000000005,417.3125 568.63,417.3125 568.63,475.42499999999995" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="299.2755000000001,563.025 299.2755000000001,580.9124999999999 433.95275000000004,580.9124999999999 433.95275000000004,598.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="568.63,546.125 568.63,580.9124999999999 433.95275000000004,580.9124999999999 433.95275000000004,598.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="433.95275000000004,652.5999999999999 433.95275000000004,710.7124999999999 312.61350000000004,710.7124999999999 312.61350000000004,768.8249999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="433.95275000000004,652.5999999999999 433.95275000000004,710.7124999999999 555.292,710.7124999999999 555.292,768.8249999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="312.61350000000004,839.525 312.61350000000004,857.4124999999999 433.95275000000004,857.4124999999999 433.95275000000004,875.3" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="J" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="555.292,822.6249999999999 555.292,857.4124999999999 433.95275000000004,857.4124999999999 433.95275000000004,875.3" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="233.89625,208.5 233.89625,248.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="A" data-label="项目根
+&lt;root&gt;/.dsh/skills (rank 100)
+&lt;root&gt;/.agents/skills (rank 200)" data-shape="rectangle">
+  <rect x="321.279" y="92.45" width="224.23600000000002" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="433.397" y="127.80000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="433.397" dy="-12.350000000000001">项目根</tspan><tspan x="433.397" dy="16.900000000000002">&lt;root&gt;/.dsh/skills (rank 100)</tspan><tspan x="433.397" dy="16.900000000000002">&lt;root&gt;/.agents/skills (rank 200)</tspan></text>
+</g>
+<g class="node" data-id="D" data-label="FileSystemSkillProvider.list()
+扫目录 + 解析 frontmatter" data-shape="rectangle">
+  <rect x="327.207" y="194.7" width="212.37999999999994" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="433.39699999999993" y="221.6" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="433.39699999999993" dy="-3.9000000000000012">FileSystemSkillProvider.list()</tspan><tspan x="433.39699999999993" dy="16.900000000000002">扫目录 + 解析 frontmatter</tspan></text>
+</g>
+<g class="node" data-id="B" data-label="customSkillDirs (300)
+~/.dsh/skills (400) ~/.agents/skills (500)" data-shape="rectangle">
+  <rect x="569.515" y="92.45" width="267.9549999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="703.4925" y="119.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="703.4925" dy="-3.9000000000000012">customSkillDirs (300)</tspan><tspan x="703.4925" dy="16.900000000000002">~/.dsh/skills (400) ~/.agents/skills (500)</tspan></text>
+</g>
+<g class="node" data-id="C" data-label="bundled 根 / dsh-badge 插件 (600)
+runtime 注册 (250)" data-shape="rectangle">
+  <rect x="56" y="92.45" width="241.279" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="176.6395" y="119.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="176.6395" dy="-3.9000000000000012">bundled 根 / dsh-badge 插件 (600)</tspan><tspan x="176.6395" dy="16.900000000000002">runtime 注册 (250)</tspan></text>
+</g>
+<g class="node" data-id="E" data-label="SkillRegistry.collect()
+分层合并:近层遮蔽远层
+层内 rank → provider 序 → 局部序" data-shape="rectangle">
+  <rect x="313.869" y="288.5" width="239.056" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="433.39700000000005" y="323.85" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="433.39700000000005" dy="-12.350000000000001">SkillRegistry.collect()</tspan><tspan x="433.39700000000005" dy="16.900000000000002">分层合并:近层遮蔽远层</tspan><tspan x="433.39700000000005" dy="16.900000000000002">层内 rank → provider 序 → 局部序</tspan></text>
+</g>
+<g class="node" data-id="F" data-label="tool-skill 目录监听器
+agent/pre-step 瀑布
+digest 比对 → 注入/替换
+&lt;available_skills&gt; user 消息" data-shape="rectangle">
+  <rect x="193.82650000000007" y="475.42499999999995" width="210.898" height="87.60000000000001" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="299.2755000000001" y="519.2249999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="299.2755000000001" dy="-20.8">tool-skill 目录监听器</tspan><tspan x="299.2755000000001" dy="16.900000000000002">agent/pre-step 瀑布</tspan><tspan x="299.2755000000001" dy="16.900000000000002">digest 比对 → 注入/替换</tspan><tspan x="299.2755000000001" dy="16.900000000000002">&lt;available_skills&gt; user 消息</tspan></text>
+</g>
+<g class="node" data-id="G" data-label="skill 工具 schema
+ctx.tools.register → wireSchemas
+→ systemPrompt.assemble → header.tools" data-shape="rectangle">
+  <rect x="428.72450000000003" y="475.42499999999995" width="279.8109999999999" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="568.63" y="510.775" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="568.63" dy="-12.350000000000001">skill 工具 schema</tspan><tspan x="568.63" dy="16.900000000000002">ctx.tools.register → wireSchemas</tspan><tspan x="568.63" dy="16.900000000000002">→ systemPrompt.assemble → header.tools</tspan></text>
+</g>
+<g class="node" data-id="H" data-label="step(): 全部 decision.messages
+落 user/message 会话事件" data-shape="rectangle">
+  <rect x="321.09375000000006" y="598.8" width="225.718" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="433.95275000000004" y="625.6999999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="433.95275000000004" dy="-3.9000000000000012">step(): 全部 decision.messages</tspan><tspan x="433.95275000000004" dy="16.900000000000002">落 user/message 会话事件</tspan></text>
+</g>
+<g class="node" data-id="I" data-label="模型调用 skill({name})
+→ ctx.skills.get()
+→ provider.get() 重读正文" data-shape="rectangle">
+  <rect x="216.05650000000003" y="768.8249999999999" width="193.114" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="312.61350000000004" y="804.175" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="312.61350000000004" dy="-12.350000000000001">模型调用 skill({name})</tspan><tspan x="312.61350000000004" dy="16.900000000000002">→ ctx.skills.get()</tspan><tspan x="312.61350000000004" dy="16.900000000000002">→ provider.get() 重读正文</tspan></text>
+</g>
+<g class="node" data-id="J" data-label="用户 /name 手势
+→ 注入 &lt;skill_content&gt; instructions" data-shape="rectangle">
+  <rect x="433.1705" y="768.8249999999999" width="244.24299999999997" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="555.292" y="795.7249999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="555.292" dy="-3.9000000000000012">用户 /name 手势</tspan><tspan x="555.292" dy="16.900000000000002">→ 注入 &lt;skill_content&gt; instructions</tspan></text>
+</g>
+<g class="node" data-id="K" data-label="renderSkillContent()
+&lt;skill_content&gt;/&lt;skill_resources&gt;/&lt;skill_instructions&gt;" data-shape="rectangle">
+  <rect x="252.18075000000005" y="875.3" width="363.5439999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="433.95275000000004" y="902.1999999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="433.95275000000004" dy="-3.9000000000000012">renderSkillContent()</tspan><tspan x="433.95275000000004" dy="16.900000000000002">&lt;skill_content&gt;/&lt;skill_resources&gt;/&lt;skill_instructions&gt;</tspan></text>
+</g>
+<g class="node" data-id="L" data-label="文本回流模型(工具结果 / 注入消息)" data-shape="rectangle">
+  <rect x="301.45725000000004" y="969.0999999999999" width="264.991" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="433.95275000000004" y="987.55" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">文本回流模型(工具结果 / 注入消息)</text>
+</g>
+</svg>

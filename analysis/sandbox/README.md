@@ -31,6 +31,10 @@
 
 下图是骨架:**一次 `bash` 工具调用穿过沙箱的全部函数跨度**,节点标注真实定义位置。实线为同步调用,虚线为跨层数据流。
 
+![流程图：README](../assets/diagrams/sandbox__README-34.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   subgraph tool["① 工具层(策略的解析者与审批的发起者)"]
@@ -88,6 +92,8 @@ flowchart TD
   style deny fill:#fef,stroke:#a8a
 ```
 
+</details>
+
 读图要点:
 
 1. **策略在工具层解析,不在执行器里**。`tool-bash/src/index.ts:198-199` 与 `tool-fs/src/sandbox.ts:89` 都只调 `ctx.sandboxPolicy.resolve(...)`,执行器拿到的 `spec.sandboxPolicy` 已是完整策略(`packages/shell/shell/src/types.ts:109`),这就是"默认值是消费者边界上的显式步骤"的落点。
@@ -95,6 +101,48 @@ flowchart TD
 3. **Provider 只有两个出口**:包装后的 argv,或 `SandboxUnavailableError`(`sandbox/src/index.ts:152-157` 明文禁止静默原样放行)。
 4. **分类顺序不可交换**:先判"执行器坏了、命令没跑"(S2/S3),再判"约束生效并拦住了它"(S5)。原因写在 `bash-sandbox/src/index.ts:108-109`。
 5. **升级是一次带更宽策略的新调用**,不是修改 provider 状态:审批通过后只在这一次的 `policy.mode` 上替换(`tool-bash/src/index.ts:336-338`)。
+
+图上 T2 → T3 → E4 一路传下去的那个对象,真实定义是"模式 + 根 + 会话身份"三元组;`SandboxPolicy` 只是把 `mode` 收窄成非 `danger-full-access` 的别名(`sessionId` 是后端 key 每会话状态的凭据,`danger-full-access` 在这条缝上不会出现——执行器在 `confine` 之前就分流了):
+
+```typescript
+// packages/sandbox/sandbox/src/index.ts:29-72(节选)
+export type SandboxMode = 'read-only' | 'workspace-write' | 'danger-full-access'
+export type ConfinedSandboxMode = Exclude<SandboxMode, 'danger-full-access'>
+// ...(略)
+export interface SandboxExecutionPolicy {
+  /** The file-effect mode this execution runs under. */
+  mode: SandboxMode
+  /** Absolute root directory `workspace-write` may write under. */
+  workspaceRoot: string
+  // ...(略):sessionId 及其注释
+}
+// ...(略)
+export interface SandboxPolicy extends SandboxExecutionPolicy {
+  /** The file-effect mode this execution runs under. */
+  mode: ConfinedSandboxMode
+}
+```
+
+provider 只有两个出口(读图要点 3):要么返回这个结构,要么抛 `SandboxUnavailableError`。结构里四个字段分别回答"跑什么""约束得多严""什么 stderr 算被拦""什么 stderr 算执行器坏了";而缝本身只有一个方法,`argv` 是精确数组而不是 shell 字符串——shell 形状的消费者自己拼 `['bash', '-c', command]`:
+
+```typescript
+// packages/sandbox/sandbox/src/index.ts:95-116(节选)
+export interface ConfinedArgv {
+  /** The wrapped argv (runner, profile, separator, then the caller's argv). */
+  argv: string[]
+  /** How completely the selected backend enforces the policy's file effects. */
+  enforcement: SandboxEnforcement
+  // ...(略):denialSignatures 与其方言注释(EROFS / EACCES / EPERM)
+  denialSignatures: readonly string[]
+  // ...(略):runnerFailureRules 与其顺序注释
+  runnerFailureRules: readonly RunnerFailureRule[]
+}
+```
+
+```typescript
+// packages/sandbox/sandbox/src/index.ts:175(契约 JSDoc 见 :164-174)
+  abstract confine(argv: readonly string[], policy: SandboxPolicy): ConfinedArgv
+```
 
 ---
 
@@ -150,6 +198,41 @@ flowchart TD
 | fail-closed | 无法强制执行时抛错,绝不静默无约束放行 | `sandbox/src/index.ts:152-157` |
 | standing grant | 工作区 ACE,刻意不撤销,作为跨会话复用缓存 | `sandbox-local/src/index.ts:266-272` |
 | revocable grant | 私有临时目录 ACE,随 provider dispose 撤销 | `sandbox-local/src/index.ts:266-272` |
+
+### 升级口径(`WIDER_MODES`)与 fail-closed 抛点
+
+```typescript
+// packages/sandbox/sandbox/src/escalation.ts:28-31
+export const WIDER_MODES: Record<string, readonly SandboxMode[]> = {
+  'read-only': ['workspace-write', 'danger-full-access'],
+  'workspace-write': ['danger-full-access'],
+}
+```
+
+这张表只有一个执行点,就是升级入口的第一条有序失败点(该函数共六条有序失败点,其余五条都在 `approval` 通道上):
+
+```typescript
+// packages/sandbox/sandbox/src/escalation.ts:157-164
+export async function approveEscalation<A, C>(request: EscalationRequest, approval: EscalationApproval<A, C>): Promise<SandboxMode> {
+  const { requestedMode: mode, effectiveMode, justification, subject } = request
+  // Strict widening is an EXECUTION check against the call's effective mode —
+  // deliberately not a schema constraint (the enum is the closed target
+  // vocabulary; the effective mode is per-call truth).
+  if (!(WIDER_MODES[effectiveMode] ?? []).includes(mode as SandboxMode)) {
+    throw new Error(`sandbox escalation to "${mode}" is not strictly wider than this call's current "${effectiveMode}" mode`)
+  }
+```
+
+升级之外还有一道 fail-closed:provider 侧平台没有可用链、或所有候选探针都不通过时,命令**根本不跑**:
+
+```typescript
+// packages/sandbox/sandbox-local/src/index.ts:492-496
+  private selectRunner(mode: ConfinedSandboxMode): SelectedRunner {
+    this.selectedRunner ??= this.chainVerdict()
+    if (this.selectedRunner === 'unavailable') throw new SandboxUnavailableError(mode)
+    return this.selectedRunner
+  }
+```
 
 ---
 

@@ -71,6 +71,23 @@ export type SessionEvent<T extends SessionEventType = SessionEventType> = {
 }[T]
 ```
 
+上面是文档化的简写;真实源码里 `ignorable` 的完整读者契约(`types.ts:473-482`)是这样钉住的:
+
+```typescript
+// packages/core/session/src/types.ts:466-488
+[K in SessionEventType]: {
+  type: K
+  seq: SessionSeq
+  time: number
+  data: SessionEventMap[K]
+  // ...(略): 468-482 行是 seq / time / data 的字段注释与 `ignorable` 的完整读者契约
+  ignorable?: true
+} & (K extends SurfaceEventType ? SurfaceIntent<K> : {
+  surfaceOp?: never
+  sourceEventSeqs?: never
+})
+```
+
 核心词汇(`SessionEventMap`,`types.ts:269-401`)分四类:
 
 | 类别 | 事件 | 语义 |
@@ -80,7 +97,19 @@ export type SessionEvent<T extends SessionEventType = SessionEventType> = {
 | 请求锚 | `request/header` `request/context` | 下一次请求的完整头快照(config/adapterDefaults/tools)与路由元数据;log-only,最新快照即重建值(`request-header.ts:63` 的 `foldRequestHeader`) |
 | 生命周期 | `session/end-seed` `assistant/attempt` `tool/call` | `end-seed` 是构造 seed 边界的持久投影;`attempt` 记录未产出 surface 消息的失败/取消尝试;`tool/call` 记录模型原始 arguments 字符串 |
 
-词汇扩展走 **declaration merging**:如 compaction 在 `packages/compaction/compaction/src/types.ts:17` 向 `SessionEventMap` 合并 `compaction/start|summary|end|prune`;session-title 在 `packages/session/session-title/src/index.ts:71` 合并 `session/title`;todo 合并 `todo/write`。**不 bump 版本号**:`SESSION_FORMAT_VERSION`(`types.ts:88`,当前 `3`)只在结构性变化(header 形状、事件信封、核心事件语义、surface 机制)时递增;新增普通事件类型由信封上的 `ignorable: true` 守卫兜底——读者遇到未知且未标记的事件必须**拒绝重建**(`packages/session/session-persistence/src/storage-contract.ts:69` 的 `validateStoredEvents`)。本构建认识的全部词汇由生成文件 `packages/core/session/src/known-event-types.ts:22` 枚举(56 种)。
+词汇扩展走 **declaration merging**:如 compaction 在 `packages/compaction/compaction/src/types.ts:17` 向 `SessionEventMap` 合并 `compaction/start|summary|end|prune`;session-title 在 `packages/session/session-title/src/index.ts:71` 合并 `session/title`;todo 合并 `todo/write`。**不 bump 版本号**:`SESSION_FORMAT_VERSION`(`types.ts:88`,当前 `3`)只在结构性变化(header 形状、事件信封、核心事件语义、surface 机制)时递增;新增普通事件类型由信封上的 `ignorable: true` 守卫兜底——读者遇到未知且未标记的事件必须**拒绝重建**(`packages/session/session-persistence/src/storage-contract.ts:69` 的 `validateStoredEvents`)。本构建认识的全部词汇由生成文件 `packages/core/session/src/known-event-types.ts:22` 枚举(56 种)。"拒绝重建"落在后端共享校验里,失败信息就是给用户看的:
+
+```typescript
+// packages/session/session-persistence/src/storage-contract.ts:74-80
+for (const event of events) {
+  if (!KNOWN_SESSION_EVENT_TYPES.has(event.type) && event.ignorable !== true) {
+    throw unsupported(
+      `session "${meta.id}" contains event type "${event.type}" (seq ${event.seq}) unknown to this harness and not marked ignorable; refusing to interpret the log — it was likely written by a newer harness`,
+      location,
+    )
+  }
+}
+```
 
 ### 1.2 追加路径:验证先于落日志
 
@@ -106,11 +135,47 @@ append<T extends SessionEventType>(type: T, data: SessionEventMap[T], ...opts) {
 - **热路径不阻塞 I/O**:持久化插件异步缓冲;事件一旦进入 log 即已提交,观察者失败只被记录。
 - **防重入**:同一 store 条目上 `appending` 为真时再 append 直接抛错(`index.ts:729`)。
 - **返回的是落入日志的快照**,不是调用方仍可变的输入。
+
+上面伪代码对应的真实提交段(`index.ts:728-754`),"提交点"就是那一次 `log.push`:
+
+```typescript
+// packages/core/session/src/index.ts:728-754
+// ...(略): 728-731 行是 `appending` 防重入守卫(见上文要点)
+const event = deepFreeze({
+  type,
+  seq: SessionSeq(this.log.length),
+  time: Date.now(),
+  data: dataSnapshot,
+  ...(surfaceMetadataSnapshot as { surfaceOp?: unknown; sourceEventSeqs?: unknown }),
+} as unknown as SessionEvent<T>)
+validateSessionEventData(event, `session event "${type}" at seq ${event.seq}`)
+this.surfaceManager.validateNext(event as SessionEvent)
+// ...(略): 742-748 行收集监听器快照,746-753 行只在 push 之后回调
+this.log.push(event as SessionEvent)
+```
+
 - 构造 seed(resume/fork/replay)走**与 append 完全相同的验证**(`index.ts:562-582`):`snapshotJsonValue` 脱拷贝、信封白名单校验(`assertSessionEventEnvelope`,`index.ts:199`)、seq 必须从 0 连续、`surfaceManager.validateNext` 逐个预检——"不能构造出任何持久化后端无法存储的活日志"。
 
 ### 1.3 关系不变式:invariant 伴随插件
 
 包级不变式(`packages/core/session/src/invariant.ts`)以 Cordis 伴随插件形式安装,在 `internal/dispatch` 阶段对候选事件做**预提交纯校验**(结果暂存 WeakMap),`session/event` 到达时才把转移应用到已提交 trace(`invariant.ts:227-245`)。校验项包括:seq 严格递增、turn/step 编号恰好递增且嵌套合法、`tool/result` 必须有本步内的 `tool/call` 配对(合成 `TOOL_NOT_STARTED` 修复事件除外,`invariant.ts:138`)、`request/header` 与 `request/context` 必须在打开的 turn 内(`invariant.ts:154-159`)等。
+
+"预提交纯校验 → 提交后才推进"的两半写在同一张 `stagedTransitions` WeakMap 上(`invariant.ts:237-245`):
+
+```typescript
+// packages/core/session/src/invariant.ts:237-245
+ctx.on('internal/dispatch', (_mode, eventName, args) => {
+  if (eventName !== 'session/event') return
+  const [session, event] = args as [Session, SessionEvent]
+  const trace = traceFor(session)
+  const transition = validateEvent(trace, event, fail)
+  // A later dispatch listener may veto. Validation is pure, so abandoning
+  // this weakly keyed transition does not advance or retain the session.
+  stagedTransitions.set(event, { session, trace, transition })
+}, { global: true })
+```
+
+已提交事件的另一侧消费同一份暂存转移(`invariant.ts:227-235`):取不到匹配的暂存记录就直接 `fail('session/event reached publication without matching pre-commit validation')`;否则 `stagedTransitions.delete(event)` 之后才 `applyTransition(staged.trace, staged.transition)`。
 
 ### 1.4 存储元数据不入日志
 
@@ -137,6 +202,38 @@ export type SurfaceOp =
 - `tool/result` 替换只允许改 `content`(其余字段深度相等,`assertToolResultRewrite`,`surface.ts:365`);
 - **系统提示头部保护**:覆盖 surface 节点 0 的替换,若节点 0 是 `system/message`,替换者必须是恰好覆盖该节点的 `system/message`(`assertSystemHeadRewrite`,`surface.ts:404-418`)——压缩区间拿不到系统提示。
 
+这四条检查不是散落的防御,而是 `planSurfaceEvent()` 里固定顺序的一段(`surface.ts:428-439`):先验 seq 连续性,再按 `append`/`replace` 分派,replace 才走三重断言:
+
+```typescript
+// packages/core/session/src/surface.ts:428-439
+if (event.seq !== expectedSeq) {
+  throw new Error(`session event seq ${event.seq} is not contiguous; expected ${expectedSeq}`)
+}
+const surfaceOp = validateSurfaceMetadata(event)
+if (surfaceOp === undefined) return
+if (surfaceOp === 'append') {
+  return { kind: 'append', seq: event.seq }
+}
+const range = replacementRange(state, surfaceOp)
+assertProvenance(event, range.shadowedSeqs)
+assertToolResultRewrite(event, range.shadowedSeqs, events, baseSeq)
+assertSystemHeadRewrite(event, state, range.startIdx, range.shadowedSeqs, events, baseSeq)
+```
+
+来源完整性断言的落点(`surface.ts:300-303`)——`shadowedSeqs` 的每一个都必须出现在 `sources` 集合里:
+
+```typescript
+// packages/core/session/src/surface.ts:300-417
+const missing = shadowedSeqs.filter(seq => !sources.has(seq))
+if (missing.length > 0) {
+  throw new Error(`surface replace: sourceEventSeqs must include every shadowed surface node; missing ${missing.join(', ')}`)
+}
+// ...(略): 同文件 415-417 行的系统提示节点 0 保护
+if (event.type !== 'system/message' || shadowedSeqs.length !== 1) {
+  throw new Error('surface replace: node 0 holds the system prompt and may be rewritten only by a system/message over exactly that node')
+}
+```
+
 `replaceGeneration` 计数器(`surface.ts:194`)是缓存失效信号:每次替换递增。
 
 ### 2.2 deriveMessages:从 surface 折叠模型输入
@@ -159,16 +256,41 @@ export function deriveEventMessage(event: SessionEvent): Message | null {
 
 `Session.deriveMessages()`(`index.ts:832`)把它折叠到活 surface 上,带三级缓存:逐节点只投影一次(O(新增节点));`replaceGeneration` 变化时整体重建;返回数组是每次新建的快照,但其中的 `Message` 对象是**共享且深冻结**的——派发、持久历史、模型请求引用同一份冻结消息。这就是"模型可见 ⟺ 已落日志"的执行机构:请求的 `messages` 字段除了 surface 没有第二个来源。
 
+```typescript
+// packages/core/session/src/index.ts:832-853
+deriveMessages(): Message[] {
+  const surface = this.surface
+  const nodes = surface.nodes
+  const generation = surface.replaceGeneration
+  if (generation !== this.derivedGeneration) {
+    this.derived = []
+    this.derivedNodes = 0
+    this.derivedGeneration = generation
+  }
+  for (const seq of nodes.slice(this.derivedNodes)) {
+    const msg = this.deriveEventMessage(this.log[seq]!)
+    // A surface node is one of the five message-producing types, but an
+    // empty-content assistant/message (a max-tokens step that hosts only
+    // usage) derives to null and must not enter the transcript.
+    if (msg) this.derived.push(msg)
+  }
+  this.derivedNodes = nodes.length
+  return [...this.derived]
+}
+```
+
 ### 2.3 请求头折叠与 reason
 
-`request/header` 事件记录下一次请求的完整 `EpochHeader`(config + adapterDefaults + tools);`foldRequestHeader`(`request-header.ts:63`)取最新快照即重建值,活 Session 用 `requestHeader()`(`index.ts:776`)增量维护同一折叠。`reason` 四值(`types.ts:261`):`initial`(新会话首条)/ `resume`(进程重启或 fork seed 后的首个请求)/ `change`(头变化,可带 `startsSeries`)/ `series`(头未变但开新消息系列)。`request/context` 只在路由、容量或系统提示更新模式变化时记录,不参与请求重建。JSONL 存储层对 `sourceEventSeqs` 做区间压缩编码(`seq-ranges.ts:18` 的 `encodeSeqRanges`)。
+`request/header` 事件记录下一次请求的完整 `EpochHeader`(config + adapterDefaults + tools);`foldRequestHeader`(`request-header.ts:63`)取最新快照即重建值——纯离线路径就是一次 `if (event.type === 'request/header') state = canonicalHeader(event.data.header)` 的循环(`request-header.ts:63-69`),活 Session 用 `requestHeader()`(`index.ts:776`)增量维护同一折叠。
+
+`reason` 四值(`types.ts:261`):`initial`(新会话首条)/ `resume`(进程重启或 fork seed 后的首个请求)/ `change`(头变化,可带 `startsSeries`)/ `series`(头未变但开新消息系列)。`request/context` 只在路由、容量或系统提示更新模式变化时记录,不参与请求重建。JSONL 存储层对 `sourceEventSeqs` 做区间压缩编码(`seq-ranges.ts:18` 的 `encodeSeqRanges`)。
 
 ### 2.4 领域投影:`ctx.sessionProjections`
 
 surface 只回答"模型看到什么";UI/遥测/工具需要"会话现在处于什么状态"。`packages/session/session-projection/src/index.ts` 定义了投影能力缝(capability seam):
 
 - 每个领域注册一个 `ProjectionDefinition`(`index.ts:48` 起):`key`、`stateSchema`(zod)、`init(header, inheritedEventCount)`、纯同步 `apply(state, event)`(不感兴趣的事件必须返回同一引用,`Object.is` 门控下游零工作)、可选 `wire.view`、`stateVersion`。
-- 注册表 `SessionProjectionRegistry`(`index.ts:199`)对 `session/event` 只订阅一次,把每条已提交事件**急切地**驱过所有已注册单元(`drive`,`index.ts:220`);cell 按 `(unit, session)` 惰性建立,落后时从内存日志补折叠。
+- 注册表 `SessionProjectionRegistry`(`index.ts:199`)对 `session/event` 只订阅一次,把每条已提交事件**急切地**驱过所有已注册单元(`drive`,`index.ts:220`);cell 按 `(unit, session)` 惰性建立,落后时从内存日志补折叠——门控就是一句 `const changed = !Object.is(next, previousState)`,引用不变则下游零工作(`index.ts:680-684`)。
 - 读面:`stateOf`(host 内部状态)、`snapshot`(所有 wire 单元在同一 `asOfSeq` 水位线的一致切面,`index.ts:338`)、`onChanged` 变更推送。
 - **承载规则**(模块头注释):携带状态的日志事件必须携带**变更后的完整状态**,绝不只带 delta——`todo/write` 写整份清单、`session/title` 是最新标题快照、`goal/change` 同理(`packages/goal/goal/src/index.ts:613`)。
 
@@ -206,13 +328,50 @@ publish: sessions.enter(session); agents.enter(agent); sessions.announce(session
 2. 一条 `step/end`(若 step 打开);
 3. 一条 `turn/end { reason: { kind: 'interrupted' } }`。
 
-合成事件复用最后一条真实事件的时间戳,seq 接续日志;均衡日志返回空数组。同一函数也被 `session-query` 的冷读复用:`readColdSessionLog`(`packages/session-query/session-query/src/cold-read.ts:31`)只读路径在内存中追加同样的事件、**不回写**,使崩溃中段的日志也能折叠成均衡 transcript。
+合成事件复用最后一条真实事件的时间戳,seq 接续日志;均衡日志返回空数组。
+
+```typescript
+// packages/core/session/src/repair.ts:81-133
+const last = events.at(-1)
+if (openTurn === null || last === undefined) return []
+// ...(略): 84-86 行注释说明 seq 基线与时间戳复用最后一条真实事件
+let seq = last.seq + 1
+const time = last.time
+// ...(略): 91-126 行按 Map 插入序为每个未配对 tool-call 补 isError 结果
+// Close an open step next — a turn/end while a step is open is an invariant
+// violation, so the step's boundary must be synthesized before the turn's.
+if (openStep !== null) {
+  closers.push({ type: 'step/end', seq: SessionSeq(seq++), time, data: { turn: openTurn, step: openStep } })
+}
+closers.push({ type: 'turn/end', seq: SessionSeq(seq++), time, data: { turn: openTurn, reason: { kind: 'interrupted' } } })
+```
+
+同一函数也被 `session-query` 的冷读复用:`readColdSessionLog`(`packages/session-query/session-query/src/cold-read.ts:31`)只读路径在内存中追加同样的事件、**不回写**,使崩溃中段的日志也能折叠成均衡 transcript。
 
 ### 3.3 物理层修复:torn tail 与世代文件
 
 JSONL 后端把"物理有效前缀"与"语义均衡"分开处理:
 
 - 读路径 `SessionLogScanner`(`packages/session/session-persistence-jsonl/src/format.ts:385`)按 `\n` 切完整记录;`finish()` 把**无换行结尾的最后一条**当作 torn tail 忽略,返回 `committedBytes` 安全截断点;`recoverable` 模式下一条无法解码的已提交行会抑制后续行,遇到 `turn/end` 才抛错(`format.ts:497-515`)——宁缺毋滥,绝不向读者返回撕裂尾部。
+
+切分与残片拼装是同一段循环(`format.ts:426-441`),只有走完 `\n` 的记录才会进入 `consumeEventLine`,尾部残片被拷进 `fragments` 等下一批:
+
+```typescript
+// packages/session/session-persistence-jsonl/src/format.ts:426-436
+const fragment = chunk.subarray(lineStart, newline)
+let line = fragment
+if (this.fragments.length > 0) {
+  if (fragment.length > 0) this.fragments.push(fragment)
+  line = Buffer.concat(this.fragments, this.fragmentBytes + fragment.length)
+  this.fragments = []
+  this.fragmentBytes = 0
+}
+this.consumeEventLine(line, chunkStart + newline + 1)
+lineStart = newline + 1
+}
+```
+
+每解出一行就推进水位:`this.committedBytes = endByte`(`format.ts:518`)——`committedBytes` 只认完整行的字节边界,`recoverable` 模式下遇到 `turn/end` 的坏行才抛错(`format.ts:511-515`)。
 - 写路径在首次追加前执行截断修复:`persistContiguous`(`session-persistence-jsonl/src/storage.ts:319-343`)先 `truncateTornTail`,再把从撕裂帧里抢救出的完整事件 `recoveredTail` 持久重写,然后才写新批次。
 - 每个会话一个目录:`<root>/<projectKey(cwd)>/<encodeSegment(id)>/`(`format.ts:253/266`),每个格式世代一个不可变文件(`log.v3.jsonl` 或 `.jsonl.zstd`,`format.ts:57`);历史世代只读不删。
 
@@ -221,7 +380,7 @@ JSONL 后端把"物理有效前缀"与"语义均衡"分开处理:
 `docs/session-format-status.md` 是版本权威:写者版本只由 `SESSION_FORMAT_VERSION`(=3)持有,已发布格式 v3 的证据是 `dsh-v0.1.5-alpha.1`。迁移机制:
 
 - `session-format` 定义纯接口族(`packages/session/session-format/src/types.ts`):`SessionFormatCodec`(物理行编解码,随一个已发布格式冻结)、`SessionFormatMigration`(**相邻** vN→vN+1 转换,`chain.ts:30` 强制 `toVersion === fromVersion + 1`)、`SessionFormatCatalog`(分类 + 流式恢复 + 当前格式编码器)。
-- `createSessionFormatChain`(`chain.ts:41`)在构建时校验链**完备且唯一**(v0 到 current 每相邻边恰好一条,缺边/重名即抛),`createStream` 把各边 stage 串成单遍流(`chain.ts:89-127`),header 迁移与 body 迁移分步、inherited cut 逐级传递。
+- `createSessionFormatChain`(`chain.ts:41`)在构建时校验链**完备且唯一**(v0 到 current 每相邻边恰好一条,缺边/重名即抛),`createStream` 把各边 stage 串成单遍流(`chain.ts:89-127`),header 迁移与 body 迁移分步、inherited cut 逐级传递。相邻性与完备性是两段独立的循环:前者 `if (to !== from + 1) throw new SessionFormatError(\`${migration.name} must declare adjacent v${from}->v${from + 1}\`)`(`chain.ts:30-32`),后者逐版本查表 `Session migration v${version}->v${version + 1} is missing`(`chain.ts:65-71`)。
 - 目录是生成代码(`packages/session/session-format-catalog/src/generated.ts:14`):codecs = [v0, v1, v2, v3],migrations = [v0→v1, v1→v2, v2→v3],当前编码器是 v3 codec;`restoreCurrent` 先按 v3 已发布校验恢复,再过**已安装 Session 包**的完整校验(`current.ts:37` 直接 `Session.fromRestore` 空跑一遍)。
 - JSONL 后端打开历史文件时按版本分发:低于当前版本走 `requireStoredLog` 里的迁移准备(`session-persistence-jsonl/src/index.ts:495-519`,按 `(sourcePath, revision)` 记忆化,一次解码/迁移操作可 join),写打开时迁移结果**发布为新的当前世代文件**后再接管;高于当前版本或未知必需词汇一律 fail-closed 拒绝(`storage-contract.ts:46-53/69-104`)。
 
@@ -247,6 +406,28 @@ user/message      surfaceOp: { op:'replace', startSeq, endSeq }   # 真正的 su
 compaction/end    { compactionId, turn, error? }                  # 释放锁; error 记录失败尝试
 ```
 
+真实源码里的声明(`types.ts:19-35` 与 `:68-89`),`compaction/summary` 的注释直接把"相邻的 `user/message` 才是替换者"写成契约:
+
+```typescript
+// packages/compaction/compaction/src/types.ts:19-33
+/**
+ * Marks the start of a compaction — log-only, holds the lock until
+ * `compaction/end`. A numbered owner is strictly enclosed by that open turn;
+ * `null` identifies a standalone manual transaction between turns.
+ */
+'compaction/start': { compactionId: CompactionId; sourceCommandId?: CommandId; turn: number | null }
+/**
+ * Completed summary, its inputs, and its model call facts — log-only, no surfaceOp.
+ * The summary content is in `data.summary`; the actual surface replacement
+ * is performed by the immediately following `user/message` event that
+ * shadows the compacted range. That adjacency is contractual — the
+ * shadowed pricing fields are the replacement's shadow price, so a
+ * consumer may pair a replacement with the metering event directly
+ * before it (`compaction/prune` documents the shared protocol).
+ */
+```
+
+`compaction/end` 释放同名锁、`error` 记录失败尝试;`compaction/prune` 则是纯裁剪路径的影子价格事件,注释把"替换事件必须紧跟其后同步追加"写成硬契约(`types.ts:68-89`)。那份"紧随其后的 `user/message`"在源码里就是下面这一句(`compaction-basic/src/region.ts:491-494`,逐字):`session.append('user/message', checkpointMessage, { surfaceOp: { op: 'replace', startSeq: start, endSeq: end }, sourceEventSeqs: [startEvent.seq, summaryEvent.seq, ...shadowedSeqs] })`——`sourceEventSeqs` 的前两项是锁与摘要事件,其后是被遮蔽的全部 surface 节点。
 被遮蔽的历史**仍在日志里**(transcript 用 append-origin 事件还原,`surface.ts:60` 的 `isAppendSurfaceEvent`),只是不再投影给模型。摘要经 `frameSummary` 包成 `<compacted-summary>` 检查点(`compaction-basic/src/summarizer.ts:186`),其消息来源用 `compactCheckpointSource(compactionId)`(`compaction/src/checkpoint.ts:33`)标记,消费端凭 `{ kind:'plugin', plugin:'compact' }` 识别。
 
 ### 4.2 触发:压力与溢出

@@ -277,6 +277,10 @@ const ready: Promise<ConnectionOutcome> = settling.then(() => {
 
 ### 8.1 正常重连(连上过 → 掉线 → 恢复)
 
+![时序图：04-connection-supervisor](../assets/diagrams/mcp__04-connection-supervisor-280.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
   participant Srv as MCP 服务器进程
@@ -301,6 +305,8 @@ sequenceDiagram
   Note over Conn: failedAttempts 保留到下次断连;<br/>新代存活 ≥ maxDelayMs 才重置为 0
 ```
 
+</details>
+
 ### 8.2 崩溃循环(短暂连上又崩,仍在稳定窗口内)
 
 对应 `reconnect.spec.ts:365-382`(`maxDelayMs: 10_000`、`maxAttempts: 1`):
@@ -324,6 +330,10 @@ t3  再次崩溃(t3 - t2 < 10s)
 
 ### 8.3 预算耗尽与 `enabled:false` 的两种终态
 
+![流程图：04-connection-supervisor](../assets/diagrams/mcp__04-connection-supervisor-327.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["generationDown (173)"] --> B["scheduleReconnect (192)"]
@@ -343,6 +353,8 @@ flowchart TD
   style J fill:#eee,stroke:#888
   style K fill:#ffe,stroke:#aa8
 ```
+
+</details>
 
 | 终态 | 工具是否在注册表 | 调用行为 | 恢复路径 |
 |---|---|---|---|

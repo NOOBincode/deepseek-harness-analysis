@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1329.4674999999997 637" width="1329.4674999999997" height="637" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<g class="block" data-type="alt" data-label="目标是常驻子">
+  <rect x="256.2289999999999" y="188" width="876.0099999999999" height="384" rx="0" ry="0" fill="none" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="256.2289999999999" y="188" width="117.31" height="18" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="262.2289999999999" y="197" font-size="11" font-weight="600" fill="var(--_text-sec)" dy="3.8499999999999996">alt [目标是常驻子]</text>
+  <line x1="256.2289999999999" y1="414" x2="1132.2389999999998" y2="414" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+  <text x="264.2289999999999" y="428" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">[目标不在册]</text>
+</g>
+<line class="lifeline" data-actor="T" x1="128.11449999999996" y1="70" x2="128.11449999999996" y2="607" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="M" x1="374.7174999999999" y1="70" x2="374.7174999999999" y2="607" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="L" x1="593.5329999999999" y1="70" x2="593.5329999999999" y2="607" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="R" x1="809.7549999999999" y1="70" x2="809.7549999999999" y2="607" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="A" x1="1038.9444999999998" y1="70" x2="1038.9444999999998" y2="607" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="T" data-to="M" data-label="sendMessage(sender, targetId, content, {signal})" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="128.11449999999996" y1="90" x2="374.7174999999999" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="251.41599999999994" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">sendMessage(sender, targetId, content, {signal})</text>
+</g>
+<g class="message" data-from="M" data-to="M" data-label="ctx.agents.get(sender.id) !== sender ? UNAUTHORIZED : 继续" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="374.7174999999999,130 404.7174999999999,130 404.7174999999999,150 374.7174999999999,150" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="412.7174999999999" y="140" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">ctx.agents.get(sender.id) !== sender ? UNAUTHORIZED : 继续</text>
+</g>
+<g class="message" data-from="M" data-to="L" data-label="locks.run(childId)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="374.7174999999999" y1="228" x2="593.5329999999999" y2="228" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="484.12524999999994" y="218" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">locks.run(childId)</text>
+</g>
+<g class="message" data-from="M" data-to="M" data-label="contentHasImage → assertImageCapable(可选)" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="374.7174999999999,268 404.7174999999999,268 404.7174999999999,288 374.7174999999999,288" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="412.7174999999999" y="278" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">contentHasImage → assertImageCapable(可选)</text>
+</g>
+<g class="message" data-from="M" data-to="R" data-label="submitAdmitted(无 await 临界区)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="374.7174999999999" y1="338" x2="809.7549999999999" y2="338" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="592.2362499999999" y="328" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">submitAdmitted(无 await 临界区)</text>
+</g>
+<g class="message" data-from="R" data-to="A" data-label="inbox.deliver(steer/queue) → wake" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="809.7549999999999" y1="378" x2="1038.9444999999998" y2="378" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="924.3497499999999" y="368" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">inbox.deliver(steer/queue) → wake</text>
+</g>
+<g class="message" data-from="M" data-to="M" data-label="coldResume → observeSession → foldSubagentDescriptor" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="374.7174999999999,442 404.7174999999999,442 404.7174999999999,462 374.7174999999999,462" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="412.7174999999999" y="452" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">coldResume → observeSession → foldSubagentDescriptor</text>
+</g>
+<g class="message" data-from="M" data-to="R" data-label="materialize(descriptor 提供全部重建输入,不派发 provider)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="374.7174999999999" y1="512" x2="809.7549999999999" y2="512" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="592.2362499999999" y="502" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">materialize(descriptor 提供全部重建输入,不派发 provider)</text>
+</g>
+<g class="message" data-from="M" data-to="R" data-label="submitMaterialized → 投递 + commit(目录) + announced" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="374.7174999999999" y1="552" x2="809.7549999999999" y2="552" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="592.2362499999999" y="542" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">submitMaterialized → 投递 + commit(目录) + announced</text>
+</g>
+<g class="note" data-position="over" data-actors="A">
+  <polygon points="778.4214999999999,560 1293.4674999999997,560 1299.4674999999997,566 1299.4674999999997,583 778.4214999999999,583" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="1293.4674999999997,560 1299.4674999999997,566 1293.4674999999997,566" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1038.9444999999998" y="571.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)"><tspan x="1038.9444999999998" dy="-3.3000000000000007">interrupt_agent 只 cancel 当前 turn,keepInbox:true</tspan><tspan x="1038.9444999999998" dy="14.3">它自己起的 agent 与未认领的 inbox 工作全部保留</tspan></text>
+</g>
+<g class="actor" data-id="T" data-label="send_message / list_agents" data-type="participant">
+  <rect x="29.999999999999986" y="30" width="196.22899999999996" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="128.11449999999996" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">send_message / list_agents</text>
+</g>
+<g class="actor" data-id="M" data-label="SubagentContinuationManager" data-type="participant">
+  <rect x="266.2289999999999" y="30" width="216.97699999999998" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="374.7174999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">SubagentContinuationManager</text>
+</g>
+<g class="actor" data-id="L" data-label="ChildLock(childId)" data-type="participant">
+  <rect x="523.2059999999999" y="30" width="140.654" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="593.5329999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">ChildLock(childId)</text>
+</g>
+<g class="actor" data-id="R" data-label="ContinuableActivationRegistry" data-type="participant">
+  <rect x="703.8599999999999" y="30" width="211.78999999999996" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="809.7549999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">ContinuableActivationRegistry</text>
+</g>
+<g class="actor" data-id="A" data-label="子 Agent(自己起过的)" data-type="participant">
+  <rect x="955.6499999999999" y="30" width="166.58899999999997" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="1038.9444999999998" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">子 Agent(自己起过的)</text>
+</g>
+</svg>

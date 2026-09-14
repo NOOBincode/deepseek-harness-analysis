@@ -41,6 +41,10 @@
 
 ## 发现 → 目录 → 按需加载:函数级调用栈
 
+![流程图：README](../assets/diagrams/skills__README-44.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   subgraph L0["① 发现(发现层,每次 pre-step 一次)"]
@@ -87,6 +91,8 @@ flowchart TD
   L1 -. "目录提供名字" .-> L2
   C2 -. "isUserInvocable 过滤" .-> C9
 ```
+
+</details>
 
 三条纵轴对应三篇主体文档:**①→01、②→03、③→03**;02 贯穿 ① 的合并裁决段,04 是 ① 的失效输入,05 是 ① 的层选择依据。
 

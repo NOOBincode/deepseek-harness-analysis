@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 481.4257499999999 1392.343" width="481.4257499999999" height="1392.343" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<g class="subgraph" data-id="SCHED" data-label="TOOL_RUNTIME_SCHEDULER(index.ts:789)">
+  <rect x="82.62924999999998" y="585.2429999999999" width="337.0049999999999" height="352.1" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="82.62924999999998" y="585.2429999999999" width="337.0049999999999" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="94.62924999999998" y="599.2429999999999" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">TOOL_RUNTIME_SCHEDULER(index.ts:789)</text>
+</g>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="251.13174999999993,1258.5430000000001 251.13174999999993,1286.5430000000001 201.8406666666666,1286.5430000000001 201.8406666666666,1298.5430000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="120.9203333333333,1298.5430000000001 120.9203333333333,1286.5430000000001 41.31983333333329,1286.5430000000001 41.31983333333329,396.543 110.65958333333327,396.543 110.65958333333327,241.18224999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="exclusive" points="177.7203333333333,308.243 177.7203333333333,336.243 155.91274999999993,336.243 155.91274999999993,408.543" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="parallel" points="244.7810833333333,241.18224999999998 244.7810833333333,336.243 346.35074999999995,336.243 346.35074999999995,408.543" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="155.91274999999993,462.343 155.91274999999993,482.343 251.13174999999993,482.343 251.13174999999993,502.343" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="346.35074999999995,462.343 346.35074999999995,482.343 251.13174999999993,482.343 251.13174999999993,502.343" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="J" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="251.13174999999993,1054.0430000000001 251.13174999999993,1094.0430000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="A" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="251.13174999999993,1147.843 251.13174999999993,1187.843" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="251.13174999999993,539.2429999999999 251.13174999999993,629.2429999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="251.13174999999993,921.343 251.13174999999993,983.3429999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="251.13174999999993,699.943 251.13174999999993,739.943" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="251.13174999999993,810.6429999999999 251.13174999999993,850.6429999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="C" data-to="D" data-label="exclusive">
+  <rect x="123.91274999999995" y="343.243" width="63.982000000000006" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="155.90374999999995" y="358.393" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">exclusive</text>
+</g>
+<g class="edge-label" data-from="C" data-to="E" data-label="parallel">
+  <rect x="319.35074999999995" y="343.243" width="53.290000000000006" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="345.99574999999993" y="358.393" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">parallel</text>
+</g>
+<g class="node" data-id="A" data-label="LLM stream 完成
+message.content 过滤 tool-call 块
+agent.ts:486" data-shape="rectangle">
+  <rect x="132.34474999999995" y="1187.843" width="237.57399999999996" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="251.13174999999993" y="1223.193" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="251.13174999999993" dy="-12.350000000000001">LLM stream 完成</tspan><tspan x="251.13174999999993" dy="16.900000000000002">message.content 过滤 tool-call 块</tspan><tspan x="251.13174999999993" dy="16.900000000000002">agent.ts:486</tspan></text>
+</g>
+<g class="node" data-id="B" data-label="&quot;executeToolCalls() tool-calls.ts:60
+parseArguments → PlannedCall[" data-shape="rectangle">
+  <rect x="40" y="1298.5430000000001" width="242.7609999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="161.38049999999996" y="1325.4430000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="161.38049999999996" dy="-3.9000000000000012">&quot;executeToolCalls() tool-calls.ts:60</tspan><tspan x="161.38049999999996" dy="16.900000000000002">parseArguments → PlannedCall[</tspan></text>
+</g>
+<g class="node" data-id="C" data-label="executionMode(首个未提交调用)
+index.ts:1266 恰好 true ?" data-shape="diamond">
+  <polygon points="177.7203333333333,40 311.8418333333333,174.1215 177.7203333333333,308.243 43.59883333333329,174.1215" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="177.7203333333333" y="174.1215" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="177.7203333333333" dy="-3.9000000000000012">executionMode(首个未提交调用)</tspan><tspan x="177.7203333333333" dy="16.900000000000002">index.ts:1266 恰好 true ?</tspan></text>
+</g>
+<g class="node" data-id="D" data-label="组 = 单个调用
+独占 + 排序屏障" data-shape="rectangle">
+  <rect x="84.54974999999993" y="408.543" width="142.726" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="155.91274999999993" y="435.443" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="155.91274999999993" dy="-3.9000000000000012">组 = 单个调用</tspan><tspan x="155.91274999999993" dy="16.900000000000002">独占 + 排序屏障</tspan></text>
+</g>
+<g class="node" data-id="E" data-label="组 = 剩余全部调用
+启动前可重新分类截断" data-shape="rectangle">
+  <rect x="251.27574999999993" y="408.543" width="190.14999999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="346.35074999999995" y="435.443" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="346.35074999999995" dy="-3.9000000000000012">组 = 剩余全部调用</tspan><tspan x="346.35074999999995" dy="16.900000000000002">启动前可重新分类截断</tspan></text>
+</g>
+<g class="node" data-id="F" data-label="runGroup() tool-calls.ts:122" data-shape="rectangle">
+  <rect x="153.09274999999994" y="502.343" width="196.07799999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="251.13174999999993" y="520.793" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">runGroup() tool-calls.ts:122</text>
+</g>
+<g class="node" data-id="J" data-label="commitReady():按模型序
+appendToolResult → tool/result
+tool-calls.ts:147/269" data-shape="rectangle">
+  <rect x="140.86624999999995" y="983.3430000000001" width="220.53099999999995" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="251.13174999999993" y="1018.6930000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="251.13174999999993" dy="-12.350000000000001">commitReady():按模型序</tspan><tspan x="251.13174999999993" dy="16.900000000000002">appendToolResult → tool/result</tspan><tspan x="251.13174999999993" dy="16.900000000000002">tool-calls.ts:147/269</tspan></text>
+</g>
+<g class="node" data-id="K" data-label="additionalContexts → inbox('next-step')
+agent.ts:488-491 → 下一 step 回流模型" data-shape="rectangle">
+  <rect x="118.63624999999993" y="1094.0430000000001" width="264.991" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="251.13174999999993" y="1120.9430000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="251.13174999999993" dy="-3.9000000000000012">additionalContexts → inbox(&#39;next-step&#39;)</tspan><tspan x="251.13174999999993" dy="16.900000000000002">agent.ts:488-491 → 下一 step 回流模型</tspan></text>
+</g>
+<g class="node" data-id="G" data-label="prepare() 有序阶段 index.ts:1449
+createExecution → pre-execute 瀑布
+→ serviceAsk 审批 → guardReason 守卫" data-shape="rectangle">
+  <rect x="111.96724999999992" y="629.2429999999999" width="278.329" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="251.13174999999993" y="664.593" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="251.13174999999993" dy="-12.350000000000001">prepare() 有序阶段 index.ts:1449</tspan><tspan x="251.13174999999993" dy="16.900000000000002">createExecution → pre-execute 瀑布</tspan><tspan x="251.13174999999993" dy="16.900000000000002">→ serviceAsk 审批 → guardReason 守卫</tspan></text>
+</g>
+<g class="node" data-id="H" data-label="dispatch() 可并发阶段 index.ts:1559
+tools/execute 瀑布(around)
+→ dispatchToolBody: fuse 信号 + tool.execute" data-shape="rectangle">
+  <rect x="98.62924999999998" y="739.943" width="305.0049999999999" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="251.13174999999993" y="775.293" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="251.13174999999993" dy="-12.350000000000001">dispatch() 可并发阶段 index.ts:1559</tspan><tspan x="251.13174999999993" dy="16.900000000000002">tools/execute 瀑布(around)</tspan><tspan x="251.13174999999993" dy="16.900000000000002">→ dispatchToolBody: fuse 信号 + tool.execute</tspan></text>
+</g>
+<g class="node" data-id="I" data-label="finalize()/finish() index.ts:1599/1621
+post-execute → finalizeContent
+→ materializeFinalResult → notifyResult" data-shape="rectangle">
+  <rect x="120.11824999999996" y="850.6429999999999" width="262.02699999999993" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="251.13174999999993" y="885.9929999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="251.13174999999993" dy="-12.350000000000001">finalize()/finish() index.ts:1599/1621</tspan><tspan x="251.13174999999993" dy="16.900000000000002">post-execute → finalizeContent</tspan><tspan x="251.13174999999993" dy="16.900000000000002">→ materializeFinalResult → notifyResult</tspan></text>
+</g>
+</svg>

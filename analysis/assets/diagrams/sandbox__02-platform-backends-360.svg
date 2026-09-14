@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 579.8149999999998 1377.5800000000002" width="579.8149999999998" height="1377.5800000000002" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="291.53774999999996,93.80000000000001 291.53774999999996,133.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="291.53774999999996,187.60000000000002 291.53774999999996,227.60000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="291.53774999999996,264.5 291.53774999999996,304.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="D1" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="252.14108333333328,501.48333333333335 252.14108333333328,568.88 204.35849999999996,568.88 204.35849999999996,641.18" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D1" data-to="D2" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="204.35849999999996,678.0799999999999 204.35849999999996,718.0799999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D2" data-to="D3" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="204.35849999999996,754.9799999999999 204.35849999999996,794.9799999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D3" data-to="D4" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="204.35849999999996,831.8799999999999 204.35849999999996,871.8799999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="330.9344166666666,501.48333333333335 330.9344166666666,722.68 378.7169999999999,722.68 378.7169999999999,936.7799999999999 301.53774999999996,936.7799999999999 301.53774999999996,948.7799999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D4" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="204.35849999999996,908.7799999999999 204.35849999999996,936.7799999999999 281.53774999999996,936.7799999999999 281.53774999999996,948.7799999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="281.53774999999996,985.6799999999998 281.53774999999996,997.6799999999998 179.83149999999995,997.6799999999998 179.83149999999995,1069.9799999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="E1" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="301.53774999999996,985.6799999999998 301.53774999999996,997.6799999999998 403.2439999999999,997.6799999999998 403.2439999999999,1069.9799999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E1" data-to="E2" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="403.2439999999999,1106.8799999999999 403.2439999999999,1146.8799999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E2" data-to="E3" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="403.2439999999999,1183.78 403.2439999999999,1223.78" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E3" data-to="E4" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="403.2439999999999,1260.68 403.2439999999999,1300.68" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="D" data-to="D1" data-label="否">
+  <rect x="189.3585" y="575.88" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="204.12349999999998" y="591.03" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="edge-label" data-from="D" data-to="E" data-label="是">
+  <rect x="363.7169999999999" y="729.68" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="378.4819999999999" y="744.8299999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="E" data-to="F" data-label="是">
+  <rect x="164.83149999999995" y="1004.6799999999998" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="179.59649999999993" y="1019.8299999999998" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="E" data-to="E1" data-label="否">
+  <rect x="388.2439999999999" y="1004.6799999999998" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="403.0089999999999" y="1019.8299999999998" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="node" data-id="A" data-label="materializeAclGrant(sessionId, workspaceRoot)
+sandbox-local:392" data-shape="rectangle">
+  <rect x="130.88424999999995" y="40" width="321.30699999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="291.53774999999996" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="291.53774999999996" dy="-3.9000000000000012">materializeAclGrant(sessionId, workspaceRoot)</tspan><tspan x="291.53774999999996" dy="16.900000000000002">sandbox-local:392</tspan></text>
+</g>
+<g class="node" data-id="B" data-label="assertTempRootOutsideWorkspace
+临时根在工作区内即拒" data-shape="rectangle">
+  <rect x="164.97024999999996" y="133.8" width="253.13499999999993" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="291.53774999999996" y="160.70000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="291.53774999999996" dy="-3.9000000000000012">assertTempRootOutsideWorkspace</tspan><tspan x="291.53774999999996" dy="16.900000000000002">临时根在工作区内即拒</tspan></text>
+</g>
+<g class="node" data-id="C" data-label="writeSid = workspaceWriteSid(root)" data-shape="rectangle">
+  <rect x="167.19324999999998" y="227.60000000000002" width="248.68899999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="291.53774999999996" y="246.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">writeSid = workspaceWriteSid(root)</text>
+</g>
+<g class="node" data-id="D" data-label="workspaceGrants.has(root)?" data-shape="diamond">
+  <polygon points="291.53774999999996,304.5 409.72774999999996,422.69 291.53774999999996,540.88 173.34774999999996,422.69" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="291.53774999999996" y="422.69" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">workspaceGrants.has(root)?</text>
+</g>
+<g class="node" data-id="D1" data-label="AclWriteGrant.create(writeSid)" data-shape="rectangle">
+  <rect x="94.09299999999999" y="641.18" width="220.53099999999995" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="204.35849999999996" y="659.63" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">AclWriteGrant.create(writeSid)</text>
+</g>
+<g class="node" data-id="D2" data-label="grant.add(root, true) ← standing" data-shape="rectangle">
+  <rect x="94.09299999999998" y="718.0799999999999" width="220.53099999999998" height="36.900000000000006" rx="0" ry="0" fill="#efe" stroke="#8a8" stroke-width="0.75" />
+  <text x="204.35849999999996" y="736.53" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">grant.add(root, true) ← standing</text>
+</g>
+<g class="node" data-id="D3" data-label="grantWrite → hasExactGrant 跳过 或 merge-apply" data-shape="rectangle">
+  <rect x="40" y="794.9799999999999" width="328.7169999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="204.35849999999996" y="813.43" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">grantWrite → hasExactGrant 跳过 或 merge-apply</text>
+</g>
+<g class="node" data-id="D4" data-label="workspaceGrants.set(root, grant)" data-shape="rectangle">
+  <rect x="85.94199999999998" y="871.8799999999999" width="236.83299999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="204.35849999999996" y="890.3299999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">workspaceGrants.set(root, grant)</text>
+</g>
+<g class="node" data-id="E" data-label="E" data-shape="rectangle">
+  <rect x="261.53774999999996" y="948.7799999999999" width="60" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="291.53774999999996" y="967.2299999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">E</text>
+</g>
+<g class="node" data-id="F" data-label="复用现有 capability" data-shape="rectangle">
+  <rect x="99.94699999999995" y="1069.9799999999998" width="159.769" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="179.83149999999995" y="1088.4299999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">复用现有 capability</text>
+</g>
+<g class="node" data-id="E1" data-label="mkdtempSync(join(tmpdir(), 'dsh-'))" data-shape="rectangle">
+  <rect x="283.71599999999995" y="1069.9799999999998" width="239.05599999999995" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="403.2439999999999" y="1088.4299999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">mkdtempSync(join(tmpdir(), &#39;dsh-&#39;))</text>
+</g>
+<g class="node" data-id="E2" data-label="AclWriteGrant.create(tempWriteSid(dir))" data-shape="rectangle">
+  <rect x="266.67299999999994" y="1146.8799999999999" width="273.14199999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="403.2439999999999" y="1165.33" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">AclWriteGrant.create(tempWriteSid(dir))</text>
+</g>
+<g class="node" data-id="E3" data-label="grant.add(tempDir) ← 默认 revocable" data-shape="rectangle">
+  <rect x="275.93549999999993" y="1223.78" width="254.617" height="36.900000000000006" rx="0" ry="0" fill="#fee" stroke="#a88" stroke-width="0.75" />
+  <text x="403.2439999999999" y="1242.23" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">grant.add(tempDir) ← 默认 revocable</text>
+</g>
+<g class="node" data-id="E4" data-label="tempCapabilities.set(key, capability)" data-shape="rectangle">
+  <rect x="278.89949999999993" y="1300.68" width="248.68899999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="403.2439999999999" y="1319.13" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">tempCapabilities.set(key, capability)</text>
+</g>
+</svg>

@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 835.7719166666665 1213.6999999999996" width="835.7719166666665" height="1213.6999999999996" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="232.3585,93.80000000000001 232.3585,133.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="232.3585,187.60000000000002 232.3585,227.60000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="deny" points="175.74374999999998,281.40000000000003 175.74374999999998,369.70000000000005 57,369.70000000000005 57,629 156.38104166666665,629 156.38104166666665,649.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="ask" points="232.3585,281.40000000000003 232.3585,381.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="allow" points="288.97325,281.40000000000003 288.97325,369.70000000000005 437.717,369.70000000000005 437.717,507.80000000000007 406.65116666666665,507.80000000000007 406.65116666666665,519.8000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="allowed-once" points="287.1446666666667,435.50000000000006 287.1446666666667,463.50000000000006 295.05949999999996,463.50000000000006 295.05949999999996,507.80000000000007 386.65116666666665,507.80000000000007 386.65116666666665,519.8000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="rejected / cancelled / unavailable" points="177.57233333333335,435.50000000000006 177.57233333333335,568.7 208.6085,568.7 208.6085,629 201.88079166666665,629 201.88079166666665,649.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="reason" points="386.65116666666665,556.7 386.65116666666665,584.7 339.5446666666666,584.7 339.5446666666666,629 247.38054166666663,629 247.38054166666663,649.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="undefined" points="406.65116666666665,556.7 406.65116666666665,585.6 423.467125,585.6 423.467125,649.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="423.467125,686.35 423.467125,734.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="danger-full-access" points="380.90745833333335,788.5999999999999 380.90745833333335,816.5999999999999 286.29116666666664,816.5999999999999 286.29116666666664,888.8999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="read-only / workspace-write" points="466.02679166666667,788.5999999999999 466.02679166666667,816.5999999999999 516.0021666666667,816.5999999999999 516.0021666666667,888.8999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="无可用后端" points="476.53,925.7999999999998 476.53,953.7999999999998 393.5514166666666,953.7999999999998 393.5514166666666,1026.0999999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="wrapped argv" points="555.4743333333332,925.7999999999998 555.4743333333332,953.7999999999998 638.4529166666666,953.7999999999998 638.4529166666665,1026.0999999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="M" data-to="N" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="638.4529166666665,1079.8999999999996 638.4529166666665,1119.8999999999996" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="C" data-to="D" data-label="deny">
+  <rect x="36" y="591.7" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="56.705" y="606.85" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">deny</text>
+</g>
+<g class="edge-label" data-from="C" data-to="E" data-label="ask">
+  <rect x="214.3585" y="316.40000000000003" width="35.47" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="232.0935" y="331.55" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">ask</text>
+</g>
+<g class="edge-label" data-from="C" data-to="G" data-label="allow">
+  <rect x="416.717" y="454.50000000000006" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="437.42199999999997" y="469.65000000000003" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">allow</text>
+</g>
+<g class="edge-label" data-from="E" data-to="G" data-label="allowed-once">
+  <rect x="254.55949999999996" y="470.50000000000006" width="80.02000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="294.56949999999995" y="485.65000000000003" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">allowed-once</text>
+</g>
+<g class="edge-label" data-from="E" data-to="D" data-label="rejected / cancelled / unavailable">
+  <rect x="123.10849999999999" y="575.7" width="170.902" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="208.55949999999999" y="590.85" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">rejected / cancelled / unavailable</text>
+</g>
+<g class="edge-label" data-from="G" data-to="D" data-label="reason">
+  <rect x="313.0446666666666" y="591.7" width="52.102" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="339.0956666666666" y="606.85" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">reason</text>
+</g>
+<g class="edge-label" data-from="G" data-to="H" data-label="undefined">
+  <rect x="391.467125" y="592.6" width="63.982000000000006" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="423.458125" y="607.75" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">undefined</text>
+</g>
+<g class="edge-label" data-from="I" data-to="J" data-label="danger-full-access">
+  <rect x="232.79116666666664" y="823.5999999999999" width="106.75000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="286.16616666666664" y="838.7499999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">danger-full-access</text>
+</g>
+<g class="edge-label" data-from="I" data-to="K" data-label="read-only / workspace-write">
+  <rect x="441.50216666666665" y="823.5999999999999" width="148.924" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="515.9641666666666" y="838.7499999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">read-only / workspace-write</text>
+</g>
+<g class="edge-label" data-from="K" data-to="L" data-label="无可用后端">
+  <rect x="354.5514166666667" y="960.7999999999998" width="77.05000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="393.07641666666666" y="975.9499999999998" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">无可用后端</text>
+</g>
+<g class="edge-label" data-from="K" data-to="M" data-label="wrapped argv">
+  <rect x="596.4529166666666" y="960.7999999999998" width="83.58400000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="638.2449166666667" y="975.9499999999998" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">wrapped argv</text>
+</g>
+<g class="node" data-id="A" data-label="模型 tool-call 块
+args 为 JSON.parse 结果或原始串" data-shape="rectangle">
+  <rect x="105.05000000000001" y="40" width="254.61699999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="232.3585" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="232.3585" dy="-3.9000000000000012">模型 tool-call 块</tspan><tspan x="232.3585" dy="16.900000000000002">args 为 JSON.parse 结果或原始串</tspan></text>
+</g>
+<g class="node" data-id="B" data-label="ToolRuntime.createExecution
+snapshotJsonValue 必须无损 + deepFreeze" data-shape="rectangle">
+  <rect x="77.63300000000001" y="133.8" width="309.45099999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="232.3585" y="160.70000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="232.3585" dy="-3.9000000000000012">ToolRuntime.createExecution</tspan><tspan x="232.3585" dy="16.900000000000002">snapshotJsonValue 必须无损 + deepFreeze</tspan></text>
+</g>
+<g class="node" data-id="C" data-label="tools/pre-execute 瀑布
+插件 / hook 可 allow / deny / ask" data-shape="rectangle">
+  <rect x="119.12899999999999" y="227.60000000000002" width="226.459" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="232.3585" y="254.50000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="232.3585" dy="-3.9000000000000012">tools/pre-execute 瀑布</tspan><tspan x="232.3585" dy="16.900000000000002">插件 / hook 可 allow / deny / ask</tspan></text>
+</g>
+<g class="node" data-id="D" data-label="isError 结果
+仍走 tools/post-execute" data-shape="rectangle">
+  <rect x="110.88129166666667" y="649.45" width="181.99899999999997" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="201.88079166666665" y="676.35" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="201.88079166666665" dy="-3.9000000000000012">isError 结果</tspan><tspan x="201.88079166666665" dy="16.900000000000002">仍走 tools/post-execute</tspan></text>
+</g>
+<g class="node" data-id="E" data-label="ApprovalService.request
+approval/asked + approval/decided 成对落日志" data-shape="rectangle">
+  <rect x="68" y="381.70000000000005" width="328.717" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="232.3585" y="408.6" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="232.3585" dy="-3.9000000000000012">ApprovalService.request</tspan><tspan x="232.3585" dy="16.900000000000002">approval/asked + approval/decided 成对落日志</tspan></text>
+</g>
+<g class="node" data-id="G" data-label="G" data-shape="rectangle">
+  <rect x="366.65116666666665" y="519.8000000000001" width="60" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="396.65116666666665" y="538.2500000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">G</text>
+</g>
+<g class="node" data-id="H" data-label="工具体 execute" data-shape="rectangle">
+  <rect x="355.438625" y="649.45" width="136.05700000000002" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="423.467125" y="667.9000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">工具体 execute</text>
+</g>
+<g class="node" data-id="I" data-label="ctx.sandboxPolicy.resolve(session)
+mode + workspaceRoot + sessionId" data-shape="rectangle">
+  <rect x="295.78812500000004" y="734.8" width="255.35799999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="423.467125" y="761.6999999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="423.467125" dy="-3.9000000000000012">ctx.sandboxPolicy.resolve(session)</tspan><tspan x="423.467125" dy="16.900000000000002">mode + workspaceRoot + sessionId</tspan></text>
+</g>
+<g class="node" data-id="J" data-label="直接 spawn 原始 argv" data-shape="rectangle">
+  <rect x="198.9966666666666" y="888.8999999999999" width="174.589" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="286.29116666666664" y="907.3499999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">直接 spawn 原始 argv</text>
+</g>
+<g class="node" data-id="K" data-label="ctx.sandbox.confine(argv, policy)" data-shape="rectangle">
+  <rect x="397.5856666666666" y="888.8999999999999" width="236.83299999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="516.0021666666667" y="907.3499999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">ctx.sandbox.confine(argv, policy)</text>
+</g>
+<g class="node" data-id="L" data-label="SandboxUnavailableError
+SANDBOX_UNAVAILABLE,fail closed" data-shape="rectangle">
+  <rect x="261.0559166666667" y="1026.0999999999997" width="264.9909999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="393.5514166666666" y="1052.9999999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="393.5514166666666" dy="-3.9000000000000012">SandboxUnavailableError</tspan><tspan x="393.5514166666666" dy="16.900000000000002">SANDBOX_UNAVAILABLE,fail closed</tspan></text>
+</g>
+<g class="node" data-id="M" data-label="内核 / ACL 拒绝
+sandbox denial marker" data-shape="rectangle">
+  <rect x="550.0469166666666" y="1026.0999999999997" width="176.81199999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="638.4529166666665" y="1052.9999999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="638.4529166666665" dy="-3.9000000000000012">内核 / ACL 拒绝</tspan><tspan x="638.4529166666665" dy="16.900000000000002">sandbox denial marker</tspan></text>
+</g>
+<g class="node" data-id="N" data-label="携带 sandbox_permissions + justification 升级
+approveEscalation → 用户审批" data-shape="rectangle">
+  <rect x="481.13391666666666" y="1119.8999999999996" width="314.6379999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="638.4529166666666" y="1146.7999999999997" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="638.4529166666666" dy="-3.9000000000000012">携带 sandbox_permissions + justification 升级</tspan><tspan x="638.4529166666666" dy="16.900000000000002">approveEscalation → 用户审批</tspan></text>
+</g>
+</svg>

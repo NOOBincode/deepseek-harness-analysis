@@ -1,0 +1,285 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1311.7900833333333 2712.955" width="1311.7900833333333" height="2712.955" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<g class="subgraph" data-id="tool" data-label="① 工具层(策略的解析者与审批的发起者)">
+  <rect x="247.1775" y="1667.355" width="690.0934999999998" height="489.00000000000006" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="247.1775" y="1667.355" width="690.0934999999998" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="259.1775" y="1681.355" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">① 工具层(策略的解析者与审批的发起者)</text>
+</g>
+<g class="subgraph" data-id="exec" data-label="② 执行器(把策略落到精确 argv)">
+  <rect x="618.4199999999998" y="2208.355" width="455.1954999999999" height="438.6" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="618.4199999999998" y="2208.355" width="455.1954999999999" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="630.4199999999998" y="2222.355" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">② 执行器(把策略落到精确 argv)</text>
+</g>
+<g class="subgraph" data-id="prov" data-label="③ Provider(选执行器 + 生成包装 argv)">
+  <rect x="160.51308333333327" y="58" width="948.4288333333332" height="807.155" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="160.51308333333327" y="58" width="948.4288333333332" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="172.51308333333327" y="72" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">③ Provider(选执行器 + 生成包装 argv)</text>
+</g>
+<g class="subgraph" data-id="settle" data-label="④ 结算分类(命令没跑 vs 被拦住)">
+  <rect x="40" y="917.155" width="825.4134999999999" height="378.3" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="40" y="917.155" width="825.4134999999999" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="52" y="931.155" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">④ 结算分类(命令没跑 vs 被拦住)</text>
+</g>
+<g class="subgraph" data-id="deny" data-label="⑤ 模型可见文本与升级回路">
+  <rect x="198.43300000000002" y="1347.455" width="497.8029999999999" height="207.60000000000002" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="198.43300000000002" y="1347.455" width="497.8029999999999" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="210.43300000000002" y="1361.455" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">⑤ 模型可见文本与升级回路</text>
+</g>
+<polyline class="edge" data-from="T7" data-to="E1" data-style="dotted" data-arrow-start="false" data-arrow-end="true" points="822.8614999999999,1858.955 822.8614999999998,2252.355" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E5" data-to="P1" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="930.6774999999998,2630.955 930.6774999999998,2664.955 1263.7900833333333,2664.955 1263.7900833333333,40 544.1082499999999,40 544.1082499999999,102" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P2" data-to="S1" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="299.7460833333332,473.95500000000004 299.7460833333332,46 503.46149999999994,46 503.46149999999994,961.155" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P6" data-to="S1" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="871.9248749999997,567.755 871.9248749999997,46 503.46149999999994,46 503.46149999999994,961.155" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="S5" data-to="D1" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="177.75099999999998,1279.455 177.75099999999998,1329.455 333.5905,1329.455 333.5905,1391.455" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="S6" data-to="D2" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="728.4034999999999,1185.655 728.4034999999999,1329.455 572.564,1329.455 572.564,1391.455" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D3" data-to="T4" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="模型重试同一命令" points="333.5905,1539.0549999999998 333.5905,1870.955 339.7753333333333,1870.955 339.7753333333333,1898.955" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="T1" data-to="T2" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="605.0065,1765.155 605.0065,1805.155" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="T2" data-to="T3" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="605.0065,1858.955 605.0065,1898.955" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="T1" data-to="T4" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="带 sandbox_permissions" points="556.17225,1765.155 556.17225,1777.155 409.5905,1777.155 409.5905,1870.955 403.4056666666666,1870.955 403.4056666666666,1898.955" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="T4" data-to="T5" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="371.59049999999996,1952.755 371.59049999999996,1992.755" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="T5" data-to="T6" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="371.59049999999996,2046.555 371.59049999999996,2086.5550000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="T1" data-to="T7" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="653.84075,1765.155 653.84075,1777.155 822.8614999999999,1777.155 822.8614999999999,1805.155" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E1" data-to="E2" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="822.8614999999999,2306.155 822.8614999999999,2346.155" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E2" data-to="E3" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="mode === danger-full-access" points="782.2778333333332,2399.955 782.2778333333332,2411.955 715.0454999999998,2411.955 715.0454999999998,2500.255" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E2" data-to="E4" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="read-only / workspace-write" points="863.4451666666665,2399.955 863.4451666666665,2411.955 930.6774999999998,2411.955 930.6774999999998,2500.255" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E4" data-to="E5" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="930.6774999999998,2554.0550000000003 930.6774999999998,2594.0550000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P1" data-to="P2" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="507.7990833333332,283.54583333333335 507.7990833333332,331.855 299.7460833333332,331.855 299.7460833333332,420.15500000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P1" data-to="P3" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="580.4174166666666,283.54583333333335 580.4174166666666,331.855 673.9689999999998,331.855 673.9689999999998,420.15500000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P3" data-to="P4" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="673.9689999999998,473.95500000000004 673.9689999999998,493.95500000000004 546.1261666666666,493.95500000000004 546.1261666666666,513.955" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P4" data-to="P5" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="508.6299999999999,567.7550000000001 508.6299999999999,579.7550000000001 452.7434166666666,579.7550000000001 452.7434166666666,607.7550000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P3" data-to="P6" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="673.9689999999998,473.95500000000004 673.9689999999998,493.95500000000004 871.9248749999997,493.95500000000004 871.9248749999997,513.955" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P6" data-to="P7" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="871.9248749999998,567.7550000000001 871.9248749999998,579.7550000000001 857.6984166666665,579.7550000000001 857.6984166666665,607.7550000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P6" data-to="P8" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="win32" points="928.1691249999998,567.7550000000001 928.1691249999998,579.7550000000001 980.4534166666665,579.7550000000001 980.4534166666665,701.5550000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P8" data-to="P9" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="980.4534166666665,755.355 980.4534166666665,795.355" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P4" data-to="P10" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="无链或无候选通过" points="583.6223333333332,567.7550000000001 583.6223333333332,579.7550000000001 639.5089166666666,579.7550000000001 639.5089166666666,701.5550000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="S1" data-to="S2" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="451.66324999999995,998.055 451.66324999999995,1010.055 220.4959166666667,1010.055 220.4959166666667,1038.055" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="S1" data-to="S3" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="503.46149999999994,998.055 503.46149999999994,1038.055" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="S2" data-to="S4" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="命中致命行" points="258.48608333333334,1091.855 258.48608333333334,1103.855 332.3495833333333,1103.855 332.3495833333333,1197.655 401.4583333333333,1197.655 401.4583333333333,1225.655" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="S3" data-to="S4" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="ENOENT/EACCES 指向 argv[0]" points="503.46149999999994,1091.855 503.46149999999994,1197.655 479.4146666666666,1197.655 479.4146666666666,1225.655" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="S2" data-to="S5" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="未命中" points="182.50575000000003,1091.855 182.50575000000003,1103.855 177.75099999999998,1103.855 177.75099999999998,1225.655" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="S1" data-to="S6" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="后台进程" points="555.2597499999999,998.055 555.2597499999999,1010.055 728.4034999999999,1010.055 728.4034999999999,1131.855" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D1" data-to="D3" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="333.5905,1445.2549999999999 333.5905,1485.2549999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="D3" data-to="T4" data-label="模型重试同一命令">
+  <rect x="277.0905" y="1596.055" width="112.69000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="333.43550000000005" y="1611.2050000000002" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">模型重试同一命令</text>
+</g>
+<g class="edge-label" data-from="T1" data-to="T4" data-label="带 sandbox_permissions">
+  <rect x="340.5905" y="1816.905" width="137.04400000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="409.11250000000007" y="1832.055" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">带 sandbox_permissions</text>
+</g>
+<g class="edge-label" data-from="E2" data-to="E3" data-label="mode === danger-full-access">
+  <rect x="638.0454999999998" y="2434.955" width="153.08200000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="714.5864999999999" y="2450.105" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">mode === danger-full-access</text>
+</g>
+<g class="edge-label" data-from="E2" data-to="E4" data-label="read-only / workspace-write">
+  <rect x="856.1774999999998" y="2434.955" width="148.924" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="930.6394999999998" y="2450.105" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">read-only / workspace-write</text>
+</g>
+<g class="edge-label" data-from="P1" data-to="P2" data-label="是">
+  <rect x="284.7460833333332" y="354.855" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="299.5110833333332" y="370.005" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="P1" data-to="P3" data-label="否">
+  <rect x="658.9689999999999" y="354.855" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="673.7339999999999" y="370.005" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="edge-label" data-from="P6" data-to="P8" data-label="win32">
+  <rect x="957.9534166666665" y="619.5050000000001" width="44.974" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="980.4404166666665" y="634.6550000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">win32</text>
+</g>
+<g class="edge-label" data-from="P4" data-to="P10" data-label="无链或无候选通过">
+  <rect x="583.0089166666666" y="619.5050000000001" width="112.69000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="639.3539166666666" y="634.6550000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">无链或无候选通过</text>
+</g>
+<g class="edge-label" data-from="S2" data-to="S4" data-label="命中致命行">
+  <rect x="293.3495833333334" y="1143.605" width="77.05000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="331.87458333333336" y="1158.755" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">命中致命行</text>
+</g>
+<g class="edge-label" data-from="S3" data-to="S4" data-label="ENOENT/EACCES 指向 argv[0]">
+  <rect x="419.46149999999994" y="1143.605" width="167.932" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="503.42749999999995" y="1158.755" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">ENOENT/EACCES 指向 argv[0]</text>
+</g>
+<g class="edge-label" data-from="S2" data-to="S5" data-label="未命中">
+  <rect x="150.75099999999998" y="1143.605" width="53.29" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="177.396" y="1158.755" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">未命中</text>
+</g>
+<g class="edge-label" data-from="S1" data-to="S6" data-label="后台进程">
+  <rect x="695.4034999999999" y="1049.8049999999998" width="65.17" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="727.9884999999999" y="1064.955" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">后台进程</text>
+</g>
+<g class="node" data-id="T1" data-label="bash.execute
+tool-bash/src/index.ts:329" data-shape="rectangle">
+  <rect x="507.33799999999997" y="1711.355" width="195.33699999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="605.0065" y="1738.255" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="605.0065" dy="-3.9000000000000012">bash.execute</tspan><tspan x="605.0065" dy="16.900000000000002">tool-bash/src/index.ts:329</tspan></text>
+</g>
+<g class="node" data-id="T2" data-label="resolveSandboxPolicy
+tool-bash/src/index.ts:198" data-shape="rectangle">
+  <rect x="509.5609999999999" y="1805.155" width="190.89099999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="605.0065" y="1832.055" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="605.0065" dy="-3.9000000000000012">resolveSandboxPolicy</tspan><tspan x="605.0065" dy="16.900000000000002">tool-bash/src/index.ts:198</tspan></text>
+</g>
+<g class="node" data-id="T3" data-label="ctx.sandboxPolicy.resolve
+sandbox-policy/src/index.ts:163" data-shape="rectangle">
+  <rect x="491.03599999999994" y="1898.955" width="227.94099999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="605.0065" y="1925.855" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="605.0065" dy="-3.9000000000000012">ctx.sandboxPolicy.resolve</tspan><tspan x="605.0065" dy="16.900000000000002">sandbox-policy/src/index.ts:163</tspan></text>
+</g>
+<g class="node" data-id="T4" data-label="approveBashEscalation
+tool-bash/src/index.ts:212" data-shape="rectangle">
+  <rect x="276.145" y="1898.955" width="190.89099999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="371.59049999999996" y="1925.855" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="371.59049999999996" dy="-3.9000000000000012">approveBashEscalation</tspan><tspan x="371.59049999999996" dy="16.900000000000002">tool-bash/src/index.ts:212</tspan></text>
+</g>
+<g class="node" data-id="T5" data-label="approveEscalation
+sandbox/src/escalation.ts:157" data-shape="rectangle">
+  <rect x="263.1775" y="1992.755" width="216.82599999999994" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="371.59049999999996" y="2019.6550000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="371.59049999999996" dy="-3.9000000000000012">approveEscalation</tspan><tspan x="371.59049999999996" dy="16.900000000000002">sandbox/src/escalation.ts:157</tspan></text>
+</g>
+<g class="node" data-id="T6" data-label="ctx.approval.request
+escalation.ts:173" data-shape="rectangle">
+  <rect x="289.11249999999995" y="2086.5550000000003" width="164.95600000000002" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="371.59049999999996" y="2113.4550000000004" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="371.59049999999996" dy="-3.9000000000000012">ctx.approval.request</tspan><tspan x="371.59049999999996" dy="16.900000000000002">escalation.ts:173</tspan></text>
+</g>
+<g class="node" data-id="T7" data-label="拼 request.sandboxPolicy
+tool-bash/src/index.ts:346" data-shape="rectangle">
+  <rect x="724.4519999999999" y="1805.155" width="196.81899999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="822.8614999999999" y="1832.055" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="822.8614999999999" dy="-3.9000000000000012">拼 request.sandboxPolicy</tspan><tspan x="822.8614999999999" dy="16.900000000000002">tool-bash/src/index.ts:346</tspan></text>
+</g>
+<g class="node" data-id="E1" data-label="ShellExecutor.resolve
+bash-sandbox/src/index.ts:85" data-shape="rectangle">
+  <rect x="713.3369999999999" y="2252.355" width="219.04899999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="822.8614999999999" y="2279.255" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="822.8614999999999" dy="-3.9000000000000012">ShellExecutor.resolve</tspan><tspan x="822.8614999999999" dy="16.900000000000002">bash-sandbox/src/index.ts:85</tspan></text>
+</g>
+<g class="node" data-id="E2" data-label="run / start
+bash-sandbox/src/index.ts:89 / :117" data-shape="rectangle">
+  <rect x="701.1104999999999" y="2346.155" width="243.50199999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="822.8614999999999" y="2373.0550000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="822.8614999999999" dy="-3.9000000000000012">run / start</tspan><tspan x="822.8614999999999" dy="16.900000000000002">bash-sandbox/src/index.ts:89 / :117</tspan></text>
+</g>
+<g class="node" data-id="E3" data-label="super.run(spec)
+不调用 ctx.sandbox" data-shape="rectangle">
+  <rect x="634.4199999999998" y="2500.255" width="161.251" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="715.0454999999998" y="2527.155" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="715.0454999999998" dy="-3.9000000000000012">super.run(spec)</tspan><tspan x="715.0454999999998" dy="16.900000000000002">不调用 ctx.sandbox</tspan></text>
+</g>
+<g class="node" data-id="E4" data-label="confine(command, policy)
+bash-sandbox/src/index.ts:179" data-shape="rectangle">
+  <rect x="819.6709999999998" y="2500.255" width="222.01299999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="930.6774999999998" y="2527.155" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="930.6774999999998" dy="-3.9000000000000012">confine(command, policy)</tspan><tspan x="930.6774999999998" dy="16.900000000000002">bash-sandbox/src/index.ts:179</tspan></text>
+</g>
+<g class="node" data-id="E5" data-label="&quot;ctx.sandbox.confine(['bash','-c',cmd" data-shape="rectangle">
+  <rect x="803.7394999999999" y="2594.0550000000003" width="253.87599999999992" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="930.6774999999999" y="2612.505" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">&quot;ctx.sandbox.confine([&#39;bash&#39;,&#39;-c&#39;,cmd</text>
+</g>
+<g class="node" data-id="P1" data-label="runnerCommand 已配置?" data-shape="diamond">
+  <polygon points="544.1082499999999,102.00000000000001 653.0357499999999,210.9275 544.1082499999999,319.855 435.1807499999999,210.9275" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="544.1082499999999" y="210.9275" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">runnerCommand 已配置?</text>
+</g>
+<g class="node" data-id="P2" data-label="bwrap 兼容 profile + 断言 full
+sandbox-local/src/index.ts:317-323" data-shape="rectangle">
+  <rect x="176.51308333333327" y="420.15500000000003" width="246.46599999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="299.7460833333332" y="447.055" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="299.7460833333332" dy="-3.9000000000000012">bwrap 兼容 profile + 断言 full</tspan><tspan x="299.7460833333332" dy="16.900000000000002">sandbox-local/src/index.ts:317-323</tspan></text>
+</g>
+<g class="node" data-id="P3" data-label="selectRunner
+sandbox-local/src/index.ts:492" data-shape="rectangle">
+  <rect x="561.4804999999999" y="420.15500000000003" width="224.97699999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="673.9689999999998" y="447.055" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="673.9689999999998" dy="-3.9000000000000012">selectRunner</tspan><tspan x="673.9689999999998" dy="16.900000000000002">sandbox-local/src/index.ts:492</tspan></text>
+</g>
+<g class="node" data-id="P4" data-label="chainVerdict
+sandbox-local/src/index.ts:499" data-shape="rectangle">
+  <rect x="433.6376666666666" y="513.955" width="224.97699999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="546.1261666666666" y="540.855" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="546.1261666666666" dy="-3.9000000000000012">chainVerdict</tspan><tspan x="546.1261666666666" dy="16.900000000000002">sandbox-local/src/index.ts:499</tspan></text>
+</g>
+<g class="node" data-id="P5" data-label="probeRunner
+sandbox-local/src/index.ts:513" data-shape="rectangle">
+  <rect x="342.4779166666666" y="607.7550000000001" width="220.53099999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="452.7434166666666" y="634.6550000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="452.7434166666666" dy="-3.9000000000000012">probeRunner</tspan><tspan x="452.7434166666666" dy="16.900000000000002">sandbox-local/src/index.ts:513</tspan></text>
+</g>
+<g class="node" data-id="P6" data-label="runnerArgv
+sandbox-local/src/index.ts:336" data-shape="rectangle">
+  <rect x="759.4363749999998" y="513.955" width="224.97699999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="871.9248749999997" y="540.855" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="871.9248749999997" dy="-3.9000000000000012">runnerArgv</tspan><tspan x="871.9248749999997" dy="16.900000000000002">sandbox-local/src/index.ts:336</tspan></text>
+</g>
+<g class="node" data-id="P7" data-label="profiles.ts:16 / :30 / :51" data-shape="rectangle">
+  <rect x="777.4434166666665" y="607.7550000000001" width="160.51000000000002" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="857.6984166666665" y="626.2050000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">profiles.ts:16 / :30 / :51</text>
+</g>
+<g class="node" data-id="P8" data-label="windowsAclRunnerArgv
+sandbox-local/src/index.ts:358" data-shape="rectangle">
+  <rect x="867.9649166666666" y="701.5550000000001" width="224.97699999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="980.4534166666665" y="728.455" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="980.4534166666665" dy="-3.9000000000000012">windowsAclRunnerArgv</tspan><tspan x="980.4534166666665" dy="16.900000000000002">sandbox-local/src/index.ts:358</tspan></text>
+</g>
+<g class="node" data-id="P9" data-label="materializeAclGrant
+sandbox-local/src/index.ts:392" data-shape="rectangle">
+  <rect x="867.9649166666666" y="795.355" width="224.97699999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="980.4534166666665" y="822.255" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="980.4534166666665" dy="-3.9000000000000012">materializeAclGrant</tspan><tspan x="980.4534166666665" dy="16.900000000000002">sandbox-local/src/index.ts:392</tspan></text>
+</g>
+<g class="node" data-id="P10" data-label="throw SandboxUnavailableError
+sandbox-local/src/index.ts:494" data-shape="rectangle">
+  <rect x="522.5744166666666" y="701.5550000000001" width="233.86899999999997" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="639.5089166666666" y="728.455" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="639.5089166666666" dy="-3.9000000000000012">throw SandboxUnavailableError</tspan><tspan x="639.5089166666666" dy="16.900000000000002">sandbox-local/src/index.ts:494</tspan></text>
+</g>
+<g class="node" data-id="S1" data-label="runArgv / startArgv → spawn" data-shape="rectangle">
+  <rect x="399.86499999999995" y="961.155" width="207.19299999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="503.46149999999994" y="979.605" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">runArgv / startArgv → spawn</text>
+</g>
+<g class="node" data-id="S2" data-label="classifyRunnerFailure
+bash-sandbox/src/helpers.ts:81" data-shape="rectangle">
+  <rect x="106.52541666666673" y="1038.055" width="227.94099999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="220.4959166666667" y="1064.9550000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="220.4959166666667" dy="-3.9000000000000012">classifyRunnerFailure</tspan><tspan x="220.4959166666667" dy="16.900000000000002">bash-sandbox/src/helpers.ts:81</tspan></text>
+</g>
+<g class="node" data-id="S3" data-label="isRunnerSpawnFailure
+bash-sandbox/src/helpers.ts:39" data-shape="rectangle">
+  <rect x="387.268" y="1038.055" width="232.38699999999994" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="503.46149999999994" y="1064.9550000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="503.46149999999994" dy="-3.9000000000000012">isRunnerSpawnFailure</tspan><tspan x="503.46149999999994" dy="16.900000000000002">bash-sandbox/src/helpers.ts:39</tspan></text>
+</g>
+<g class="node" data-id="S4" data-label="throw SandboxUnavailableError
+bash-sandbox/src/index.ts:112" data-shape="rectangle">
+  <rect x="323.50199999999995" y="1225.655" width="233.86899999999997" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="440.4364999999999" y="1252.555" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="440.4364999999999" dy="-3.9000000000000012">throw SandboxUnavailableError</tspan><tspan x="440.4364999999999" dy="16.900000000000002">bash-sandbox/src/index.ts:112</tspan></text>
+</g>
+<g class="node" data-id="S5" data-label="classifyDenial → matchesSignature
+bash-sandbox/src/index.ts:114" data-shape="rectangle">
+  <rect x="56" y="1225.655" width="243.50199999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="177.75099999999998" y="1252.555" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="177.75099999999998" dy="-3.9000000000000012">classifyDenial → matchesSignature</tspan><tspan x="177.75099999999998" dy="16.900000000000002">bash-sandbox/src/index.ts:114</tspan></text>
+</g>
+<g class="node" data-id="S6" data-label="onProcessDone 装 proc.sandbox
+bash-sandbox/src/index.ts:151-166" data-shape="rectangle">
+  <rect x="607.3934999999999" y="1131.855" width="242.01999999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="728.4034999999999" y="1158.755" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="728.4034999999999" dy="-3.9000000000000012">onProcessDone 装 proc.sandbox</tspan><tspan x="728.4034999999999" dy="16.900000000000002">bash-sandbox/src/index.ts:151-166</tspan></text>
+</g>
+<g class="node" data-id="D1" data-label="sandboxDenialMarker(mode)
+escalation.ts:71" data-shape="rectangle">
+  <rect x="226.28900000000002" y="1391.455" width="214.60299999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="333.5905" y="1418.355" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="333.5905" dy="-3.9000000000000012">sandboxDenialMarker(mode)</tspan><tspan x="333.5905" dy="16.900000000000002">escalation.ts:71</tspan></text>
+</g>
+<g class="node" data-id="D2" data-label="tool-bash/src/render.ts:86-88" data-shape="rectangle">
+  <rect x="464.89199999999994" y="1391.455" width="215.34399999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="572.564" y="1409.905" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">tool-bash/src/render.ts:86-88</text>
+</g>
+<g class="node" data-id="D3" data-label="escalationHintMarker('command')
+escalation.ts:84" data-shape="rectangle">
+  <rect x="214.43300000000002" y="1485.2549999999999" width="238.31499999999994" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="333.5905" y="1512.155" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="333.5905" dy="-3.9000000000000012">escalationHintMarker(&#39;command&#39;)</tspan><tspan x="333.5905" dy="16.900000000000002">escalation.ts:84</tspan></text>
+</g>
+</svg>

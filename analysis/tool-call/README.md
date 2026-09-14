@@ -38,6 +38,34 @@
 
 以**原生模式**下一次模型工具调用为例(文件内行号均为 `dbbaa4a37`)。括号内是 `路径:行号`。
 
+先看这张图的两个基点——栈的入口,以及它下面那一层调度器接口:
+
+```typescript
+// packages/core/agent-loop/src/tool-calls.ts:60-67
+export async function executeToolCalls(
+  ctx: Context,
+  turn: number,
+  step: number,
+  toolCalls: ToolCallBlock[],
+  signal: AbortSignal,
+  acceptContext: (context: UserMessage) => void,
+): Promise<{ concluded: boolean }> {
+```
+
+```typescript
+// packages/core/tools/src/index.ts:444-453
+export interface ToolRuntimeScheduler {
+  /** Materialize input, run the ordered pre-execute/guard gate, and decide what stage follows. */
+  prepare(exec: ToolExecutionInput): Promise<ScheduledToolPreparation>
+  /** Run only the around-dispatch/body stage. */
+  dispatch(exec: ToolRunContext): Promise<ScheduledToolDispatch>
+  /** Run post-execute and definition-owned content finalization, then materialize and notify. */
+  finalize(exec: ToolRunContext, result: ToolExecutionResult): Promise<ToolExecutionResult>
+  /** Run definition-owned content finalization, then materialize and notify without post-execute. */
+  finish(exec: ToolRunContext, result: ToolExecutionResult): ToolExecutionResult
+}
+```
+
 ```text
 ReactLoopAgent.step()                                        agent.ts:307 → :486
 ├─ message.content.filter(block => block.type === 'tool-call')          agent.ts:486
@@ -129,6 +157,25 @@ ReactLoopAgent.step()                                        agent.ts:307 → :4
 
 `acceptContext` 就是 `agent.ts:490` 传入的闭包,把上下文 `splice` 进 `inbox.nextStep` 尾部;它在**下一个 step 边界**随 `preClaim` 一起投给模型(`agent.ts:244-255`)。工具结果本身则走 `tool/result` 会话事件,由 `deriveMessages()` 变成消息序列的权威副本——两条通道互不替代。
 
+图中 `get(name, scope)` 取到的那个对象,其类型就是:
+
+```typescript
+// packages/core/tools/src/index.ts:214-280(节选)
+export interface ToolDefinition extends ToolSchema {
+  readonly output: ToolOutputDefinition
+  // ...(略)
+  execute(args: unknown, exec: ToolRunContext): Promise<unknown>
+  // ...(略)
+  finalizeContent?(exec: Readonly<ToolExecution>, result: Readonly<ToolExecutionResult>): ContentBlock[] | undefined
+  // ...(略):presentCall 与各成员的长 JSDoc
+  timeoutMs?: number
+  isConcurrencySafe?(args: unknown): boolean
+  presentResult?(args: unknown, result: ToolResult): ToolResultView | undefined
+}
+```
+
+`execute` 返回的是**规范化 JSON 值**而不是内容块:`ContentBlock[]` 由 `output.render` 在 `createSuccessResult` 里投影出来(`index.ts:1790`),这正是 `finalizeContent` 能在最后一米重写内容的余地。
+
 ### PTC 模式下的分叉
 
 `mode === 'ptc'` 时同一张图在 `dispatchToolBody` 处换成 `run_code` 工具体,再由它自己开一条有序 lane:
@@ -151,6 +198,46 @@ tool.execute = run_code body                              ptc.ts:327
 ```
 
 详见 [05-ptc-mode.md](./05-ptc-mode.md)。
+
+### 四段在 `ToolRuntime` 上的真实签名
+
+栈图里 `prepare` / `dispatch` / `finalize` 三个节点的方法签名(均为节选):
+
+```typescript
+// packages/core/tools/src/index.ts:1453-1459
+  private async prepareExecution<T>(
+    input: ToolExecutionInput,
+    next: (prepared: ScheduledToolPreparation) => T | PromiseLike<T>,
+  ): Promise<T> {
+    const created = this.createExecution(input)
+    if (created.kind !== 'ready') return next(created)
+    const exec = created.exec
+```
+
+```typescript
+// packages/core/tools/src/index.ts:1559-1564
+  private async dispatchScheduledExecution(exec: ToolRunContext): Promise<ScheduledToolDispatch> {
+    try {
+      const mutableExec = exec as MutableToolRunContext
+      const carrier = scopeTarget(this, exec.agent)
+      const result = await this.ctx.waterfall(
+        carrier, 'tools/execute', mutableExec,
+```
+
+```typescript
+// packages/core/tools/src/index.ts:1599-1607
+  private async finalizeScheduledExecution(exec: ToolRunContext, result: ToolExecutionResult): Promise<ToolExecutionResult> {
+    try {
+      const postResult = await this.postExecute(exec, result)
+      return this.finishScheduledExecution(
+        exec,
+        this.callerCancelled(exec) && !postResult.isError
+          ? this.cancellationResult(exec, postResult)
+          : postResult,
+      )
+```
+
+三段都只有一条 `try`,失败一律交给 `finishScheduledExecution`(`:1621`,同步、自身还有两层 `try`)降级成结构化错误——这就是"任何失败都不会逃出管道"的落点。
 
 ---
 

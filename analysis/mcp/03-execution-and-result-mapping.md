@@ -317,6 +317,10 @@ return `[image unavailable: ${mediaType}; ${reason}; raw image data remains avai
 
 ### 4.5 准入链全貌
 
+![流程图：03-execution-and-result-mapping](../assets/diagrams/mcp__03-execution-and-result-mapping-320.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["execute 返回 result.content"] --> B{"containsImage tools.ts:374"}
@@ -346,6 +350,8 @@ flowchart TD
   style F fill:#fee,stroke:#a88
   style J fill:#efe,stroke:#8a8
 ```
+
+</details>
 
 ---
 

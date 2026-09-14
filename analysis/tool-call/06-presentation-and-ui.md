@@ -39,6 +39,10 @@ A tool can retain pure `presentCall()` and `presentResult()` methods for Host-lo
 export type ToolCallKind = 'read' | 'edit' | 'delete' | 'move' | 'search' | 'execute' | 'fetch' | 'other'
 ```
 
+![流程图：06-presentation-and-ui](../assets/diagrams/tool-call__06-presentation-and-ui-42.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart LR
   subgraph CALL["调用态 ToolCallView :46"]
@@ -55,6 +59,8 @@ flowchart LR
     WR["WebResultView :347<br/>kind = 'search' | 'fetch'"]
   end
 ```
+
+</details>
 
 辅助结构:`FileLocation`(`:23`)、`FileDiff`(`:34`)、`ReadFileLine`(`:127`)、`SearchLineMatch`(`:193`)、`SearchFileMatches`(`:201`)、`WebSource`(`:319`)。
 
@@ -117,6 +123,10 @@ export interface ToolResult {
 
 ## 四、`presentationMeta` 的持久化路径
 
+![时序图：06-presentation-and-ui](../assets/diagrams/tool-call__06-presentation-and-ui-120.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
   participant B as tool.execute
@@ -134,6 +144,8 @@ sequenceDiagram
   S->>U: 投影成 ToolResultNode.meta ui-chat tool.ts:65
   U->>U: readMeta(block.meta) read-card-model.ts:107 等五个消费点
 ```
+
+</details>
 
 ### 4.1 产生:只在顶层
 

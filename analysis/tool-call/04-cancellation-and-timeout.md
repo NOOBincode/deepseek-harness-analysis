@@ -81,6 +81,10 @@ interface FusedToolSignal {
 }
 ```
 
+![流程图：04-cancellation-and-timeout](../assets/diagrams/tool-call__04-cancellation-and-timeout-84.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["dispatchToolBody(exec) :1522"] --> B{"caller === wrapper?"}
@@ -100,6 +104,8 @@ flowchart TD
   L --> M["body 执行"]
   M --> N["finally: fused.dispose()<br/>exec.signal = wrapperSignal :1547-1548"]
 ```
+
+</details>
 
 ### 2.1 四条实现细节
 

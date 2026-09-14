@@ -131,6 +131,10 @@ export class SandboxUnavailableError extends HarnessError {
 
 ## 第二节 谁在调用 `confine`:调用点全表
 
+![流程图：01-seam-and-policy](../assets/diagrams/sandbox__01-seam-and-policy-134.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart LR
   A["bash 工具<br/>tool-bash:346"] --> B["SandboxBashExecutor<br/>spec.sandboxPolicy"]
@@ -147,6 +151,8 @@ flowchart LR
 
   style M fill:#ffe,stroke:#aa8
 ```
+
+</details>
 
 | 调用点 | 位置 | 传入的 argv | 传不传 `ctx.sandbox` |
 |---|---|---|---|
@@ -194,6 +200,10 @@ resolve(request: SandboxPolicyRequest = {}): SandboxExecutionPolicy {
 
 三个 `??` 串出四级优先级,**从左到右**:
 
+![流程图：01-seam-and-policy](../assets/diagrams/sandbox__01-seam-and-policy-197.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["request.mode<br/>已批准的升级 mode"] -->|"undefined 时下探"| B["overrideOf(session)<br/>会话最后一次 sandbox/mode"]
@@ -210,6 +220,8 @@ flowchart TD
   style B fill:#eef,stroke:#88a
   style C fill:#fee,stroke:#a88
 ```
+
+</details>
 
 | 级别 | 来源 | 谁写入 | 作用域 |
 |---|---|---|---|
@@ -324,6 +336,10 @@ bwrap 与 Landlock **不**共用这份列表(`profiles.ts:16-23` 直接拼挂载
 
 ## 第五节 fail-closed 的抛点全表
 
+![流程图：01-seam-and-policy](../assets/diagrams/sandbox__01-seam-and-policy-327.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["① 加载期:配置自相矛盾"] -->|"sandbox-local:284/:287/:290/:196"| A1["throw Error<br/>插件加载失败"]
@@ -342,6 +358,8 @@ flowchart TD
   style D1 fill:#fee,stroke:#a88
   style E1 fill:#fee,stroke:#a88
 ```
+
+</details>
 
 逐条列出,全部标注真实行号:
 

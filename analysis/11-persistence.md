@@ -83,17 +83,97 @@ return Buffer.concat([await compressZstdFrame(header), await compressZstdFrame(b
 
 每帧带校验和(`zstd.ts:18-20` 的 `ZSTD_c_checksumFlag`)且独立可解——这是"追加一段 = 追加一个帧、撕裂只可能落在最后一帧"的物理前提。因此元数据读取只需解第一帧:`readFirstZstdLine()`(`index.ts:1332`)断言首帧明文**恰好是一行 header**(`assertZstdHeaderFrame`,`index.ts:75`),`stat`/`list` 不必解压整个文件。
 
+header 行的白名单校验与"一事件一行"的编码分别落在两个纯函数上。先是必须键/可选键的集合与首行的类型守卫(`format.ts:95-185`):
+
+```typescript
+// packages/session/session-persistence-jsonl/src/format.ts:95-162
+const HEADER_REQUIRED_KEYS = ['type', 'version', 'id', 'createdAt', 'isSeeded', 'delegationDepth'] as const
+const HEADER_OPTIONAL_KEYS = ['cwd', 'parentSession', 'origin', 'agentPreset'] as const
+const HEADER_KEYS = new Set<string>([...HEADER_REQUIRED_KEYS, ...HEADER_OPTIONAL_KEYS])
+// ...(略): 99-156 行是退役字段拒绝与 toHeaderLine/parseHeaderRecord
+/** Type guard: a parsed first line is a well-formed session header. */
+function isHeaderLine(value: unknown): value is HeaderLine {
+  return (
+    typeof value === 'object' && value !== null && !Array.isArray(value)
+    && HEADER_REQUIRED_KEYS.every(key => Object.hasOwn(value, key))
+    && Object.keys(value).every(key => HEADER_KEYS.has(key))
+    // ...(略): 163-183 行逐字段校验 type/version/id/createdAt/delegationDepth/cwd/...
+```
+
+再是事件行的序列化——每个事件恰好一行 JSON,行尾换行由写入方补(`format.ts:312-323`):
+
+```typescript
+// packages/session/session-persistence-jsonl/src/format.ts:312-323
+export function eventLines(events: readonly SessionEvent[]): string {
+  return events.map(eventLine).join('\n')
+}
+// ...(略): 316-320 行是 eventLine 的 JSDoc
+export function eventLine(event: SessionEvent): string {
+  return JSON.stringify(sessionFormatCatalog.encodeCurrentEvent(event as unknown as SessionFormatEvent))
+}
+```
+
 ### 1.3 canonical 世代名与代际选择
 
 规则集中在 `session-format/src/filename.ts:5`:`CANONICAL_LOG_FILENAME = /^session(?:\.v([1-9][0-9]*))?\.jsonl$/u`,即 v0 = `session.jsonl`、vN = `session.vN.jsonl`;大写、前导零、`.v0`、带压缩后缀的名字都**不是** canonical(`filename.ts:26-32`)。JSONL 后端在此之上叠压缩后缀(`generationLogFilename`,`format.ts:57-59`)。
 
+```typescript
+// packages/session/session-format/src/filename.ts:5-32
+const CANONICAL_LOG_FILENAME = /^session(?:\.v([1-9][0-9]*))?\.jsonl$/u
+// ...(略): 7-13 行是 sessionFormatLogFilename 的 JSDoc
+export function sessionFormatLogFilename(version: number): string {
+  const generation = sessionFormatVersion(version, 'Session log generation version')
+  return generation === 0 ? 'session.jsonl' : `session.v${generation}.jsonl`
+}
+// ...(略): 19-25 行是 parseSessionFormatLogFilename 的 JSDoc
+export function parseSessionFormatLogFilename(filename: string): number | undefined {
+  const match = CANONICAL_LOG_FILENAME.exec(filename)
+  if (match === null) return undefined
+  if (match[1] === undefined) return 0
+  const version = Number(match[1])
+  return Number.isSafeInteger(version) ? version : undefined
+}
+```
+
 `resolveGenerationInDirectory()`(`index.ts:1369-1404`)做三件事:(a) 收集当前压缩后缀的 canonical 名,同时收集**相反后缀**的 canonical 名,后者非空即 `encodingMismatch` 抛错(`index.ts:1394`)——同一会话不允许 `.jsonl` 与 `.jsonl.zstd` 并存,改配置不会静默挑一个读;(b) 排序取数值最高的一代:`const latest = generations.sort((left, right) => right.version - left.version)[0]`(`index.ts:1395`);(c) 目标路径恒为**当前版本**的 canonical 名(`index.ts:1400-1403`),与源文件同目录。
+
+```typescript
+// packages/session/session-persistence-jsonl/src/index.ts:1382-1404
+// ...(略): 1382-1393 行声明 generations/opposite 并按当前与相反压缩后缀分别收集 canonical 名
+if (opposite.length > 0) throw this.encodingMismatch(opposite[0] as string)
+const latest = generations.sort((left, right) => right.version - left.version)[0]
+if (latest === undefined) return undefined
+return {
+  sourcePath: latest.path,
+  sourceVersion: latest.version,
+  currentPath: join(
+    dir,
+    generationLogFilename(sessionFormatCatalog.currentVersion, this.compression),
+  ),
+}
+```
 
 `findLog()`(`index.ts:1408`)再跨项目目录按 id 查找,找到**多于一份**即报 `duplicate JSONL session id … appears in multiple project directories`(`index.ts:1418-1420`);旧扁平布局另由 `rejectLegacyFlatArtifact` 明确拒绝。
 
 ### 1.4 惰性物化与可见性
 
 `create()` 只做四件事:校验并深拷贝 header、预演 header 行编码(fail fast)、查重、在本进程登记 pending(`index.ts:308-327`)。查重同时看内存 pending 与磁盘世代,冲突即 `SessionAlreadyExistsError`(`index.ts:317-319`);此时**不取锁**——物化前没有可供别的进程竞争的持久产物,句柄在第一次产生日志字节前才取(`index.ts:321-326`)。登记后 `stat`/`list`/`open('read')` 立刻能看到它,但**只有本进程**(`index.ts:432-435`、`485-487`)。这是 seam 层面的承诺而非实现细节(`session-persistence/src/index.ts:125-131`):"物化前崩溃的会话从未存在过"。物化点两个——首次 `persistBatch(isMaterialized=false)`(`index.ts:818`)与显式 flush 空会话的 `persistHeader()`(`index.ts:828`)。
+
+```typescript
+// packages/session/session-persistence-jsonl/src/index.ts:308-326
+async create(header: SessionHeader, options?: SessionPersistenceCreateOptions): Promise<SessionHandle> {
+  // ...(略): 309-314 行是 signal 检查、materializeCreateHeader 与 toHeaderLine 预演
+  await this.ensureRootEncoding()
+  options?.signal?.throwIfAborted()
+  if (this.tracker.hasPending(snapshot.id) || await this.findLog(snapshot.id, options?.signal) !== undefined) {
+    throw new SessionAlreadyExistsError(snapshot.id)
+  }
+  options?.signal?.throwIfAborted()
+  // ...(略): 321-324 行注释说明物化前不取锁
+  this.tracker.registerCreated(snapshot, inheritedEventCount)
+  return this.tracker.adopt(new JsonlSessionHandle(this, snapshot.id, snapshot, 'write', { cursor: 0, materialized: false, inheritedEventCount }))
+}
+```
 
 ---
 
@@ -102,6 +182,41 @@ return Buffer.concat([await compressZstdFrame(header), await compressZstdFrame(b
 ### 2.1 append 是 best-effort,flush 是屏障
 
 seam 明确分开二者(`handle.ts:97-109`):`append` 解析时只保证"已接受、已排序、本实例后续读可见",**只有 flush 解析才承诺崩溃存活**。JSONL 实现比这个下限强——`appendLines()` 内部直接 `write + fsync`(`index.ts:1260-1261`),所以它的 `flush` 退化成 materialize-if-needed(`storage.ts:203-212`):已物化就立即返回(appends are durable on resolution),否则取租约并写一个只含 header 的产物(`persistHeader`),再把 `materialized` 置真。
+
+seam 那边把这条差异写成 append/flush 的对照契约(`handle.ts:86-97`,节选):
+
+```typescript
+// packages/session/session-persistence/src/handle.ts:85-97
+/**
+ * Append a contiguous batch continuing the current logical end. The first
+ * event's `seq` MUST equal the stored next-seq; committed events are never
+ * rewritten. Persistence is best-effort: on resolution the batch is
+ * accepted, ordered, and visible to reads on this backend instance, but
+ * only a resolved {@link flush} promises it survives a crash — a backend
+ * may buffer or batch physical writes behind append. Rejects with
+ * `SessionReadOnlyError` on a read handle and `SessionOwnershipLostError`
+ * when write ownership is gone.
+ * @param events - the contiguous batch, in seq order.
+ * @param options - optional cancellation observed before the write starts.
+ */
+append(events: readonly SessionEvent[], options?: SessionHandleAppendOptions): Promise<void>
+```
+
+JSONL 句柄的 `flush` 因此退化成"必要时物化"(`storage.ts:203-211`):
+
+```typescript
+// packages/session/session-persistence-jsonl/src/storage.ts:203-212
+flush(options?: SessionHandleFlushOptions): Promise<void> {
+  return this.run('flush', async () => {
+    options?.signal?.throwIfAborted()
+    if (this.access !== 'write') throw new SessionReadOnlyError(this.id, 'flush')
+    if (this.state.materialized) return // appends are durable on resolution
+    await this.ensureLease()
+    await this.storage.persistHeader(this.header, this.state.inheritedEventCount)
+    this.state.materialized = true
+  })
+}
+```
 
 ### 2.2 路由与批量窗口
 
@@ -144,6 +259,25 @@ ctx.on('agent/pre-step', async ({ agent }, next) => { // ③ 步边界:下一步
 ### 3.2 相邻迁移链:编译期就要求完整
 
 编解码由 catalog 统一调度(`session-format/src/catalog.ts:29` 的 `createSessionFormatCatalog`),链的合法性在**编译期**定死(`session-format/src/chain.ts:24-77`):每条迁移必须相邻(`to !== from + 1` 即抛 `must declare adjacent v${from}->v${from+1}`,`chain.ts:30-32`)、起始版本与名字不得重复(`chain.ts:57-63`)、v0 到 current 必须逐版本齐备(缺一条即 `Session migration v${v}->v${v+1} is missing`,`chain.ts:65-71`)、指向 current 之外的迁移直接报错(`chain.ts:72-75`)。`plan(from)` 对**未来版本**拒绝:`stored Session uses newer format v${from}; this build writes v${this.currentVersion}`(`chain.ts:79-87`)——用户该看到"升级 harness",不是"会话损坏",所以 `refuseForeignFormatVersion()` 在任何结构校验之前先做版本判别(`format.ts:339-345`)。
+
+相邻性与"未来版本拒绝"两处判定是纯函数,没有 IO 也没有插件依赖(`chain.ts:30-87`):
+
+```typescript
+// packages/session/session-format/src/chain.ts:30-87
+if (to !== from + 1) {
+  throw new SessionFormatError(`${migration.name} must declare adjacent v${from}->v${from + 1}`)
+}
+// ...(略): 33-78 行是 defineSessionFormatMigration 的收尾、createSessionFormatChain 与构造期的重复/缺失校验
+private plan(fromVersion: number): readonly SessionFormatMigration[] {
+  const from = sessionFormatVersion(fromVersion, 'stored Session format version')
+  if (from > this.currentVersion) {
+    throw new SessionFormatUnsupportedMigrationError(
+      `stored Session uses newer format v${from}; this build writes v${this.currentVersion}`,
+    )
+  }
+  return Object.freeze(this.migrations.slice(from))
+}
+```
 
 当前 catalog 是**生成文件**(`session-format-catalog/src/generated.ts:14-32`,由 `scripts/gen-session-format-catalog.ts` 生成),直接 import 四个 codec 与三条迁移,使历史可读性不依赖任何已挂载插件:
 
@@ -230,9 +364,36 @@ static async acquire(dir: string, id: SessionId): Promise<SessionWriteLease> {
 
 四个要点:**(i) 进程死亡即释放**——内核在持有者描述符或最后一个对象句柄关闭时释放,崩溃的持有者绝不卡住后继者;**(ii) 故意没有过期时间**——活着但卡死的写者持锁到进程退出,设 TTL 等于允许抢占一个停滞写者,而它恢复后的追加会撕裂日志(`lease.ts:10-13`);**(iii) POSIX 锁的是 inode 不是路径**——锁完必须回验 `ino`/`dev` 仍是路径上的文件,因此 `release()` **从不删除** `session.lock`,保留稳定 inode 供后来者校验(`lease.ts:118-134`),Windows 根本没有锁文件;**(iv) 获取时机**——读句柄永不碰锁,写打开已存在产物时立即取(`index.ts:370`),新建会话则在第一次产生日志字节前才取(`ensureLease()`,`storage.ts:352-354`);句柄物化失败也**继续持锁**,使"正在物化"的会话在重试间保持独占(`storage.ts:345-351`)。进程内另有 `JsonlBackendTracker.writers: Map<SessionId, JsonlSessionHandle | null>` 保证每 id 一个活跃写句柄,`null` 表示句柄仍在构造中(`storage.ts:391-397`)——进程内登记 + 内核租约合起来才是完整的单写者保证。
 
+"新建会话在第一次产生日志字节前才取锁"就落在这一个方法上(`storage.ts:345-354`):
+
+```typescript
+// packages/session/session-persistence-jsonl/src/storage.ts:345-354
+// ...(略): 345-351 行 JSDoc 说明取锁时机,以及物化失败仍持锁以免重试期间被抢
+private async ensureLease(): Promise<void> {
+  this.lease ??= await this.storage.acquireWriteLease(this.header)
+}
+```
+
 ### 4.2 读侧:撕裂尾巴永不返回
 
 核心不变式:**只有落在换行符之后的字节才算已提交**。`SessionLogScanner`(`format.ts:385`)在原始 Buffer 上找 `0x0A`,只对完整记录解码,且**跨 write 的残片要拷贝**——解码器可能在 `write()` 返回后复用输出缓冲(`format.ts:416-442`)。每解出一行就推进 `committedBytes = endByte`(`format.ts:518`),`finish()` 只交出连续前缀与可安全追加的偏移。纯文本模式下撕裂尾巴就是一条不完整 JSONL 行,里面**没有**完整记录可回收,故 `recoveredTail: []`(`index.ts:736-740`)。
+
+"无法解码的已提交行抑制后续行"的抑制点也在读侧,它在解出坏行后**直接 return**,于是 `committedBytes` 不再前进(`format.ts:476-486`):
+
+```typescript
+// packages/session/session-persistence-jsonl/src/format.ts:476-486
+private consumeEventLine(line: Buffer, endByte: number): void {
+  this.eventLine += 1
+  let decoded: unknown
+  try {
+    decoded = JSON.parse(line.toString('utf8')) as unknown
+  } catch {
+    const issue = new Error(`corrupt session log: unparsable committed event at line ${this.eventLine}`)
+    if (this.recovery === 'strict') throw issue
+    this.issue ??= issue
+    return
+  }
+```
 
 zstd 模式不同:拼接帧容器能结构扫描出**最后一个不完整帧的起点**(`scanZstdFrames()` 返回 `tornStart`,`zstd.ts:48-104`),再用 `ZSTD_e_flush` 语义把该帧里**已 flush 出去的完整记录**捞回来(`decompressZstdPrefix()`,`zstd.ts:154-155`):
 
@@ -359,6 +520,10 @@ await this.appendUnstoredSuffix(stored, preparation.session)
 return await this.setupAndPublish(ownerCtx, id, preparation, …, 'resume', owned, options.parentAgent)
 ```
 
+![时序图：11-persistence](./assets/diagrams/11-persistence-523.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -382,6 +547,30 @@ sequenceDiagram
     L->>P: handle.append(interruptedTurnClosers(events))
     L->>A: setupAndPublish(…,'resume')
     A->>S: append('request/header',{ reason:'resume' })
+```
+
+</details>
+
+上面伪代码对应的真实源码段(`core/agent-loop/src/index.ts:879-899`),五步的顺序与注释都在这里:
+
+```typescript
+// packages/core/agent-loop/src/index.ts:879-899
+handle = await raceAbortCall(
+  () => persistence.open(id, 'write', { signal: fused }),
+  // ...(略): 882-884 行是 fused 与 abandoned 句柄清理参数
+)
+// ...(略): 885-888 行注释说明语义修复属于 agent 层,持久层只给物理有效日志
+const coldRead = await handle.read(0, undefined, { signal: fused })
+fused.throwIfAborted()
+const persisted = coldRead.events
+const closers = interruptedTurnClosers(persisted)
+if (closers.length > 0) await handle.append(closers)
+preparation = SessionPreparation.create(this.runtime.ctx.sessions.prepare(id, {
+  seed: [...persisted, ...closers],
+  meta: structuredClone(handle.header),
+  inheritedEventCount: handle.inheritedEventCount,
+  eventState: coldRead.eventState,
+}))
 ```
 
 ### 7.1 repair:为什么语义修复不在持久层

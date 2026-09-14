@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 651.2061833333333 638.2" width="651.2061833333333" height="638.2" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="H" data-to="P" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="432.6120833333333,93.80000000000001 432.6120833333333,133.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P" data-to="A" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="365.1189833333333,204.5 365.1189833333333,216.5 204.92810000000003,216.5 204.92810000000003,228.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="410.1143833333333,204.5 410.1143833333333,431.50000000000006 402.3620833333333,431.50000000000006 402.3620833333333,431.50000000000006 331.5183833333334,431.50000000000006 331.5183833333334,467.50000000000006" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="500.10518333333323,204.5 500.10518333333323,383.20000000000005 587.6511166666667,383.20000000000005 587.6511166666667,455.50000000000006 557.20885,455.50000000000006 557.20885,467.50000000000006" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A" data-to="A1" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="226.73976666666667,265.40000000000003 226.73976666666667,293.40000000000003 285.45500000000004,293.40000000000003 285.45500000000004,305.40000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="B1" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="313.8371833333334,504.40000000000003 313.83718333333337,544.4000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="C1" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="530.2101833333334,504.40000000000003 530.2101833333334,544.4000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A1" data-to="B" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="不可见" points="255.24533333333335,359.20000000000005 255.24533333333335,395.20000000000005 256.81,395.20000000000005 256.81,443.50000000000006 296.1559833333334,443.50000000000006 296.1559833333334,467.50000000000006" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A1" data-to="C" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="不可见" points="315.6646666666667,359.20000000000005 315.6646666666667,387.20000000000005 348.06938333333335,387.20000000000005 348.06938333333335,455.50000000000006 503.21151666666674,455.50000000000006 503.21151666666674,467.50000000000006" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P" data-to="B" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="可见(链上求交后)" points="455.1097833333333,204.5 455.1097833333333,395.20000000000005 509.0048333333333,395.20000000000005 509.0048333333333,443.50000000000006 366.8807833333334,443.50000000000006 366.8807833333334,467.50000000000006" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A" data-to="B" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="事件只向上,父可观察子" points="183.11643333333336,265.40000000000003 183.11643333333336,411.20000000000005 105.5,411.20000000000005 105.5,455.50000000000006 260.79358333333334,455.50000000000006 260.79358333333334,467.50000000000006" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="A1" data-to="B" data-label="不可见">
+  <rect x="229.80999999999997" y="402.20000000000005" width="53.29" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="256.455" y="417.35" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">不可见</text>
+</g>
+<g class="edge-label" data-from="A1" data-to="C" data-label="不可见">
+  <rect x="321.06938333333335" y="394.20000000000005" width="53.29" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="347.71438333333333" y="409.35" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">不可见</text>
+</g>
+<g class="edge-label" data-from="P" data-to="B" data-label="可见(链上求交后)">
+  <rect x="455.5048333333333" y="402.20000000000005" width="106.75000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="508.8798333333333" y="417.35" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">可见(链上求交后)</text>
+</g>
+<g class="edge-label" data-from="A" data-to="B" data-label="事件只向上,父可观察子">
+  <rect x="36" y="418.20000000000005" width="138.82600000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="105.41300000000001" y="433.35" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">事件只向上,父可观察子</text>
+</g>
+<g class="node" data-id="H" data-label="host composition(root realm)
+subagents 注册表 · workflow 引擎之外的能力" data-shape="rectangle">
+  <rect x="272.3290833333333" y="40" width="320.5659999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="432.61208333333326" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="432.61208333333326" dy="-3.9000000000000012">host composition(root realm)</tspan><tspan x="432.61208333333326" dy="16.900000000000002">subagents 注册表 · workflow 引擎之外的能力</tspan></text>
+</g>
+<g class="node" data-id="P" data-label="preset standing scope
+key = { agentPreset: 'standard' }
+mount.ts:243 定位" data-shape="rectangle">
+  <rect x="320.1235833333333" y="133.8" width="224.97699999999995" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="432.61208333333326" y="169.15" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="432.61208333333326" dy="-12.350000000000001">preset standing scope</tspan><tspan x="432.61208333333326" dy="16.900000000000002">key = { agentPreset: &#39;standard&#39; }</tspan><tspan x="432.61208333333326" dy="16.900000000000002">mount.ts:243 定位</tspan></text>
+</g>
+<g class="node" data-id="A" data-label="父 agent scope" data-shape="rectangle">
+  <rect x="139.49310000000003" y="228.5" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="204.92810000000003" y="246.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">父 agent scope</text>
+</g>
+<g class="node" data-id="B" data-label="子 agent scope(spawn)" data-shape="rectangle">
+  <rect x="225.4311833333334" y="467.50000000000006" width="176.81199999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="313.83718333333337" y="485.95000000000005" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">子 agent scope(spawn)</text>
+</g>
+<g class="node" data-id="C" data-label="子 agent scope(fork)" data-shape="rectangle">
+  <rect x="449.2141833333334" y="467.50000000000006" width="161.99200000000002" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="530.2101833333334" y="485.95000000000005" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">子 agent scope(fork)</text>
+</g>
+<g class="node" data-id="A1" data-label="父自己注册的层
+例:ACP 私有 MCP 工具" data-shape="rectangle">
+  <rect x="194.82600000000002" y="305.40000000000003" width="181.25799999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="285.45500000000004" y="332.3" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="285.45500000000004" dy="-3.9000000000000012">父自己注册的层</tspan><tspan x="285.45500000000004" dy="16.900000000000002">例:ACP 私有 MCP 工具</tspan></text>
+</g>
+<g class="node" data-id="B1" data-label="子自己的层
+structured_output · 子 persona · restrict 掩码" data-shape="rectangle">
+  <rect x="157.2591833333334" y="544.4000000000001" width="313.15599999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="313.83718333333337" y="571.3000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="313.83718333333337" dy="-3.9000000000000012">子自己的层</tspan><tspan x="313.83718333333337" dy="16.900000000000002">structured_output · 子 persona · restrict 掩码</tspan></text>
+</g>
+<g class="node" data-id="C1" data-label="同上" data-shape="rectangle">
+  <rect x="494.4151833333333" y="544.4000000000001" width="71.59" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="530.2101833333332" y="562.8500000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">同上</text>
+</g>
+</svg>

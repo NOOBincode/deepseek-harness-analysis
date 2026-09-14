@@ -258,6 +258,10 @@ update(options, create, force)                                   entry.ts:142
 
 只有 `patchReload: 'live'` 的 profile 装 watcher(`apps/cli/src/profile-boot.ts:355-385`):
 
+![时序图：02-loader-and-composition](../assets/diagrams/plugin-system__02-loader-and-composition-261.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
     participant W as watchUserPatches app-boot:250
@@ -273,6 +277,8 @@ sequenceDiagram
     E->>E: diff=['config'] → 分支 C(不重挂)→ _patchContext → 逐条 create/update
     Note over R: refresh 抛错 → warn + parallel('hmr/config-update-failed')
 ```
+
+</details>
 
 `watchUserPatches`(`app-boot/src/index.ts:250-282`)的回调显式丢弃旧 patches 并重读两个用户文件(`:262-270`),`compose` 即 `composeLive`(`profile-boot.ts:328-333`):bundle 层放下面、overlays 放上面,使"用户编辑永远无法顶掉 bundle 与 `--patch`";两个 watcher(profile 层与 home 层)共享同一个 `composeLive`。它还容忍一种特殊失败(`:274-280`):注册时抛 `INACTIVE_EFFECT`(整棵树在 watcher 打开期间被处置)则返回空 disposer 而非崩溃。
 

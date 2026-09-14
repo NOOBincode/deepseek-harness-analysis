@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 865.021 1158.655" width="865.021" height="1158.655" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="Q" data-to="A" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="628.1712499999999,76.9 628.17125,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="文件效果" points="590.1330833333333,307.0908333333333 590.1330833333333,373.129 522.3209999999999,373.129 522.3209999999999,445.42900000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A" data-to="A1" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="网络/进程/设备/凭据/syscall" points="666.2094166666666,307.0908333333334 666.2094166666666,677.9549999999999 734.0214999999998,677.9549999999999 734.0215,736.693" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="full" points="490.0873333333333,606.5973333333334 490.0873333333333,650.831 302.9533333333334,650.831 302.9533333333334,736.693" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="B1" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="partial" points="554.5546666666667,606.5973333333333 554.5546666666667,788.655 566.1533333333333,788.655 566.1533333333333,860.9549999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="C1" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="denied 方言命中" points="246.82233333333335,905.0859999999999 246.82233333333335,975.655 153.59999999999997,975.655 153.59999999999997,1039.955" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="C2" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="runnerFailureRules 命中" points="302.9533333333334,961.217 302.9533333333334,975.655 390.72099999999995,975.655 390.72099999999995,1039.955" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="C3" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="都没命中" points="359.08433333333335,792.824 359.08433333333335,959.655 631.5469999999999,959.655 631.547,1039.955" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="A" data-to="B" data-label="文件效果">
+  <rect x="489.32099999999997" y="380.129" width="65.17" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="521.906" y="395.279" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">文件效果</text>
+</g>
+<g class="edge-label" data-from="A" data-to="A1" data-label="网络/进程/设备/凭据/syscall">
+  <rect x="654.0214999999998" y="684.9549999999999" width="159.022" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="733.5324999999998" y="700.1049999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">网络/进程/设备/凭据/syscall</text>
+</g>
+<g class="edge-label" data-from="B" data-to="C" data-label="full">
+  <rect x="287.4533333333334" y="657.831" width="30.717999999999996" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="302.81233333333336" y="672.981" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">full</text>
+</g>
+<g class="edge-label" data-from="B" data-to="B1" data-label="partial">
+  <rect x="542.1533333333333" y="795.655" width="47.35" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="565.8283333333333" y="810.805" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">partial</text>
+</g>
+<g class="edge-label" data-from="C" data-to="C1" data-label="denied 方言命中">
+  <rect x="103.59999999999997" y="982.655" width="99.028" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="153.11399999999998" y="997.805" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">denied 方言命中</text>
+</g>
+<g class="edge-label" data-from="C" data-to="C2" data-label="runnerFailureRules 命中">
+  <rect x="321.221" y="982.655" width="138.23200000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="390.337" y="997.805" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">runnerFailureRules 命中</text>
+</g>
+<g class="edge-label" data-from="C" data-to="C3" data-label="都没命中">
+  <rect x="598.5469999999999" y="966.655" width="65.17" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="631.132" y="981.805" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">都没命中</text>
+</g>
+<g class="node" data-id="Q" data-label="一次受限执行" data-shape="rectangle">
+  <rect x="562.7362499999999" y="40" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="628.1712499999999" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">一次受限执行</text>
+</g>
+<g class="node" data-id="A" data-label="策略层:mode 表达了什么?" data-shape="diamond">
+  <polygon points="628.17125,116.89999999999999 742.28575,231.0145 628.17125,345.129 514.05675,231.0145" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="628.17125" y="231.0145" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">策略层:mode 表达了什么?</text>
+</g>
+<g class="node" data-id="B" data-label="强制层:enforcement?" data-shape="diamond">
+  <polygon points="522.3209999999999,445.429 619.0219999999999,542.13 522.3209999999999,638.831 425.6199999999999,542.13" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="522.3209999999999" y="542.13" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">强制层:enforcement?</text>
+</g>
+<g class="node" data-id="A1" data-label="词表外
+沙箱/src/index.ts:26-27
+不表达,也不保证" data-shape="rectangle">
+  <rect x="643.0219999999999" y="736.693" width="181.99899999999997" height="70.7" rx="0" ry="0" fill="#ffe" stroke="#aa8" stroke-width="0.75" />
+  <text x="734.0215" y="772.043" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="734.0215" dy="-12.350000000000001">词表外</tspan><tspan x="734.0215" dy="16.900000000000002">沙箱/src/index.ts:26-27</tspan><tspan x="734.0215" dy="16.900000000000002">不表达,也不保证</tspan></text>
+</g>
+<g class="node" data-id="C" data-label="证据层:怎么知道被拒了?" data-shape="diamond">
+  <polygon points="302.9533333333334,736.693 415.2153333333334,848.9549999999999 302.9533333333334,961.2169999999999 190.69133333333338,848.9549999999999" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="302.9533333333334" y="848.9549999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">证据层:怎么知道被拒了?</text>
+</g>
+<g class="node" data-id="B1" data-label="Windows: Everyone + 硬链接 + FAT
+Landlock: 较老 ABI
+只上报,不拒绝" data-shape="rectangle">
+  <rect x="439.2153333333333" y="860.9549999999999" width="253.87599999999998" height="70.7" rx="0" ry="0" fill="#ffe" stroke="#aa8" stroke-width="0.75" />
+  <text x="566.1533333333333" y="896.305" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="566.1533333333333" dy="-12.350000000000001">Windows: Everyone + 硬链接 + FAT</tspan><tspan x="566.1533333333333" dy="16.900000000000002">Landlock: 较老 ABI</tspan><tspan x="566.1533333333333" dy="16.900000000000002">只上报,不拒绝</tspan></text>
+</g>
+<g class="node" data-id="C1" data-label="denied = true
+可能误判(应用打印同样文本)
+可能漏判(拒绝落在尾部之外)" data-shape="rectangle">
+  <rect x="40" y="1039.955" width="227.19999999999996" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="153.59999999999997" y="1075.3049999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="153.59999999999997" dy="-12.350000000000001">denied = true</tspan><tspan x="153.59999999999997" dy="16.900000000000002">可能误判(应用打印同样文本)</tspan><tspan x="153.59999999999997" dy="16.900000000000002">可能漏判(拒绝落在尾部之外)</tspan></text>
+</g>
+<g class="node" data-id="C2" data-label="SandboxUnavailableError
+命令没跑" data-shape="rectangle">
+  <rect x="291.19999999999993" y="1039.955" width="199.042" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="390.72099999999995" y="1066.855" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="390.72099999999995" dy="-3.9000000000000012">SandboxUnavailableError</tspan><tspan x="390.72099999999995" dy="16.900000000000002">命令没跑</tspan></text>
+</g>
+<g class="node" data-id="C3" data-label="普通退出码结果
+其中可能藏着一次真实的拒绝" data-shape="rectangle">
+  <rect x="514.242" y="1039.955" width="234.60999999999999" height="53.800000000000004" rx="0" ry="0" fill="#ffe" stroke="#aa8" stroke-width="0.75" />
+  <text x="631.5469999999999" y="1066.855" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="631.5469999999999" dy="-3.9000000000000012">普通退出码结果</tspan><tspan x="631.5469999999999" dy="16.900000000000002">其中可能藏着一次真实的拒绝</tspan></text>
+</g>
+</svg>

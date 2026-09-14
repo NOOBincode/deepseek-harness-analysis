@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 843.1524999999999 855" width="843.1524999999999" height="855" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line class="lifeline" data-actor="S" x1="181.22699999999995" y1="70" x2="181.22699999999995" y2="825" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="R" x1="356.32349999999997" y1="70" x2="356.32349999999997" y2="825" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="P" x1="558.837" y1="70" x2="558.837" y2="825" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="B" x1="760.6094999999999" y1="70" x2="760.6094999999999" y2="825" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="S" data-to="R" data-label="prepare(exec) :1449" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="181.22699999999995" y1="90" x2="356.32349999999997" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="268.77524999999997" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">prepare(exec) :1449</text>
+</g>
+<g class="message" data-from="R" data-to="R" data-label="createExecution :1354" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="356.32349999999997,130 386.32349999999997,130 386.32349999999997,150 356.32349999999997,150" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="394.32349999999997" y="140" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">createExecution :1354</text>
+</g>
+<g class="message" data-from="R" data-to="P" data-label="waterfall 'tools/pre-execute' :1465（有序）" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="356.32349999999997" y1="200" x2="558.837" y2="200" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="457.58025" y="190" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">waterfall &#39;tools/pre-execute&#39; :1465（有序）</text>
+</g>
+<g class="message" data-from="R" data-to="R" data-label="serviceAsk :1679（仅 ask）→ guardReason :1109" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="356.32349999999997,240 386.32349999999997,240 386.32349999999997,260 356.32349999999997,260" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="394.32349999999997" y="250" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">serviceAsk :1679（仅 ask）→ guardReason :1109</text>
+</g>
+<g class="message" data-from="R" data-to="S" data-label="'dispatch' / 'post-result' / 'final-result'" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="356.32349999999997" y1="310" x2="181.22699999999995" y2="310" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="268.77524999999997" y="300" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">&#39;dispatch&#39; / &#39;post-result&#39; / &#39;final-result&#39;</text>
+</g>
+<g class="message" data-from="S" data-to="R" data-label="dispatch(exec) :1559" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="181.22699999999995" y1="350" x2="356.32349999999997" y2="350" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="268.77524999999997" y="340" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">dispatch(exec) :1559</text>
+</g>
+<g class="message" data-from="R" data-to="P" data-label="waterfall 'tools/execute'（around，可并发）" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="356.32349999999997" y1="390" x2="558.837" y2="390" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="457.58025" y="380" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">waterfall &#39;tools/execute&#39;（around，可并发）</text>
+</g>
+<g class="message" data-from="P" data-to="B" data-label="next() → dispatchToolBody :1522" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="558.837" y1="430" x2="760.6094999999999" y2="430" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="659.72325" y="420" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">next() → dispatchToolBody :1522</text>
+</g>
+<g class="message" data-from="B" data-to="P" data-label="ToolExecutionResult" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="760.6094999999999" y1="470" x2="558.837" y2="470" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="659.72325" y="460" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">ToolExecutionResult</text>
+</g>
+<g class="message" data-from="R" data-to="R" data-label="normalizeDispatchResult :1816" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="356.32349999999997,510 386.32349999999997,510 386.32349999999997,530 356.32349999999997,530" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="394.32349999999997" y="520" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">normalizeDispatchResult :1816</text>
+</g>
+<g class="message" data-from="R" data-to="S" data-label="'post-result'（body 失败也走 post）" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="356.32349999999997" y1="580" x2="181.22699999999995" y2="580" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="268.77524999999997" y="570" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">&#39;post-result&#39;（body 失败也走 post）</text>
+</g>
+<g class="message" data-from="S" data-to="R" data-label="finalize(exec, result) :1599" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="181.22699999999995" y1="620" x2="356.32349999999997" y2="620" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="268.77524999999997" y="610" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">finalize(exec, result) :1599</text>
+</g>
+<g class="message" data-from="R" data-to="P" data-label="waterfall 'tools/post-execute' :1733（有序）" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="356.32349999999997" y1="660" x2="558.837" y2="660" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="457.58025" y="650" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">waterfall &#39;tools/post-execute&#39; :1733（有序）</text>
+</g>
+<g class="message" data-from="R" data-to="R" data-label="cancellationResult :1508 → finishScheduledExecution :1621" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="356.32349999999997,700 386.32349999999997,700 386.32349999999997,720 356.32349999999997,720" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="394.32349999999997" y="710" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">cancellationResult :1508 → finishScheduledExecution :1621</text>
+</g>
+<g class="message" data-from="R" data-to="S" data-label="冻结的最终结果" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="356.32349999999997" y1="770" x2="181.22699999999995" y2="770" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="268.77524999999997" y="760" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">冻结的最终结果</text>
+</g>
+<g class="note" data-position="over" data-actors="S">
+  <polygon points="30,778 326.4539999999999,778 332.4539999999999,784 332.4539999999999,801 30,801" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="326.4539999999999,778 332.4539999999999,784 326.4539999999999,784" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="181.22699999999995" y="789.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">commitReady() 按模型序 appendToolResult tool-calls.ts:156</text>
+</g>
+<g class="actor" data-id="S" data-label="agent-loop tool-calls.ts" data-type="participant">
+  <rect x="99.41449999999996" y="30" width="163.62499999999997" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="181.22699999999995" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">agent-loop tool-calls.ts</text>
+</g>
+<g class="actor" data-id="R" data-label="ToolRuntime" data-type="participant">
+  <rect x="303.0395" y="30" width="106.568" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="356.32349999999997" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">ToolRuntime</text>
+</g>
+<g class="actor" data-id="P" data-label="策略监听器 (pre/execute/post)" data-type="participant">
+  <rect x="449.6075" y="30" width="218.45899999999997" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="558.837" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">策略监听器 (pre/execute/post)</text>
+</g>
+<g class="actor" data-id="B" data-label="tool.execute" data-type="participant">
+  <rect x="708.0664999999999" y="30" width="105.086" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="760.6094999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">tool.execute</text>
+</g>
+</svg>

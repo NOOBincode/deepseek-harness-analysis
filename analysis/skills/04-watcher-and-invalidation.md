@@ -8,6 +8,10 @@
 
 ## 1. 失效输入全景
 
+![流程图：04-watcher-and-invalidation](../assets/diagrams/skills__04-watcher-and-invalidation-11.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   E1["chokidar add/addDir/change/unlink/unlinkDir"] --> F1["handleWatchEvent :546"]
@@ -26,6 +30,8 @@ flowchart TD
   I --> J["invalidateCache :621-625 → revision++ / clear / notify"]
   J --> L["下一次 snapshot() 未命中 → collectFresh → provider.list()"]
 ```
+
+</details>
 
 三条输入的差别只在**时序**,不在语义:
 

@@ -20,6 +20,10 @@ DSH 的沙箱**不是一个沙箱程序,而是一条能力缝 + 一个共享策�
 4. **词表只覆盖文件效果**：网络、进程可见性、设备、凭据都不在其内(`index.ts:23-29`)。
 5. **平台差异如实上报**：每次包装都带 `enforcement: full|partial`、`denialSignatures`(该后端真实产生的拒绝方言)与 `runnerFailureRules`(执行器自身失败的证据规则)(`index.ts:95-116`)。
 
+![流程图：07-sandbox](./assets/diagrams/07-sandbox-23.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["工具调用:<br/>bash / pwsh / write / edit / 持久终端"] --> B["ctx.sandboxPolicy.resolve(session)<br/>→ effective mode"]
@@ -41,6 +45,8 @@ flowchart TD
   Q -->|"allowed-once"| R["仅这一次调用带更宽 mode 执行"]
   Q -->|"rejected / cancelled / unavailable / 非更宽 / 无通道"| S["抛错 → 该次调用 isError,什么都没执行"]
 ```
+
+</details>
 
 ---
 

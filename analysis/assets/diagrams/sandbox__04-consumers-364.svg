@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 775.778 470" width="775.778" height="470" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line class="lifeline" data-actor="T" x1="73.2805" y1="70" x2="73.2805" y2="440" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="SP" x1="228.37" y1="70" x2="228.37" y2="440" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="W" x1="391.981" y1="70" x2="391.981" y2="440" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="FS" x1="567.448" y1="70" x2="567.448" y2="440" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="T" data-to="SP" data-label="resolve({ session }) → sandboxPolicy" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="73.2805" y1="90" x2="228.37" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="150.82525" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">resolve({ session }) → sandboxPolicy</text>
+</g>
+<g class="message" data-from="T" data-to="FS" data-label="resolve(path, { cwd: sandboxPolicy.workspaceRoot })" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="73.2805" y1="130" x2="567.448" y2="130" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="320.36424999999997" y="120" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">resolve(path, { cwd: sandboxPolicy.workspaceRoot })</text>
+</g>
+<g class="message" data-from="T" data-to="W" data-label="waterfall('fs/edit-intent', target, exec)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="73.2805" y1="170" x2="391.981" y2="170" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="232.63075" y="160" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">waterfall(&#39;fs/edit-intent&#39;, target, exec)</text>
+</g>
+<g class="message" data-from="W" data-to="T" data-label="{ version } 或抛 FS_NOT_OBSERVED" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="391.981" y1="210" x2="73.2805" y2="210" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="232.63075" y="200" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">{ version } 或抛 FS_NOT_OBSERVED</text>
+</g>
+<g class="message" data-from="T" data-to="FS" data-label="editText(target, edit, intent, signal, sandboxPolicy)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="73.2805" y1="250" x2="567.448" y2="250" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="320.36424999999997" y="240" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">editText(target, edit, intent, signal, sandboxPolicy)</text>
+</g>
+<g class="message" data-from="FS" data-to="FS" data-label="checkedTarget → 沙箱围栏" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="567.448,290 597.448,290 597.448,310 567.448,310" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="605.448" y="300" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">checkedTarget → 沙箱围栏</text>
+</g>
+<g class="message" data-from="FS" data-to="T" data-label="结果，或抛 FS_SANDBOX_DENIED" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="567.448" y1="360" x2="73.2805" y2="360" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="320.36424999999997" y="350" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">结果，或抛 FS_SANDBOX_DENIED</text>
+</g>
+<g class="message" data-from="T" data-to="W" data-label="emit('fs/observed', { kind: 'present', version })" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="73.2805" y1="400" x2="391.981" y2="400" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="232.63075" y="390" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">emit(&#39;fs/observed&#39;, { kind: &#39;present&#39;, version })</text>
+</g>
+<g class="actor" data-id="T" data-label="edit 工具" data-type="participant">
+  <rect x="30" y="30" width="86.561" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="73.2805" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">edit 工具</text>
+</g>
+<g class="actor" data-id="SP" data-label="ctx.sandboxPolicy" data-type="participant">
+  <rect x="156.561" y="30" width="143.618" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="228.37" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">ctx.sandboxPolicy</text>
+</g>
+<g class="actor" data-id="W" data-label="fs/edit-intent" data-type="participant">
+  <rect x="340.179" y="30" width="103.604" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="391.981" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">fs/edit-intent</text>
+</g>
+<g class="actor" data-id="FS" data-label="SandboxedFileSystem" data-type="participant">
+  <rect x="483.783" y="30" width="167.32999999999996" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="567.448" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">SandboxedFileSystem</text>
+</g>
+</svg>

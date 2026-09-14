@@ -368,6 +368,10 @@ generation.setNotificationHandler(
 
 ## 七、两条同步路径的完整时序
 
+![时序图：01-discovery-and-sync](../assets/diagrams/mcp__01-discovery-and-sync-371.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
   participant Apply as apply() index.ts:146
@@ -394,6 +398,8 @@ sequenceDiagram
   Conn-->>Apply: ready → {} 或 { error }
   Note over Reg: 此后每次 list_changed →<br/>通知处理器 → enqueueSync → 同一条链
 ```
+
+</details>
 
 ---
 

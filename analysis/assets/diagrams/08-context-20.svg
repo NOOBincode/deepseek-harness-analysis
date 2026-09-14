@@ -1,0 +1,240 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560.1604166666666 1800.4079999999997" width="1560.1604166666666" height="1800.4079999999997" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="START" data-to="CLAIM" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1239.0939166666665,76.9 1239.0939166666665,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CLAIM" data-to="ASM" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1239.0939166666665,170.70000000000002 1239.0939166666665,210.70000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ASM" data-to="SEC" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1239.0939166666665,264.5 1239.0939166666665,304.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SEC" data-to="PROJ" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1239.0939166666665,358.30000000000007 1239.0939166666665,398.30000000000007" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PROJ" data-to="DIFF" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1239.0939166666665,452.1 1239.0939166666665,492.1" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="DIFF" data-to="NOCTX" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="1205.6252499999998,659.4433333333334 1205.6252499999998,704.912 1111.6414166666664,704.912 1111.6414166666666,784.9794999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="DIFF" data-to="CTX" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="1272.5625833333331,659.4433333333334 1272.5625833333331,704.912 1366.5464166666666,704.912 1366.5464166666666,784.9794999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="NOCTX" data-to="PRESTOP" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1111.6414166666664,821.8794999999999 1111.6414166666664,841.8794999999999 1239.0939166666665,841.8794999999999 1239.0939166666665,861.8794999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CTX" data-to="PRESTOP" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1366.5464166666666,821.8794999999999 1366.5464166666666,841.8794999999999 1239.0939166666665,841.8794999999999 1239.0939166666665,861.8794999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PRESTOP" data-to="PRESS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1239.0939166666665,898.7794999999999 1239.0939166666665,931.012" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PRESS" data-to="PRESDEC" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1239.0939166666665,984.8119999999999 1239.0939166666665,1024.812" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PRESDEC" data-to="BLOCKED" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="reject" points="1263.1765833333332,1145.2253333333333 1263.1765833333332,1253.158" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PRESDEC" data-to="STEPSTART" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="enter" points="1215.0112499999998,1145.2253333333333 1215.0112499999998,1241.608 1011.9047499999998,1241.608 1011.9047499999998,1253.608" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="STEPSTART" data-to="REQ" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="963.8114999999999,1307.408 963.8114999999999,1335.6329999999998 797.9778333333331,1335.6329999999998 797.9778333333331,1347.408" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REQ" data-to="SYSP" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="797.9778333333333,1401.2079999999999 797.9778333333333,1441.2079999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SYSP" data-to="USERS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="797.9778333333333,1495.0079999999998 797.9778333333333,1543.9079999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="USERS" data-to="HDR" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="797.9778333333333,1597.7079999999996 797.9778333333333,1628.8079999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="HDR" data-to="DERIVE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="797.9778333333333,1682.6079999999997 797.9778333333333,1694.6079999999997 434.8066666666666,1694.6079999999997 434.8066666666666,1706.6079999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="DERIVE" data-to="STREAM" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="344.0063333333334,1706.6079999999997 344.0063333333334,1694.6079999999997 40.039999999999964,1694.6079999999997 40.039999999999964,1074.608 266.3066666666666,1074.608 266.3066666666666,450.97400000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="STREAM" data-to="MAXTOK" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="max-tokens" points="316.3986666666666,476.02 316.3986666666666,643.5469999999999 408.31933333333325,643.5469999999999 408.3193333333332,715.8469999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="STREAM" data-to="ERRW" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="error / aborted" points="291.35266666666655,476.02 291.35266666666655,1086.608 219.0214166666666,1086.608 219.0214166666666,1158.908" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ERRW" data-to="OVF" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="219.0214166666666,1212.7079999999999 219.0214166666666,1232.933 691.4929999999998,1232.933 691.4929999999998,1253.158" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="OVF" data-to="REQ" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="691.4929999999998,1323.858 691.4929999999998,1335.6329999999998 797.9778333333331,1335.6329999999998 797.9778333333331,1347.408" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ERRW" data-to="FAIL" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="219.0214166666666,1212.7079999999999 219.0214166666666,1232.933 172.4205,1232.933 172.4205,1543.9079999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="STREAM" data-to="TOOLS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="completed" points="341.44466666666654,450.97400000000005 341.44466666666654,500.543 678.9995833333332,500.543 678.9995833333332,572.843" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="TOOLS" data-to="DONE" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="656.3989166666665,685.8463333333332 656.3989166666665,720.4469999999999 549.8798333333333,720.4469999999999 549.8798333333332,784.9794999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="TOOLS" data-to="EXEC" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="701.60025,685.8463333333332 701.60025,1045.7079999999999 881.8345833333332,1045.7079999999999 881.8345833333332,1118.0079999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="EXEC" data-to="STEPSTART" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="881.8345833333332,1188.7079999999999 881.8345833333332,1200.7079999999999 963.8114999999998,1200.7079999999999 963.8114999999998,1253.608" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MAXTOK" data-to="CLOSE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="408.3193333333332,752.7469999999998 408.3193333333332,841.8794999999999 479.09958333333327,841.8794999999999 479.09958333333327,861.8794999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="DONE" data-to="CLOSE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="549.8798333333333,821.8794999999999 549.8798333333333,841.8794999999999 479.09958333333327,841.8794999999999 479.09958333333327,861.8794999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="FAIL" data-to="TURNEND" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="172.4205,1580.8079999999998 172.4205,1613.7079999999996 235.18633333333324,1613.7079999999996 235.18633333333324,1629.7079999999996" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CLOSE" data-to="STOP" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="434.6394166666666,1084.1803333333332 434.63941666666665,1212.7079999999999 416.581,1212.7079999999999 416.581,1543.9079999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CLOSE" data-to="STEPSTART" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="523.5597499999999,1084.1803333333332 523.5597499999999,1212.7079999999999 915.7182499999999,1212.7079999999999 915.7182499999999,1253.608" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="STOP" data-to="TURNEND" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="416.581,1597.7079999999996 416.581,1613.7079999999996 235.18633333333324,1613.7079999999996 235.18633333333324,1629.7079999999996" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="DIFF" data-to="NOCTX" data-label="是">
+  <rect x="1096.6414166666664" y="711.912" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1111.4064166666665" y="727.062" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="DIFF" data-to="CTX" data-label="否">
+  <rect x="1351.5464166666666" y="711.912" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1366.3114166666667" y="727.062" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="edge-label" data-from="PRESDEC" data-to="BLOCKED" data-label="reject">
+  <rect x="1240.6765833333332" y="1204.308" width="44.974000000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1263.1635833333332" y="1219.458" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">reject</text>
+</g>
+<g class="edge-label" data-from="PRESDEC" data-to="STEPSTART" data-label="enter">
+  <rect x="1193.5112499999998" y="1204.308" width="42.598" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1214.8102499999998" y="1219.458" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">enter</text>
+</g>
+<g class="edge-label" data-from="STREAM" data-to="MAXTOK" data-label="max-tokens">
+  <rect x="372.31933333333325" y="650.5469999999999" width="71.70400000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="408.1713333333333" y="665.6969999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">max-tokens</text>
+</g>
+<g class="edge-label" data-from="STREAM" data-to="ERRW" data-label="error / aborted">
+  <rect x="175.0214166666666" y="1093.608" width="87.14800000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="218.5954166666666" y="1108.758" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">error / aborted</text>
+</g>
+<g class="edge-label" data-from="STREAM" data-to="TOOLS" data-label="completed">
+  <rect x="645.9995833333332" y="507.543" width="65.17" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="678.5845833333333" y="522.693" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">completed</text>
+</g>
+<g class="edge-label" data-from="TOOLS" data-to="DONE" data-label="否">
+  <rect x="534.8798333333333" y="727.4469999999999" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="549.6448333333333" y="742.5969999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="edge-label" data-from="TOOLS" data-to="EXEC" data-label="是">
+  <rect x="866.8345833333332" y="1052.7079999999999" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="881.5995833333332" y="1067.858" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="CLOSE" data-to="STOP" data-label="是">
+  <rect x="419.63941666666665" y="1175.408" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="434.40441666666663" y="1190.558" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="CLOSE" data-to="STEPSTART" data-label="否">
+  <rect x="508.5597499999999" y="1171.408" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="523.3247499999999" y="1186.558" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="node" data-id="START" data-label="turn(): phase.step = 0" data-shape="rectangle">
+  <rect x="1157.7274166666664" y="40" width="162.73300000000003" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1239.0939166666665" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">turn(): phase.step = 0</text>
+</g>
+<g class="node" data-id="CLAIM" data-label="inbox.claim(target, turn)
+agent.ts:244" data-shape="rectangle">
+  <rect x="1150.3174166666665" y="116.9" width="177.55300000000003" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1239.0939166666665" y="143.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1239.0939166666665" dy="-3.9000000000000012">inbox.claim(target, turn)</tspan><tspan x="1239.0939166666665" dy="16.900000000000002">agent.ts:244</tspan></text>
+</g>
+<g class="node" data-id="ASM" data-label="systemPrompt.assemble(assembleContextFor(this, signal))
+agent.ts:245" data-shape="rectangle">
+  <rect x="1047.3184166666665" y="210.70000000000002" width="383.5509999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1239.0939166666665" y="237.60000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1239.0939166666665" dy="-3.9000000000000012">systemPrompt.assemble(assembleContextFor(this, signal))</tspan><tspan x="1239.0939166666665" dy="16.900000000000002">agent.ts:245</tspan></text>
+</g>
+<g class="node" data-id="SEC" data-label="renderContextSections(assembly)
+agent.ts:247" data-shape="rectangle">
+  <rect x="1117.3429166666665" y="304.5" width="243.50199999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1239.0939166666665" y="331.4" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1239.0939166666665" dy="-3.9000000000000012">renderContextSections(assembly)</tspan><tspan x="1239.0939166666665" dy="16.900000000000002">agent.ts:247</tspan></text>
+</g>
+<g class="node" data-id="PROJ" data-label="runtimeContext.project(joinContextSections(sections), sections)
+agent.ts:248" data-shape="rectangle">
+  <rect x="1033.2394166666666" y="398.30000000000007" width="411.70899999999983" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1239.0939166666665" y="425.20000000000005" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1239.0939166666665" dy="-3.9000000000000012">runtimeContext.project(joinContextSections(sections), sections)</tspan><tspan x="1239.0939166666665" dy="16.900000000000002">agent.ts:248</tspan></text>
+</g>
+<g class="node" data-id="DIFF" data-label="与 retained 快照相同?" data-shape="diamond">
+  <polygon points="1239.0939166666665,492.09999999999997 1339.4999166666664,592.506 1239.0939166666665,692.9119999999999 1138.6879166666665,592.506" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1239.0939166666665" y="592.506" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">与 retained 快照相同?</text>
+</g>
+<g class="node" data-id="NOCTX" data-label="context = undefined" data-shape="rectangle">
+  <rect x="1034.3504166666664" y="784.9794999999999" width="154.582" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1111.6414166666664" y="803.4295" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">context = undefined</text>
+</g>
+<g class="node" data-id="CTX" data-label="append 候选 user/message(CLEARED 标记)" data-shape="rectangle">
+  <rect x="1212.9324166666665" y="784.9794999999999" width="307.22799999999995" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1366.5464166666666" y="803.4295" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">append 候选 user/message(CLEARED 标记)</text>
+</g>
+<g class="node" data-id="PRESTOP" data-label="PRESTOP" data-shape="rectangle">
+  <rect x="1186.9969166666665" y="861.8794999999999" width="104.194" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1239.0939166666665" y="880.3294999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">PRESTOP</text>
+</g>
+<g class="node" data-id="PRESS" data-label="压力分支:compactIfNeeded(agent, 'pressure')
+compaction-basic/src/index.ts:148-166" data-shape="rectangle">
+  <rect x="1082.8864166666665" y="931.012" width="312.4149999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1239.0939166666665" y="957.9119999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1239.0939166666665" dy="-3.9000000000000012">压力分支:compactIfNeeded(agent, &#39;pressure&#39;)</tspan><tspan x="1239.0939166666665" dy="16.900000000000002">compaction-basic/src/index.ts:148-166</tspan></text>
+</g>
+<g class="node" data-id="PRESDEC" data-label="decision.kind" data-shape="diamond">
+  <polygon points="1239.0939166666665,1024.812 1311.3419166666665,1097.06 1239.0939166666665,1169.308 1166.8459166666664,1097.06" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1239.0939166666665" y="1097.06" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">decision.kind</text>
+</g>
+<g class="node" data-id="BLOCKED" data-label="turnEnds = blocked;不花模型调用" data-shape="rectangle">
+  <rect x="1139.2025833333332" y="1253.158" width="247.94799999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1263.1765833333332" y="1271.608" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">turnEnds = blocked;不花模型调用</text>
+</g>
+<g class="node" data-id="STEPSTART" data-label="step/start → step(decision)
+agent.ts:302-307" data-shape="rectangle">
+  <rect x="867.6249999999999" y="1253.608" width="192.37299999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="963.8114999999999" y="1280.508" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="963.8114999999999" dy="-3.9000000000000012">step/start → step(decision)</tspan><tspan x="963.8114999999999" dy="16.900000000000002">agent.ts:302-307</tspan></text>
+</g>
+<g class="node" data-id="REQ" data-label="prepareRequest → agent/request 瀑布 → llm.prepareCall
+agent.ts:362, 530-550" data-shape="rectangle">
+  <rect x="614.7238333333332" y="1347.408" width="366.5079999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="797.9778333333331" y="1374.308" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="797.9778333333331" dy="-3.9000000000000012">prepareRequest → agent/request 瀑布 → llm.prepareCall</tspan><tspan x="797.9778333333331" dy="16.900000000000002">agent.ts:362, 530-550</tspan></text>
+</g>
+<g class="node" data-id="SYSP" data-label="systemPrompt.project(renderedPrompt, {inHistory, startsSeries})
+agent.ts:364-372 → system/message" data-shape="rectangle">
+  <rect x="588.0478333333333" y="1441.2079999999999" width="419.85999999999984" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="797.9778333333333" y="1468.108" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="797.9778333333333" dy="-3.9000000000000012">systemPrompt.project(renderedPrompt, {inHistory, startsSeries})</tspan><tspan x="797.9778333333333" dy="16.900000000000002">agent.ts:364-372 → system/message</tspan></text>
+</g>
+<g class="node" data-id="USERS" data-label="首次尝试追加 decision.messages
+agent.ts:373-377 → user/message" data-shape="rectangle">
+  <rect x="674.3743333333332" y="1543.9079999999997" width="247.20699999999997" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="797.9778333333331" y="1570.8079999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="797.9778333333331" dy="-3.9000000000000012">首次尝试追加 decision.messages</tspan><tspan x="797.9778333333331" dy="16.900000000000002">agent.ts:373-377 → user/message</tspan></text>
+</g>
+<g class="node" data-id="HDR" data-label="buildRequest → request/header + request/context(contextWindow)
+agent.ts:552-598" data-shape="rectangle">
+  <rect x="586.1953333333333" y="1628.8079999999998" width="423.56499999999994" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="797.9778333333334" y="1655.7079999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="797.9778333333334" dy="-3.9000000000000012">buildRequest → request/header + request/context(contextWindow)</tspan><tspan x="797.9778333333334" dy="16.900000000000002">agent.ts:552-598</tspan></text>
+</g>
+<g class="node" data-id="DERIVE" data-label="session.deriveMessages() → 冻结请求
+agent.ts:603-617" data-shape="rectangle">
+  <rect x="253.20600000000002" y="1706.6079999999997" width="272.40099999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="389.4065" y="1733.5079999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="389.4065" dy="-3.9000000000000012">session.deriveMessages() → 冻结请求</tspan><tspan x="389.4065" dy="16.900000000000002">agent.ts:603-617</tspan></text>
+</g>
+<g class="node" data-id="STREAM" data-label="finish.kind" data-shape="diamond">
+  <polygon points="303.8756666666666,363.313 366.4906666666666,425.928 303.8756666666666,488.543 241.26066666666657,425.928" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="303.8756666666666" y="425.928" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">finish.kind</text>
+</g>
+<g class="node" data-id="MAXTOK" data-label="turnEnds = max-tokens(粘性)" data-shape="rectangle">
+  <rect x="301.7588333333332" y="715.8469999999999" width="213.12099999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="408.3193333333332" y="734.2969999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">turnEnds = max-tokens(粘性)</text>
+</g>
+<g class="node" data-id="ERRW" data-label="agent/request-error waterfall
+agent.ts:448-463" data-shape="rectangle">
+  <rect x="113.20191666666665" y="1158.908" width="211.63899999999992" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="219.0214166666666" y="1185.808" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="219.0214166666666" dy="-3.9000000000000012">agent/request-error waterfall</tspan><tspan x="219.0214166666666" dy="16.900000000000002">agent.ts:448-463</tspan></text>
+</g>
+<g class="node" data-id="OVF" data-label="溢出分支:CONTEXT_WINDOW_EXCEEDED
+→ compactIfNeeded('context-overflow') → retry
+compaction-basic/src/index.ts:180-224" data-shape="rectangle">
+  <rect x="539.3609999999999" y="1253.158" width="304.26399999999995" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="691.4929999999998" y="1288.5079999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="691.4929999999998" dy="-12.350000000000001">溢出分支:CONTEXT_WINDOW_EXCEEDED</tspan><tspan x="691.4929999999998" dy="16.900000000000002">→ compactIfNeeded(&#39;context-overflow&#39;) → retry</tspan><tspan x="691.4929999999998" dy="16.900000000000002">compaction-basic/src/index.ts:180-224</tspan></text>
+</g>
+<g class="node" data-id="FAIL" data-label="throw LlmError → turnEnds = error" data-shape="rectangle">
+  <rect x="51.039999999999964" y="1543.9079999999997" width="242.76100000000005" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="172.4205" y="1562.3579999999997" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">throw LlmError → turnEnds = error</text>
+</g>
+<g class="node" data-id="TOOLS" data-label="有 tool-call?" data-shape="diamond">
+  <polygon points="678.9995833333332,572.843 746.8015833333333,640.645 678.9995833333332,708.447 611.1975833333332,640.645" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="678.9995833333332" y="640.645" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">有 tool-call?</text>
+</g>
+<g class="node" data-id="DONE" data-label="turnEnds = completed" data-shape="rectangle">
+  <rect x="465.91983333333326" y="784.9794999999999" width="167.92" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="549.8798333333333" y="803.4295" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">turnEnds = completed</text>
+</g>
+<g class="node" data-id="EXEC" data-label="executeToolCalls → tool/result
+additionalContexts → inbox.splice('next-step')
+tool-calls.ts:157; agent.ts:488-491" data-shape="rectangle">
+  <rect x="731.5550833333332" y="1118.0079999999998" width="300.5589999999999" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="881.8345833333332" y="1153.3579999999997" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="881.8345833333332" dy="-12.350000000000001">executeToolCalls → tool/result</tspan><tspan x="881.8345833333332" dy="16.900000000000002">additionalContexts → inbox.splice(&#39;next-step&#39;)</tspan><tspan x="881.8345833333332" dy="16.900000000000002">tool-calls.ts:157; agent.ts:488-491</tspan></text>
+</g>
+<g class="node" data-id="CLOSE" data-label="turnEnds 且 inbox.nextStep 为空?" data-shape="diamond">
+  <polygon points="479.09958333333327,861.8794999999999 612.4800833333333,995.2599999999999 479.09958333333327,1128.6405 345.7190833333333,995.2599999999999" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="479.09958333333327" y="995.2599999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">turnEnds 且 inbox.nextStep 为空?</text>
+</g>
+<g class="node" data-id="TURNEND" data-label="TURNEND" data-shape="rectangle">
+  <rect x="183.08933333333323" y="1629.7079999999996" width="104.194" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="235.18633333333324" y="1648.1579999999997" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">TURNEND</text>
+</g>
+<g class="node" data-id="STOP" data-label="agent/turn-stopping(serial)
+agent.ts:315-318" data-shape="rectangle">
+  <rect x="317.80100000000004" y="1543.9079999999997" width="197.55999999999997" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="416.581" y="1570.8079999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="416.581" dy="-3.9000000000000012">agent/turn-stopping(serial)</tspan><tspan x="416.581" dy="16.900000000000002">agent.ts:315-318</tspan></text>
+</g>
+</svg>

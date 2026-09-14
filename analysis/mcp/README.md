@@ -30,6 +30,10 @@
 
 下图是本章的骨架:从 Cordis 装载到一次 `tools/call` 上线的**全部函数跨度**,标注真实定义位置。实线是同步调用链,虚线是跨代际的解耦点(通知、定时器、注册表回调)。
 
+![流程图：README](../assets/diagrams/mcp__README-33.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   subgraph load["装载期(apply 的同步段落)"]
@@ -77,6 +81,8 @@ flowchart TD
   style runtime fill:#fee,stroke:#a88
   style superv fill:#ffe,stroke:#aa8
 ```
+
+</details>
 
 读图要点:
 

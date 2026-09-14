@@ -305,6 +305,10 @@ packages/core/scope/src/index.ts:158-180
 
 所以一份 preset standing composition **能观察它下面的每个 agent**,反之不行。委派生命周期事件正是靠这个性质分发的:carrier 由**委派父**决定,故父级监听器只看到自己的委派(`subagent/src/lifecycle.ts:86-90,134-163`;`subagent/src/index.ts:151-170` 的事件注释)。
 
+![流程图：03-child-agent-composition](../assets/diagrams/multi-agent__03-child-agent-composition-308.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 graph TD
   H["host composition(root realm)<br/>subagents 注册表 · workflow 引擎之外的能力"]
@@ -320,6 +324,8 @@ graph TD
   P -. 可见(链上求交后) .-> B
   A -. 事件只向上,父可观察子 .-> B
 ```
+
+</details>
 
 ---
 

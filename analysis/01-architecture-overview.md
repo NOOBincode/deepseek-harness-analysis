@@ -98,17 +98,92 @@ Cordis 是 dsh 之下的 vendored 插件框架(`docs/cordis-primer.md:5`)。`doc
 
 代理的意义:普通属性读走服务解析器。读一个未声明 `inject` 的服务键会直接抛错(`vendor/cordis/src/reflect.ts:144`:`cannot get property "<prop>" without inject`);已声明但服务未就绪则抛 `cannot get required service ... in inactive context`(`reflect.ts:159-161`)。这迫使每个插件诚实声明依赖。
 
+```typescript
+// vendor/cordis/src/context.ts:71-83(构造函数:建 Proxy、根 fiber 与四个内建服务)
+  constructor() {
+    this[symbols.isolate] = Object.create(null)
+    this[symbols.intercept] = Object.create(null)
+    const self = new Proxy<this>(this, ReflectService.handler)
+    this.root = self
+    this.baseUrl = undefined
+    this.fiber = new Fiber(self, {}, Object.create(null), null, () => [])
+    this.reflect = new ReflectService(self)
+    this.registry = new RegistryService(self)
+    this.events = new EventsService(self)
+    this.logger = new LoggerService(self)
+    this.fiber._disposables.clear()
+    return self
+  }
+```
+
+```typescript
+// vendor/cordis/src/reflect.ts:144,155-161(代理读服务:未声明 inject 直接抛错)
+      const error = new Error(`cannot get property "${prop}" without inject`)
+      // ...(略 145-154:accessor 分支与 internal/get waterfall 入口)
+          let fiber = (ctx[symbols.shadow] as Context ?? ctx).fiber
+          while (true) {
+            const impl = fiber.store?.[prop]
+            if (impl) return getTraceable(ctx, impl.value)
+            if (prop in fiber.inject) {
+              error.message = `cannot get required service "${prop}" in inactive context`
+              throw error
+            }
+```
+
 ### 2.2 插件与 Service
 
 插件是"实现了 Service 语义的对象"(`docs/cordis-primer.md:9`):可以是带 `inject` 与 `apply(ctx)` 的函数,也可以是 `Service` 子类。`Service` 基类的构造函数(`vendor/cordis/src/service.ts:42-58`)在构造时即调用 `ctx.reflect.provide(name, self, this[Service.check])` **立刻注册服务**,且随所属 fiber 卸载自动注销(`service.ts:33-36` 的契约注释)。harness 侧约定(`packages/AGENTS.md`):服务包默认导出服务类;函数插件具名导出 `name`/`inject`/`Config`/`apply`,两者不可混用。
+
+```typescript
+// vendor/cordis/src/service.ts:42-58(构造即注册:provide(name, self),随 fiber 卸载注销)
+  constructor(protected ctx: Context, name: string) {
+    name ??= this.constructor['provide'] as string
+
+    // ...(略 45-52:callable service 包装与 tracker)
+    self.ctx = ctx
+    self.name = name
+    defineProperty(self, symbols.tracker, tracker)
+
+    self.ctx.reflect.provide(name, self, this[symbols.check])
+    return self
+  }
+```
 
 ### 2.3 inject:以依赖表达加载顺序
 
 `ctx.inject(deps, callback)` 是 `ctx.plugin({ inject, apply: callback })` 的语法糖(`vendor/cordis/src/registry.ts:169-176`):回调在所需服务可用时运行,服务变化时卸载重跑。机制在 fiber 层:fiber 构造后按 `inject` 逐个 `_checkImpl`(`vendor/cordis/src/fiber.ts:314-319`),`_refresh()`(`fiber.ts:611-623`)把注入键集合解析成 epoch——**任何一个注入服务缺席,epoch 置为 INACTIVE,fiber 停在 PENDING**;全部到位才 `_reload()` 进入 LOADING→ACTIVE(`fiber.ts:631-633`),服务变动则 `_unload()` 后按新 epoch 重建。这就是"行序无加载语义"的实现基础。
 
+```typescript
+// vendor/cordis/src/fiber.ts:611-623(_refresh():注入服务缺席即 epoch=INACTIVE,fiber 停在 PENDING)
+  _refresh() {
+    let epoch: string | boolean = false
+    epoch = ''
+    for (const name of Object.keys(this.inject)) {
+      const impl = this._store[name]
+      if (!impl) {
+        epoch = INACTIVE
+        break
+      }
+      epoch += ':' + impl.fiber.uid
+    }
+    this._setEpoch(epoch)
+  }
+```
+
 ### 2.4 effect:可逆注册
 
 仓库惯例第一条:"Registrations are effects"(`AGENTS.md:106`)。`ctx.effect()`(`vendor/cordis/src/fiber.ts:415-418`)立即执行 `execute`,收集其产出的全部 disposer;调用返回的 disposer、或 fiber 卸载时,按**逆序**执行清理,重复调用是 no-op;fiber 已在 UNLOADING 状态则抛 `INACTIVE_EFFECT`(`fiber.ts:419-422`)。提示段、工具 schema、适配器、监听器全部经 `ctx.effect()`/`ctx.on()` 安装,所以热重载与拆卸可以预测地回卷(`docs/cordis-primer.md:13`)。vendored 版对 fiber 生命周期做了专项加固(重入处置、UNLOADING 期拒绝新 effect 等,`vendor/README.md:38` 本地修改第 6 条)。
+
+```typescript
+// vendor/cordis/src/fiber.ts:419-431(effect:UNLOADING 拒注册、disposer 幂等、splice(0).reverse() 逆序回收)
+    this.assertActive()
+    if (this.state === FiberState.UNLOADING) {
+      throw new CordisError('INACTIVE_EFFECT')
+    }
+
+    // ...(略 423-430:disposables 数组、disposing/disposalTask 状态,以及 dispose 闭包开头的幂等分支 `if (disposing) return disposalTask`)
+      for (const disposable of disposables.splice(0).reverse()) {
+```
 
 ### 2.5 事件与瀑布
 
@@ -118,11 +193,43 @@ Cordis 是 dsh 之下的 vendored 插件框架(`docs/cordis-primer.md:5`)。`doc
 
 `Loader`(`vendor/loader/src/index.ts:65`)是"owns a loader entry tree and imports configured plugins"的服务,构造时 `ctx.reflect.provide('loader', this, ...)` 自我注册(`loader/src/index.ts:90`),并通过 `internal/config` 监听器在 fiber 注入激活后才对条目的 `config` 做 `!!js` 表达式插值(`loader/src/index.ts:92-101`;树载体 Group/Include 保持字面量)。`Include` 提供条目表的 YAML 方言:`!!js` 标量往返为表达式节点,`entryListSchema`(`vendor/include/src/index.ts:9-23`)被导出,使 `dsh --dump-config` 与挂载用**同一解析器**,杜绝漂移。
 
+```typescript
+// vendor/loader/src/index.ts:90-101(Loader 自我注册 + fiber 激活后对条目 config 做 !!js 插值)
+    ctx.reflect.provide('loader', this, this[Service.check])
+
+    ctx.on('internal/config', function (this: Fiber, _config, next) {
+      const config = next()
+      if (!this.entry || this.parent.fiber?.entry === this.entry) return config
+      // Tree carriers (Group, Include) keep their configs literal: their
+      // entry and patch lists hold other rows' configs, whose `!!js`
+      // expressions belong to those rows' own fibers.
+      const plugin = this.runtime?.callback as Record<PropertyKey, unknown> | undefined
+      if (plugin?.[EntryGroup.key]) return config
+      return interpolate(this.ctx, config)
+    }, { global: true })
+```
+
 配置合成的唯一算法是 `applyEntryPatches(data, patches, warn)`(`vendor/include/src/index.ts:58-128`):先 `structuredClone` 脱离输入,再顺序应用 patch——`insert` 追加行(无 id 追加到顶层;带 id 则要求目标是 group),其余 patch 按 `id` 定位行并整体替换字段;插入的行立即入索引,**同一列表中靠后的 patch 可以配置或禁用靠前的 patch 刚插入的行**(`include/src/index.ts:96-101`)。patch 命不中任何行只告警跳过(`include/src/index.ts:110-114`)。
 
 ### 2.7 HMR 与 Scope
 
 HMR(`@deepseek-ai/cordis-plugin-hmr`,vendored)做模块级热替换;DSH 更常用其 `registerConfig()` 精确配置监听——监视单个绝对路径、串行化合并刷新、返回异步 disposer(`vendor/README.md:41` 本地修改第 9 条)。fiber 即 Cordis 的作用域原语:每个插件实例一棵 fiber,拥有自己的子 context、effect 集合与状态机(PENDING/LOADING/ACTIVE/UNLOADING/FAILED);`ctx.root` 指向全应用共享的根(`context.ts:22`)。harness 在其上叠加了 `packages/core/scope` 的"按 agent 的作用域注册"原语(`docs/architecture.md:66`),使 MCP 之类插件可挂到单个 Agent 的 `agent.ctx` 下。
+
+```typescript
+// vendor/hmr/src/index.ts:134-139,177-181(精确配置监听:单绝对路径去重,返回异步 disposer)
+  async registerConfig(filename: string, refresh: () => Promise<void> | void): Promise<() => Promise<void>> {
+    if (!this.watcher) throw new Error('HMR is not active')
+    filename = resolve(this.baseDir, filename)
+    const target = await findWatchRoot(filename)
+    const watchFilename = target.filename
+    if (this.configs.has(watchFilename)) throw new Error(`config path already registered: ${filename}`)
+    // ...(略 140-176:精确 watch 建立、ready/error 状态机与串行化刷新)
+      return this.ctx.effect(() => async () => {
+        if (this.configs.get(watchFilename) === registration) this.configs.delete(watchFilename)
+        await watcher.close()
+        await this.configRefreshes.get(registration)?.running
+      }, 'hmr.registerConfig()')
+```
 
 ---
 
@@ -151,6 +258,22 @@ export async function runCli(): Promise<void> {
 }
 ```
 
+```typescript
+// apps/cli/src/bin.ts:28-39(节选:argv 裁决后按 mode 分发,profile 分支调 runProfile)
+export async function runCli(): Promise<void> {
+  const invocation = parseDshArgs(process.argv.slice(2), readVersion())
+
+  switch (invocation.mode) {
+    case 'profile': {
+      const { runProfile } = await import('./profile-boot.ts')
+      await runProfile({
+        environment: loadLayeredEnv('dsh'),
+        profile: invocation.profile,
+        fromDefaultProfile: invocation.fromDefaultProfile,
+        patchFiles: invocation.patches,
+        args: invocation.args,
+```
+
 `parseDshArgs`(`apps/cli/src/args.ts:126-211`)确立了两条入口规则:
 
 - **启动器只解析自己的旗标**(`--profile`、`--from-default-profile`、`--patch`、两个 dump);第一个不认识的 token 起,全部原样交给被启动的树——`dsh --profile tui --resume abc` 中 `--resume abc` 属于 app(`args.ts:1-16` 模块注释)。`web` 是 `--profile web` 的硬编码别名(`args.ts:175-188`),`plugin` 子命令在 profile 目录里转发 pnpm(`args.ts:190-201`)。
@@ -159,6 +282,20 @@ export async function runCli(): Promise<void> {
 ### 3.2 环境分层:`loadLayeredEnv`
 
 在任何插件挂载前,`loadLayeredEnv`(`packages/boot/app-boot/src/index.ts:195-216`)产出本次运行**冻结的环境快照**:继承环境 > 调用目录 `.env` > Harness home `.env`;两份文件**先各自解析校验再应用**,且已存在的继承变量不被覆盖(`index.ts:204-209`)。文件不得设置引导级变量(`PATH`、`NODE_OPTIONS`、代理、CA、git 钩子、`DSH_*` 前缀等,`index.ts:93-117`),唯一豁免是 home 层可设代理(`HOME_LAYER_PROXY_NAMES`,`index.ts:126`)。随后 `runProfile` 用这份快照装 HTTP 代理(`apps/cli/src/profile-boot.ts:287-290`)——必须在任何请求发出前完成。
+
+```typescript
+// packages/boot/app-boot/src/index.ts:201-210(两份文件先各自解析校验,再应用且不覆盖已存在的继承变量)
+  // Parse both layers first: a rejection must not leave one file applied.
+  const project = readEnvLayer(binName, cwd, warn, home)
+  const user = home === resolve(cwd) ? undefined : readEnvLayer(binName, home, warn, home)
+  // Apply the checked values without replacing a higher-ranked name.
+  for (const layer of [project, user]) {
+    if (layer === undefined) continue
+    for (const [name, value] of Object.entries(layer.values)) {
+      if (process.env[name] === undefined) process.env[name] = value
+    }
+  }
+```
 
 ### 3.3 profile 与 bundle:配置组合
 
@@ -208,6 +345,22 @@ export async function boot(
     ...
   }
 }
+```
+
+```typescript
+// packages/boot/app-boot/src/index.ts:801-820(boot():装 Loader → prepare → mountRootInclude → 等整树 settle → 激活审计;失败处置半成品)
+    await ctx.plugin(Loader)
+    await prepare?.(ctx)
+    stage = 'plugin tree failed to load'
+    await mountRootInclude(ctx, absoluteConfigPath, patches, bareModuleBaseUrl)
+    // ...(略 805-811:整树 settle 期间可能被 surface 处置的活性重查说明)
+    await ctx.get('loader')?.await()
+    if (ctx.get('loader') === undefined) return ctx
+    await assertEntriesActivated(ctx, binName)
+    return ctx
+  } catch (cause) {
+    // ...(略 817-819:根 fiber 处置对每个 observer 收容清理失败、重复调用返回同一结果的说明)
+    await ctx.fiber.dispose()
 ```
 
 `mountRootInclude`(`index.ts:516-559`)把静态导入的 Include 注册为 `ctx.loader.builtins.include`(`cordis:group` 一并注册,`index.ts:540`),以固定 id `include` 创建根条目,初始 patches 一次带入。Include 读入空根 `cordis.yml`,用 `applyEntryPatches` 一次性应用层叠 patch,得到最终条目树后由 Loader **并发挂载**:每个条目 import 插件模块、建 fiber,`inject` 不齐者挂起,服务注册动作级联唤醒——激活顺序是依赖图的拓扑序,不是文件行序。
@@ -271,6 +424,10 @@ Desktop 是"Electron shell around the dsh Web UI",**不开任何监听端口**:�
 
 依赖图由 `scripts/gen-module-graph.ts` 生成并保鲜门禁于 CI(`packages/README.md:93`);`docs/module-graph.md:6` 说明其语义:只画 `@deepseek-ai/dsh-*` 包之间的 **peer 依赖**(消费者要求共享实例),`a --> b` 表示 a 把 b 声明为 peer。主干事实(边均出自 `docs/module-graph.md`):
 
+![流程图：01-architecture-overview](./assets/diagrams/01-architecture-overview-427.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   llm["llm<br/>(ctx.llm:消息/流词汇 + 适配器缝)"]
@@ -304,6 +461,8 @@ flowchart TD
   providers --> llm
   caps --> llm
 ```
+
+</details>
 
 - `agent-loop` 的 peer 集是主干的最大扇入:`agent、llm、scope、session、session-persistence、session-projection、settings、system-prompt、tools`(`docs/module-graph.md:705-714`)——默认驱动装配整个主干。
 - `agent --> session/system-prompt/scope/llm`(`:466-468`)、`tools --> agent/llm/scope/session/system-prompt`(`:635-641`)、`system-prompt --> llm/scope`(`:410-411`)、`session --> scope`(`:408`)。注意方向:**`dsh-agent` 拥有公开 `Agent` 契约,`agent-loop` 只是默认实现**,扩展插件依赖前者,驱动保持可替换(`packages/core/README.md:38`)。

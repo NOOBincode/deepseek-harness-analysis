@@ -222,6 +222,10 @@ const RUNNER_FAILURE_RULES = {
 
 ### 3.2 三组事实如何被消费
 
+![流程图：02-platform-backends](../assets/diagrams/sandbox__02-platform-backends-225.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["confine 返回 ConfinedArgv"] --> C["runnerFailureRules"]
@@ -240,6 +244,8 @@ flowchart TD
   style H fill:#fee,stroke:#a88
   style K fill:#ffe,stroke:#aa8
 ```
+
+</details>
 
 `isRunnerSpawnFailure` 的判据四条缺一不可:
 
@@ -357,6 +363,10 @@ private readonly tempCapabilities = new Map<string, AclTempCapability>()
 
 ### 5.2 物化流程
 
+![流程图：02-platform-backends](../assets/diagrams/sandbox__02-platform-backends-360.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["materializeAclGrant(sessionId, workspaceRoot)<br/>sandbox-local:392"] --> B["assertTempRootOutsideWorkspace<br/>临时根在工作区内即拒"]
@@ -377,6 +387,8 @@ flowchart TD
   style D2 fill:#efe,stroke:#8a8
   style E3 fill:#fee,stroke:#a88
 ```
+
+</details>
 
 半物化失败路径逐条对应:
 

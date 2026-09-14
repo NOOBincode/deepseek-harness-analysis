@@ -297,6 +297,10 @@ async function readSkillText(ctx, path, signal?, trustedHost = false): Promise<S
 
 ## 5. 错误与降级语义总表
 
+![流程图：01-skill-format-and-discovery](../assets/diagrams/skills__01-skill-format-and-discovery-300.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   S["根的直接子项"] --> T{"类型?"}
@@ -321,6 +325,8 @@ flowchart TD
   Z4 -->|旧键/非法布尔| X9["warn: invalid invocation frontmatter"]
   Z4 -->|合法| OK["产出 SkillCandidate<br/>content = body.trim()"]
 ```
+
+</details>
 
 | 坏输入 | 日志 | 范围 | 相邻 skill |
 |---|---|---|---|

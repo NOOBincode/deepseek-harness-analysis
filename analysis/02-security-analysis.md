@@ -71,7 +71,21 @@ export function scrubbedParentEnv(): Record<string, string> {
 }
 ```
 
-即:**凭据形状的名字与全部 `DSH_*` 默认不外泄,显式 `env` 在清洗之后合并才放行**(`packages/subprocess/subprocess-local/src/spawn.ts:46`,Windows 上按环境名大小写不敏感做去重覆盖)。
+即:**凭据形状的名字与全部 `DSH_*` 默认不外泄,显式 `env` 在清洗之后合并才放行**(`packages/subprocess/subprocess-local/src/spawn.ts:46`,Windows 上按环境名大小写不敏感做去重覆盖)。上面代码块中省略的尾段(代理重放与返回)同样逐字来自源文件:
+
+```ts
+// packages/subprocess/subprocess/src/index.ts:69-77
+  // A child Node ignores the inherited proxy variables unless the flag this adds is set, so an MCP
+  // stdio server or subagent CLI would connect directly while its parent proxies. The same overlay
+  // restores each proxy name to what the user exported, undoing this process's own normalization —
+  // `undefined` removes a name the user never set.
+  for (const [name, value] of Object.entries(proxyEnvironmentForChild())) {
+    if (value === undefined) Reflect.deleteProperty(env, name)
+    else env[name] = value
+  }
+  return env
+}
+```
 
 ### 1.3 会话数据:模型可见 ⟺ 已落日志
 
@@ -130,7 +144,27 @@ function renderPolicyContext(policy: SandboxExecutionPolicy): string {
 
 ### 2.1 沙箱之外仍是受信代码:三条"配置即执行"的路径
 
-**MCP 服务器命令。** stdio 传输直接 spawn 配置里的 `command`/`args`(`packages/mcp/mcp-client/src/transport.ts:31`),环境经过同一套清洗后再合并配置显式 `env`(README 的 "Environment scrubbing (stdio)" 一节:`packages/mcp/mcp-client/README.md:132`)。清洗是**唯一**的边界:进程本身以完整用户权限运行,不受 `ctx.sandbox` 约束。协议、命名空间预订与工具同步的完整分析见 [`06-mcp.md`](./06-mcp.md) 第一、二节,此处不复述。
+**MCP 服务器命令。** stdio 传输直接 spawn 配置里的 `command`/`args`(`packages/mcp/mcp-client/src/transport.ts:31`),环境经过同一套清洗后再合并配置显式 `env`(README 的 "Environment scrubbing (stdio)" 一节:`packages/mcp/mcp-client/README.md:132`)。清洗是**唯一**的边界:进程本身以完整用户权限运行,不受 `ctx.sandbox` 约束。协议、命名空间预订与工具同步的完整分析见 [`06-mcp.md`](./06-mcp.md) 第一、二节,此处不复述。清洗后合并显式 `env` 的动作就是一次对象展开:
+
+```ts
+// packages/mcp/mcp-client/src/transport.ts:21-39
+function buildChildEnv(extra: Record<string, string>): Record<string, string> {
+  return { ...scrubbedParentEnv(), ...extra }
+}
+// ...(略:createTransport 的 JSDoc)
+export function createTransport(config: Config): Transport {
+  switch (config.transport) {
+    case 'stdio':
+      return new StdioClientTransport({
+        command: config.command,
+        args: config.args,
+        env: buildChildEnv(config.env),
+        cwd: config.cwd,
+      })
+    // ...(略:streamable-http 分支)
+  }
+}
+```
 
 **hook 命令。** 两个 bridge 都从外部文件读命令串并执行:Claude Code 侧读取 `configPath` 指向的 `hooks.json` 或 settings 文件(`packages/hooks/hooks-claude-code/src/index.ts:103`),解析时替换 `${CLAUDE_PLUGIN_ROOT}` / `${CLAUDE_PROJECT_DIR}`(`packages/hooks/hooks-claude-code/src/config.ts:57`);Codex 侧只保留同步 command hook(`packages/hooks/hooks-codex/src/index.ts:91`)。执行统一走 shell 能力:
 
@@ -148,7 +182,19 @@ override resolve(request: ShellExecRequest): ShellExecSpec {
 }
 ```
 
-即 hook 命令跑在**部署默认模式**(`read-only` 起步,`packages/sandbox/sandbox-policy/src/index.ts:112`)下,而不是发起该 hook 的那个会话的当前模式。这是收敛的(fail-closed 方向),但也意味着:在把默认模式配成 `workspace-write` 或 `danger-full-access` 的部署里,hook 同样获得该权限。
+即 hook 命令跑在**部署默认模式**(`read-only` 起步,`packages/sandbox/sandbox-policy/src/index.ts:112`)下,而不是发起该 hook 的那个会话的当前模式。这是收敛的(fail-closed 方向),但也意味着:在把默认模式配成 `workspace-write` 或 `danger-full-access` 的部署里,hook 同样获得该权限。runner 侧构造的 request 字段里确实没有 `sandboxPolicy`:
+
+```ts
+// packages/hooks/hook-protocol/src/runner.ts:77-84
+const request = {
+  command: hook.command,
+  timeoutMs,
+  stdin,
+  signal: options.signal,
+  ...options.cwd !== undefined ? { workdir: options.cwd } : {},
+  ...options.env !== undefined ? { env: options.env } : {},
+}
+```
 
 **插件与 preset 即代码。** preset 是一个目录 + `agent.cordis.yml`(`packages/preset/agent-presets/src/discovery.ts:37`),用户自著 preset 落在 harness home 的 `.agent-presets`(`packages/preset/agent-presets/src/discovery.ts:51`),由 loader 装载——**发现期的健康检查刻意不导入任何插件代码**(`packages/preset/agent-presets/src/discovery.ts:16`),因为真正装载时它就是可执行代码。运行时动态包走 `node:vm`,其模块头把边界写得很清楚:
 
@@ -246,6 +292,10 @@ return fresh
 
 ### 3.1 一次工具调用的安全决策流
 
+![流程图：02-security-analysis](./assets/diagrams/02-security-analysis-295.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
     A["模型 tool-call 块<br/>args 为 JSON.parse 结果或原始串"] --> B["ToolRuntime.createExecution<br/>snapshotJsonValue 必须无损 + deepFreeze"]
@@ -265,6 +315,8 @@ flowchart TD
     M --> N["携带 sandbox_permissions + justification 升级<br/>approveEscalation → 用户审批"]
 ```
 
+</details>
+
 ### 3.2 沙箱策略:区间封闭、逐调用携带、fail-closed
 
 模式词汇表只有三档,且**只管文件效应**,网络与进程可见性明确不在其中(`packages/sandbox/sandbox/src/index.ts:23`)。默认值是 `read-only`——要可写必须显式打开(`packages/sandbox/sandbox-policy/src/index.ts:112`)。策略解析优先级是"已批准的显式模式 > 会话最后一次 `sandbox/mode` > 部署默认",工作区根取会话不可变 cwd(`packages/sandbox/sandbox-policy/src/index.ts:163`)。
@@ -281,9 +333,33 @@ flowchart TD
  */
 ```
 
-不可用时抛 `SandboxUnavailableError`,错误码 `SANDBOX_UNAVAILABLE` 经 `tool/result` 结构化传递,调用方能区分"沙箱缺失"与"命令失败"(`packages/sandbox/sandbox/src/index.ts:124`、`packages/sandbox/sandbox/src/index.ts:131`)。
+不可用时抛 `SandboxUnavailableError`,错误码 `SANDBOX_UNAVAILABLE` 经 `tool/result` 结构化传递,调用方能区分"沙箱缺失"与"命令失败"(`packages/sandbox/sandbox/src/index.ts:124`、`packages/sandbox/sandbox/src/index.ts:131`)。这个抛点本身只有一行,错误消息把"拒绝以非受限方式运行"写进了异常文本:
 
-后端选择按平台成链、按需探测:Linux 依次 bwrap → Landlock,macOS Seatbelt,Windows ACL 受限令牌;唯一候选不做探测,多候选按序功能探测,全部不可用即"不可用"(`packages/sandbox/sandbox-local/src/index.ts:486`、`packages/sandbox/sandbox-local/src/index.ts:513`)。每个后端还上报自己的**拒绝方言**与**runner 失败签名**,避免把"命令根本没跑起来"误判成"沙箱成功拦截了它"(`packages/sandbox/sandbox-local/src/index.ts:205`、`packages/sandbox/sandbox-local/src/index.ts:231`)。
+```ts
+// packages/sandbox/sandbox/src/index.ts:131-143
+export class SandboxUnavailableError extends HarnessError {
+  constructor(mode: ConfinedSandboxMode, detail?: string) {
+    super(
+      `sandbox mode "${mode}" is requested but no sandbox backend is usable on this host; `
+      + 'refusing to run the command unconfined. Install bubblewrap or run a Landlock-enforcing '
+      // ...(略:其余平台建议与 ` Runner failure: ${detail}` 后缀)
+      SANDBOX_UNAVAILABLE,
+    )
+    this.name = 'SandboxUnavailableError'
+  }
+}
+```
+
+后端选择按平台成链、按需探测:Linux 依次 bwrap → Landlock,macOS Seatbelt,Windows ACL 受限令牌;唯一候选不做探测,多候选按序功能探测,全部不可用即"不可用"(`packages/sandbox/sandbox-local/src/index.ts:486`、`packages/sandbox/sandbox-local/src/index.ts:513`)。每个后端还上报自己的**拒绝方言**与**runner 失败签名**,避免把"命令根本没跑起来"误判成"沙箱成功拦截了它"(`packages/sandbox/sandbox-local/src/index.ts:205`、`packages/sandbox/sandbox-local/src/index.ts:231`)。链判定只缓存一次,判成"不可用"后每次请求都直接抛,不存在"退而求其次"的分支:
+
+```ts
+// packages/sandbox/sandbox-local/src/index.ts:492-496
+private selectRunner(mode: ConfinedSandboxMode): SelectedRunner {
+  this.selectedRunner ??= this.chainVerdict()
+  if (this.selectedRunner === 'unavailable') throw new SandboxUnavailableError(mode)
+  return this.selectedRunner
+}
+```
 
 各后端的策略表达:
 
@@ -292,7 +368,19 @@ flowchart TD
 - Seatbelt:`(deny file-write*)` 后按共享的 `writableRoots` 白名单放行(`packages/sandbox/sandbox-local/src/profiles.ts:51`);
 - 可写根由**同一个** `writableRoots` 推导,使 Seatbelt 授权与进程内 fs fence 不可能漂移(`packages/sandbox/sandbox/src/roots.ts:52`)。
 
-Windows 侧是受限令牌路线,模块头记录了一个真实的历史教训:POC 忽略错误检查会**静默以完整未受限令牌运行子进程**,现在的实现每次 API 调用都检查并以 Win32 错误码抛出(`packages/sandbox/sandbox-windows-acl/src/token.ts:1`)。
+Windows 侧是受限令牌路线,模块头记录了一个真实的历史教训:POC 忽略错误检查会**静默以完整未受限令牌运行子进程**,现在的实现每次 API 调用都检查并以 Win32 错误码抛出(`packages/sandbox/sandbox-windows-acl/src/token.ts:1`)。这条教训就写在模块头里:
+
+```ts
+// packages/sandbox/sandbox-windows-acl/src/token.ts:1-8
+/**
+ * Restricted-token construction: open the current process token, extract its
+ * logon SID, build the well-known SIDs, and call CreateRestrictedToken with
+ * the POC's restricting-SID allowlist. Every API call is checked; any failure
+ * throws with the API name and the exact Win32 code — the original POC ignored
+ * all of these and silently ran children with the FULL, unrestricted token.
+ * @module @deepseek-ai/dsh-sandbox-windows-acl/token
+ */
+```
 
 进程内文件 fence 只约束两种变更操作,读一律放行(`packages/fs/fs-sandbox/src/index.ts:6`),拒绝时抛结构化 `FS_SANDBOX_DENIED`(`packages/fs/fs-sandbox/src/index.ts:127`),由工具层翻译成与 bash 相同的模型可见标记(`packages/fs/tool-fs/src/sandbox.ts:124`)。
 
@@ -311,7 +399,28 @@ const askResolution: ToolAskResolution = gate.kind === 'ask'
   : { decision: gate, approvalCancelled: false }
 ```
 
-审批接缝缺席时,`ask` **降级为 deny** 而不是放行,且区分"用户拒绝""通道不可用""无 agent 可路由"三种理由(`packages/core/tools/src/index.ts:1679`)。
+审批接缝缺席时,`ask` **降级为 deny** 而不是放行,且区分"用户拒绝""通道不可用""无 agent 可路由"三种理由(`packages/core/tools/src/index.ts:1679`)。降级分支就写在 `serviceAsk` 的开头,`ctx.get('approval')` 拿不到服务时立刻返回 deny:
+
+```ts
+// packages/core/tools/src/index.ts:1679-1695
+private async serviceAsk(
+  exec: ToolExecution,
+  ask: Extract<PreToolDecision, { kind: 'ask' }>,
+): Promise<ToolAskResolution> {
+  const approval = this.ctx.get('approval')
+  if (approval === undefined) {
+    return {
+      decision: { kind: 'deny', reason: ask.reason ?? `tool "${exec.name}" requires approval (not yet supported)` },
+      approvalCancelled: false,
+    }
+  }
+  if (exec.agent === undefined) {
+    return {
+      decision: { kind: 'deny', reason: `tool "${exec.name}" requires approval, but the call has no agent to route it through` },
+      approvalCancelled: false,
+    }
+  }
+```
 
 **第二道:单调 guard 链。** guard 没有 allow 结果,因此监听器顺序不可能把拒绝翻回允许:
 
@@ -326,7 +435,27 @@ const askResolution: ToolAskResolution = gate.kind === 'ask'
 export type ToolGuard = (execution: Readonly<ToolExecution>) => string | undefined
 ```
 
-guard 在 `allow` 之后才求值,取第一处拒绝理由(`packages/core/tools/src/index.ts:1476`、`packages/core/tools/src/index.ts:1109`)。
+guard 在 `allow` 之后才求值,取第一处拒绝理由(`packages/core/tools/src/index.ts:1476`、`packages/core/tools/src/index.ts:1109`)。注册只向层内追加,求值只找第一个非 `undefined` 的理由——整条链没有任何"返回 allow"的出口:
+
+```ts
+// packages/core/tools/src/index.ts:1100-1118
+guard(guard: ToolGuard): () => void {
+  return this.layers.effect(
+    this.ctx,
+    layer => layer.guards.append(guard),
+    { label: 'tools.guard()', notify: false },
+  )
+}
+
+/** First monotonic denial from the global then the scope chain's guard layers, farthest first. */
+private guardReason(exec: ToolExecution): string | undefined {
+  const globalReason = this.layers.global.guardReason(exec)
+  if (globalReason !== undefined) return globalReason
+  if (exec.agent === undefined) return undefined
+  // ...(略:按 chainLayers 逐层取第一个非 undefined 的理由)
+  return undefined
+}
+```
 
 **第三道:审批服务自身的 fail-closed。** 每次询问都以 `approval/asked` + `approval/decided` 成对写入会话日志,并要求落在一个已开启的 turn 内——否则裸事件在重放时等同崩溃尾巴会静默丢弃(`packages/interaction/user-approval/src/index.ts:77`、`packages/interaction/user-approval/src/index.ts:208`)。answerer 抛异常、返回非词汇表值、信号被取消,一律归一到 `'unavailable'` / `'cancelled'`:
 
@@ -342,9 +471,42 @@ outcome => OUTCOMES.includes(outcome) ? outcome : 'unavailable',
 
 调度前先入 promise 链,使同步抛出的监听器落进同一条拒绝路径(`packages/interaction/user-approval/src/index.ts:273`);`'never'` 策略在任何分发之前短路(`packages/interaction/user-approval/src/index.ts:268`)。无头/CI 场景的确定立场由 `'never'` 提供:每次询问确定性地判为 `'rejected'`(`packages/interaction/user-approval/src/index.ts:56`)。
 
-**升级(escalation)是唯一放宽途径,且必须严格更宽。** `sandbox_permissions` 与 `justification` 必须成对出现且理由非空(`packages/sandbox/sandbox/src/escalation.ts:51`);目标模式必须是当前有效模式的**严格**超集,该判断是执行期检查而非 schema 约束,因为 schema 是全局的、有效模式是每次调用的事实(`packages/sandbox/sandbox/src/escalation.ts:158`)。不严格更宽的请求不会弹窗、直接报错(`packages/sandbox/sandbox/src/escalation.ts:162`);无审批服务、无 agent、被拒、被取消、通道不可用,各自抛出不同文案,`allowed-once` 是唯一的授权(`packages/sandbox/sandbox/src/escalation.ts:180`)。bash 与 fs 两个族共享这一整套编排,避免两族顺序漂移(`packages/sandbox/sandbox/src/escalation.ts:2`、`packages/shell/tool-bash/src/index.ts:212`、`packages/fs/tool-fs/src/sandbox.ts:87`)。
+**升级(escalation)是唯一放宽途径,且必须严格更宽。** `sandbox_permissions` 与 `justification` 必须成对出现且理由非空(`packages/sandbox/sandbox/src/escalation.ts:51`);目标模式必须是当前有效模式的**严格**超集,该判断是执行期检查而非 schema 约束,因为 schema 是全局的、有效模式是每次调用的事实(`packages/sandbox/sandbox/src/escalation.ts:158`)。不严格更宽的请求不会弹窗、直接报错(`packages/sandbox/sandbox/src/escalation.ts:162`);无审批服务、无 agent、被拒、被取消、通道不可用,各自抛出不同文案,`allowed-once` 是唯一的授权(`packages/sandbox/sandbox/src/escalation.ts:180`)。bash 与 fs 两个族共享这一整套编排,避免两族顺序漂移(`packages/sandbox/sandbox/src/escalation.ts:2`、`packages/shell/tool-bash/src/index.ts:212`、`packages/fs/tool-fs/src/sandbox.ts:87`)。成对校验是个纯函数,三条分支各自抛出自己的文案:
+
+```ts
+// packages/sandbox/sandbox/src/escalation.ts:51-61
+export function validateEscalationArgs(sandboxPermissions: string | undefined, justification: string | undefined): void {
+  if (sandboxPermissions !== undefined && justification === undefined) {
+    throw new Error('invalid escalation: sandbox_permissions requires a justification')
+  }
+  if (justification !== undefined && sandboxPermissions === undefined) {
+    throw new Error('invalid escalation: justification is only valid together with sandbox_permissions')
+  }
+  if (justification !== undefined && justification.trim().length === 0) {
+    throw new Error('invalid justification: expected a non-empty sentence')
+  }
+}
+```
 
 对用户而言,这些旋钮由 preset 收拢成可读选项:沙箱模式与审批策略是两个独立旋钮,`permission/preset` 只记录用户意图(`packages/interaction/permission-presets/src/index.ts:59`、`packages/interaction/permission-presets/src/index.ts:54`)。
+
+```ts
+// packages/sandbox/sandbox/src/escalation.ts:157-170
+export async function approveEscalation<A, C>(request: EscalationRequest, approval: EscalationApproval<A, C>): Promise<SandboxMode> {
+  const { requestedMode: mode, effectiveMode, justification, subject } = request
+  // Strict widening is an EXECUTION check against the call's effective mode —
+  // deliberately not a schema constraint (the enum is the closed target
+  // vocabulary; the effective mode is per-call truth).
+  if (!(WIDER_MODES[effectiveMode] ?? []).includes(mode as SandboxMode)) {
+    throw new Error(`sandbox escalation to "${mode}" is not strictly wider than this call's current "${effectiveMode}" mode`)
+  }
+  if (approval.approver === undefined) {
+    throw new Error(`sandbox escalation to "${mode}" requires approval, but no approval service is composed`)
+  }
+  if (approval.agent === undefined) {
+    throw new Error(`sandbox escalation to "${mode}" requires approval, but the call has no agent to route it through`)
+  }
+```
 
 升级路径的结果映射是封闭且穷尽的——每个非授权结果都有专属文案,新增词汇会让 `assertNever` 在编译期与运行期同时报错:
 
@@ -359,13 +521,42 @@ switch (outcome) {
 }
 ```
 
-拒绝后模型看到的是**同一套标记词汇**:bash 与 fs 都输出 `[sandbox: file access denied under <mode> mode]` 加一条同轮次的升级提示(`packages/sandbox/sandbox/src/escalation.ts:71`、`packages/sandbox/sandbox/src/escalation.ts:84`)。这既是可观测性设计,也是安全设计——模型不需要"记住"工具描述里的规则,决策点自己给出下一步。
+拒绝后模型看到的是**同一套标记词汇**:bash 与 fs 都输出 `[sandbox: file access denied under <mode> mode]` 加一条同轮次的升级提示(`packages/sandbox/sandbox/src/escalation.ts:71`、`packages/sandbox/sandbox/src/escalation.ts:84`)。这既是可观测性设计,也是安全设计——模型不需要"记住"工具描述里的规则,决策点自己给出下一步。两条标记都是纯函数,文案逐字固定:
+
+```ts
+// packages/sandbox/sandbox/src/escalation.ts:71-86
+export function sandboxDenialMarker(mode: SandboxMode): string {
+  return `[sandbox: file access denied under ${mode} mode]`
+}
+
+// ...(略:escalationHintMarker 的 JSDoc——提示必须留在决策点,不依赖模型回忆工具描述)
+export function escalationHintMarker(subject: string): string {
+  return `[sandbox: escalation available — retry this exact ${subject} once with sandbox_permissions (the narrowest wider mode that suffices) + justification; the approval prompt asks the user]`
+}
+```
 
 ### 3.4 守卫:循环卫生与协作式超时
 
 两个守卫都刻意**不是**强制边界,而是可观测的纠偏:
 
-- `repeat-tool-reminder` 在 `tools/post-execute` 观测,先计数(被拒绝的调用同样计数,因为"反复撞同一堵墙"正是要打断的循环),再 `await next()` 委托下游,最后把提醒折叠到下游决定上——**从不否决**(`packages/guard/repeat-tool-reminder/src/index.ts:181`、`packages/guard/repeat-tool-reminder/src/index.ts:213`)。注入的上下文带 `plugin` 来源标签,否则在派生历史里会被渲染成用户提示(`packages/guard/repeat-tool-reminder/src/index.ts:57`)。引用的参数预览有长度上限,链键仍用完整规范化串(`packages/guard/repeat-tool-reminder/src/index.ts:118`)。
+- `repeat-tool-reminder` 在 `tools/post-execute` 观测,先计数(被拒绝的调用同样计数,因为"反复撞同一堵墙"正是要打断的循环),再 `await next()` 委托下游,最后把提醒折叠到下游决定上——**从不否决**(`packages/guard/repeat-tool-reminder/src/index.ts:181`、`packages/guard/repeat-tool-reminder/src/index.ts:213`)。注入的上下文带 `plugin` 来源标签,否则在派生历史里会被渲染成用户提示(`packages/guard/repeat-tool-reminder/src/index.ts:57`)。引用的参数预览有长度上限,链键仍用完整规范化串(`packages/guard/repeat-tool-reminder/src/index.ts:118`)。计数与成文的动作(先计数、后委托、从不否决):
+
+```ts
+// packages/guard/repeat-tool-reminder/src/index.ts:189-207
+function observe(exec: ToolExecution): UserMessage | undefined {
+  // A direct `ctx.tools.execute()` caller has no model to remind and no id
+  // to key on; only agent-loop calls participate.
+  if (!exec.agent) return undefined
+  if (!tracked(exec.name)) return undefined
+  const canonical = canonicalize(exec.arguments)
+  const key = JSON.stringify([exec.name, canonical])
+  const chain = chains.get(exec.agent)
+  const count = chain !== undefined && chain.key === key ? chain.count + 1 : 1
+  chains.set(exec.agent, { key, count })
+  if (!thresholdSet.has(count)) return undefined
+  // ...(略:按 count 选择 GENTLE_REMINDER / detailedReminder,并构造带 plugin 来源标签的 UserMessage)
+}
+```
 - `timeout-policy` 把工具声明的预算转成 `exec.signal` 上的截止时间,只在**自己**的计时器触发时替换结果;用错误码作用域区分嵌套的外层截止,避免把上游取消误读成自己的超时(`packages/guard/timeout-policy/src/index.ts:18`、`packages/guard/timeout-policy/src/index.ts:55`)。它是协作式的:工具必须尊重 `exec.signal` 才能被真正停下。
 
 两者都遵循"fail loud"的配置校验:阈值列表为空、非整数、小于 2 或重复,一律在插件加载期抛错(`packages/guard/repeat-tool-reminder/src/index.ts:128`)。
@@ -393,7 +584,14 @@ switch (outcome) {
 
 ### 3.7 与 `SAFETY.md` 对齐的部署建议
 
-`SAFETY.md` 的立场与代码结构是一致的,下面每条都能落到具体机制上:
+`SAFETY.md` 的立场与代码结构是一致的,下面每条都能落到具体机制上。原文的边界声明:
+
+```text
+// SAFETY.md:13-15
+Sandboxing, approval prompts, and permission controls can reduce risk, but they do not guarantee isolation or prevent damage. Even correctly enforced restrictions cannot protect resources that the project is allowed to access.
+
+Do not rely on DeepSeek Harness as the sole security control for untrusted workloads.
+```
 
 - **最小权限运行**(`SAFETY.md:19`):默认模式已是 `read-only`(`packages/sandbox/sandbox-policy/src/index.ts:112`),不要为了让 agent"顺手"而全局改成 `danger-full-access`;该模式在 shell 侧直接短路,连 `ctx.sandbox` 都不调用(`packages/shell/bash-sandbox/src/index.ts:92`)。
 - **优先一次性环境**(`SAFETY.md:20`):沙箱只治理文件效应,网络与进程可见性明确不在词汇表内(`packages/sandbox/sandbox/src/index.ts:23`);需要网络与进程隔离只能靠容器/微虚拟机替换整个能力接缝。

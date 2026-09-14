@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 604.992 915" width="604.992" height="915" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line class="lifeline" data-actor="L" x1="98.845" y1="70" x2="98.845" y2="885" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="G" x1="253.564" y1="70" x2="253.564" y2="885" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="R" x1="393.56399999999996" y1="70" x2="393.56399999999996" y2="885" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="S" x1="533.564" y1="70" x2="533.564" y2="885" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="L" data-to="R" data-label="executionMode(call0) → 'parallel'" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="98.845" y1="90" x2="393.56399999999996" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="246.2045" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">executionMode(call0) → &#39;parallel&#39;</text>
+</g>
+<g class="message" data-from="L" data-to="G" data-label="runGroup(全部剩余, 'parallel')  %% maxParallelToolCalls = 2" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="98.845" y1="130" x2="253.564" y2="130" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="176.2045" y="120" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">runGroup(全部剩余, &#39;parallel&#39;)  %% maxParallelToolCalls = 2</text>
+</g>
+<g class="message" data-from="G" data-to="S" data-label="append('tool/call', #0)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="253.564" y1="170" x2="533.564" y2="170" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="393.56399999999996" y="160" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">append(&#39;tool/call&#39;, #0)</text>
+</g>
+<g class="message" data-from="G" data-to="R" data-label="prepare(#0)          %% 有序" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="253.564" y1="210" x2="393.56399999999996" y2="210" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="323.56399999999996" y="200" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">prepare(#0)          %% 有序</text>
+</g>
+<g class="message" data-from="R" data-to="G" data-label="'dispatch'" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="393.56399999999996" y1="250" x2="253.564" y2="250" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="323.56399999999996" y="240" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">&#39;dispatch&#39;</text>
+</g>
+<g class="message" data-from="G" data-to="R" data-label="dispatch(#0) ⤵并发" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="253.564" y1="290" x2="393.56399999999996" y2="290" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="323.56399999999996" y="280" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">dispatch(#0) ⤵并发</text>
+</g>
+<g class="message" data-from="G" data-to="G" data-label="commitReady() → 无槽，break" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="253.564,330 283.56399999999996,330 283.56399999999996,350 253.564,350" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="291.56399999999996" y="340" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">commitReady() → 无槽，break</text>
+</g>
+<g class="message" data-from="G" data-to="S" data-label="append('tool/call', #1)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="253.564" y1="400" x2="533.564" y2="400" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="393.56399999999996" y="390" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">append(&#39;tool/call&#39;, #1)</text>
+</g>
+<g class="message" data-from="G" data-to="R" data-label="prepare(#1)          %% 等 #0 的 prepare 已结束" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="253.564" y1="440" x2="393.56399999999996" y2="440" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="323.56399999999996" y="430" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">prepare(#1)          %% 等 #0 的 prepare 已结束</text>
+</g>
+<g class="message" data-from="G" data-to="R" data-label="dispatch(#1) ⤵并发" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="253.564" y1="480" x2="393.56399999999996" y2="480" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="323.56399999999996" y="470" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">dispatch(#1) ⤵并发</text>
+</g>
+<g class="message" data-from="R" data-to="G" data-label="#0 落定（kind='post-result'）" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="393.56399999999996" y1="520" x2="253.564" y2="520" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="323.56399999999996" y="510" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">#0 落定（kind=&#39;post-result&#39;）</text>
+</g>
+<g class="message" data-from="G" data-to="R" data-label="finalize(#0)         %% 跑 post-execute" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="253.564" y1="560" x2="393.56399999999996" y2="560" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="323.56399999999996" y="550" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">finalize(#0)         %% 跑 post-execute</text>
+</g>
+<g class="message" data-from="G" data-to="S" data-label="append('tool/result', #0, sourceEventSeqs=[call0])" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="253.564" y1="600" x2="533.564" y2="600" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="393.56399999999996" y="590" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">append(&#39;tool/result&#39;, #0, sourceEventSeqs=[call0])</text>
+</g>
+<g class="message" data-from="G" data-to="G" data-label="commitReady() → slots[1] 空，break" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="253.564,640 283.56399999999996,640 283.56399999999996,660 253.564,660" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="291.56399999999996" y="650" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">commitReady() → slots[1] 空，break</text>
+</g>
+<g class="message" data-from="G" data-to="R" data-label="executionMode(call2) → 'exclusive'" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="253.564" y1="710" x2="393.56399999999996" y2="710" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="323.56399999999996" y="700" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">executionMode(call2) → &#39;exclusive&#39;</text>
+</g>
+<g class="message" data-from="R" data-to="G" data-label="#1 落定 → finalize(#1) → append('tool/result', #1)" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="393.56399999999996" y1="765" x2="253.564" y2="765" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="323.56399999999996" y="755" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">#1 落定 → finalize(#1) → append(&#39;tool/result&#39;, #1)</text>
+</g>
+<g class="message" data-from="G" data-to="L" data-label="{ consumed: 2, aborted: false }" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="253.564" y1="805" x2="98.845" y2="805" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="176.2045" y="795" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">{ consumed: 2, aborted: false }</text>
+</g>
+<g class="message" data-from="L" data-to="G" data-label="runGroup([call2], 'exclusive')   %% 独占 + 栅栏" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="98.845" y1="845" x2="253.564" y2="845" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="176.2045" y="835" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">runGroup([call2], &#39;exclusive&#39;)   %% 独占 + 栅栏</text>
+</g>
+<g class="note" data-position="over" data-actors="G">
+  <polygon points="168.271,718 332.85699999999997,718 338.85699999999997,724 338.85699999999997,741 168.271,741" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="332.85699999999997,718 338.85699999999997,724 332.85699999999997,724" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="253.564" y="729.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">break：屏障立起，started=2</text>
+</g>
+<g class="actor" data-id="L" data-label="executeToolCalls" data-type="participant">
+  <rect x="30" y="30" width="137.69" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="98.845" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">executeToolCalls</text>
+</g>
+<g class="actor" data-id="G" data-label="runGroup" data-type="participant">
+  <rect x="207.69" y="30" width="91.74799999999999" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="253.564" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">runGroup</text>
+</g>
+<g class="actor" data-id="R" data-label="ToolRuntime" data-type="participant">
+  <rect x="340.28" y="30" width="106.568" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="393.56399999999996" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">ToolRuntime</text>
+</g>
+<g class="actor" data-id="S" data-label="Session" data-type="participant">
+  <rect x="492.13599999999997" y="30" width="82.856" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="533.564" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Session</text>
+</g>
+</svg>

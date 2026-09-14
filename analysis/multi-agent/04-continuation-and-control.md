@@ -390,6 +390,10 @@ service 面暴露两个方法(`packages/subagent/subagent/src/index.ts:299-330`)
 
 即 **"child-first"必须靠转出顺序表达**,不能靠"挂一个 cleanup effect 到同一个 scope"——那会让句柄的结构性析构绕开父子顺序。
 
+![时序图：04-continuation-and-control](../assets/diagrams/multi-agent__04-continuation-and-control-393.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -413,6 +417,8 @@ sequenceDiagram
     end
     Note over A: interrupt_agent 只 cancel 当前 turn,keepInbox:true<br/>它自己起的 agent 与未认领的 inbox 工作全部保留
 ```
+
+</details>
 
 ---
 

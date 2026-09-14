@@ -84,7 +84,31 @@ try {
 }
 ```
 
-三条协议事实:①**退出码是主通道**,`2` 是唯一阻塞码(`const BLOCKING_EXIT_CODE = 2`,`packages/hooks/hook-protocol/src/codec.ts:11`),`stderr` 成为阻塞理由,其余退出码按"非阻塞错误"处理(`packages/hooks/hook-protocol/src/codec.ts:65-69`);②**结构化 stdout 只在退出码 0 且首字符为 `{` 时尝试**,JSON 畸形退回纯文本而不报错(`packages/hooks/hook-protocol/src/codec.ts:71-86`);③**决策词汇被归一**:顶层 `decision` 只接受 `approve|block`,而 `allow|deny|ask` 只能来自 `hookSpecificOutput.permissionDecision`,越界的 `{"decision":"deny"}` 被忽略(`packages/hooks/hook-protocol/src/codec.ts:32-45`),且 `hookEventName` 与触发事件不符时只丢事件域字段、保留判别值(`packages/hooks/hook-protocol/src/codec.ts:115-126`)。超时默认值只有一份:`DEFAULT_HOOK_TIMEOUT_MS = 600_000`(`packages/hooks/hook-protocol/src/runner.ts:20`),配置里的 `timeoutSec` 是秒,由 runner 换算成毫秒。
+三条协议事实:①**退出码是主通道**,`2` 是唯一阻塞码(`const BLOCKING_EXIT_CODE = 2`,`packages/hooks/hook-protocol/src/codec.ts:11`),`stderr` 成为阻塞理由,其余退出码按"非阻塞错误"处理(`packages/hooks/hook-protocol/src/codec.ts:65-69`);②**结构化 stdout 只在退出码 0 且首字符为 `{` 时尝试**,JSON 畸形退回纯文本而不报错(`packages/hooks/hook-protocol/src/codec.ts:71-86`);③**决策词汇被归一**:顶层 `decision` 只接受 `approve|block`,而 `allow|deny|ask` 只能来自 `hookSpecificOutput.permissionDecision`,越界的 `{"decision":"deny"}` 被忽略(`packages/hooks/hook-protocol/src/codec.ts:32-45`),且 `hookEventName` 与触发事件不符时只丢事件域字段、保留判别值(`packages/hooks/hook-protocol/src/codec.ts:115-126`)。超时默认值只有一份:`DEFAULT_HOOK_TIMEOUT_MS = 600_000`(`packages/hooks/hook-protocol/src/runner.ts:20`),配置里的 `timeoutSec` 是秒,由 runner 换算成毫秒。解码侧是一个**全函数**(从不抛错),三条事实各占一个分支:
+
+```typescript
+// packages/hooks/hook-protocol/src/codec.ts:59-88
+export function parseHookOutput(exitCode: number | undefined, stdout: string, stderr: string, expectedEventName?: string): HookOutput {
+  const trimmedErr = stderr.trim()
+  const trimmedOut = stdout.trim()
+  // Plain stdout remains available even when it is not JSON.
+  const output: HookOutput = { exitCode, stderr: trimmedErr, stdout: trimmedOut }
+
+  // Both dialects treat exit 2 as a block with stderr as its reason.
+  if (exitCode === BLOCKING_EXIT_CODE) {
+    output.decision = 'block'
+    if (trimmedErr.length > 0) output.reason = trimmedErr
+  }
+
+  // Structured stdout is valid only for a clean exit.
+  if (exitCode === 0) {
+    // ...(略:仅当 stdout 以 `{` 开头才尝试 JSON.parse,畸形 JSON 静默退回纯文本)
+    if (parsed) applyStructured(output, parsed, expectedEventName)
+  }
+
+  return output
+}
+```
 
 ### 1.3 事件点与决策映射
 
@@ -130,7 +154,18 @@ for (const group of groups) {
 return mergeHookOutputs(outputs)
 ```
 
-两个桥的差异全部体现在这里:Codex 的 `trailingNewline` 为 `false`(`packages/hooks/hooks-codex/src/index.ts:145`),并把"干净的纯文本 stdout"当作 `additionalContext`(`packages/hooks/hooks-codex/src/index.ts:151-155`);Codex 的 `PreToolUse` 不返回 `ask`(`packages/hooks/hooks-codex/src/index.ts:224-230`),CC 会(`packages/hooks/hooks-claude-code/src/index.ts:240-241`);子代理事件上 CC 桥恒定报告 `agent_type: 'general-purpose'`,因为 subagent 缝不携带按种类的标签(`packages/hooks/hooks-claude-code/src/index.ts:297-303`)。
+两个桥的差异全部体现在这里:Codex 的 `trailingNewline` 为 `false`(`packages/hooks/hooks-codex/src/index.ts:145`),并把"干净的纯文本 stdout"当作 `additionalContext`(`packages/hooks/hooks-codex/src/index.ts:151-155`);Codex 的 `PreToolUse` 不返回 `ask`(`packages/hooks/hooks-codex/src/index.ts:224-230`),CC 会(`packages/hooks/hooks-claude-code/src/index.ts:240-241`);子代理事件上 CC 桥恒定报告 `agent_type: 'general-purpose'`,因为 subagent 缝不携带按种类的标签(`packages/hooks/hooks-claude-code/src/index.ts:297-303`)。CC 桥在 `tools/pre-execute` 上的决策映射只有四行,`deny`/`ask` 之外一律 `next()` 委托下游:
+
+```typescript
+// packages/hooks/hooks-claude-code/src/index.ts:237-243
+ctx.on('tools/pre-execute', async (exec, next): Promise<PreToolDecision> => {
+  const turn = lastTurn(ctx, exec.agent)
+  const merged = await runPoint('PreToolUse', exec.name, preToolPayload(exec), { ...exec.agent ? { agent: exec.agent } : {}, turn, signal: exec.signal })
+  if (merged.decision === 'deny') return { kind: 'deny', reason: merged.reason ?? 'blocked by PreToolUse hook' }
+  if (merged.decision === 'ask') return { kind: 'ask', ...merged.reason !== undefined ? { reason: merged.reason } : {} }
+  return next()
+})
+```
 
 ### 1.4 合并语义与审计
 
@@ -163,7 +198,20 @@ return {
 }
 ```
 
-`imagePromptEnabled` 不是常量,而是 initialize 时按当前 provider/model 探得的能力(`packages/acp/acp/src/index.ts:179`)。传输固定 stdio,用 SDK 的换行 JSON 流包住 `process.stdout`/`process.stdin`(`packages/acp/acp/src/index.ts:374-377`),9 个 handler 一一对应 SDK 的方法常量(`packages/acp/acp/src/index.ts:378-391`)。装配只有一行 bundle row(`packages/bundle/acp-app/cordis.patch.yml:16-18`),同一份 patch 还关掉 `session-title-llm` 并把 persona 固定为"你的工作目录是 {{cwd}}",因为呈现层属于 ACP 客户端。
+`imagePromptEnabled` 不是常量,而是 initialize 时按当前 provider/model 探得的能力(`packages/acp/acp/src/index.ts:179`)。传输固定 stdio,用 SDK 的换行 JSON 流包住 `process.stdout`/`process.stdin`(`packages/acp/acp/src/index.ts:374-377`),9 个 handler 一一对应 SDK 的方法常量(`packages/acp/acp/src/index.ts:378-391`)。装配只有一行 bundle row(`packages/bundle/acp-app/cordis.patch.yml:16-18`),同一份 patch 还关掉 `session-title-llm` 并把 persona 固定为"你的工作目录是 {{cwd}}",因为呈现层属于 ACP 客户端。装载点把传输固定成 stdio,并把 9 个 handler 一一挂到 SDK 的方法常量上:
+
+```typescript
+// packages/acp/acp/src/index.ts:374-391
+const stream: Stream = config.stream ?? ndJsonStream(
+  Writable.toWeb(process.stdout) as WritableStream<Uint8Array>,
+  Readable.toWeb(process.stdin) as ReadableStream<Uint8Array>,
+)
+const app = createAcpAgentApp({ name: 'deepseek-harness-acp' })
+  .onRequest(methods.agent.initialize, ({ params }) => implementation.initialize(params))
+  // ...(略:agent.authenticate 与 session.new / session.list / session.resume / session.close / session.setConfigOption / session.prompt)
+  .onNotification(methods.agent.session.cancel, ({ params }) => implementation.cancel(params))
+const connection = app.connect(stream)
+```
 
 ### 2.2 会话生命周期:每个 ACP 会话 = 一个受管 Agent
 
@@ -183,9 +231,25 @@ const handle = await ctx.agents.create({
 })
 ```
 
-`session/new` 返回前做三件事:创建记录 → 取 `configOptions` → `ctx.sessions.flush()`,失败则删记录并 `close()` 回滚(`packages/acp/acp/src/index.ts:225-236`)。`session/resume` 更严:先 `persistence.stat()` 校验头部,拒绝 `origin === 'subagent'` 或有 `parentSession` 的会话,再用 `realpath` 比对 cwd,最后才 `ctx.agents.resume()`(`packages/acp/acp/src/index.ts:248-289`)。`session/list` 用不透明 keyset 游标(base64url 的 `[createdAt, sessionId]`,并校验规范形式)分页(`packages/acp/acp/src/index.ts:475-508`)。
+`session/new` 返回前做三件事:创建记录 → 取 `configOptions` → `ctx.sessions.flush()`,失败则删记录并 `close()` 回滚(`packages/acp/acp/src/index.ts:225-236`)。`session/resume` 更严:先 `persistence.stat()` 校验头部,拒绝 `origin === 'subagent'` 或有 `parentSession` 的会话,再用 `realpath` 比对 cwd,最后才 `ctx.agents.resume()`(`packages/acp/acp/src/index.ts:248-289`)。`session/list` 用不透明 keyset 游标(base64url 的 `[createdAt, sessionId]`,并校验规范形式)分页(`packages/acp/acp/src/index.ts:475-508`)。 `session/resume` 的两道门(头部校验 + cwd 比对)与失败回滚:
+
+```typescript
+// packages/acp/acp/src/index.ts:248-287
+const persisted = (await persistence.stat(sessionId, { signal }))?.header
+if (persisted === undefined || persisted.origin === 'subagent' || persisted.parentSession !== undefined) {
+  throw invalidParams(`session is not resumable: ${sessionId}`)
+}
+if (!await sameDirectory(persisted.cwd, params.cwd)) {
+  throw invalidParams(`session cwd does not match: ${params.cwd}`)
+}
+// ...(略:AcpSession.resume、恢复后再次 cwd 比对、closed 竞态检查,以及 configOptions 失败时的 sessions.delete + record.close 回滚)
+```
 
 ### 2.3 一次 prompt 的全过程
+
+![时序图：13-extensions-ecosystem](./assets/diagrams/13-extensions-ecosystem-250.svg)
+
+<details><summary>Mermaid 源码</summary>
 
 ```mermaid
 sequenceDiagram
@@ -205,7 +269,29 @@ sequenceDiagram
     S-->>C: { stopReason }
 ```
 
+</details>
+
 关键点:①**准入是显式阶段**,失败按 `AcpContentError.kind` 映射成 `invalidParams`/`internalError`,`agent.followup()` 抛错则回滚 `messageQueued` 与 selection(`packages/acp/acp/src/session.ts:280-304`);②**同一会话同时只允许一个在飞 prompt**(`packages/acp/acp/src/session.ts:249`);③**路由按消息钉住**:prompt 时快照 selection,`agent/inbox/claimed` 到来时 `pinTurn(turn, selection)`(`packages/acp/acp/src/session.ts:396-401`);④**结算条件是"整 Agent 静默 + 更新排空"**,依次等 `admissionDone` → `agent.whenIdle()` → `outputTail`,再按取消/输出错误/Agent 错误/`turn/end.reason` 决定 resolve 或 reject(`packages/acp/acp/src/session.ts:483-523`);⑤**流式更新是"提交后才发"**,三类日志事件分别投影成 assistant 块、`tool_call`、`tool_call_update` 并串在同一条 `outputTail` 上保证顺序(`packages/acp/acp/src/session.ts:345-389`、`packages/acp/acp/src/updates.ts:52-85`),`reasoning` 块发成 `agent_thought_chunk`,只有同时具备 token 计量与上下文窗口两个事实时才附 `usage_update`(`packages/acp/acp/src/updates.ts:22-45`、`packages/acp/acp/src/updates.ts:88-102`)。
+
+①里的"准入"在源码中就是一次异步调用加两次**前后各一次**的存活校验:
+
+```typescript
+// packages/acp/acp/src/session.ts:277-290
+if (this.ctx.agents.get(this.agent.id) !== this.agent) {
+  throw internalError('prompt was not queued: the agent was disposed outside the bridge')
+}
+const content = await admitAcpPrompt(
+  this.ctx,
+  promptSelection,
+  params.prompt,
+  imageEnabled,
+  admissionController.signal,
+)
+admissionController.signal.throwIfAborted()
+if (this.ctx.agents.get(this.agent.id) !== this.agent) {
+  throw internalError('prompt was not queued: the agent was disposed outside the bridge')
+}
+```
 
 ### 2.4 审批回传:单次、不可推断的机器策略通道
 
@@ -237,7 +323,33 @@ ctx.on('approval/request', (request, next) => {
 
 ### 2.5 取消、终态与拆除
 
-`session/cancel` 通知走串行监听:`cancel()` 先置 `cancelRequested`、abort 准入控制器、必要时 `agent.cancel({kind:'user'})`;若当前没有在飞 prompt,则取消 Agent 的自主工作(`packages/acp/acp/src/session.ts:334-338`、`packages/acp/acp/src/session.ts:474-481`)。终态映射集中在纯函数 `turnEndToStopReason`(`packages/acp/acp/src/codec.ts:14-33`):`completed→end_turn`、`max-tokens→max_tokens`、`interrupted→cancelled`,而 `blocked`/`error`/`aborted` 一律 `end_turn`——注释明确 `cancelled` 只留给显式客户端取消与拆除。拆除顺序固定为"取消 → 等准入与 idle → 排空输出 → 排空 continuable 子代理 → flush 持久化 → dispose Agent",多路失败聚合成 `AggregateError`(`packages/acp/acp/src/session.ts:428-468`);连接关闭时桥做全局 `quiesce()`,先无条件关闭所有会话记录(`packages/acp/acp/src/index.ts:395-423`)。
+`session/cancel` 通知走串行监听:`cancel()` 先置 `cancelRequested`、abort 准入控制器、必要时 `agent.cancel({kind:'user'})`;若当前没有在飞 prompt,则取消 Agent 的自主工作(`packages/acp/acp/src/session.ts:334-338`、`packages/acp/acp/src/session.ts:474-481`)。终态映射集中在纯函数 `turnEndToStopReason`(`packages/acp/acp/src/codec.ts:14-33`):`completed→end_turn`、`max-tokens→max_tokens`、`interrupted→cancelled`,而 `blocked`/`error`/`aborted` 一律 `end_turn`——注释明确 `cancelled` 只留给显式客户端取消与拆除。拆除顺序固定为"取消 → 等准入与 idle → 排空输出 → 排空 continuable 子代理 → flush 持久化 → dispose Agent",多路失败聚合成 `AggregateError`(`packages/acp/acp/src/session.ts:428-468`);连接关闭时桥做全局 `quiesce()`,先无条件关闭所有会话记录(`packages/acp/acp/src/index.ts:395-423`)。结算体本身(取消/输出错误/Agent 错误/`turn/end.reason` 四路出口)逐字如下:
+
+```typescript
+// packages/acp/acp/src/session.ts:486-514
+void (async () => {
+  await inflight.admissionDone
+  if (inflight.messageQueued) {
+    await this.agent.whenIdle()
+    await this.outputTail
+  }
+  if (this.inflight !== inflight) return
+  this.inflight = undefined
+  if (inflight.cancelRequested) {
+    inflight.resolve('cancelled')
+    return
+  }
+  // ...(略:outputError / agentError 两个 reject 分支)
+  const end = inflight.endReason
+  if (end === undefined) {
+    inflight.resolve('cancelled')
+  } else if (end.kind === 'error') {
+    inflight.reject(internalError(`turn failed: ${end.error.message}`))
+  } else {
+    inflight.resolve(turnEndToStopReason(end))
+  }
+})()
+```
 
 ---
 
@@ -263,7 +375,29 @@ dispatch<K extends string>(delivery: VerifiedWebhookDelivery<K>): void {
 
 ### 3.2 GitHub 适配器:先验签,再解析,最后 202
 
-`webhook-github` 在注入的 `webServer` 上注册一条 exact route(`packages/webhook/webhook-github/src/index.ts:47-61`),处理顺序严格(`packages/webhook/webhook-github/src/handler.ts:82-120`):必须 POST(否则 405 + `allow` 头)→ `content-type` 必须是 `application/json`(可带一个 `charset=utf-8`,否则 415)→ 读取**有上限的** UTF-8 请求体 → `x-hub-signature-256`/`x-github-delivery`/`x-github-event` 三个头必须各出现一次 → 解析凭据引用取共享密钥(缺失 503)→ Octokit `verify()` 验签,失败 401 → payload 必须是无损 JSON 对象 → `dispatch()`(运行时不可用则 503)→ **202**。即 **202 只承诺"已入内存队列",不承诺任何 Session 已建立**;`deliveryId` 只作为来源标记传给模型(`packages/webhook/webhook/src/types.ts:19-20`),适配器不做去重。
+`webhook-github` 在注入的 `webServer` 上注册一条 exact route(`packages/webhook/webhook-github/src/index.ts:47-61`),处理顺序严格(`packages/webhook/webhook-github/src/handler.ts:82-120`):必须 POST(否则 405 + `allow` 头)→ `content-type` 必须是 `application/json`(可带一个 `charset=utf-8`,否则 415)→ 读取**有上限的** UTF-8 请求体 → `x-hub-signature-256`/`x-github-delivery`/`x-github-event` 三个头必须各出现一次 → 解析凭据引用取共享密钥(缺失 503)→ Octokit `verify()` 验签,失败 401 → payload 必须是无损 JSON 对象 → `dispatch()`(运行时不可用则 503)→ **202**。即 **202 只承诺"已入内存队列",不承诺任何 Session 已建立**;`deliveryId` 只作为来源标记传给模型(`packages/webhook/webhook/src/types.ts:19-20`),适配器不做去重。验签到 202 的主干:
+
+```typescript
+// packages/webhook/webhook-github/src/handler.ts:91-120
+const body = await readBoundedUtf8Body(request, config.maxBodyBytes)
+const signature = requiredHeader(request, 'x-hub-signature-256')
+const deliveryId = requiredHeader(request, 'x-github-delivery')
+const eventName = requiredHeader(request, 'x-github-event')
+const credential = await ctx.credentials.resolve(config.secretEnv)
+if (credential === undefined || credential.value === '') {
+  throw new WebhookHttpError(503, 'GitHub webhook secret is unavailable')
+}
+let verified = false
+try {
+  verified = await new Webhooks({ secret: credential.value }).verify(body, signature)
+} catch {
+  // Octokit verification errors carry no response detail safe or useful to the sender.
+}
+if (!verified) throw new WebhookHttpError(401, 'invalid webhook signature')
+const payload = parsePayload(body)
+// ...(略:构造 VerifiedWebhookDelivery;dispatch() 抛错时转 503 'webhook runtime is unavailable')
+respond(response, 202)
+```
 
 ### 3.3 会话创建:一次性事务 + 回滚
 
@@ -295,11 +429,37 @@ handle.agent.followup(createUserMessage({
 
 `apps/` 下四个目录:`cli`(唯一的 `dsh` 可执行文件,`@deepseek-ai/dsh`,bin 为 `lib/bin.js`)、`web`(`@deepseek-ai/dsh-web-frontend`,只导出 `./dist/*`)、`desktop`(`@deepseek-ai/dsh-desktop`,Electron 壳)、`desktop-host`(私有的上游 Node 宿主)。用户看到的 `web`/`acp`/`headless`/`sdk`/`sdk-minimal` 都是 profile 模板,`web` 是其中**唯一 `patchReload: 'live'`** 的模板,因此只有它挂 patch 热重载(`packages/boot/app-boot/src/profile.ts:105-126`)。
 
-`apps/web` 不是应用:`apps/web/src/main.ts:1-6` 全文只有 6 行,把 `#root` 交给壳库 `AppWebEntry`,既不读 boot 图也不挂插件运行时。浏览器侧的插件图由 Host 注入:Host 组装 `WebBootGraph`(`rev` + `entries` + `batches`,`packages/client/modules/src/client/manifest.ts:81-93`),以 `globalThis["__DSH_BOOT__"]` 写进 `index.html`(`packages/client/modules/src/index.ts:474`);浏览器引导第一句 await 同一注入表给出的 `__DSH_BOOT_READY__`,再取 `__ModuleLoader__` facade 并以该图建模块表(`packages/client/web/src/boot.ts:54-69`),解析失败即抛 `client-modules: window.__DSH_BOOT__ is missing or not an object`(`packages/client/modules/src/client/manifest.ts:215`)。这正是"裸 Vite 跑不起来"的机制来源(`apps/web/vite.config.ts:9`)。`dsh web` 只是 `--profile web` 的硬编码别名(`apps/cli/src/args.ts:175-187`),默认端口 `3080`(`packages/bundle/web-app/cordis.patch.yml:140`);启动后由 web-app bundle 打印带启动令牌的 URL、可选打开浏览器,并把"用户正通过 Web GUI 与你交互"写进 system prompt(`packages/bundle/web-app/src/index.ts:135-146`、`packages/bundle/web-app/src/index.ts:261-277`)。客户端插件的热重载走独立 dev SSE 通道 `/plugins/events`(`packages/client/hmr/src/events.ts:44`),只有 `pnpm run dev:web` 重写 bundle 时才产生重建事件。
+`apps/web` 不是应用:`apps/web/src/main.ts:1-6` 全文只有 6 行,把 `#root` 交给壳库 `AppWebEntry`,既不读 boot 图也不挂插件运行时。浏览器侧的插件图由 Host 注入:Host 组装 `WebBootGraph`(`rev` + `entries` + `batches`,`packages/client/modules/src/client/manifest.ts:81-93`),以 `globalThis["__DSH_BOOT__"]` 写进 `index.html`(`packages/client/modules/src/index.ts:474`);浏览器引导第一句 await 同一注入表给出的 `__DSH_BOOT_READY__`,再取 `__ModuleLoader__` facade 并以该图建模块表(`packages/client/web/src/boot.ts:54-69`),解析失败即抛 `client-modules: window.__DSH_BOOT__ is missing or not an object`(`packages/client/modules/src/client/manifest.ts:215`)。这正是"裸 Vite 跑不起来"的机制来源(`apps/web/vite.config.ts:9`)。`dsh web` 只是 `--profile web` 的硬编码别名(`apps/cli/src/args.ts:175-187`),默认端口 `3080`(`packages/bundle/web-app/cordis.patch.yml:140`);启动后由 web-app bundle 打印带启动令牌的 URL、可选打开浏览器,并把"用户正通过 Web GUI 与你交互"写进 system prompt(`packages/bundle/web-app/src/index.ts:135-146`、`packages/bundle/web-app/src/index.ts:261-277`)。客户端插件的热重载走独立 dev SSE 通道 `/plugins/events`(`packages/client/hmr/src/events.ts:44`),只有 `pnpm run dev:web` 重写 bundle 时才产生重建事件。`apps/web` 侧的全部代码就是把这个 `#root` 交给壳库:
+
+```typescript
+// apps/web/src/main.ts:1-6
+/** Browser entry for the Web client. */
+import { AppWebEntry } from '@deepseek-ai/dsh-client-web'
+
+const el = document.getElementById('root')
+if (el === null) throw new Error('web app: missing #root')
+void new AppWebEntry(el).run()
+```
 
 ### 4.2 Remote:Host 能力的双侧 BFF 与 Typert Gateway
 
-分层是 `remotes → gateway → connection → webserver`(`docs/api-gateway.md:162`)。Host 侧业务类继承 `TypertRemoteService`,构造时声明命名空间,方法用 `@Remote` 导出(`packages/api/session-controller/src/index.ts:87`、`packages/api/session-controller/src/index.ts:121`):`@Remote('create')` 是一元方法,`@Remote({ mode: 'stream' })` 返回 `AsyncIterable`(`packages/api/session-controller/src/index.ts:244-247`、`packages/api/session-controller/src/index.ts:400-403`)。端点名是规范化的 `<namespace>/<method>`(`packages/api/gateway/src/index.ts:1012-1014` 的 `endpointOf`),浏览器侧映射成 `POST /api/<ns>/<method>`,body 为 `{type:'client-request', rpcId, method: endpoint, payload}`,`rpcId` 由发起方生成、响应方回显,不匹配即抛错(`packages/client/connection/src/client/rpc.ts:34-51`、`packages/client/connection/src/client/rpc.ts:56-57`)。
+分层是 `remotes → gateway → connection → webserver`(`docs/api-gateway.md:162`)。Host 侧业务类继承 `TypertRemoteService`,构造时声明命名空间,方法用 `@Remote` 导出(`packages/api/session-controller/src/index.ts:87`、`packages/api/session-controller/src/index.ts:121`):`@Remote('create')` 是一元方法,`@Remote({ mode: 'stream' })` 返回 `AsyncIterable`(`packages/api/session-controller/src/index.ts:244-247`、`packages/api/session-controller/src/index.ts:400-403`)。端点名是规范化的 `<namespace>/<method>`(`packages/api/gateway/src/index.ts:1012-1014` 的 `endpointOf`),浏览器侧映射成 `POST /api/<ns>/<method>`,body 为 `{type:'client-request', rpcId, method: endpoint, payload}`,`rpcId` 由发起方生成、响应方回显,不匹配即抛错(`packages/client/connection/src/client/rpc.ts:34-51`、`packages/client/connection/src/client/rpc.ts:56-57`)。两种 `@Remote` 形态的声明原文:
+
+```typescript
+// packages/api/session-controller/src/index.ts:244-247
+@Remote('create')
+create(request: SessionCreateRequest): Promise<SessionCreateValue> {
+  return this.commands.create(request)
+}
+```
+
+```typescript
+// packages/api/session-controller/src/index.ts:400-403
+@Remote({ mode: 'stream' })
+follow(request: SessionFollowRequest, signal: AbortSignal): AsyncIterable<SessionFollowFrame> {
+  return this.history.follow(request, signal)
+}
+```
 
 Gateway 把这些方法搬上网:在 `connection` 的 `/api` 通道上做拦截式认领,并在 `webServer` 上注册唯一一条 WebSocket 升级路由承载所有流:
 
@@ -341,7 +501,25 @@ const response = url.pathname === DESKTOP_STREAM_PATH
     : await assets.fetch(request)
 ```
 
-也就是说 **Desktop 复用同一套 Host 内核与同一套 Gateway 语义**,只把"HTTP + WebSocket"换成"自定义协议 + 字节管道":API 仍走 `/api`(由 `connection.createSharedFetchHandler('/api')` 提供),`/plugins/` 仍走 client-modules 的 bundle 服务(`apps/desktop-host/src/index.ts:200`),而 Gateway 的**流式**能力退化成 NDJSON——宿主把 `gateway.wireStream.open()` 的产出逐行写成 `application/x-ndjson`(`apps/desktop-host/src/index.ts:243-263`),并给渲染进程注入 `globalThis.__DSH_TRANSPORT__` 脚本消费它(`apps/desktop-host/src/index.ts:99-120`)。帧是 13 字节定长头(magic + type + streamId + payloadLength)+ 载荷,数据帧上限 64 KB、控制帧上限 1 MB,超限、magic 不符、帧内 EOF 都直接致命(`apps/desktop-host/src/wire.ts:15-16`、`apps/desktop-host/src/wire.ts:63-76`);背压显式实现:请求体消费者 `desiredSize <= 0` 时暂停请求管道,直到 `pull()` 恢复(`apps/desktop-host/src/index.ts:517-520`)。
+也就是说 **Desktop 复用同一套 Host 内核与同一套 Gateway 语义**,只把"HTTP + WebSocket"换成"自定义协议 + 字节管道":API 仍走 `/api`(由 `connection.createSharedFetchHandler('/api')` 提供),`/plugins/` 仍走 client-modules 的 bundle 服务(`apps/desktop-host/src/index.ts:200`),而 Gateway 的**流式**能力退化成 NDJSON——宿主把 `gateway.wireStream.open()` 的产出逐行写成 `application/x-ndjson`(`apps/desktop-host/src/index.ts:243-263`),并给渲染进程注入 `globalThis.__DSH_TRANSPORT__` 脚本消费它(`apps/desktop-host/src/index.ts:99-120`)。帧是 13 字节定长头(magic + type + streamId + payloadLength)+ 载荷,数据帧上限 64 KB、控制帧上限 1 MB,超限、magic 不符、帧内 EOF 都直接致命(`apps/desktop-host/src/wire.ts:15-16`、`apps/desktop-host/src/wire.ts:63-76`);背压显式实现:请求体消费者 `desiredSize <= 0` 时暂停请求管道,直到 `pull()` 恢复(`apps/desktop-host/src/index.ts:517-520`)。帧编码即"13 字节头 + 载荷",超限直接抛:
+
+```typescript
+// apps/desktop-host/src/wire.ts:63-75
+function encodeFrame(type: ResponseFrameType, streamId: number, payload: Buffer): Buffer {
+  assertStreamId(streamId)
+  const limit = type === RESPONSE_FRAME_DATA ? DESKTOP_PIPE_CHUNK_BYTES : MAX_CONTROL_PAYLOAD_BYTES
+  if (payload.byteLength > limit) {
+    throw new Error(`dsh desktop: response pipe frame exceeds the ${String(limit)}-byte limit`)
+  }
+  const frame = Buffer.allocUnsafe(FRAME_HEADER_BYTES + payload.byteLength)
+  frame.writeUInt32BE(FRAME_MAGIC, 0)
+  frame.writeUInt8(type, 4)
+  frame.writeUInt32BE(streamId, 5)
+  frame.writeUInt32BE(payload.byteLength, 9)
+  payload.copy(frame, FRAME_HEADER_BYTES)
+  return frame
+}
+```
 
 ### 4.4 三端差异一览
 
@@ -371,7 +549,35 @@ export interface HarnessSdkRequestMap {
 //       subagent.started、subagent.finished(仅进程内子代理)
 ```
 
-服务端是 profile 里的一个插件(`@deepseek-ai/dsh-sdk-jsonrpc-server`),把该传输装到 stdio 上,并把 `initialize` 当作就绪边界:`await ctx.get('loader')?.await()` 之后才宣告就绪;`shutdown` 的响应写出后由 `setImmediate` 触发 `flush → rootFiber.dispose() → exit(0)`(`packages/sdk/server/src/index.ts:76-93`)。四个要点:①**没有 `session/create`**——会话由 `session/prompt` 惰性创建(`packages/sdk/server/src/server.ts:259-272`),`packages/sdk/protocol/README.md:114` 明确"无 cancel/close 方法,客户端靠关闭进程放弃一轮";②**审批不在 SDK 平面上**:server→client 请求是一条预留但未实现的能力(`packages/sdk/client/README.md:125`、`packages/sdk/protocol/README.md:115`),Web BFF 平面里的审批走的是转发瀑布事件 `approval/request`;③构造即订阅:`session/event` → `session.event`,`agent/status` → `session.status`,`session/created`(带 `parentSession`)→ `subagent.started`,`subagent/end` 只在 `info.local` 时发 `subagent.finished`(`packages/sdk/server/src/server.ts:95-127`);④`initialize` 会校验 provider/model/reasoningEffort/maxTokens,必要时动态挂载 DeepSeek 适配器,`prompt` 在附件准入的异步边界前后各校验一次"这个 Agent 还活着"(`packages/sdk/server/src/server.ts:150-161`、`packages/sdk/server/src/server.ts:195-199`)。
+分派就在传输层:同一个 `id + method` 三元判定把一行分成请求、应答、通知三路,未知方法与 handler 抛错各自映射到固定错误码:
+
+```typescript
+// packages/sdk/protocol/src/transport.ts:211-223
+const id = frame.id
+const method = frame.method
+if ((typeof id === 'string' || typeof id === 'number') && typeof method === 'string') {
+  await this.handleIncomingRequest(id, method, objectParams(frame.params))
+  return
+}
+// ...(略:只有 id → handleIncomingResponse;只有 method → notificationHandler;handleIncomingRequest 内未知方法回 -32601、handler 抛错回 -32603)
+```
+
+服务端是 profile 里的一个插件(`@deepseek-ai/dsh-sdk-jsonrpc-server`),把该传输装到 stdio 上,并把 `initialize` 当作就绪边界:`await ctx.get('loader')?.await()` 之后才宣告就绪;`shutdown` 的响应写出后由 `setImmediate` 触发 `flush → rootFiber.dispose() → exit(0)`(`packages/sdk/server/src/index.ts:76-93`)。就绪与退出两个边界写在插件的请求钩子里:
+
+```typescript
+// packages/sdk/server/src/index.ts:84-92
+if (method === 'initialize') {
+  await ctx.get('loader')?.await()
+}
+const result = await server.handleRequest(method, params)
+if (method === 'shutdown') {
+  // Run after the handler result is written; the task then flushes, disposes, and exits.
+  setImmediate(() => { void disposeAndExit() })
+}
+return result
+```
+
+四个要点:①**没有 `session/create`**——会话由 `session/prompt` 惰性创建(`packages/sdk/server/src/server.ts:259-272`),`packages/sdk/protocol/README.md:114` 明确"无 cancel/close 方法,客户端靠关闭进程放弃一轮";②**审批不在 SDK 平面上**:server→client 请求是一条预留但未实现的能力(`packages/sdk/client/README.md:125`、`packages/sdk/protocol/README.md:115`),Web BFF 平面里的审批走的是转发瀑布事件 `approval/request`;③构造即订阅:`session/event` → `session.event`,`agent/status` → `session.status`,`session/created`(带 `parentSession`)→ `subagent.started`,`subagent/end` 只在 `info.local` 时发 `subagent.finished`(`packages/sdk/server/src/server.ts:95-127`);④`initialize` 会校验 provider/model/reasoningEffort/maxTokens,必要时动态挂载 DeepSeek 适配器,`prompt` 在附件准入的异步边界前后各校验一次"这个 Agent 还活着"(`packages/sdk/server/src/server.ts:150-161`、`packages/sdk/server/src/server.ts:195-199`)。
 
 客户端默认以 `dsh --profile sdk` 拉起运行时,argv 是 `[nodeArgs..., '--profile', profile, '--patch', ...]`,并**强制版本一致**:SDK 客户端与 `dsh` 包的 `version` 不同即抛错(`packages/sdk/client/src/launch.ts:132`、`packages/sdk/client/src/launch.ts:141-143`、`packages/sdk/client/src/launch.ts:55-66`);源码态回退到 `--import tsx/esm src/bin.ts` 加一份专用 patch(`packages/sdk/client/src/launch.ts:104-108`)。高层 API 把"一次运行"定义为"从入队回执到整个 Agent 下一次 idle"(`packages/sdk/client/src/api.ts:1-6`),子进程惰性启动、由实例独占直至 `close()`(`packages/sdk/client/src/api.ts:22-46`)。关闭是阶梯式的:先尽力发协议 `shutdown`(默认 1 秒),再 `stdin.end()` 等 6 秒,非 Win32 补 `SIGTERM` 等 3 秒,最后 `SIGKILL` 并等退出边(`packages/sdk/client/src/dispose.ts:86-99`、`packages/sdk/client/src/client.ts:398-406`)。
 

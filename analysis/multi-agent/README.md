@@ -44,6 +44,10 @@
 
 ## 三、父 Agent → 派生子 Agent → 结果回流:函数级调用栈
 
+![时序图：README](../assets/diagrams/multi-agent__README-47.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -81,6 +85,8 @@ sequenceDiagram
     Note over T: stopReasonError(156) → 非 completed 即 throw<br/>withDiagnosticAndPartialText → isError 工具结果
     T->>T: run.dispose()(225),结果失败优先于 dispose 失败
 ```
+
+</details>
 
 同一份调用栈在**后台/续存路线**上的分叉点(详见 [04](./04-continuation-and-control.md) 与 [06](./06-jobs-and-notifications.md)):
 

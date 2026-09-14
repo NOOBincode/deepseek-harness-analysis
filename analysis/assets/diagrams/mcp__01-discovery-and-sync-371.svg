@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1465.2579999999996 830" width="1465.2579999999996" height="830" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line class="lifeline" data-actor="Apply" x1="101.4385" y1="70" x2="101.4385" y2="800" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="Conn" x1="327.2935" y1="70" x2="327.2935" y2="800" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="Gen" x1="607.9824999999998" y1="70" x2="607.9824999999998" y2="800" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="Chain" x1="871.6284999999998" y1="70" x2="871.6284999999998" y2="800" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="Sync" x1="1090.0734999999997" y1="70" x2="1090.0734999999997" y2="800" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="Reg" x1="1264.4289999999996" y1="70" x2="1264.4289999999996" y2="800" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="Apply" data-to="Conn" data-label="startConnection(ctx, config, policy)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="101.4385" y1="90" x2="327.2935" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="214.36599999999999" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">startConnection(ctx, config, policy)</text>
+</g>
+<g class="message" data-from="Conn" data-to="Gen" data-label="connectGeneration(true)  (connection.ts:308)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="327.2935" y1="130" x2="607.9824999999998" y2="130" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="467.6379999999999" y="120" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">connectGeneration(true)  (connection.ts:308)</text>
+</g>
+<g class="message" data-from="Gen" data-to="Gen" data-label="new Client + onclose + 通知处理器 (238-270)" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="607.9824999999998,170 637.9824999999998,170 637.9824999999998,190 607.9824999999998,190" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="645.9824999999998" y="180" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">new Client + onclose + 通知处理器 (238-270)</text>
+</g>
+<g class="message" data-from="Gen" data-to="Gen" data-label="await generation.connect(createTransport(config)) (272)" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="607.9824999999998,240 637.9824999999998,240 637.9824999999998,260 607.9824999999998,260" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="645.9824999999998" y="250" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">await generation.connect(createTransport(config)) (272)</text>
+</g>
+<g class="message" data-from="Gen" data-to="Chain" data-label="enqueueSync(generation, startupOpts) (278)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="607.9824999999998" y1="310" x2="871.6284999999998" y2="310" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="739.8054999999998" y="300" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">enqueueSync(generation, startupOpts) (278)</text>
+</g>
+<g class="message" data-from="Chain" data-to="Sync" data-label="run: syncTools(client, ctx, opts, disposers) (165)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="871.6284999999998" y1="350" x2="1090.0734999999997" y2="350" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="980.8509999999998" y="340" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">run: syncTools(client, ctx, opts, disposers) (165)</text>
+</g>
+<g class="message" data-from="Sync" data-to="Sync" data-label="阶段一 分页 drain + 建 definitions (150-184)" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="1090.0734999999997,390 1120.0734999999997,390 1120.0734999999997,410 1090.0734999999997,410" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="1128.0734999999997" y="400" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">阶段一 分页 drain + 建 definitions (150-184)</text>
+</g>
+<g class="message" data-from="Sync" data-to="Reg" data-label="阶段二 dispose 旧代 → register 新代 (186-192)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="1090.0734999999997" y1="475" x2="1264.4289999999996" y2="475" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="1177.2512499999998" y="465" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">阶段二 dispose 旧代 → register 新代 (186-192)</text>
+</g>
+<g class="message" data-from="Reg" data-to="Sync" data-label="逐个 disposer" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="1264.4289999999996" y1="515" x2="1090.0734999999997" y2="515" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="1177.2512499999998" y="505" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">逐个 disposer</text>
+</g>
+<g class="message" data-from="Sync" data-to="Chain" data-label="新 disposers" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="1090.0734999999997" y1="555" x2="871.6284999999998" y2="555" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="980.8509999999998" y="545" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">新 disposers</text>
+</g>
+<g class="message" data-from="Chain" data-to="Gen" data-label="resolve" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="871.6284999999998" y1="595" x2="607.9824999999998" y2="595" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="739.8054999999998" y="585" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">resolve</text>
+</g>
+<g class="message" data-from="Gen" data-to="Gen" data-label="connectedAt = Date.now() (303)" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="607.9824999999998,635 637.9824999999998,635 637.9824999999998,655 607.9824999999998,655" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="645.9824999999998" y="645" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">connectedAt = Date.now() (303)</text>
+</g>
+<g class="message" data-from="Gen" data-to="Conn" data-label="settling 落定" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="607.9824999999998" y1="705" x2="327.2935" y2="705" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="467.6379999999999" y="695" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">settling 落定</text>
+</g>
+<g class="message" data-from="Conn" data-to="Apply" data-label="ready → {} 或 { error }" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="327.2935" y1="745" x2="101.4385" y2="745" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="214.36599999999999" y="735" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">ready → {} 或 { error }</text>
+</g>
+<g class="note" data-position="over" data-actors="Sync">
+  <polygon points="953.3994999999998,428 1220.7475,428 1226.7475,434 1226.7475,451 953.3994999999998,451" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="1220.7475,428 1226.7475,434 1220.7475,434" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1090.0734999999997" y="439.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)"><tspan x="1090.0734999999997" dy="-3.3000000000000007">任一 throw → 直接返回,注册表未变</tspan><tspan x="1090.0734999999997" dy="14.3">旧代继续服务</tspan></text>
+</g>
+<g class="note" data-position="over" data-actors="Reg">
+  <polygon points="1093.5999999999997,753 1429.2579999999996,753 1435.2579999999996,759 1435.2579999999996,776 1093.5999999999997,776" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="1429.2579999999996,753 1435.2579999999996,759 1429.2579999999996,759" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1264.4289999999996" y="764.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)"><tspan x="1264.4289999999996" dy="-3.3000000000000007">此后每次 list_changed →</tspan><tspan x="1264.4289999999996" dy="14.3">通知处理器 → enqueueSync → 同一条链</tspan></text>
+</g>
+<g class="actor" data-id="Apply" data-label="apply() index.ts:146" data-type="participant">
+  <rect x="30" y="30" width="142.877" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="101.4385" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">apply() index.ts:146</text>
+</g>
+<g class="actor" data-id="Conn" data-label="startConnection connection.ts:123" data-type="participant">
+  <rect x="212.87700000000004" y="30" width="228.8329999999999" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="327.2935" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">startConnection connection.ts:123</text>
+</g>
+<g class="actor" data-id="Gen" data-label="connectGeneration connection.ts:237" data-type="participant">
+  <rect x="481.70999999999987" y="30" width="252.54499999999993" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="607.9824999999998" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">connectGeneration connection.ts:237</text>
+</g>
+<g class="actor" data-id="Chain" data-label="syncChain connection.ts:161" data-type="participant">
+  <rect x="774.2549999999999" y="30" width="194.74699999999996" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="871.6284999999998" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">syncChain connection.ts:161</text>
+</g>
+<g class="actor" data-id="Sync" data-label="syncTools tools.ts:144" data-type="participant">
+  <rect x="1009.0019999999997" y="30" width="162.143" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="1090.0734999999997" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">syncTools tools.ts:144</text>
+</g>
+<g class="actor" data-id="Reg" data-label="ToolRuntime" data-type="participant">
+  <rect x="1211.1449999999995" y="30" width="106.568" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="1264.4289999999996" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">ToolRuntime</text>
+</g>
+</svg>

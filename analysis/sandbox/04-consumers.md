@@ -13,6 +13,10 @@
 
 ## 第一节 消费方全景
 
+![流程图：04-consumers](../assets/diagrams/sandbox__04-consumers-16.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   P["ctx.sandboxPolicy<br/>sandbox-policy/src/index.ts:109"]
@@ -34,6 +38,8 @@ flowchart TD
   style O fill:#ffe,stroke:#aa8
   style F fill:#fee,stroke:#a88
 ```
+
+</details>
 
 | 消费方 | 注册 | 围栏手段 | 调 `ctx.sandbox` | 需要 `ctx.sandboxPolicy` |
 |---|---|---|---|---|
@@ -361,6 +367,10 @@ ctx.on('fs/observed', (target, observation, actor) => { gate.observe(target, obs
 
 ### 6.3 同一次调用上的叠加顺序
 
+![时序图：04-consumers](../assets/diagrams/sandbox__04-consumers-364.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
   participant T as edit 工具
@@ -376,6 +386,8 @@ sequenceDiagram
   FS-->>T: 结果，或抛 FS_SANDBOX_DENIED
   T->>W: emit('fs/observed', { kind: 'present', version })
 ```
+
+</details>
 
 顺序是**先观察策略、后沙箱围栏**:`fs/edit-intent` 在 `tool-fs/src/edit.ts:127`,`ctx.fs.editText` 在 `:128`,两者在同一个 `try` 里,任一拒绝都走同一段错误映射(`:135-140`)。另外 `:118` 的 `sessionResolveOptions(exec, input.filePath, sandboxPolicy?.workspaceRoot)` 让策略解析出的工作区根**优先于**会话 cwd 作为路径解析基准(`tool-fs/src/session-cwd.ts:35-45`)。
 

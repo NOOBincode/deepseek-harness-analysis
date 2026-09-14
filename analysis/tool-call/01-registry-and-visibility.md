@@ -86,6 +86,10 @@ export function createScope(ctx: Context, key: ScopeKey, options?: CreateScopeOp
 
 ### 2.2 分层图
 
+![流程图：01-registry-and-visibility](../assets/diagrams/tool-call__01-registry-and-visibility-89.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TB
   G["global 层(构造时急切创建)<br/>ScopedLayers.global store.ts:161"]
@@ -102,6 +106,8 @@ flowchart TB
   O -->|"own.tools 直接 set,过滤之外"| V
   R["run_code 传输<br/>modeFor(scope) !== native 时最后插入"] -->|visible.set| V
 ```
+
+</details>
 
 `chainLayers` 是整张图的骨架:
 
@@ -240,6 +246,10 @@ private view(scope?: ScopeKey): ToolView {
 
 ### 3.3 view() 的调用者:四个出口共用同一次遍历
 
+![流程图：01-registry-and-visibility](../assets/diagrams/tool-call__01-registry-and-visibility-243.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart LR
   V["view(scope) index.ts:1142"]
@@ -254,6 +264,8 @@ flowchart LR
   RE --> PE["postExecute :1758<br/>value 替换时重解析"]
   V --> R["restrict(filter) :1078<br/>读 restrictableNames"]
 ```
+
+</details>
 
 四个出口读同一个 `ToolView`,所以"展示集、可查找集、可调度集、可执行集不可能互相漂移"不是靠约定,而是靠**没有第二份派生逻辑**。三处细节:
 

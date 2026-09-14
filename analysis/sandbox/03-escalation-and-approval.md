@@ -101,6 +101,10 @@ export function validateEscalationArgs(sandboxPermissions: string | undefined, j
 
 ## 第三节 `approveEscalation`:有序失败封闭序列
 
+![流程图：03-escalation-and-approval](../assets/diagrams/sandbox__03-escalation-and-approval-104.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["approveEscalation(request, approval)<br/>escalation.ts:157"] --> B{"(effectiveMode → mode) ∈ W? :162"}
@@ -123,6 +127,8 @@ flowchart TD
   style X4 fill:#fee,stroke:#a88
   style X5 fill:#fee,stroke:#a88
 ```
+
+</details>
 
 ### 3.1 八条失败点 + 一条成功路径,逐条列出
 
@@ -334,6 +340,10 @@ flowchart LR
 
 ### 5.4 端到端时序
 
+![时序图：03-escalation-and-approval](../assets/diagrams/sandbox__03-escalation-and-approval-337.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
   participant M as 模型
@@ -355,6 +365,8 @@ sequenceDiagram
   TB->>BA: run(spec with { ...policy, mode: 'workspace-write' })
   Note over TB,BA: 只有这一次调用带更宽 mode；会话的 sandbox/mode 未被改写
 ```
+
+</details>
 
 最后一条 Note 是这条机制的核心性质:**升级不改任何持久状态**。下一次调用的有效模式仍是 `read-only`。
 

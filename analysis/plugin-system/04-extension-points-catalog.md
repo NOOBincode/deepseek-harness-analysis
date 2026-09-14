@@ -22,6 +22,10 @@
 
 ## 第一节 内核阶段总图
 
+![流程图：04-extension-points-catalog](../assets/diagrams/plugin-system__04-extension-points-catalog-25.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TB
     subgraph SESSION["① session 生命周期(dsh-session)"]
@@ -79,6 +83,8 @@ flowchart TB
     TOOL -.->|"工具结果落日志"| SE
 ```
 
+</details>
+
 **读图要点**:只有 ① 与 ② 的 `session/event`、`turn/*`、`step/*`、`tool/*` 等是**持久会话事件**(模型可见性来源);其余都是进程内扩展点。哪些是持久的,由 `docs/architecture.md:105` 明确列出。
 
 ---
@@ -91,6 +97,22 @@ flowchart TB
 | `session/event` | `emit` | `session/src/index.ts:72` | 同上 | 全仓最热事件:23 个消费者(`docs/event-producer-consumer.md:53`),含 `session-persistence-jsonl`、`session-telemetry-otel`、`token-meter`、`tools`、`agent-loop` |
 | `session/flush` | `parallel` | `session/src/index.ts:81` | 同上 | `session-persistence-jsonl`、`session-telemetry`(`:54`) |
 | `session/disposed` | `emit` | `session/src/index.ts:60` | 同上 | `agent-loop`、`session-persistence-jsonl`、`session-projection-cache`、`session-title`、`session-telemetry`、`file-upload`(`:52`) |
+
+表里各行事件的声明原文(这里取三条,`session/disposed` 与它们同形;`@mode` 标签就写在每个事件自己的 JSDoc 里,`session/flush` 的那一行是 `parallel`):
+
+```typescript
+// packages/core/session/src/index.ts:39-81(节选)
+    /**
+     * Creation announcement during session publication. A synchronous throw vetoes and rolls
+     * back with a paired disposal; detach requested during dispatch is deferred.
+     * @mode emit
+     */
+    'session/created'(this: Scoped<Session>, session: Session): void
+    // ...(略)
+    'session/event'(this: Scoped<Session>, session: Session, event: SessionEvent): void
+    // ...(略)
+    'session/flush'(this: Scoped<Session>, session: Session): Promise<void> | void
+```
 
 ### 关键实现:`session/event` 不走 `ctx.emit`
 
@@ -168,6 +190,19 @@ try {
 | `agent/disposed` | `emit` | `:267` | Agent 处置 | `agent-loop`、`goal-round-driver`、`subagent`、`tool-subagent`、`session-controller`(`:14`) |
 | `agent-loop/config-start-failed` | `emit` | `packages/core/agent-loop/src/index.ts:246` | 启动配置失败 | 无监听器(`:10`)——纯诊断 |
 
+表里十个 `emit` 事件的声明形态(全部带 `this: Scoped<Agent>` 载体,payload 是单对象):
+
+```typescript
+// packages/core/agent/src/runtime-types.ts:258-304(节选)
+    'agent/created'(this: Scoped<Agent>, payload: { agent: Agent }): void
+    // ...(略)
+    'agent/status'(this: Scoped<Agent>, payload: { agent: Agent; status: AgentStatus }): void
+    // ...(略)
+    'agent/inbox/claimed'(this: Scoped<Agent>, payload: { agent: Agent; message: UserMessage; turn: number }): void
+    // ...(略)
+    'agent/inbox/discarded'(this: Scoped<Agent>, payload: { agent: Agent; message: UserMessage }): void
+```
+
 ### 3.1 `agent/pre-step` 的决策类型
 
 它是"决定本步接受什么输入"的唯一位置,监听器返回 `PreStepDecision`:
@@ -185,12 +220,37 @@ try {
 
 `serial` 语义(见 [01](./01-cordis-runtime-internals.md)6.2):顺序 await,**首个返回非 `null`/`false`/`undefined` 的监听器终止后续**。hooks 桥用它实现"Stop hook 阻塞则强制继续"(见第八节)。
 
+§3 里三个可改写的点的声明长这样(`agent/request` 与 `agent/request-error` 都返回替换值,`agent/turn-stopping` 返回 `void`,靠 steer 表达反对):
+
+```typescript
+// packages/core/agent/src/runtime-types.ts:347-391(节选)
+    'agent/request'(this: Scoped<Agent>, payload: { agent: Agent; turn: number; step: number; signal: AbortSignal }, next: () => Promise<LlmCallConfig>): Promise<LlmCallConfig>
+    // ...(略)
+    'agent/request-error'(this: Scoped<Agent>, payload: { agent: Agent; turn: number; step: number; provider: string; failure: LlmFailure; retryPolicy: ResolvedRetryPolicy | undefined; signal: AbortSignal }, next: () => Promise<RequestErrorAction>): Promise<RequestErrorAction>
+    // ...(略)
+    'agent/turn-stopping'(this: Scoped<Agent>, payload: { agent: Agent; turn: number; signal: AbortSignal }): Promise<void> | void
+```
+
 ### 3.3 request 装配阶段的两个瀑布
 
 | 扩展点 | 模式 | 声明与调用 |
 |---|---|---|
 | `system-prompt/assemble` | `waterfall` | 声明 `packages/core/system-prompt/src/index.ts:31`;调用 `:617-618`(`scopeTarget(this, scope)` 作载体) |
 | `llm/stream` | `waterfall` | 声明 `packages/llm/llm/src/index.ts:72`;消费者为 `agent-loop`、`llm`、`llm-replay`、`session-checkpoint-policy`、`session-title`(`docs/event-producer-consumer.md:49`) |
+
+两个声明(§3.3 表格里那两行)原文如下,`system-prompt/change` 没有 payload,是纯注册表通知:
+
+```typescript
+// packages/core/system-prompt/src/index.ts:31-37(节选)
+    'system-prompt/assemble'(this: Scoped<SystemPrompt>, assembly: PromptAssembly, context: AssembleContext, next: () => Promise<PromptAssembly>): Promise<PromptAssembly>
+    // ...(略)
+    'system-prompt/change'(): void
+```
+
+```typescript
+// packages/llm/llm/src/index.ts:72
+    'llm/stream'(this: LlmRuntime, options: GenerateOptions, next: () => AsyncIterable<StreamChunk>): AsyncIterable<StreamChunk>
+```
 
 `llm/stream` 的契约(第十二章已引 JSDoc):**请求是深冻结的**("mutation throws"),监听器只读不改写。要改请求行为,正确位置是 `agent/request`(决定路由)与 `prepareCall`(代际绑定),而不是改 `llm/stream` 的载荷。
 
@@ -208,6 +268,19 @@ try {
 | `tools/ptc-dispatch-log` | `waterfall` | `:181` | `:1288-1289` | `spill-policy`(`:68`) |
 | `tools/result` | `emit` | `:189` | `:1656` | `agent-instructions`、`subagent-in-process-driver`、`tool-present`(`:69`) |
 | `tools/change` | `emit` | `:199` | `:806` | `tool-subagent`(`:64`) |
+
+§4 表格里四个瀑布的声明原文——它们都挂在 `ToolRuntime` 上,`this: Scoped<ToolRuntime>` 是作用域载体:
+
+```typescript
+// packages/core/tools/src/index.ts:144-181(节选)
+    'tools/pre-execute'(this: Scoped<ToolRuntime>, exec: ToolExecution, next: () => Promise<PreToolDecision>): Promise<PreToolDecision>
+    // ...(略)
+    'tools/execute'(this: Scoped<ToolRuntime>, exec: ToolDispatchExecution, next: () => Promise<ToolExecutionResult>): Promise<ToolExecutionResult>
+    // ...(略)
+    'tools/post-execute'(this: Scoped<ToolRuntime>, exec: ToolExecution, result: Readonly<ToolExecutionResult>, next: () => Promise<PostToolDecision>): Promise<PostToolDecision>
+    // ...(略)
+    'tools/ptc-dispatch-log'(this: Scoped<ToolRuntime>, dispatch: PtcDispatchLog, next: () => Promise<ContentBlock[]>): Promise<ContentBlock[]>
+```
 
 三个瀑布的**能力边界**(JSDoc 原文已划定,`docs/tool-execution-pipeline.md` 是权威):
 
@@ -252,6 +325,15 @@ private async completeScheduledExecution(prepared: ScheduledToolPreparation): Pr
 
 `ScheduledToolPreparation` 的三分支(`dispatch` / `post-result` / `final-result`)让"在 `pre-execute` 就被拒绝的调用"和"真正执行的调用"共用同一条收尾路径——所以被拒绝的调用**也会**经 `post-execute` 与 `tools/result`,监听器只需写一次。
 
+`tools/result` 与 `tools/change` 是这一节仅有的两个 `emit`,前者拿深冻结的结果快照,后者刻意**不做**作用域过滤:
+
+```typescript
+// packages/core/tools/src/index.ts:189-199(节选)
+    'tools/result'(this: Scoped<ToolRuntime>, exec: Readonly<ToolExecution>, result: Readonly<ToolExecutionResult>): undefined
+    // ...(略)
+    'tools/change'(): void
+```
+
 ### 4.2 filesystem 子缝的三个瀑布
 
 `ctx.fs` 是另一条独立缝,它自己的拦截点声明在 `packages/fs/fs/src/index.ts`:
@@ -261,6 +343,17 @@ private async completeScheduledExecution(prepared: ScheduledToolPreparation): Pr
 | `fs/write-intent` | `waterfall` | `fs/src/index.ts:58` | `tool-fs`、`tool-str-replace-editor` | `fs-observation-policy`(`docs/event-producer-consumer.md:45`) |
 | `fs/edit-intent` | `waterfall` | `fs/src/index.ts:66` | 同上 | `fs-observation-policy`(`:43`) |
 | `fs/observed` | `emit` | `fs/src/index.ts:76` | 同上 | `fs-observation-policy`、`skill-filesystem`、`workspace-files`(`:44`) |
+
+`ctx.fs` 三个挂点的声明(前两个是单槽位决策:第一个返回 intent 的监听器独占决定权):
+
+```typescript
+// packages/fs/fs/src/index.ts:58-76(节选)
+    'fs/write-intent'(target: FsTarget, actor: object | undefined, next: () => FsWriteIntent | undefined | Promise<FsWriteIntent | undefined>): Promise<FsWriteIntent | undefined>
+    // ...(略)
+    'fs/edit-intent'(target: FsTarget, actor: object | undefined, next: () => { version: FsVersion } | undefined | Promise<{ version: FsVersion } | undefined>): Promise<{ version: FsVersion } | undefined>
+    // ...(略)
+    'fs/observed'(target: FsTarget, observation: FsObservation, actor: object | undefined): void
+```
 
 这是"未修改 tool 代码就加了一道文件策略"的范例:`fs-observation-policy`(默认观测策略)只是一个监听者,`tool-fs` 的 schema 一行没动。
 
@@ -286,6 +379,19 @@ compaction 不是一个事件,而是一条**缝 + 一组持久事件 + 若干监
 
 ---
 
+表格里"自动触发挂点"那一行的真实监听器:压缩是旁挂行为,所以它无论成败都 `return next()`——waterfall 监听器不调 `next()` 就等于自己接管了这一步的输入决策:
+
+```typescript
+// packages/compaction/compaction-basic/src/index.ts:148-166(节选)
+    ctx.on('agent/pre-step', async (
+      { agent, signal },
+      next,
+    ): Promise<PreStepDecision> => {
+      // ...(略):compactIfNeeded(agent, 'pressure', signal) 成功记日志,抛错则 warn 后继续本 turn
+      return next()
+    })
+```
+
 ## 第六节 ⑤ 组合层 / 框架层扩展点
 
 这些事件属于 Cordis 与 Loader 本身,任何插件都能监听,是"给框架编程"的入口。
@@ -309,6 +415,21 @@ compaction 不是一个事件,而是一条**缝 + 一组持久事件 + 若干监
 | `hmr/config-update-failed` | `parallel` | `hmr/src/index.ts:312` | —— | 配置错误提示(声明 `:23-29`) |
 | `exit` | `emit` | `loader/src/index.ts:25` 声明 | `Loader.exit()`(`:188`)由 HMR 全量重载时调用(`hmr/src/index.ts:260`) | 宿主可覆盖以重启进程 |
 
+框架自己的事件契约原文(取三行代表三种形态:`internal/plugin` 的 `emit`、`internal/update` 的 `waterfall`、`internal/dispatch` 的诊断 `emit`):
+
+```typescript
+// vendor/cordis/src/events.ts:329-352(节选)
+export interface Events {
+  /** A plugin fiber was created or its uid was cleared on disposal. */
+  'internal/plugin'(fiber: Fiber): void
+  // ...(略)
+  /** Waterfall: a fiber config update is being applied; skip `next()` to veto. */
+  'internal/update'(this: Fiber, config: any, noSave: boolean, next: () => void | Promise<void>): void | Promise<void>
+  /** An event is being dispatched to listeners (fired for non-internal events only). */
+  'internal/dispatch'(mode: DispatchMode, name: string, args: any[], thisArg: any): void
+}
+```
+
 `internal/update` 的**双通道**值得单列:每个 fiber 有自己的 `internal/update` 私有链(`events.ts:142`),全局监听器(`events.ts:148-155`)把它串成 waterfall。因此 `ctx.on('internal/update', ...)` 只在本 fiber 更新时触发;要观察所有 fiber 必须 `{ global: true }`——Loader 的三个监听器(`:103`、`:111`)都带 `global: true`。
 
 ---
@@ -327,6 +448,20 @@ compaction 不是一个事件,而是一条**缝 + 一组持久事件 + 若干监
 | `SubagentStart` / `SubagentStop` | `subagent/start` / `subagent/end` | `:280-293` | start 可注入子上下文,stop 仅观察 |
 
 hook 名白名单在 `packages/hooks/hooks-claude-code/src/config.ts:12-18`(含 `Notification` 等)。注意 `UserPromptSubmit` 与 `Stop` 的 matcher 字段被**丢弃**(`config.ts:109`),因为那两个事件没有可匹配主体——这是"事件语义决定适配层能力"的具体例子。
+
+表里 `PreToolUse` 那一行的映射代码原文——注意最后一行 `return next()`:它把"本次 hook 没拦"与"后续监听器仍可拦"两件事分开表达:
+
+```typescript
+// packages/hooks/hooks-claude-code/src/index.ts:236-243
+  // --- PreToolUse → PreToolDecision. Matcher subject is the tool name. ---
+  ctx.on('tools/pre-execute', async (exec, next): Promise<PreToolDecision> => {
+    const turn = lastTurn(ctx, exec.agent)
+    const merged = await runPoint('PreToolUse', exec.name, preToolPayload(exec), { ...exec.agent ? { agent: exec.agent } : {}, turn, signal: exec.signal })
+    if (merged.decision === 'deny') return { kind: 'deny', reason: merged.reason ?? 'blocked by PreToolUse hook' }
+    if (merged.decision === 'ask') return { kind: 'ask', ...merged.reason !== undefined ? { reason: merged.reason } : {} }
+    return next()
+  })
+```
 
 `hooks-codex` 是同一形态的第二实现(消费者列表见 `docs/event-producer-consumer.md` 的 `agent/pre-step`、`tools/pre-execute`、`tools/post-execute`、`agent/turn-stopping` 行)。
 
@@ -357,6 +492,18 @@ hook 名白名单在 `packages/hooks/hooks-claude-code/src/config.ts:12-18`(含 
 | `cordis/request-run` 等 5 个 | `emit` | `packages/extensions/cordis-host-runner/src/types.ts:368-398` | `remotes`(自省面板) |
 | `feedback/committed` | `parallel` | `packages/feedback/message-feedback/src/index.ts:58` | `session-telemetry-otel` |
 | `session-telemetry/record` | `waterfall` | `packages/session/session-telemetry/src/index.ts:43` | 无内建消费者,供部署接遥测后端 |
+
+表中 `subagent/start` / `subagent/end` 的"scope 载体"写法(声明里的 `this: Scoped<SubagentRuntime>` 即载体,`@dshScopeScan unsupported` 表示作用域不由 payload 字段推导):
+
+```typescript
+// packages/subagent/subagent/src/index.ts:158-170(节选)
+     * @dshScopeScan unsupported
+     * @mode emit
+     */
+    'subagent/start'(this: Scoped<SubagentRuntime>, info: SubagentRunInfo): void
+    // ...(略)
+    'subagent/end'(this: Scoped<SubagentRuntime>, info: SubagentRunEndInfo): void
+```
 
 > 完整清单与逐事件的生产者/消费者边,以生成物 `docs/event-producer-consumer.md` 为准(本篇只补它的内核阶段归类与语义)。该文件由 `scripts/gen-doc-graphs.ts` 从 TypeScript Program 解析产生,并由 `verify-*` 门控新鲜度。
 

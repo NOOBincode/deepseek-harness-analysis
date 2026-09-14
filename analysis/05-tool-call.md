@@ -21,6 +21,10 @@ DSH 的 tool call 是**"一张分层注册表 + 一条四段式执行管道 + �
 5. **并发失败关闭**。`executionMode()`(`index.ts:1266`)只有分类器**恰好返回 `true`** 才判 `parallel`;未声明、抛错、非 `true`、工具不可见一律 `exclusive`。
 6. **取消不放弃 promise**。注册表把调用者信号与 wrapper 信号 fuse(`fuseToolSignals`,`index.ts:1879`),已启动的 body 必须静默到 quiescence,只有结果被替换成 `ABORTED` / `ABORTED_BEFORE_DISPATCH` 两种规范码之一(`index.ts:462,465`)。
 
+![流程图：05-tool-call](./assets/diagrams/05-tool-call-24.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 flowchart TD
   A["LLM stream 完成<br/>message.content 过滤 tool-call 块<br/>agent.ts:486"] --> B["executeToolCalls() tool-calls.ts:60<br/>parseArguments → PlannedCall[]"]
@@ -38,6 +42,8 @@ flowchart TD
   J --> K["additionalContexts → inbox('next-step')<br/>agent.ts:488-491 → 下一 step 回流模型"]
   K --> A
 ```
+
+</details>
 
 ---
 

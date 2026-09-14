@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 649.6809999999999 419.65000000000003" width="649.6809999999999" height="419.65000000000003" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="174.575,66.9 209.01750000000004,66.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="158.273,144.7 209.01750000000004,144.70000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="179.762,214.05000000000004 207.72775000000004,214.05000000000004 207.72775000000004,248.72500000000005 209.01750000000004,248.72500000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="206.43800000000005,283.40000000000003 207.72775000000004,283.40000000000003 207.72775000000004,248.72500000000005 209.01750000000004,248.72500000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="195.32300000000004,352.75 209.01750000000004,352.75" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="390.27549999999997,66.9 426.2,66.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="391.75749999999994,144.70000000000002 426.2,144.70000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="351.00250000000005,352.75 426.2,352.75" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="384.34749999999997,248.72500000000005 426.2,248.72500000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="A" data-label="bash 工具
+tool-bash:346" data-shape="rectangle">
+  <rect x="53.33800000000001" y="40" width="121.237" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="113.9565" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="113.9565" dy="-3.9000000000000012">bash 工具</tspan><tspan x="113.9565" dy="16.900000000000002">tool-bash:346</tspan></text>
+</g>
+<g class="node" data-id="B" data-label="SandboxBashExecutor
+spec.sandboxPolicy" data-shape="rectangle">
+  <rect x="209.01750000000004" y="40" width="181.25799999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="299.64650000000006" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="299.64650000000006" dy="-3.9000000000000012">SandboxBashExecutor</tspan><tspan x="299.64650000000006" dy="16.900000000000002">spec.sandboxPolicy</tspan></text>
+</g>
+<g class="node" data-id="C" data-label="pwsh 工具" data-shape="rectangle">
+  <rect x="53.33800000000001" y="126.25" width="104.93499999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="105.8055" y="144.7" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">pwsh 工具</text>
+</g>
+<g class="node" data-id="D" data-label="SandboxPwshExecutor
+spec.sandboxPolicy" data-shape="rectangle">
+  <rect x="209.01750000000004" y="117.80000000000001" width="182.73999999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="300.38750000000005" y="144.70000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="300.38750000000005" dy="-3.9000000000000012">SandboxPwshExecutor</tspan><tspan x="300.38750000000005" dy="16.900000000000002">spec.sandboxPolicy</tspan></text>
+</g>
+<g class="node" data-id="E" data-label="write/edit 工具
+tool-fs" data-shape="rectangle">
+  <rect x="53.33800000000001" y="187.15000000000003" width="126.424" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="116.55000000000001" y="214.05000000000004" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="116.55000000000001" dy="-3.9000000000000012">write/edit 工具</tspan><tspan x="116.55000000000001" dy="16.900000000000002">tool-fs</tspan></text>
+</g>
+<g class="node" data-id="F" data-label="SandboxedFileSystem
+writeText 第 5 参" data-shape="rectangle">
+  <rect x="209.01750000000004" y="221.82500000000005" width="175.32999999999996" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="296.6825" y="248.72500000000005" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="296.6825" dy="-3.9000000000000012">SandboxedFileSystem</tspan><tspan x="296.6825" dy="16.900000000000002">writeText 第 5 参</tspan></text>
+</g>
+<g class="node" data-id="G" data-label="str_replace_editor" data-shape="rectangle">
+  <rect x="53.33800000000001" y="264.95000000000005" width="153.10000000000002" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="129.88800000000003" y="283.40000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">str_replace_editor</text>
+</g>
+<g class="node" data-id="H" data-label="持久终端
+terminal-bash:194" data-shape="rectangle">
+  <rect x="53.33800000000001" y="325.85" width="141.985" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="124.33050000000001" y="352.75" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="124.33050000000001" dy="-3.9000000000000012">持久终端</tspan><tspan x="124.33050000000001" dy="16.900000000000002">terminal-bash:194</tspan></text>
+</g>
+<g class="node" data-id="I" data-label="spawnArgv
+terminal-bash:100" data-shape="rectangle">
+  <rect x="209.01750000000004" y="325.85" width="141.985" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="280.01000000000005" y="352.75" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="280.01000000000005" dy="-3.9000000000000012">spawnArgv</tspan><tspan x="280.01000000000005" dy="16.900000000000002">terminal-bash:100</tspan></text>
+</g>
+<g class="node" data-id="J" data-label="ctx.sandbox.confine
+bash-sandbox:180" data-shape="rectangle">
+  <rect x="426.2" y="40" width="160.51" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="506.455" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="506.455" dy="-3.9000000000000012">ctx.sandbox.confine</tspan><tspan x="506.455" dy="16.900000000000002">bash-sandbox:180</tspan></text>
+</g>
+<g class="node" data-id="K" data-label="ctx.sandbox.confine
+pwsh-sandbox:185" data-shape="rectangle">
+  <rect x="426.2" y="117.80000000000001" width="160.51" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="506.455" y="144.70000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="506.455" dy="-3.9000000000000012">ctx.sandbox.confine</tspan><tspan x="506.455" dy="16.900000000000002">pwsh-sandbox:185</tspan></text>
+</g>
+<g class="node" data-id="L" data-label="ctx.sandbox.confine
+terminal-bash:108" data-shape="rectangle">
+  <rect x="426.2" y="325.85" width="160.51" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="506.455" y="352.75" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="506.455" dy="-3.9000000000000012">ctx.sandbox.confine</tspan><tspan x="506.455" dy="16.900000000000002">terminal-bash:108</tspan></text>
+</g>
+<g class="node" data-id="M" data-label="进程内围栏
+不调用 ctx.sandbox" data-shape="rectangle">
+  <rect x="426.2" y="221.82500000000005" width="161.251" height="53.800000000000004" rx="0" ry="0" fill="#ffe" stroke="#aa8" stroke-width="0.75" />
+  <text x="506.8255" y="248.72500000000005" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="506.8255" dy="-3.9000000000000012">进程内围栏</tspan><tspan x="506.8255" dy="16.900000000000002">不调用 ctx.sandbox</tspan></text>
+</g>
+</svg>

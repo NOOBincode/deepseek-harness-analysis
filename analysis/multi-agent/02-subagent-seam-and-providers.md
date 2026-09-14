@@ -400,6 +400,10 @@ return {
 
 ## 第六节 一张图:一次前台委派的控制流
 
+![时序图：02-subagent-seam-and-providers](../assets/diagrams/multi-agent__02-subagent-seam-and-providers-403.svg)
+
+<details><summary>Mermaid 源码</summary>
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -424,6 +428,8 @@ sequenceDiagram
     T->>S: await run.result → SubagentResult
     T->>S: run.dispose()
 ```
+
+</details>
 
 ---
 
