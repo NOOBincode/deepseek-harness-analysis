@@ -102,9 +102,11 @@ flowchart TD
 | 你想了解 | 章节(结论) | 模块(函数级) |
 |---|---|---|
 | 程序怎么启动、`dsh` 命令背后发生了什么 | [第一章](./01-architecture-overview.md) | [`plugin-system/02-loader-and-composition.md`](./plugin-system/02-loader-and-composition.md) |
+| 主循环怎么转、一次请求怎么发出去 | [第一章](./01-architecture-overview.md) | [`harness/`](./harness/README.md) |
 | 插件怎么写、effect 与 HMR 如何运作 | [第一章](./01-architecture-overview.md)、[第十二章](./12-architecture-highlights.md) | [`plugin-system/`](./plugin-system/README.md) |
 | 安全边界在哪、哪些代码在沙箱之外 | [第二章](./02-security-analysis.md) | [`sandbox/03-escalation-and-approval.md`](./sandbox/03-escalation-and-approval.md) |
-| 会话状态怎么存、为什么"日志即真源" | [第三章](./03-session-memory.md)、[第十一章](./11-persistence.md) | —— |
+| 会话状态怎么存、为什么"日志即真源" | [第三章](./03-session-memory.md)、[第十一章](./11-persistence.md) | [`memory/`](./memory/README.md) |
+| 上下文窗口里装了什么、爆了怎么办 | [第八章](./08-context.md) | [`context/`](./context/README.md) |
 | 怎么加一个能力(工具/skill/MCP) | [第四](./04-skills.md)/[五](./05-tool-call.md)/[六章](./06-mcp.md) | [`skills/`](./skills/README.md)、[`tool-call/`](./tool-call/README.md)、[`mcp/`](./mcp/README.md) |
 | 命令与文件操作的隔离怎么做的 | [第七章](./07-sandbox.md) | [`sandbox/`](./sandbox/README.md) |
 | 上下文窗口爆了会怎样 | [第八章](./08-context.md) | —— |

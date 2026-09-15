@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 946.798 1172.81" width="946.798" height="1172.81" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="366.36100000000005,76.9 366.36100000000005,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="下一步" points="345.4893333333334,221.25833333333333 345.4893333333334,270.13 274.106,270.13 274.1060000000001,342.43" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="下一轮" points="387.23266666666666,221.25833333333338 387.23266666666666,270.13 458.616,270.13 458.616,342.43" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="274.1060000000001,379.33000000000004 274.1060000000001,399.33000000000004 366.361,399.33000000000004 366.361,419.33" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="458.616,379.33000000000004 458.616,399.33000000000004 366.361,399.33000000000004 366.361,419.33" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="366.361,456.22999999999996 366.361,496.23" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="343.01933333333335,612.9383333333334 343.01933333333335,732.6100000000001 135.07500000000005,732.6100000000001 135.07500000000005,804.9100000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="389.7026666666667,612.9383333333333 389.7026666666667,648.28 506.8,648.28 506.8,720.5799999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="空闲" points="469.231,808.241 469.231,857.81 218.92000000000007,857.81 218.92000000000007,944.1099999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="维护中" points="494.277,833.2869999999999 494.277,869.81 403.43000000000006,869.81 403.43000000000006,944.1099999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="活动已中止" points="519.323,833.2869999999999 519.323,885.81 610.17,885.81 610.1700000000001,944.1099999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="正在处置" points="544.369,808.2409999999999 544.369,857.81 818.0215,857.81 818.0215,944.1099999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="218.92000000000004,981.0099999999999 218.92000000000004,1000.01 336.0390833333334,1000.01 336.0390833333334,1019.01" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="J" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="403.43000000000006,981.0099999999999 403.43000000000006,1000.01 336.0390833333334,1000.01 336.0390833333334,1019.01" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="610.1700000000001,981.0099999999999 610.1700000000001,1000.01 336.0390833333334,1000.01 336.0390833333334,1019.01" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="135.075,841.8100000000001 135.075,1000.01 336.0390833333334,1000.01 336.0390833333334,1019.01" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="M" data-to="N" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="336.0390833333334,1055.9099999999999 336.03908333333345,1095.9099999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="B" data-to="C" data-label="下一步">
+  <rect x="247.10599999999997" y="277.13" width="53.29" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="273.751" y="292.28" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">下一步</text>
+</g>
+<g class="edge-label" data-from="B" data-to="D" data-label="下一轮">
+  <rect x="431.616" y="277.13" width="53.29" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="458.26099999999997" y="292.28" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">下一轮</text>
+</g>
+<g class="edge-label" data-from="F" data-to="G" data-label="否">
+  <rect x="120.07500000000003" y="739.6100000000001" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="134.84000000000003" y="754.7600000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="edge-label" data-from="F" data-to="H" data-label="是">
+  <rect x="491.8" y="655.28" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="506.565" y="670.43" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="H" data-to="I" data-label="空闲">
+  <rect x="197.92000000000007" y="876.81" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="218.62500000000006" y="891.9599999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">空闲</text>
+</g>
+<g class="edge-label" data-from="H" data-to="J" data-label="维护中">
+  <rect x="376.43000000000006" y="876.81" width="53.29" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="403.07500000000005" y="891.9599999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">维护中</text>
+</g>
+<g class="edge-label" data-from="H" data-to="K" data-label="活动已中止">
+  <rect x="571.17" y="892.81" width="77.05000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="609.6949999999999" y="907.9599999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">活动已中止</text>
+</g>
+<g class="edge-label" data-from="H" data-to="L" data-label="正在处置">
+  <rect x="785.0215" y="864.81" width="65.17" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="817.6065" y="879.9599999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">正在处置</text>
+</g>
+<g class="node" data-id="A" data-label="输入带着一个目标边界和一个唤醒标记" data-shape="rectangle">
+  <rect x="219.41600000000005" y="40" width="293.89" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="366.36100000000005" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">输入带着一个目标边界和一个唤醒标记</text>
+</g>
+<g class="node" data-id="B" data-label="目标边界" data-shape="diamond">
+  <polygon points="366.36100000000005,116.89999999999999 428.97600000000006,179.515 366.36100000000005,242.13 303.74600000000004,179.515" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="366.36100000000005" y="179.515" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">目标边界</text>
+</g>
+<g class="node" data-id="C" data-label="追加到下一步待办" data-shape="rectangle">
+  <rect x="193.8510000000001" y="342.43" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="274.1060000000001" y="360.88" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">追加到下一步待办</text>
+</g>
+<g class="node" data-id="D" data-label="追加到下一轮待办" data-shape="rectangle">
+  <rect x="378.361" y="342.43" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="458.616" y="360.88" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">追加到下一轮待办</text>
+</g>
+<g class="node" data-id="E" data-label="落一条可重放的插入记录" data-shape="rectangle">
+  <rect x="263.87600000000003" y="419.33" width="204.96999999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="366.361" y="437.78" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">落一条可重放的插入记录</text>
+</g>
+<g class="node" data-id="F" data-label="带唤醒标记" data-shape="diamond">
+  <polygon points="366.361,496.23 436.38599999999997,566.255 366.361,636.28 296.336,566.255" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="366.361" y="566.255" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">带唤醒标记</text>
+</g>
+<g class="node" data-id="G" data-label="静静等待下一个步边界" data-shape="rectangle">
+  <rect x="40" y="804.9100000000001" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="135.075" y="823.3600000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">静静等待下一个步边界</text>
+</g>
+<g class="node" data-id="H" data-label="当前相位" data-shape="diamond">
+  <polygon points="506.8,720.5799999999999 569.415,783.1949999999999 506.8,845.81 444.185,783.1949999999999" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="506.8" y="783.1949999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">当前相位</text>
+</g>
+<g class="node" data-id="I" data-label="立刻起一个驱动" data-shape="rectangle">
+  <rect x="146.07500000000005" y="944.1099999999999" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="218.92000000000004" y="962.56" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">立刻起一个驱动</text>
+</g>
+<g class="node" data-id="J" data-label="闩住唤醒等维护结束" data-shape="rectangle">
+  <rect x="315.76500000000004" y="944.1099999999999" width="175.32999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="403.43000000000006" y="962.56" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">闩住唤醒等维护结束</text>
+</g>
+<g class="node" data-id="K" data-label="闩住唤醒等收敛后重放" data-shape="rectangle">
+  <rect x="515.095" y="944.1099999999999" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="610.1700000000001" y="962.56" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">闩住唤醒等收敛后重放</text>
+</g>
+<g class="node" data-id="L" data-label="不闩 让处置直接结束" data-shape="rectangle">
+  <rect x="729.245" y="944.1099999999999" width="177.55299999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="818.0215" y="962.56" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">不闩 让处置直接结束</text>
+</g>
+<g class="node" data-id="M" data-label="步边界一次性取走整批" data-shape="rectangle">
+  <rect x="240.9640833333334" y="1019.01" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="336.0390833333334" y="1037.46" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">步边界一次性取走整批</text>
+</g>
+<g class="node" data-id="N" data-label="批次成为本步的模型输入" data-shape="rectangle">
+  <rect x="233.55408333333344" y="1095.9099999999999" width="204.96999999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="336.03908333333345" y="1114.36" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">批次成为本步的模型输入</text>
+</g>
+</svg>

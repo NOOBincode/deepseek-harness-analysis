@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 852.1616666666666 347.6" width="852.1616666666666" height="347.6" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="P" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="105.435,84.9 105.435,100.9 322.92,100.9 322.92,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="P" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="252.89499999999998,84.9 252.89499999999998,100.9 322.92,100.9 322.92,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="P" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="392.94499999999994,84.9 392.94499999999994,100.9 322.92,100.9 322.92,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="P" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="540.405,84.9 540.405,100.9 322.92,100.9 322.92,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="322.92,153.8 322.91999999999996,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="705.155,116.9 705.155,84.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="758.6583333333333,84.9 758.6583333333333,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="S" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="731.9066666666666,153.8 731.9066666666666,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="S" data-to="T" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="731.9066666666666,230.70000000000002 731.9066666666666,270.70000000000005" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="540.405,84.9 540.405,100.9 562.2166666666667,100.9 562.2166666666667,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="A" data-label="跨会话引用包" data-shape="rectangle">
+  <rect x="40" y="48" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="105.435" y="66.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">跨会话引用包</text>
+</g>
+<g class="node" data-id="P" data-label="步边界的消息瀑布" data-shape="rectangle">
+  <rect x="242.66500000000002" y="116.9" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="322.92" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">步边界的消息瀑布</text>
+</g>
+<g class="node" data-id="B" data-label="时间读数包" data-shape="rectangle">
+  <rect x="194.86999999999998" y="48" width="116.05" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="252.89499999999998" y="66.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">时间读数包</text>
+</g>
+<g class="node" data-id="C" data-label="终端位置包" data-shape="rectangle">
+  <rect x="334.91999999999996" y="48" width="116.05" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="392.94499999999994" y="66.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">终端位置包</text>
+</g>
+<g class="node" data-id="D" data-label="工作区指令包" data-shape="rectangle">
+  <rect x="474.97" y="48" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="540.405" y="66.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">工作区指令包</text>
+</g>
+<g class="node" data-id="M" data-label="本步落盘的用户消息" data-shape="rectangle">
+  <rect x="235.255" y="193.8" width="175.32999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="322.91999999999996" y="212.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">本步落盘的用户消息</text>
+</g>
+<g class="node" data-id="E" data-label="文件引用发现服务" data-shape="rectangle">
+  <rect x="651.6516666666666" y="116.9" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="731.9066666666666" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">文件引用发现服务</text>
+</g>
+<g class="node" data-id="F" data-label="本地目录检索实现" data-shape="rectangle">
+  <rect x="651.6516666666666" y="48" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="731.9066666666666" y="66.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">本地目录检索实现</text>
+</g>
+<g class="node" data-id="S" data-label="提示段落注册表" data-shape="rectangle">
+  <rect x="659.0616666666666" y="193.8" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="731.9066666666666" y="212.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">提示段落注册表</text>
+</g>
+<g class="node" data-id="T" data-label="提示正文" data-shape="rectangle">
+  <rect x="681.2916666666666" y="270.70000000000005" width="101.22999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="731.9066666666666" y="289.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">提示正文</text>
+</g>
+<g class="node" data-id="I" data-label="下一步收件箱" data-shape="rectangle">
+  <rect x="496.78166666666664" y="116.9" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="562.2166666666667" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">下一步收件箱</text>
+</g>
+</svg>

@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1049.2321666666667 664.8499999999999" width="1049.2321666666667" height="664.8499999999999" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="184.27649999999994,301.25000000000006 184.27649999999994,341.25000000000006" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="184.27649999999994,378.15000000000003 184.27649999999994,406.15000000000003 247.11308333333324,406.15000000000003 247.11308333333324,426.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="271.3947499999999,463.05 271.3947499999999,503.05" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="271.3947499999999,539.95 271.3947499999999,559.95 224.13783333333322,559.95 224.13783333333322,579.95" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="150.1334999999999,579.95 150.1334999999999,559.95 40.03999999999999,559.95 40.03999999999999,252.35000000000005 333.8159999999999,252.35000000000005 333.8159999999999,76.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="417.7003333333333,76.9 417.7003333333333,104.9 570.7021666666666,104.9 570.7021666666666,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="570.7021666666666,153.8 570.7021666666666,193.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="继续" points="528.6871666666666,291.8350000000001 528.6871666666666,345.85 358.5129999999999,345.85 358.5129999999999,406.15000000000003 295.67641666666657,406.15000000000003 295.67641666666657,426.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="正常结束" points="556.6971666666666,319.845 556.6971666666666,361.85 471.03716666666645,361.85 471.0371666666665,426.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="失败" points="584.7071666666666,319.845 584.7071666666666,361.85 670.3671666666665,361.85 670.3671666666665,426.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="被取消且已有内容" points="612.7171666666666,291.83500000000004 612.7171666666666,349.85 891.9271666666666,349.85 891.9271666666665,426.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="471.0371666666665,463.05000000000007 471.0371666666665,483.05000000000007 670.3671666666665,483.05000000000007 670.3671666666665,503.05" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="J" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="670.3671666666665,463.05000000000007 670.3671666666665,483.05000000000007 670.3671666666665,483.05000000000007 670.3671666666665,503.05" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="891.9271666666665,463.05000000000007 891.9271666666665,483.05000000000007 670.3671666666665,483.05000000000007 670.3671666666665,503.05" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="L" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="670.3671666666665,539.95 670.3671666666665,579.95" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="H" data-to="C" data-label="继续">
+  <rect x="337.5129999999999" y="352.85" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="358.2179999999999" y="368" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">继续</text>
+</g>
+<g class="edge-label" data-from="H" data-to="I" data-label="正常结束">
+  <rect x="438.03716666666645" y="368.85" width="65.17" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="470.62216666666643" y="384" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">正常结束</text>
+</g>
+<g class="edge-label" data-from="H" data-to="J" data-label="失败">
+  <rect x="649.3671666666665" y="368.85" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="670.0721666666666" y="384" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">失败</text>
+</g>
+<g class="edge-label" data-from="H" data-to="K" data-label="被取消且已有内容">
+  <rect x="835.4271666666666" y="368.85" width="112.69000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="891.7721666666666" y="384" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">被取消且已有内容</text>
+</g>
+<g class="node" data-id="A" data-label="一步开始 建立一次尝试" data-shape="rectangle">
+  <rect x="88.08999999999996" y="264.35" width="192.373" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="184.27649999999994" y="282.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">一步开始 建立一次尝试</text>
+</g>
+<g class="node" data-id="B" data-label="发出开始帧 带上尝试标识与修订号" data-shape="rectangle">
+  <rect x="51.03999999999999" y="341.25000000000006" width="266.47299999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="184.27649999999997" y="359.70000000000005" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">发出开始帧 带上尝试标识与修订号</text>
+</g>
+<g class="node" data-id="C" data-label="适配器开始吐块" data-shape="rectangle">
+  <rect x="198.5497499999999" y="426.15000000000003" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="271.39474999999993" y="444.6" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">适配器开始吐块</text>
+</g>
+<g class="node" data-id="D" data-label="每块先记一次时间戳" data-shape="rectangle">
+  <rect x="183.72974999999985" y="503.05" width="175.32999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="271.3947499999998" y="521.5" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">每块先记一次时间戳</text>
+</g>
+<g class="node" data-id="E" data-label="喂给紧凑流累积器 供落库用" data-shape="rectangle">
+  <rect x="76.12916666666656" y="579.95" width="222.013" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="187.13566666666657" y="598.4000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">喂给紧凑流累积器 供落库用</text>
+</g>
+<g class="node" data-id="F" data-label="喂给块组装器 产出规范块与用量" data-shape="rectangle">
+  <rect x="249.93166666666662" y="40" width="251.653" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="375.7581666666666" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">喂给块组装器 产出规范块与用量</text>
+</g>
+<g class="node" data-id="G" data-label="发出块帧 带稠密序号" data-shape="rectangle">
+  <rect x="481.92566666666653" y="116.9" width="177.55299999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="570.7021666666665" y="135.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">发出块帧 带稠密序号</text>
+</g>
+<g class="node" data-id="H" data-label="流还继续吗" data-shape="diamond">
+  <polygon points="570.7021666666666,193.80000000000004 640.7271666666666,263.82500000000005 570.7021666666666,333.85 500.6771666666666,263.82500000000005" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="570.7021666666666" y="263.82500000000005" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">流还继续吗</text>
+</g>
+<g class="node" data-id="I" data-label="组装助手消息并写日志" data-shape="rectangle">
+  <rect x="375.9621666666665" y="426.15000000000003" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="471.0371666666665" y="444.6" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">组装助手消息并写日志</text>
+</g>
+<g class="node" data-id="J" data-label="只写一条尝试记录" data-shape="rectangle">
+  <rect x="590.1121666666666" y="426.15000000000003" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="670.3671666666665" y="444.6" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">只写一条尝试记录</text>
+</g>
+<g class="node" data-id="K" data-label="写一条带中断标记的助手消息" data-shape="rectangle">
+  <rect x="774.6221666666665" y="426.15000000000003" width="234.60999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="891.9271666666665" y="444.6" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">写一条带中断标记的助手消息</text>
+</g>
+<g class="node" data-id="L" data-label="发出提交帧 带上事件类型与序号" data-shape="rectangle">
+  <rect x="544.5406666666665" y="503.05" width="251.653" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="670.3671666666665" y="521.5" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">发出提交帧 带上事件类型与序号</text>
+</g>
+<g class="node" data-id="M" data-label="本步的后续处理" data-shape="rectangle">
+  <rect x="597.5221666666665" y="579.95" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="670.3671666666665" y="598.4000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">本步的后续处理</text>
+</g>
+</svg>

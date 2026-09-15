@@ -3,7 +3,7 @@
 > 对 [DeepSeek Harness](https://github.com/innokria/deepseek-harness)(DSH)——一个"一切皆插件"的 Cordis agent harness——的源码分析。
 > 分析基线:upstream commit [`dbbaa4a3`](https://github.com/innokria/deepseek-harness/commit/dbbaa4a37fb9098aba814c97d2956f7b2f105f46)
 
-14 章正文 + 6 个模块的函数级深度展开。
+14 章正文 + 9 个模块的函数级深度展开。
 
 ---
 
@@ -57,11 +57,14 @@ DSH 的四个贯穿性判据(全套文档反复用到):
 | 五 · 扩展分析 | 第十三章 扩展生态(Hooks / ACP / Webhook / Web+Desktop / 双 SDK) |
 | 总结 | 第十四章 总结结论(不变式、端到端生命周期、横向对比、设计代价) |
 
-### 6 个模块深度展开(函数级)
+### 9 个模块深度展开(函数级)
 
 | 模块 | 篇数 | 覆盖 |
 |---|---|---|
+| [`harness/`](./analysis/harness/README.md) | 8 | 主循环骨架(turn/step 状态机)、输入与步边界(inbox/wake)、一次模型请求全过程、助手流与落库、取消与处置、不变量与守卫、生命周期事件 |
 | [`plugin-system/`](./analysis/plugin-system/README.md) | 6 | Cordis 运行时内部(代理/状态机/effect 回收/事件分发)、Loader 与组合(事务回滚、HMR)、能力缝解剖、扩展点目录、插件编写指南 |
+| [`memory/`](./analysis/memory/README.md) | 8 | 事件日志提交路径、surface 与可见性、派生投影与水印、压缩选区与事务、落盘与恢复、状态型记忆、不变量与失败模式 |
+| [`context/`](./analysis/context/README.md) | 7 | 六类来源通道、每步组装五段、运行时投影三态、token 计量与压力折算、压缩与溢写优先级、上下文类插件 |
 | [`tool-call/`](./analysis/tool-call/README.md) | 7 | 注册表与可见性、执行管道逐段、调度与并发、取消与超时、PTC 模式、结果展示层 |
 | [`mcp/`](./analysis/mcp/README.md) | 7 | 发现与两阶段同步、命名算法实测、执行与结果映射、连接监管、传输与安全、失败模式清单 |
 | [`skills/`](./analysis/skills/README.md) | 6 | 格式与六档发现根、provider 注册表裁决、目录与按需加载、watcher 失效、作用域与出货 |
@@ -74,6 +77,9 @@ DSH 的四个贯穿性判据(全套文档反复用到):
 |---|---|
 | **只想拿结论**(30 分钟) | [`analysis/14-final-summary.md`](./analysis/14-final-summary.md) → 需要细节时按阅读地图跳转 |
 | **理解整体架构** | [`analysis/01-architecture-overview.md`](./analysis/01-architecture-overview.md) → [`analysis/12-architecture-highlights.md`](./analysis/12-architecture-highlights.md) → [`analysis/plugin-system/`](./analysis/plugin-system/README.md) |
+| **看懂主循环怎么转** | [`analysis/harness/`](./analysis/harness/README.md) |
+| **搞清会话状态与恢复** | [`analysis/03-session-memory.md`](./analysis/03-session-memory.md) / [`analysis/11-persistence.md`](./analysis/11-persistence.md) → [`analysis/memory/`](./analysis/memory/README.md) |
+| **搞清上下文与压缩** | [`analysis/08-context.md`](./analysis/08-context.md) → [`analysis/context/`](./analysis/context/README.md) |
 | **加一个能力**(工具/skill/MCP) | [`analysis/05-tool-call.md`](./analysis/05-tool-call.md) → [`analysis/tool-call/`](./analysis/tool-call/README.md) / [`analysis/skills/`](./analysis/skills/README.md) / [`analysis/mcp/`](./analysis/mcp/README.md) |
 | **查具体实现** | 直接进对应模块目录,或读该章末尾的"关键文件索引表"按 `文件:行号` 回源码 |
 
@@ -95,7 +101,11 @@ DSH 的四个贯穿性判据(全套文档反复用到):
     ├── 01-architecture-overview.md
     ├── ...
     ├── 14-final-summary.md
+    ├── assets/diagrams/      # 渲染后的 SVG 图
+    ├── harness/              # 8 篇:主循环、请求、流、处置、不变量、事件
     ├── plugin-system/        # 6 篇:插件设计函数级展开
+    ├── memory/               # 8 篇:事件日志、surface、投影、压缩、落盘恢复、状态记忆
+    ├── context/              # 7 篇:来源、组装、运行时投影、计量、压缩溢写、上下文插件
     ├── tool-call/            # 7 篇
     ├── mcp/                  # 7 篇
     ├── skills/               # 6 篇

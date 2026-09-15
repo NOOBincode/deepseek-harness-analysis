@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800.3162499999999 546.3" width="800.3162499999999" height="546.3" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="ASM" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="114.28916666666663,145.8 114.28916666666663,161.8 254.23166666666668,161.8 254.23166666666668,177.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="ASM" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="283.97916666666663,145.8 283.97916666666663,161.8 254.23166666666668,161.8 254.23166666666668,177.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="ASM" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="483.30916666666667,145.8 483.30916666666667,161.8 254.23166666666668,161.8 254.23166666666668,177.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="483.30916666666656,76.9 483.30916666666667,108.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ASM" data-to="W" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="254.23166666666668,214.70000000000002 254.23166666666668,254.70000000000002" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="W" data-to="SYS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="254.23166666666668,291.6 254.23166666666668,315.6 120.255,315.6 120.255,339.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="W" data-to="USR" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="254.23166666666668,291.6 254.23166666666668,315.6 312.17499999999995,315.6 312.17499999999995,339.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SYS" data-to="LOG" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="120.255,376.5 120.255,388.5 353.1745833333333,388.5 353.1745833333333,400.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="USR" data-to="LOG" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="312.17499999999995,376.5 312.17499999999995,388.5 353.1745833333333,388.5 353.1745833333333,400.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="LOG" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="353.1745833333333,437.4 353.1745833333333,457.4 566.77,457.4 566.77,469.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="M" data-to="P" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="630.1533333333332,469.4 630.1533333333332,457.4 749.22,457.4 749.22,380.5 725.3037499999999,380.5 725.3037499999999,213.93749999999994" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P" data-to="CMP" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="超阈值" points="655.27875,213.93750000000006 655.27875,259.3 496.68499999999995,259.3 496.68499999999995,339.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="P" data-to="NX" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="未超" points="690.2912499999999,248.95000000000002 690.2912499999999,320.2 666.375,320.2 666.375,400.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CMP" data-to="LOG" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="496.68499999999995,376.5 496.68499999999995,388.5 353.1745833333333,388.5 353.1745833333333,400.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="P" data-to="CMP" data-label="超阈值">
+  <rect x="469.68499999999995" y="266.3" width="53.29" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="496.3299999999999" y="281.45" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">超阈值</text>
+</g>
+<g class="edge-label" data-from="P" data-to="NX" data-label="未超">
+  <rect x="645.375" y="327.2" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="666.08" y="342.34999999999997" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">未超</text>
+</g>
+<g class="node" data-id="A" data-label="提示段落注册表" data-shape="rectangle">
+  <rect x="41.44416666666663" y="108.9" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="114.28916666666663" y="127.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">提示段落注册表</text>
+</g>
+<g class="node" data-id="ASM" data-label="每步组装一次" data-shape="rectangle">
+  <rect x="188.79666666666668" y="177.8" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="254.23166666666668" y="196.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">每步组装一次</text>
+</g>
+<g class="node" data-id="B" data-label="动态上下文贡献" data-shape="rectangle">
+  <rect x="211.13416666666663" y="108.9" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="283.97916666666663" y="127.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">动态上下文贡献</text>
+</g>
+<g class="node" data-id="C" data-label="收件箱里待发的用户消息" data-shape="rectangle">
+  <rect x="380.82416666666666" y="108.9" width="204.96999999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="483.30916666666667" y="127.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">收件箱里待发的用户消息</text>
+</g>
+<g class="node" data-id="D" data-label="工具结果随附的消息" data-shape="rectangle">
+  <rect x="395.6441666666666" y="40" width="175.32999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="483.30916666666656" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">工具结果随附的消息</text>
+</g>
+<g class="node" data-id="W" data-label="前置瀑布按序改写" data-shape="rectangle">
+  <rect x="173.9766666666667" y="254.70000000000002" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="254.23166666666668" y="273.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">前置瀑布按序改写</text>
+</g>
+<g class="node" data-id="SYS" data-label="落成系统提示节点" data-shape="rectangle">
+  <rect x="40" y="339.6" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="120.255" y="358.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">落成系统提示节点</text>
+</g>
+<g class="node" data-id="USR" data-label="落成运行时快照节点" data-shape="rectangle">
+  <rect x="224.51" y="339.6" width="175.32999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="312.17499999999995" y="358.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">落成运行时快照节点</text>
+</g>
+<g class="node" data-id="LOG" data-label="会话日志派生请求" data-shape="rectangle">
+  <rect x="272.9195833333333" y="400.5" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="353.1745833333333" y="418.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">会话日志派生请求</text>
+</g>
+<g class="node" data-id="M" data-label="启发式计量当前可见面" data-shape="rectangle">
+  <rect x="503.3866666666666" y="469.4" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="598.4616666666666" y="487.84999999999997" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">启发式计量当前可见面</text>
+</g>
+<g class="node" data-id="P" data-label="压力或溢出" data-shape="diamond">
+  <polygon points="690.2912499999999,108.9 760.3162499999999,178.925 690.2912499999999,248.95000000000002 620.2662499999999,178.925" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="690.2912499999999" y="178.925" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">压力或溢出</text>
+</g>
+<g class="node" data-id="CMP" data-label="压缩区间换摘要" data-shape="rectangle">
+  <rect x="423.8399999999999" y="339.6" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="496.68499999999995" y="358.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">压缩区间换摘要</text>
+</g>
+<g class="node" data-id="NX" data-label="进入下一次请求" data-shape="rectangle">
+  <rect x="593.53" y="400.5" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="666.375" y="418.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">进入下一次请求</text>
+</g>
+</svg>

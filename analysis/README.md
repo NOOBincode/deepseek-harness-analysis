@@ -95,16 +95,19 @@ DSH 的系统特征一句话:**"一切皆插件"**——从工具注册表、系
 
 ## 模块深度展开(函数级)
 
-六个核心模块在章节之外另有子目录,做函数级走查:调用栈逐段拆解、状态机与变量表、失败分支、边界用例与测试证据。章节给结论,模块给实现细节。
+九个模块在章节之外另有子目录,做函数级走查:调用栈逐段拆解、状态机与变量表、失败分支、边界用例与测试证据。章节给结论,模块给实现细节。
 
-| 模块 | 目录 | 篇目 | 与章节的关系 |
+| 模块 | 目录 | 篇目 | 对应章节 |
 |---|---|---|---|
-| 插件设计 | [`plugin-system/`](./plugin-system/README.md) | 6 篇:Cordis 运行时内部、Loader 与组合、能力缝解剖、扩展点目录、插件编写指南 | 展开第一/十二章 |
-| Tool Call | [`tool-call/`](./tool-call/README.md) | 7 篇:注册表与可见性、执行管道、调度与并发、取消与超时、PTC 模式、展示层 | 展开第五章 |
-| MCP | [`mcp/`](./mcp/README.md) | 7 篇:发现与同步、命名算法、执行与结果映射、连接监管、传输与安全、测试与失败模式 | 展开第六章 |
-| Skills | [`skills/`](./skills/README.md) | 6 篇:格式与发现、provider 注册表、目录与加载、watcher 失效、作用域与组合 | 展开第四章 |
-| Sandbox | [`sandbox/`](./sandbox/README.md) | 7 篇:缝隙与策略、平台后端、升级审批、消费方、E2B、边界与失败模式 | 展开第七/二章 |
-| Multi-Agent | [`multi-agent/`](./multi-agent/README.md) | 8 篇:Agent 生命周期、缝隙与 provider、子 Agent 组装、续存管控、workflow、jobs、preset | 展开第十章 |
+| 运行时内核 | [`harness/`](./harness/README.md) | 8 篇:主循环骨架、输入与步边界、一次模型请求、助手流、取消与处置、不变量与守卫、生命周期事件 | 第一/十四章 |
+| 插件设计 | [`plugin-system/`](./plugin-system/README.md) | 6 篇:Cordis 运行时内部、Loader 与组合、能力缝解剖、扩展点目录、插件编写指南 | 第一/十二章 |
+| Memory | [`memory/`](./memory/README.md) | 8 篇:事件日志、surface 与可见性、派生投影、压缩、落盘与恢复、状态型记忆、不变量与失败模式 | 第三/十一章 |
+| Context | [`context/`](./context/README.md) | 7 篇:来源分层、每步组装、运行时投影、token 计量、压缩与溢写、上下文插件 | 第八章 |
+| Tool Call | [`tool-call/`](./tool-call/README.md) | 7 篇:注册表与可见性、执行管道、调度与并发、取消与超时、PTC 模式、展示层 | 第五章 |
+| MCP | [`mcp/`](./mcp/README.md) | 7 篇:发现与同步、命名算法、执行与结果映射、连接监管、传输与安全、测试与失败模式 | 第六章 |
+| Skills | [`skills/`](./skills/README.md) | 6 篇:格式与发现、provider 注册表、目录与加载、watcher 失效、作用域与组合 | 第四章 |
+| Sandbox | [`sandbox/`](./sandbox/README.md) | 7 篇:缝隙与策略、平台后端、升级审批、消费方、E2B、边界与失败模式 | 第七/二章 |
+| Multi-Agent | [`multi-agent/`](./multi-agent/README.md) | 8 篇:Agent 生命周期、缝隙与 provider、子 Agent 组装、续存管控、workflow、jobs、preset | 第十章 |
 
 各模块目录内均有 `README.md` 作为模块索引(含函数级调用栈图与篇目导读)。
 

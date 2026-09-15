@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 929.23075 1338.6499999999999" width="929.23075" height="1338.6499999999999" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="331.55033333333336,76.9 331.55033333333336,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="不保留" points="303.26866666666666,258.30833333333334 303.26866666666666,314.59000000000003 239.2953333333333,314.59000000000003 239.2953333333333,386.89" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="保留" points="359.832,258.3083333333334 359.832,374.89 423.8053333333333,374.89 423.8053333333333,463.78999999999996" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="239.2953333333333,423.78999999999996 239.2953333333333,463.78999999999996" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="423.8053333333333,500.68999999999994 423.8053333333333,520.6899999999999 331.5503333333333,520.6899999999999 331.5503333333333,540.6899999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="239.2953333333333,500.68999999999994 239.2953333333333,520.6899999999999 331.5503333333333,520.6899999999999 331.5503333333333,540.6899999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="没有" points="300.79866666666663,694.4483333333333 300.79866666666663,753.2 216.50958333333332,753.2 216.50958333333332,817.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="有" points="362.30199999999996,694.4483333333333 362.30199999999996,737.1999999999999 446.5910833333333,737.1999999999999 446.5910833333333,817.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="446.5910833333333,854.4 446.5910833333333,862.3999999999999 297.725,862.3999999999999 297.725,902.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="297.725,939.3 297.725,959.3 164.71499999999997,959.3 164.71499999999997,979.3" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="297.725,939.3 297.725,959.3 430.73499999999996,959.3 430.73499999999996,1124.5499999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="446.5910833333333,854.4 446.5910833333333,862.3999999999999 679.115,862.3999999999999 679.115,870.3999999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="L" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="679.115,907.2999999999998 679.115,947.2999999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="M" data-to="N" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="处置原因" points="643.4233333333333,1125.7583333333332 643.4233333333333,1189.4499999999998 571.48425,1189.4499999999998 571.48425,1261.7499999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="M" data-to="O" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="其他原因" points="714.8066666666666,1125.7583333333332 714.8066666666666,1189.4499999999998 786.74575,1189.4499999999998 786.74575,1261.7499999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="B" data-to="C" data-label="不保留">
+  <rect x="212.2953333333333" y="321.59000000000003" width="53.29" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="238.9403333333333" y="336.74" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">不保留</text>
+</g>
+<g class="edge-label" data-from="B" data-to="D" data-label="保留">
+  <rect x="402.8053333333333" y="398.49" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="423.5103333333333" y="413.64" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">保留</text>
+</g>
+<g class="edge-label" data-from="F" data-to="G" data-label="没有">
+  <rect x="195.50958333333335" y="760.2" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="216.21458333333334" y="775.35" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">没有</text>
+</g>
+<g class="edge-label" data-from="F" data-to="H" data-label="有">
+  <rect x="431.5910833333333" y="744.1999999999999" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="446.3560833333333" y="759.3499999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">有</text>
+</g>
+<g class="edge-label" data-from="M" data-to="N" data-label="处置原因">
+  <rect x="538.48425" y="1196.4499999999998" width="65.17" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="571.06925" y="1211.6" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">处置原因</text>
+</g>
+<g class="edge-label" data-from="M" data-to="O" data-label="其他原因">
+  <rect x="753.74575" y="1196.4499999999998" width="65.17" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="786.3307500000001" y="1211.6" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">其他原因</text>
+</g>
+<g class="node" data-id="A" data-label="取消请求带着一个原因" data-shape="rectangle">
+  <rect x="236.47533333333334" y="40" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="331.55033333333336" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">取消请求带着一个原因</text>
+</g>
+<g class="node" data-id="B" data-label="要求保留待办吗" data-shape="diamond">
+  <polygon points="331.55033333333336,116.9 416.3953333333334,201.745 331.55033333333336,286.59000000000003 246.70533333333336,201.745" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="331.55033333333336" y="201.745" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">要求保留待办吗</text>
+</g>
+<g class="node" data-id="C" data-label="先清下一步待办再清下一轮待办" data-shape="rectangle">
+  <rect x="114.58033333333333" y="386.89" width="249.42999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="239.2953333333333" y="405.34" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">先清下一步待办再清下一轮待办</text>
+</g>
+<g class="node" data-id="D" data-label="待办原样留下" data-shape="rectangle">
+  <rect x="358.3703333333333" y="463.78999999999996" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="423.8053333333333" y="482.23999999999995" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">待办原样留下</text>
+</g>
+<g class="node" data-id="E" data-label="丢掉待重放的唤醒闩锁" data-shape="rectangle">
+  <rect x="144.22033333333331" y="463.78999999999996" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="239.2953333333333" y="482.23999999999995" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">丢掉待重放的唤醒闩锁</text>
+</g>
+<g class="node" data-id="F" data-label="当前有空闲活动吗" data-shape="diamond">
+  <polygon points="331.5503333333333,540.6899999999999 423.8053333333333,632.9449999999999 331.5503333333333,725.1999999999999 239.2953333333333,632.9449999999999" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="331.5503333333333" y="632.9449999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">当前有空闲活动吗</text>
+</g>
+<g class="node" data-id="G" data-label="空操作 不武装后续工作" data-shape="rectangle">
+  <rect x="120.32308333333333" y="817.5" width="192.373" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="216.50958333333332" y="835.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">空操作 不武装后续工作</text>
+</g>
+<g class="node" data-id="H" data-label="用原因中止当前取消控制器" data-shape="rectangle">
+  <rect x="336.6960833333333" y="817.5" width="219.78999999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="446.5910833333333" y="835.95" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">用原因中止当前取消控制器</text>
+</g>
+<g class="node" data-id="I" data-label="信号传到提示组装 模型调用与工具执行" data-shape="rectangle">
+  <rect x="149.66850000000005" y="902.4" width="296.11299999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="297.725" y="920.85" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">信号传到提示组装 模型调用与工具执行</text>
+</g>
+<g class="node" data-id="J" data-label="被跳过的工具调用补上合成结果" data-shape="rectangle">
+  <rect x="40" y="979.3" width="249.42999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="164.71499999999997" y="997.75" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">被跳过的工具调用补上合成结果</text>
+</g>
+<g class="node" data-id="K" data-label="已交付的流前缀落成中断消息" data-shape="rectangle">
+  <rect x="313.42999999999995" y="1124.5499999999997" width="234.60999999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="430.73499999999996" y="1142.9999999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">已交付的流前缀落成中断消息</text>
+</g>
+<g class="node" data-id="L" data-label="驱动收敛后相位回到空闲" data-shape="rectangle">
+  <rect x="576.63" y="870.3999999999999" width="204.96999999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="679.115" y="888.8499999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">驱动收敛后相位回到空闲</text>
+</g>
+<g class="node" data-id="M" data-label="处置期间还攒了唤醒吗" data-shape="diamond">
+  <polygon points="679.115,947.2999999999997 786.19,1054.3749999999998 679.115,1161.4499999999998 572.04,1054.3749999999998" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="679.115" y="1054.3749999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">处置期间还攒了唤醒吗</text>
+</g>
+<g class="node" data-id="N" data-label="不重放 停机直接结束" data-shape="rectangle">
+  <rect x="482.70775000000003" y="1261.7499999999998" width="177.55299999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="571.48425" y="1280.1999999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">不重放 停机直接结束</text>
+</g>
+<g class="node" data-id="O" data-label="待办非空则立刻重开一轮" data-shape="rectangle">
+  <rect x="684.26075" y="1261.7499999999998" width="204.96999999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="786.74575" y="1280.1999999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">待办非空则立刻重开一轮</text>
+</g>
+</svg>

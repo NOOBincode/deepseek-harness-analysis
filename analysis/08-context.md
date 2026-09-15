@@ -1,6 +1,7 @@
 # 第八章:Context 上下文管理实现细节
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> **深入阅读(函数级)**:[`context/`](./context/README.md) —— 六类来源通道、每步组装五段拆解、运行时投影三态、token 计量与压力折算、压缩与溢写优先级、上下文类插件
 > 设计依据:官方 Agent Note [`.agents/notes/implemented/architecture/2026-07-20-routed-model-context-and-compaction-policy.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/architecture/2026-07-20-routed-model-context-and-compaction-policy.md)
 
 ---

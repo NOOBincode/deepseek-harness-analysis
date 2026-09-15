@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 921.925 1602.72" width="921.925" height="1602.72" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="205.10000000000002,76.9 205.10000000000002,116.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="不认识且未标记" points="181.75833333333335,233.60833333333338 181.75833333333335,356.1 127.66499999999999,356.1 127.66499999999999,428.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="认识" points="228.4416666666667,233.60833333333335 228.4416666666667,268.95000000000005 309.355,268.95000000000005 309.355,341.25" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="更低" points="274.3425,446.28749999999997 274.3425,493.30000000000007 126.25500000000005,493.30000000000007 126.25500000000002,565.6" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="更高" points="309.355,481.3 309.355,904.7199999999999 295.94500000000005,904.7199999999999 295.94500000000005,977.0199999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="相同" points="344.3675,446.2875 344.3675,493.3000000000002 462.81500000000005,493.3000000000002 462.81500000000005,565.6000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="有洞" points="439.47333333333336,682.3083333333334 439.47333333333336,1041.9199999999998 383.08500000000004,1041.9199999999998 383.08500000000004,1114.2199999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="连续" points="486.1566666666667,682.3083333333334 486.1566666666667,733.6500000000001 542.5450000000001,733.6500000000001 542.5450000000001,805.95" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="J" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="撕裂尾巴" points="521.6733333333334,910.3083333333334 521.6733333333334,1179.12 447.995,1179.12 447.995,1253.625" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="K" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="完整" points="563.4166666666667,910.3083333333334 563.4166666666667,943.1800000000001 637.095,943.1800000000001 637.095,1015.48" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="L" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="已有持有者" points="613.7533333333333,1132.1883333333333 613.7533333333333,1316.32 553.6600000000001,1316.32 553.6600000000001,1388.62" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="K" data-to="M" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="唯一" points="660.4366666666667,1132.1883333333333 660.4366666666667,1183.53 720.53,1183.53 720.53,1253.625" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="M" data-to="N" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="有未配对开括号" points="692.2483333333332,1395.0333333333333 692.2483333333332,1453.52 631.98,1453.52 631.98,1525.82" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="M" data-to="O" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="闭合" points="748.8116666666666,1395.0333333333333 748.8116666666666,1453.52 809.08,1453.52 809.08,1525.82" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="B" data-to="C" data-label="不认识且未标记">
+  <rect x="77.16499999999999" y="363.1" width="100.81000000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="127.57" y="378.25" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">不认识且未标记</text>
+</g>
+<g class="edge-label" data-from="B" data-to="D" data-label="认识">
+  <rect x="288.355" y="275.95000000000005" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="309.06" y="291.1" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">认识</text>
+</g>
+<g class="edge-label" data-from="D" data-to="E" data-label="更低">
+  <rect x="105.25500000000005" y="500.30000000000007" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="125.96000000000005" y="515.45" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">更低</text>
+</g>
+<g class="edge-label" data-from="D" data-to="F" data-label="更高">
+  <rect x="274.94500000000005" y="911.7199999999999" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="295.65000000000003" y="926.8699999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">更高</text>
+</g>
+<g class="edge-label" data-from="D" data-to="G" data-label="相同">
+  <rect x="441.81500000000005" y="500.3000000000002" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="462.52000000000004" y="515.4500000000002" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">相同</text>
+</g>
+<g class="edge-label" data-from="G" data-to="H" data-label="有洞">
+  <rect x="362.08500000000004" y="1048.9199999999998" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="382.79" y="1064.07" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">有洞</text>
+</g>
+<g class="edge-label" data-from="G" data-to="I" data-label="连续">
+  <rect x="521.5450000000001" y="740.6500000000001" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="542.2500000000001" y="755.8000000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">连续</text>
+</g>
+<g class="edge-label" data-from="I" data-to="J" data-label="撕裂尾巴">
+  <rect x="414.995" y="1186.12" width="65.17" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="447.58" y="1201.27" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">撕裂尾巴</text>
+</g>
+<g class="edge-label" data-from="I" data-to="K" data-label="完整">
+  <rect x="616.095" y="950.1800000000001" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="636.8000000000001" y="965.33" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">完整</text>
+</g>
+<g class="edge-label" data-from="K" data-to="L" data-label="已有持有者">
+  <rect x="514.6600000000001" y="1323.32" width="77.05000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="553.1850000000001" y="1338.47" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">已有持有者</text>
+</g>
+<g class="edge-label" data-from="K" data-to="M" data-label="唯一">
+  <rect x="699.53" y="1190.53" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="720.235" y="1205.68" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">唯一</text>
+</g>
+<g class="edge-label" data-from="M" data-to="N" data-label="有未配对开括号">
+  <rect x="581.48" y="1460.52" width="100.81000000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="631.885" y="1475.67" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">有未配对开括号</text>
+</g>
+<g class="edge-label" data-from="M" data-to="O" data-label="闭合">
+  <rect x="788.08" y="1460.52" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="808.7850000000001" y="1475.67" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">闭合</text>
+</g>
+<g class="node" data-id="A" data-label="读到一个会话工件" data-shape="rectangle">
+  <rect x="124.84500000000003" y="40" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="205.10000000000002" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">读到一个会话工件</text>
+</g>
+<g class="node" data-id="B" data-label="词表认识吗" data-shape="diamond">
+  <polygon points="205.10000000000002,116.9 275.125,186.925 205.10000000000002,256.95000000000005 135.07500000000002,186.925" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="205.10000000000002" y="186.925" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">词表认识吗</text>
+</g>
+<g class="node" data-id="C" data-label="拒绝解释并指向升级" data-shape="rectangle">
+  <rect x="40" y="428.4" width="175.32999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="127.66499999999999" y="446.84999999999997" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">拒绝解释并指向升级</text>
+</g>
+<g class="node" data-id="D" data-label="版本一致吗" data-shape="diamond">
+  <polygon points="309.355,341.25 379.38,411.275 309.355,481.29999999999995 239.33,411.275" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="309.355" y="411.275" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">版本一致吗</text>
+</g>
+<g class="node" data-id="E" data-label="逐级迁移后继续" data-shape="rectangle">
+  <rect x="53.410000000000025" y="565.6" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="126.25500000000002" y="584.0500000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">逐级迁移后继续</text>
+</g>
+<g class="node" data-id="F" data-label="拒绝并提示升级" data-shape="rectangle">
+  <rect x="223.10000000000002" y="977.0199999999999" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="295.94500000000005" y="995.4699999999999" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">拒绝并提示升级</text>
+</g>
+<g class="node" data-id="G" data-label="序号连续吗" data-shape="diamond">
+  <polygon points="462.81500000000005,565.6000000000001 532.84,635.6250000000001 462.81500000000005,705.6500000000001 392.7900000000001,635.6250000000001" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="462.81500000000005" y="635.6250000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">序号连续吗</text>
+</g>
+<g class="node" data-id="H" data-label="拒绝整批或整段" data-shape="rectangle">
+  <rect x="310.24" y="1114.2199999999998" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="383.08500000000004" y="1132.6699999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">拒绝整批或整段</text>
+</g>
+<g class="node" data-id="I" data-label="行完整吗" data-shape="diamond">
+  <polygon points="542.5450000000001,805.95 605.1600000000001,868.565 542.5450000000001,931.1800000000001 479.93000000000006,868.565" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="542.5450000000001" y="868.565" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">行完整吗</text>
+</g>
+<g class="node" data-id="J" data-label="截断到最后一个完整行" data-shape="rectangle">
+  <rect x="352.9200000000001" y="1253.625" width="190.14999999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="447.99500000000006" y="1272.075" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">截断到最后一个完整行</text>
+</g>
+<g class="node" data-id="K" data-label="写者唯一吗" data-shape="diamond">
+  <polygon points="637.095,1015.4800000000001 707.12,1085.505 637.095,1155.5300000000002 567.07,1085.505" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="637.095" y="1085.505" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">写者唯一吗</text>
+</g>
+<g class="node" data-id="L" data-label="拒绝写打开" data-shape="rectangle">
+  <rect x="495.635" y="1388.62" width="116.05" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="553.66" y="1407.07" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">拒绝写打开</text>
+</g>
+<g class="node" data-id="M" data-label="压缩括号闭合吗" data-shape="diamond">
+  <polygon points="720.53,1253.625 805.375,1338.47 720.53,1423.315 635.685,1338.47" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="720.53" y="1338.47" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">压缩括号闭合吗</text>
+</g>
+<g class="node" data-id="N" data-label="报忙并拒绝新事务" data-shape="rectangle">
+  <rect x="551.725" y="1525.82" width="160.51" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="631.98" y="1544.27" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">报忙并拒绝新事务</text>
+</g>
+<g class="node" data-id="O" data-label="接受并继续处理" data-shape="rectangle">
+  <rect x="736.235" y="1525.82" width="145.69" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="809.08" y="1544.27" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">接受并继续处理</text>
+</g>
+</svg>

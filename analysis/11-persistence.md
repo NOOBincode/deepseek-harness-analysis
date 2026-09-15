@@ -1,6 +1,7 @@
 # 第十一章 · Session Storage / Transcript / Resume 持久化机制(DeepSeek Harness 源码分析)
 
 > 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`(pnpm monorepo)
+> **深入阅读(函数级)**:[`memory/05-persistence-and-recovery.md`](./memory/05-persistence-and-recovery.md) —— JSONL 分帧与世代选取、修复顺序、检查点、租约与撕裂尾巴、迁移链、resume 五步
 > 版本权威:[`docs/session-format-status.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/session-format-status.md:28)(`latestReleasedVersion: 3`,`evidenceTag: dsh-v0.1.5-alpha.1`)
 
 ---
