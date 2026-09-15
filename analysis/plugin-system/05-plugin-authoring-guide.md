@@ -1,6 +1,6 @@
 # 05 · 插件编写指南(以真实插件为模板)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 模板来源:`packages/subagent/subagent-spawn-in-process/src/index.ts`(函数插件)、`packages/llm/llm-deepseek/src/index.ts`(带 Config 与注册句柄的函数插件)、`packages/sandbox/sandbox/src/index.ts`(服务插件的 Definition 侧)
 > 事故来源:`docs/postmortem/0001-acp-default-export-drops-inject.md`(真实线上事故复盘)
 > 前置:[03](./03-capability-seam-anatomy.md)(选哪条缝)、[04](./04-extension-points-catalog.md)(挂哪个点)、[01](./01-cordis-runtime-internals.md)(effect 与 inject 的机制)。
@@ -239,7 +239,7 @@ registerProvider(provider: SubagentProvider): () => void {
 
 `packages/AGENTS.md:17`:
 
-> **Registry contributions prove disposal** through the HMR-safety test required by [testing policy](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/testing.md): dispose the fiber and observe removal.
+> **Registry contributions prove disposal** through the HMR-safety test required by [testing policy](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/testing.md): dispose the fiber and observe removal.
 
 写法(以注册表类插件为例):
 

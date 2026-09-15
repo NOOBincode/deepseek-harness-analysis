@@ -1,6 +1,6 @@
 # MCP 模块 · 函数级深化分析
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 范围:`packages/mcp/mcp-client/src/`(4 个源文件,共 1018 行)+ `packages/acp/acp/src/mcp.ts` + 相关测试与上游契约
 
 ---

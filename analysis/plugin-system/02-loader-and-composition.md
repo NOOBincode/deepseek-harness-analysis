@@ -1,6 +1,6 @@
 # 02 · Loader、Include 与组合层
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 源码面:`vendor/loader/src/**`、`vendor/include/src/index.ts`、`vendor/hmr/src/index.ts`、`packages/boot/app-boot/src/{index,profile}.ts`、`apps/cli/src/profile-boot.ts`、`packages/bundle/*/cordis.patch.yml`
 > 前置:[第一章第三节](../01-architecture-overview.md)给启动链全貌;[01](./01-cordis-runtime-internals.md)的 fiber/epoch 机制是本篇的运行时底座。
 

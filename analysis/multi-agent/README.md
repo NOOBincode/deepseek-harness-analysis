@@ -1,6 +1,6 @@
 # Multi-Agent 模块 · 深度展开文档集
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 
 ---
 

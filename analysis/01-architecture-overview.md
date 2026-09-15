@@ -1,6 +1,6 @@
 # 第一章:软件架构与程序入口(DeepSeek Harness 源码分析)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > **深入阅读(函数级)**:[`harness/`](./harness/README.md) —— 主循环骨架与 turn/step 状态机、输入与步边界、一次模型请求的全过程、助手流与落库、取消与处置
 > **深入阅读(函数级)**:[`plugin-system/`](./plugin-system/README.md) —— Cordis 运行时对象关系、Context 代理与 fiber 六状态机、Loader 事务回滚与 HMR、能力缝三列解剖、全仓扩展点目录、插件编写指南
 > 设计依据:`docs/architecture.md`、`docs/cordis-primer.md`、`packages/README.md`、`vendor/README.md`、各 bundle 的 `cordis.patch.yml`
@@ -61,7 +61,30 @@ DeepSeek Harness(dsh)是**一个"一切皆插件"的 Cordis 应用**:没有可�
 
 ## 第一节 Monorepo 布局与包分组
 
-仓库是 pnpm monorepo,`AGENTS.md:13-58` 的 Repository layout 段是权威地图。顶层结构:
+仓库是 pnpm monorepo,`AGENTS.md:13-58` 的 Repository layout 段是权威地图。先看图,再往下看逐项说明:
+
+![流程图：01-architecture-overview](./assets/diagrams/01-architecture-overview-66.svg)
+
+<details><summary>Mermaid 源码</summary>
+
+```mermaid
+flowchart TD
+  ROOT["仓库根"]
+  ROOT --> APPS["apps 四端应用<br/>cli 启动器 / web 浏览器壳 / desktop 桌面壳 / desktop-host 宿主"]
+  ROOT --> PKGS["packages 全部产品包<br/>统一 @deepseek-ai/dsh-* 命名"]
+  ROOT --> VENDOR["vendor vendored Cordis 源码<br/>Core / Loader / Include / HMR"]
+  ROOT --> SUPPORT["支撑目录<br/>python Python SDK / native 原生插件<br/>docs 文档 / scripts 门禁 / website 站点"]
+  PKGS --> CORE["core 产品主干<br/>session / system-prompt / tools / agent / agent-loop / scope"]
+  PKGS --> SEAM["能力缝<br/>llm / shell / fs / sandbox / skill / mcp<br/>subagent / context / compaction / session-persistence"]
+  PKGS --> SHELL["接入与外壳<br/>acp / interaction / boot / client / web / api / sdk / typert"]
+  PKGS --> INFRA["支撑包<br/>util / runtime-diagnostics / test-support / preset / hooks"]
+  CORE --> RUNTIME["运行时:插件按 inject 依赖激活<br/>能力缝决定行为,主循环只负责编排"]
+  SEAM --> RUNTIME
+```
+
+</details>
+
+顶层结构:
 
 - `vendor/` — vendored Cordis 源码(manifest 与同步流程在 `vendor/README.md`);
 - `packages/<group>/<pkg>/` — 全部产品包,统一 `@deepseek-ai/dsh-*` 命名;

@@ -1,6 +1,6 @@
 # 03 · 能力缝三角色的函数级解剖
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 样本:`ctx.sandbox`、`ctx.llm`、`ctx.subagents`、`ctx.sessionPersistence` 四条真实能力缝
 > 前置:[第十二章第二节](../12-architecture-highlights.md)给三角色的定义与模式论证。
 

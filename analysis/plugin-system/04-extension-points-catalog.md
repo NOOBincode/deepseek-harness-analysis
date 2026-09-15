@@ -1,6 +1,6 @@
 # 04 · 全仓扩展点目录(按内核阶段分类)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 数据底座:生成物 `docs/event-producer-consumer.md`(生产者/消费者矩阵)
 > 前置:[第十二章第一节](../12-architecture-highlights.md)给出声明合并与五种派发语义;[01](./01-cordis-runtime-internals.md)第六节给出五种分发的实现。
 

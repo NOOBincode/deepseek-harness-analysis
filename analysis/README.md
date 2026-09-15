@@ -6,7 +6,7 @@
 
 | 项 | 值 |
 |---|---|
-| 仓库 | [innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) |
+| 仓库 | [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) |
 | commit | `dbbaa4a37`(文中 `文件:行号` 均以此版本为准) |
 | 本地源码 | `../deepseek-harness/` |
 | 形态 | pnpm monorepo:全插件 Cordis agent harness,`packages/` 约 50 个包,`apps/` 四端(cli/web/desktop/desktop-host),另有 Python SDK |
@@ -89,7 +89,7 @@ DSH 的系统特征一句话:**"一切皆插件"**——从工具注册表、系
 
 - [第十三章:扩展生态——Hooks、ACP、Web/Desktop 与 SDK](./13-extensions-ecosystem.md)——五条进程边界的协议细节与内核落点
 
-### 第九部分:总结
+### 第六部分:总结
 
 - [第十四章:总结结论](./14-final-summary.md)——四条不变式、端到端生命周期、横向对比、设计代价、阅读地图
 

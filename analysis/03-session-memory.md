@@ -1,6 +1,6 @@
-# 第三章 · Session 与 Memory 机制(DeepSeek Harness 源码分析)
+# 第三章:Session 与 Memory 机制(DeepSeek Harness 源码分析)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`(pnpm monorepo)
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`(pnpm monorepo)
 > **深入阅读(函数级)**:[`memory/`](./memory/README.md) —— 事件日志提交路径、surface 可见性与 provenance、派生投影与水印、压缩选区与事务、落盘与恢复、状态型记忆
 > 版本权威:`docs/session-format-status.md`(当前写者格式 v3,已随 `dsh-v0.1.5-alpha.1` 发布)
 

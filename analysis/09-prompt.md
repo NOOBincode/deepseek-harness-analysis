@@ -1,8 +1,8 @@
 # 第九章:Prompt 管理机制与实现细节(DeepSeek Harness 源码分析)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 交叉引用:工具 schema 的可见性与调度见第五章,上下文注入细节见第八章
-> 相关文档:[`docs/subsystems/system-prompt.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/subsystems/system-prompt.md)、[`packages/core/system-prompt/README.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/README.md)
+> 相关文档:[`docs/subsystems/system-prompt.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/subsystems/system-prompt.md)、[`packages/core/system-prompt/README.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/README.md)
 
 ---
 

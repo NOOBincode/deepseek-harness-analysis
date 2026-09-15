@@ -1,6 +1,6 @@
-# 第十章 · Multi-Agent 机制与实现细节(DeepSeek Harness 源码分析)
+# 第十章:Multi-Agent 机制与实现细节(DeepSeek Harness 源码分析)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > **深入阅读(函数级)**:[`multi-agent/`](./multi-agent/README.md) —— Agent 注册表与生命周期、能力缝与 provider、子 Agent 组装、续存与管控、workflow 引擎、jobs、preset 组合
 > 核心源码:`packages/subagent/*`(capability seam:Service Definition + providers + delegation Consumers)、`packages/workflow/*`(worker-thread 编排引擎 + tool Consumer)、`packages/jobs/*`、`packages/core/agent/src/*`、`packages/preset/agent-presets/*`
 

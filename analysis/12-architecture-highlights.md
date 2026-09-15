@@ -1,6 +1,6 @@
-# 第十二章 · 程序架构及亮点(DeepSeek Harness 源码分析)
+# 第十二章:程序架构及亮点(DeepSeek Harness 源码分析)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > **深入阅读(函数级)**:[`plugin-system/`](./plugin-system/README.md) —— effect 逆序回收、invariant 伴随插件、四条真实能力缝对照、扩展点目录、postmortem 0001 复盘
 > 分析依据:`docs/architecture.md`、`docs/cordis-primer.md`、`docs/glossary.md`、`packages/AGENTS.md`、`vendor/`(Cordis 源码内嵌副本)、`packages/{typert,llm,sdk,api}` 顶层源码,以及 `.agents/notes/implemented/architecture/` 下的官方决策记录(Agent Notes)
 

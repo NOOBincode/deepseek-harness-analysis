@@ -1,6 +1,6 @@
 # Sandbox 模块 · 函数级深化分析
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 范围:`packages/sandbox/*`(4 包 12 个源文件)+ 消费方 `packages/shell/{bash-sandbox,pwsh-sandbox,tool-bash}`、`packages/fs/{fs-sandbox,tool-fs,tool-str-replace-editor,fs-observation-policy}`、`packages/terminal/terminal-bash`、`packages/interaction/permission-presets` + `packages/e2b/*`(3 包 12 个源文件)
 
 ---

@@ -1,6 +1,6 @@
 # Skills 模块 · 深度展开文档集
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 上游章节:[第四章:Skills 的技术实现与运行方式](../04-skills.md)
 > 代码面:`packages/skill/`(registry / filesystem provider / badge provider / tool-skill consumer)、`packages/api/session-controller/src/skill-catalog.ts`、`packages/client/ui-skill/`
 

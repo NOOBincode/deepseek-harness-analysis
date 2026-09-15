@@ -1,6 +1,6 @@
 # 01 · Cordis 运行时内部实现(函数级走查)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 源码面:`vendor/cordis/src/{context,reflect,service,fiber,registry,events,utils}.ts`
 > 前置:[第一章第二节](../01-architecture-overview.md)给概念总览,[第十二章第一节](../12-architecture-highlights.md)给 effect 与事件的模式级结论。
 

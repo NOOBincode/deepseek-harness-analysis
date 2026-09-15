@@ -1,6 +1,6 @@
-# 第二章 · 安全分析(DeepSeek Harness 源码分析)
+# 第二章:安全分析(DeepSeek Harness 源码分析)
 
-> 分析对象:DeepSeek Harness @ `dbbaa4a37`,pnpm monorepo,仓库根 `D:\.vscode\deepseek-harness`
+> 分析对象:DeepSeek Harness @ `dbbaa4a37`,pnpm monorepo,仓库根 `../deepseek-harness/`
 > 项目自身的安全声明见 `SAFETY.md:7`(未做安全审计、不得当作生产可用)与 `SAFETY.md:11`(沙箱与审批降低风险,但不保证隔离)。
 
 ---

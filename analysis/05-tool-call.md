@@ -1,6 +1,6 @@
-# 第五章 · Tool Call 机制实现细节(DeepSeek Harness 源码分析)
+# 第五章:Tool Call 机制实现细节(DeepSeek Harness 源码分析)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > **深入阅读(函数级)**:[`tool-call/`](./tool-call/README.md) —— 注册表与可见性解析、执行管道逐段走查、调度器并发语义、取消与超时、PTC(`run_code`)模式、结果展示层
 
 ---

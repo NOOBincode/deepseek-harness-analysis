@@ -1,7 +1,7 @@
 # DeepSeek Harness 源码分析
 
-> 对 [DeepSeek Harness](https://github.com/innokria/deepseek-harness)(DSH)——一个"一切皆插件"的 Cordis agent harness——的源码分析。
-> 分析基线:upstream commit [`dbbaa4a3`](https://github.com/innokria/deepseek-harness/commit/dbbaa4a37fb9098aba814c97d2956f7b2f105f46)
+> 对 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)(DSH)——一个"一切皆插件"的 Cordis agent harness——的源码分析。
+> 分析基线:upstream commit [`dbbaa4a3`](https://github.com/deepseek-ai/deepseek-harness/commit/dbbaa4a37fb9098aba814c97d2956f7b2f105f46)
 
 14 章正文 + 9 个模块的函数级深度展开。
 

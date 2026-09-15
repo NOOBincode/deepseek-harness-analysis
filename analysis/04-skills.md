@@ -1,8 +1,8 @@
-# 第四章 · Skills 的技术实现与运行方式(DeepSeek Harness 源码分析)
+# 第四章:Skills 的技术实现与运行方式(DeepSeek Harness 源码分析)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > **深入阅读(函数级)**:[`skills/`](./skills/README.md) —— SKILL.md 契约与六档根、provider 注册表裁决与 rev 缓存、目录五分支与按需加载四道闸门、watcher 失效全景、作用域与出货方式
-> 设计依据:子系统参考 [`docs/subsystems/skills.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/subsystems/skills.md)、Agent Note [`.agents/notes/implemented/feature/2026-07-28-skill-invocation-policy.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-28-skill-invocation-policy.md)
+> 设计依据:子系统参考 [`docs/subsystems/skills.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/subsystems/skills.md)、Agent Note [`.agents/notes/implemented/feature/2026-07-28-skill-invocation-policy.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-28-skill-invocation-policy.md)
 
 ---
 

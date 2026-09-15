@@ -1,6 +1,6 @@
 # Memory 模块 · 函数级深化分析
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 范围:`packages/core/session`、`packages/session/*`、`packages/compaction/*`、`packages/goal/*`、`packages/todo/*`、`packages/spill/*`、`packages/runtime-diagnostics/invariants`
 
 ---

@@ -1,6 +1,6 @@
 # 插件设计(plugin-system)模块
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 与第一章、第十二章的分工见文末[分工说明](#与第一十二章的分工)。
 
 ---

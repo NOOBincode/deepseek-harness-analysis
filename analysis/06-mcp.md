@@ -1,8 +1,8 @@
 # 第六章:MCP 技术架构与原理(DeepSeek Harness 源码分析)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > **深入阅读(函数级)**:[`mcp/`](./mcp/README.md) —— 发现与同步、命名算法实测表、执行与结果映射、连接监管器九变量状态、传输与安全、测试与 23 条失败模式清单
-> 设计依据:官方 Agent Note [`.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md`](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md)
+> 设计依据:官方 Agent Note [`.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md)
 
 ---
 

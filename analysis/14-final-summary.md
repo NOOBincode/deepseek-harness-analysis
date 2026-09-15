@@ -1,6 +1,6 @@
-# 第十四章 · 总结结论(DeepSeek Harness 源码分析)
+# 第十四章:总结结论(DeepSeek Harness 源码分析)
 
-> 分析对象:DeepSeek Harness @ `dbbaa4a37`(仓库根 `D:\.vscode\deepseek-harness`)
+> 分析对象:DeepSeek Harness @ `dbbaa4a37`(仓库根 `../deepseek-harness/`)
 
 ---
 

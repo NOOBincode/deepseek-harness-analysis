@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1569.1259999999995 415.20000000000005" width="1569.1259999999995" height="415.20000000000005" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="ROOT" data-to="APPS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="922.9452499999999,76.9 922.9452499999999,92.90000000000002 456.48424999999975,92.90000000000002 456.48424999999975,108.90000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ROOT" data-to="PKGS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="922.9452499999999,76.9 922.9452499999999,92.90000000000002 799.9387499999996,92.90000000000002 799.9387499999996,108.90000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ROOT" data-to="VENDOR" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="922.9452499999999,76.9 922.9452499999999,92.90000000000002 1045.9517499999997,92.90000000000002 1045.9517499999997,108.90000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ROOT" data-to="SUPPORT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="922.9452499999999,76.9 922.9452499999999,92.90000000000002 1314.1947499999997,92.90000000000002 1314.1947499999997,108.90000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PKGS" data-to="CORE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="799.9387499999996,162.70000000000005 799.9387499999996,190.92500000000004 227.32949999999997,190.92500000000004 227.32949999999997,219.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PKGS" data-to="SEAM" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="799.9387499999996,162.70000000000005 799.9387499999996,190.92500000000004 615.2439999999998,190.92500000000004 615.2439999999998,219.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PKGS" data-to="SHELL" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="799.9387499999996,162.70000000000005 799.9387499999996,190.92500000000004 984.6334999999997,190.92500000000004 984.6334999999997,219.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PKGS" data-to="INFRA" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="799.9387499999996,162.70000000000005 799.9387499999996,190.92500000000004 1353.2819999999997,190.92500000000004 1353.2819999999997,219.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CORE" data-to="RUNTIME" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="227.32949999999997,272.95000000000005 227.32949999999997,305.625 421.28674999999987,305.625 421.28674999999987,321.40000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SEAM" data-to="RUNTIME" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="615.2439999999998,289.85 615.2439999999998,305.625 421.28674999999987,305.625 421.28674999999987,321.40000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="ROOT" data-label="仓库根" data-shape="rectangle">
+  <rect x="879.7402499999998" y="40" width="86.41" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="922.9452499999999" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">仓库根</text>
+</g>
+<g class="node" data-id="APPS" data-label="apps 四端应用
+cli 启动器 / web 浏览器壳 / desktop 桌面壳 / desktop-host 宿主" data-shape="rectangle">
+  <rect x="249.5182499999998" y="108.90000000000003" width="413.9319999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="456.48424999999975" y="135.80000000000004" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="456.48424999999975" dy="-3.9000000000000012">apps 四端应用</tspan><tspan x="456.48424999999975" dy="16.900000000000002">cli 启动器 / web 浏览器壳 / desktop 桌面壳 / desktop-host 宿主</tspan></text>
+</g>
+<g class="node" data-id="PKGS" data-label="packages 全部产品包
+统一 @deepseek-ai/dsh-* 命名" data-shape="rectangle">
+  <rect x="687.4502499999996" y="108.90000000000003" width="224.97699999999995" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="799.9387499999996" y="135.80000000000004" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="799.9387499999996" dy="-3.9000000000000012">packages 全部产品包</tspan><tspan x="799.9387499999996" dy="16.900000000000002">统一 @deepseek-ai/dsh-* 命名</tspan></text>
+</g>
+<g class="node" data-id="VENDOR" data-label="vendor vendored Cordis 源码
+Core / Loader / Include / HMR" data-shape="rectangle">
+  <rect x="936.4272499999997" y="108.90000000000003" width="219.04899999999998" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1045.9517499999997" y="135.80000000000004" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1045.9517499999997" dy="-3.9000000000000012">vendor vendored Cordis 源码</tspan><tspan x="1045.9517499999997" dy="16.900000000000002">Core / Loader / Include / HMR</tspan></text>
+</g>
+<g class="node" data-id="SUPPORT" data-label="支撑目录
+python Python SDK / native 原生插件
+docs 文档 / scripts 门禁 / website 站点" data-shape="rectangle">
+  <rect x="1179.4762499999997" y="108.90000000000003" width="269.437" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1314.1947499999997" y="144.25000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1314.1947499999997" dy="-12.350000000000001">支撑目录</tspan><tspan x="1314.1947499999997" dy="16.900000000000002">python Python SDK / native 原生插件</tspan><tspan x="1314.1947499999997" dy="16.900000000000002">docs 文档 / scripts 门禁 / website 站点</tspan></text>
+</g>
+<g class="node" data-id="CORE" data-label="core 产品主干
+session / system-prompt / tools / agent / agent-loop / scope" data-shape="rectangle">
+  <rect x="40" y="219.15000000000003" width="374.65899999999993" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="227.32949999999997" y="246.05000000000004" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="227.32949999999997" dy="-3.9000000000000012">core 产品主干</tspan><tspan x="227.32949999999997" dy="16.900000000000002">session / system-prompt / tools / agent / agent-loop / scope</tspan></text>
+</g>
+<g class="node" data-id="SEAM" data-label="能力缝
+llm / shell / fs / sandbox / skill / mcp
+subagent / context / compaction / session-persistence" data-shape="rectangle">
+  <rect x="438.6589999999999" y="219.15000000000003" width="353.1699999999999" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="615.2439999999998" y="254.50000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="615.2439999999998" dy="-12.350000000000001">能力缝</tspan><tspan x="615.2439999999998" dy="16.900000000000002">llm / shell / fs / sandbox / skill / mcp</tspan><tspan x="615.2439999999998" dy="16.900000000000002">subagent / context / compaction / session-persistence</tspan></text>
+</g>
+<g class="node" data-id="SHELL" data-label="接入与外壳
+acp / interaction / boot / client / web / api / sdk / typert" data-shape="rectangle">
+  <rect x="815.8289999999997" y="219.15000000000003" width="337.6089999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="984.6334999999997" y="246.05000000000004" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="984.6334999999997" dy="-3.9000000000000012">接入与外壳</tspan><tspan x="984.6334999999997" dy="16.900000000000002">acp / interaction / boot / client / web / api / sdk / typert</tspan></text>
+</g>
+<g class="node" data-id="INFRA" data-label="支撑包
+util / runtime-diagnostics / test-support / preset / hooks" data-shape="rectangle">
+  <rect x="1177.4379999999996" y="219.15000000000003" width="351.6879999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1353.2819999999997" y="246.05000000000004" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1353.2819999999997" dy="-3.9000000000000012">支撑包</tspan><tspan x="1353.2819999999997" dy="16.900000000000002">util / runtime-diagnostics / test-support / preset / hooks</tspan></text>
+</g>
+<g class="node" data-id="RUNTIME" data-label="运行时:插件按 inject 依赖激活
+能力缝决定行为,主循环只负责编排" data-shape="rectangle">
+  <rect x="287.6797499999999" y="321.40000000000003" width="267.21399999999994" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="421.28674999999987" y="348.3" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="421.28674999999987" dy="-3.9000000000000012">运行时:插件按 inject 依赖激活</tspan><tspan x="421.28674999999987" dy="16.900000000000002">能力缝决定行为,主循环只负责编排</tspan></text>
+</g>
+</svg>

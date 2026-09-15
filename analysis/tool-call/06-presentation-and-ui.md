@@ -20,7 +20,7 @@
 
 ```typescript
 // packages/core/tools/README.md:89
-A tool can retain pure `presentCall()` and `presentResult()` methods for Host-local consumers. The built-in Web Client does not consume those values. It selects a renderer through `tool.call.toolview` and derives card props from raw call arguments, result content, failure state, and persisted metadata. The [Client-derived presentation decision](https://github.com/innokria/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/architecture/2026-08-23-client-derived-tool-presentation.md) owns this transport split.
+A tool can retain pure `presentCall()` and `presentResult()` methods for Host-local consumers. The built-in Web Client does not consume those values. It selects a renderer through `tool.call.toolview` and derives card props from raw call arguments, result content, failure state, and persisted metadata. The [Client-derived presentation decision](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/architecture/2026-08-23-client-derived-tool-presentation.md) owns this transport split.
 ```
 
 `packages/client/AGENTS.md` 的分层红线也有同一句部署约束:"Tool cards derive in the Client from raw call/event material and persisted result metadata. Unknown or malformed tool data falls back to the generic form." **为什么拆成两套**:路径 A 的输入里有 `ToolResult`(一个已归一化、冻结、含 `meta` 的对象),它只存在于 Host 进程;路径 B 的输入是**会话日志事件**,它要能被重放——只有完全由日志决定的派生链,才能保证"刷新页面看到的卡片"与"当时看到的卡片"一致。反过来,路径 A 的条件是"纯函数",所以它**只能依赖 args**(见 §三)。

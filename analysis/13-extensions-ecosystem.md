@@ -1,6 +1,6 @@
 # 第十三章:扩展生态——Hooks、ACP、Web/Desktop 与 SDK(DeepSeek Harness 源码分析)
 
-> 分析对象:[innokria/deepseek-harness](https://github.com/innokria/deepseek-harness) @ `dbbaa4a37`
+> 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 
 ---
 
