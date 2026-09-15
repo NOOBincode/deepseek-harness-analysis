@@ -1,7 +1,7 @@
 # 03 · 升级机制:严格更宽阶梯与有序失败封闭
 
 > 对应第七章 [第五节](../07-sandbox.md#第五节升级escalation与审批衔接)。
-> 涉及 `packages/sandbox/sandbox/src/escalation.ts`(189 行)的导出符号,以及两个工具族的广告闸门与错误映射。
+> 涉及 [`packages/sandbox/sandbox/src/escalation.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/escalation.ts)(189 行)的导出符号,以及两个工具族的广告闸门与错误映射。
 
 ---
 
@@ -49,7 +49,7 @@ if (!(WIDER_MODES[effectiveMode] ?? []).includes(mode as SandboxMode)) {
 | 下界无入边 | `∄m, (m, read-only) ∈ W` | `read-only` 从不出现在任何值里 | 无法升级到 `read-only` |
 | 上界无出边 | `WIDER_MODES['danger-full-access']` 未定义 | `?? []` | `danger-full-access` 下无法升级 |
 
-四条合起来说明 `W` 就是**由文件效果包含关系诱导的严格全序的前驱关系**:`read-only ⊂ workspace-write ⊂ danger-full-access`,与 `SandboxMode` 的语义定义一致(`sandbox/src/index.ts:23-29`)。
+四条合起来说明 `W` 就是**由文件效果包含关系诱导的严格全序的前驱关系**:`read-only ⊂ workspace-write ⊂ danger-full-access`,与 `SandboxMode` 的语义定义一致([`sandbox/src/index.ts:23-29`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L23-L29))。
 
 ### 1.2 为什么是执行期检查,不是 schema 约束
 
@@ -58,23 +58,23 @@ if (!(WIDER_MODES[effectiveMode] ?? []).includes(mode as SandboxMode)) {
 export const ESCALATION_TARGETS: readonly SandboxMode[] = ['workspace-write', 'danger-full-access']
 ```
 
-分工写在这两处 JSDoc 里:**schema 的 enum 是注册表全局的,有效模式是逐调用的真相**(`escalation.ts:22-27`);而"不能把 enum 收窄成比组合默认更宽的那些"拥有一个真实的反例(`:33-40`):
+分工写在这两处 JSDoc 里:**schema 的 enum 是注册表全局的,有效模式是逐调用的真相**([`escalation.ts:22-27`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/escalation.ts#L22-L27));而"不能把 enum 收窄成比组合默认更宽的那些"拥有一个真实的反例([`:33-40`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/escalation.ts#L33-L40)):
 
 | 组合默认 | 会话最后一次 `sandbox/mode` | 有效模式 | 若 enum 收窄为"比默认更宽" | 实际可用 |
 |---|---|---|---|---|
 | `read-only` | 无 | `read-only` | `['workspace-write','danger-full-access']` | 相同 |
 | `danger-full-access` | `read-only` | `read-only` | `[]`(没有比 `danger-full-access` 更宽的模式) | **是 `['workspace-write','danger-full-access']`,能救** |
 
-原文的措辞是"会让一个有效模式**低于**默认的会话被关着却没有撬杆"(`:37-39`)。
+原文的措辞是"会让一个有效模式**低于**默认的会话被关着却没有撬杆"([`:37-39`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/escalation.ts#L37-L39))。
 
 ### 1.3 广告闸门:`escalationModes = []` 的含义
 
 | 位置 | 闸门 | 行号 |
 |---|---|---|
-| bash 工具 | `const escalationModes = defaultMode === undefined ? [] : ESCALATION_TARGETS` | `tool-bash/src/index.ts:191-192` |
-| fs 工具 | `this.escalationModes = defaultMode === undefined ? [] : ESCALATION_TARGETS` | `tool-fs/src/sandbox.ts:44-45` |
+| bash 工具 | `const escalationModes = defaultMode === undefined ? [] : ESCALATION_TARGETS` | [`tool-bash/src/index.ts:191-192`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/index.ts#L191-L192) |
+| fs 工具 | `this.escalationModes = defaultMode === undefined ? [] : ESCALATION_TARGETS` | [`tool-fs/src/sandbox.ts:44-45`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L44-L45) |
 
-两个 `defaultMode` 分别来自 `ctx.shell.sandboxMode` 与 `ctx.fs.sandboxMode`;基类实现都返回 `undefined`(`packages/shell/shell/src/index.ts:74-76`、`packages/fs/fs/src/index.ts:103-105`),**只有真会 confine 的实现才覆写**(`bash-sandbox/src/index.ts:76-78` 返回 `ctx.sandboxPolicy.defaultMode`)。所以"这个组合有没有沙箱"是**能力事实**,不是配置项。
+两个 `defaultMode` 分别来自 `ctx.shell.sandboxMode` 与 `ctx.fs.sandboxMode`;基类实现都返回 `undefined`([`packages/shell/shell/src/index.ts:74-76`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/shell/src/index.ts#L74-L76)、[`packages/fs/fs/src/index.ts:103-105`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/fs/src/index.ts#L103-L105)),**只有真会 confine 的实现才覆写**([`bash-sandbox/src/index.ts:76-78`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/bash-sandbox/src/index.ts#L76-L78) 返回 `ctx.sandboxPolicy.defaultMode`)。所以"这个组合有没有沙箱"是**能力事实**,不是配置项。
 
 ---
 
@@ -95,7 +95,7 @@ export function validateEscalationArgs(sandboxPermissions: string | undefined, j
 }
 ```
 
-三条检查覆盖三种畸形请求,理由在 JSDoc 里:"**没有理由的弹窗**与**驱动不了任何东西的理由**都算畸形请求"(`escalation.ts:43-50`)。第三条用 `trim()`,所以 `"   "` 同样被拒。调用点在两条工具路径的最前面:`tool-bash/src/index.ts:64-66`(`execute` 第一行在 `:330`)与 `tool-fs/src/sandbox.ts:88`(解析标准策略**之前**)。
+三条检查覆盖三种畸形请求,理由在 JSDoc 里:"**没有理由的弹窗**与**驱动不了任何东西的理由**都算畸形请求"([`escalation.ts:43-50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/escalation.ts#L43-L50))。第三条用 `trim()`,所以 `"   "` 同样被拒。调用点在两条工具路径的最前面:[`tool-bash/src/index.ts:64-66`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/index.ts#L64-L66)(`execute` 第一行在 [`:330`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/index.ts#L330))与 [`tool-fs/src/sandbox.ts:88`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L88)(解析标准策略**之前**)。
 
 ---
 
@@ -146,10 +146,10 @@ flowchart TD
 
 四条顺序性质:
 
-1. **第 1 条在任何副作用之前**——非更宽的请求**永远不会弹窗**给用户(`escalation.ts:151-152`)。这是安全性质:模型不能靠发无意义的升级请求刷用户注意力。
+1. **第 1 条在任何副作用之前**——非更宽的请求**永远不会弹窗**给用户([`escalation.ts:151-152`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/escalation.ts#L151-L152))。这是安全性质:模型不能靠发无意义的升级请求刷用户注意力。
 2. **第 2、3 条在请求之前**,不是"发出去再说";无审批服务/无 agent 的调用根本不产生审批事件。
 3. **第 4 条没有转译**;审批服务抛出的任何异常原样冒泡。
-4. **`subject` 只出现在"被拒"的文案里**(`:184`)。两族取值不同:bash 传 `'command'`(`tool-bash/src/index.ts:223`),fs 传 `'operation'`(`tool-fs/src/sandbox.ts:98`)。
+4. **`subject` 只出现在"被拒"的文案里**([`:184`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/escalation.ts#L184))。两族取值不同:bash 传 `'command'`([`tool-bash/src/index.ts:223`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/index.ts#L223)),fs 传 `'operation'`([`tool-fs/src/sandbox.ts:98`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L98))。
 
 ### 3.2 结果词表与实际实现的同构
 
@@ -158,7 +158,7 @@ flowchart TD
 export type EscalationOutcome = 'allowed-once' | 'rejected' | 'cancelled' | 'unavailable'
 ```
 
-它是**结构相同而非导入**:与审批缝的 `ApprovalOutcome` 结构一致,所以 `ApprovalService.request` 的返回值可直接赋值,而本包不必导入它(`escalation.ts:88-92`)。审批服务侧的词表完全对齐(`user-approval/src/index.ts:47-48`)。通道本身是最小结构类型:
+它是**结构相同而非导入**:与审批缝的 `ApprovalOutcome` 结构一致,所以 `ApprovalService.request` 的返回值可直接赋值,而本包不必导入它([`escalation.ts:88-92`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/escalation.ts#L88-L92))。审批服务侧的词表完全对齐([`user-approval/src/index.ts:47-48`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/interaction/user-approval/src/index.ts#L47-L48))。通道本身是最小结构类型:
 
 ```typescript
 // packages/sandbox/sandbox/src/escalation.ts:102-109
@@ -167,7 +167,7 @@ export interface EscalationApprover<A = object, C = string> {
 }
 ```
 
-`A` / `C` 是泛型,由工具层推断成自己的 `Agent` / `ToolCallId`,工具层用闭包把 `ctx.approval.request` 递下来(`escalation.ts:10-15`)。审批请求的 `reason` 是自包含的:
+`A` / `C` 是泛型,由工具层推断成自己的 `Agent` / `ToolCallId`,工具层用闭包把 `ctx.approval.request` 递下来([`escalation.ts:10-15`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/escalation.ts#L10-L15))。审批请求的 `reason` 是自包含的:
 
 ```typescript
 // packages/sandbox/sandbox/src/escalation.ts:171-179
@@ -190,8 +190,8 @@ const outcome = await approval.approver.request({
 
 | 族 | 桥的位置 | 组合守卫(先于共享序列) | 解析方式 |
 |---|---|---|---|
-| bash | `approveBashEscalation`(`tool-bash/src/index.ts:212-232`) | `escalationModes.length === 0` → `throw new Error('sandbox_permissions is not available in this composition (no sandboxing executor to escalate)')`(`:218-220`) | `effectiveMode = standingPolicy.mode`(`:221`) |
-| fs | `FsSandboxController.resolvePolicy`(`tool-fs/src/sandbox.ts:87-108`) | 同左,文案换成 "no sandboxing filesystem to escalate"(`:93-95`) | `effectiveMode = policy.mode`(`:98`) |
+| bash | `approveBashEscalation`([`tool-bash/src/index.ts:212-232`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/index.ts#L212-L232)) | `escalationModes.length === 0` → `throw new Error('sandbox_permissions is not available in this composition (no sandboxing executor to escalate)')`([`:218-220`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/index.ts#L218-L220)) | `effectiveMode = standingPolicy.mode`([`:221`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/index.ts#L221)) |
+| fs | `FsSandboxController.resolvePolicy`([`tool-fs/src/sandbox.ts:87-108`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L87-L108)) | 同左,文案换成 "no sandboxing filesystem to escalate"([`:93-95`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L93-L95)) | `effectiveMode = policy.mode`([`:98`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L98)) |
 
 组合守卫存在的原因是真实的:
 
@@ -212,11 +212,11 @@ return approveEscalation(
 )
 ```
 
-fs 侧用同一个序列,并返回"原策略换 mode":`return { ...policy, mode: approvedMode }`(`tool-fs/src/sandbox.ts:107`)——**升级只换文件效果边界,不换工作区**。注意 `ctx.get('approval')` 而不是 `ctx.approval`:审批是可选服务,读法遵循 `packages/AGENTS.md` 的"可选服务用 `ctx.get(name)`"约定;`agent` 直接来自 `exec.agent`,无 agent 时是 `undefined`,于是第 3 条失败点触发。
+fs 侧用同一个序列,并返回"原策略换 mode":`return { ...policy, mode: approvedMode }`([`tool-fs/src/sandbox.ts:107`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L107))——**升级只换文件效果边界,不换工作区**。注意 `ctx.get('approval')` 而不是 `ctx.approval`:审批是可选服务,读法遵循 [`packages/AGENTS.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/AGENTS.md) 的"可选服务用 `ctx.get(name)`"约定;`agent` 直接来自 `exec.agent`,无 agent 时是 `undefined`,于是第 3 条失败点触发。
 
 ### 4.2 广告的两种形态
 
-bash 用条件展开 schema 字段(`tool-bash/src/index.ts:258-268`):
+bash 用条件展开 schema 字段([`tool-bash/src/index.ts:258-268`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/index.ts#L258-L268)):
 
 ```typescript
 ...escalationModes.length > 0 ? {
@@ -227,11 +227,11 @@ bash 用条件展开 schema 字段(`tool-bash/src/index.ts:258-268`):
 } : {},
 ```
 
-fs 侧从共享 controller 取字段对象(`tool-fs/src/sandbox.ts:59-73`),文案把 "command" 换成 "file operation",其余同构;消费点在 `tool-fs/src/edit.ts:92` 与 `write.ts:78`:`...sandbox.escalationModes.length > 0 ? sandbox.schemaFields() : {}`。`write` 与 `edit` 共用一个 `FsSandboxController`,在插件 `apply` 里构造一次(`tool-fs/src/index.ts:76-78`)。
+fs 侧从共享 controller 取字段对象([`tool-fs/src/sandbox.ts:59-73`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L59-L73)),文案把 "command" 换成 "file operation",其余同构;消费点在 [`tool-fs/src/edit.ts:92`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/edit.ts#L92) 与 [`write.ts:78`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/write.ts#L78):`...sandbox.escalationModes.length > 0 ? sandbox.schemaFields() : {}`。`write` 与 `edit` 共用一个 `FsSandboxController`,在插件 `apply` 里构造一次([`tool-fs/src/index.ts:76-78`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/index.ts#L76-L78))。
 
 ### 4.3 系统提示里的升级叙事
 
-`bashDescription` 在广告时才追加整段指引(`tool-bash/src/index.ts:80-91`),措辞刻意区分几种情形:
+`bashDescription` 在广告时才追加整段指引([`tool-bash/src/index.ts:80-91`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/index.ts#L80-L91)),措辞刻意区分几种情形:
 
 | 句子节选 | 约束 |
 |---|---|
@@ -256,10 +256,10 @@ export function escalationHintMarker(subject: string): string {
 
 | 挂载点 | 挂什么 | 行号 |
 |---|---|---|
-| bash 前台结果 | denied → 拒绝标记;`escalationModes.length > 0` 才追加提示 | `tool-bash/src/render.ts:45-51` |
-| bash 后台读取 | runnerFailed → 专门的"执行器坏了"提示;否则 denied → 标记 + 提示 | `tool-bash/src/render.ts:85-92` |
+| bash 前台结果 | denied → 拒绝标记;`escalationModes.length > 0` 才追加提示 | [`tool-bash/src/render.ts:45-51`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/render.ts#L45-L51) |
+| bash 后台读取 | runnerFailed → 专门的"执行器坏了"提示;否则 denied → 标记 + 提示 | [`tool-bash/src/render.ts:85-92`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/render.ts#L85-L92) |
 | pwsh 前台 / 后台 | 与 bash 同构 | `tool-pwsh/src/render.ts:64,67,102,105,107` |
-| fs 工具 | `mapError` 拼两行 | `tool-fs/src/sandbox.ts:124-130` |
+| fs 工具 | `mapError` 拼两行 | [`tool-fs/src/sandbox.ts:124-130`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L124-L130) |
 
 fs 侧保留结构化错误码的理由被完整写进注释:
 
@@ -272,7 +272,7 @@ mapError(error: unknown, policy: SandboxExecutionPolicy | undefined): unknown {
 }
 ```
 
-注释 `:110-123` 说明不能返回裸 `Error`:"`ToolRuntime` 只对 `HarnessError` 实例填充 `result.error`,裸 `Error` 会把重试与观察者依赖的错误码剥掉";又因为"`FS_SANDBOX_DENIED` 只在受限后端下产生,而受限后端总会广告升级字段,所以提示在这里**总是**适用"(`:117-119`)。`tool-str-replace-editor` 走另一条路——**只挂拒绝标记,不挂升级提示**(见 [04 篇](04-consumers.md#第七节-tool-str-replace-editor-的沙箱路径))。
+注释 [`:110-123`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L110-L123) 说明不能返回裸 `Error`:"`ToolRuntime` 只对 `HarnessError` 实例填充 `result.error`,裸 `Error` 会把重试与观察者依赖的错误码剥掉";又因为"`FS_SANDBOX_DENIED` 只在受限后端下产生,而受限后端总会广告升级字段,所以提示在这里**总是**适用"([`:117-119`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L117-L119))。`tool-str-replace-editor` 走另一条路——**只挂拒绝标记,不挂升级提示**(见 [04 篇](04-consumers.md#第七节-tool-str-replace-editor-的沙箱路径))。
 
 ---
 
@@ -295,7 +295,7 @@ static Config: z<Config> = z.object({
 })
 ```
 
-出厂组合三档全列(`packages/bundle/base/cordis.patch.yml:229-241`):`read-only+ask` / `workspace-write+ask` / `danger-full-access+never`。**捆绑而非两个独立旋钮**是这条设计的要点——沙箱更宽时审批更松,语义上是一个整体的权限姿态。一个约束被代码强制:
+出厂组合三档全列([`packages/bundle/base/cordis.patch.yml:229-241`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml#L229-L241)):`read-only+ask` / `workspace-write+ask` / `danger-full-access+never`。**捆绑而非两个独立旋钮**是这条设计的要点——沙箱更宽时审批更松,语义上是一个整体的权限姿态。一个约束被代码强制:
 
 ```typescript
 // packages/interaction/permission-presets/src/index.ts:196-198
@@ -342,7 +342,7 @@ flowchart LR
 
 </details>
 
-三处各管一件事:**策略快照**说"现在的文件边界是什么"(三个 case 的 `renderPolicyContext`,`sandbox-policy/src/index.ts:41-55`);**工具描述**说"遇到拒绝该怎么办"(仅广告时追加);**结果文本**说"这一次被拒了,可以怎么恢复"。审批策略文本由审批包贡献到同一份快照(见[第二章](../02-security-analysis.md))。
+三处各管一件事:**策略快照**说"现在的文件边界是什么"(三个 case 的 `renderPolicyContext`,[`sandbox-policy/src/index.ts:41-55`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox-policy/src/index.ts#L41-L55));**工具描述**说"遇到拒绝该怎么办"(仅广告时追加);**结果文本**说"这一次被拒了,可以怎么恢复"。审批策略文本由审批包贡献到同一份快照(见[第二章](../02-security-analysis.md))。
 
 ### 5.4 端到端时序
 
@@ -382,20 +382,20 @@ sequenceDiagram
 
 | 文件 | 关键符号 | 行号 |
 |---|---|---|
-| `packages/sandbox/sandbox/src/escalation.ts` | `WIDER_MODES` / `ESCALATION_TARGETS` / `validateEscalationArgs` | 28-31 / 41 / 51-61 |
+| [`packages/sandbox/sandbox/src/escalation.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/escalation.ts) | `WIDER_MODES` / `ESCALATION_TARGETS` / `validateEscalationArgs` | 28-31 / 41 / 51-61 |
 | | `sandboxDenialMarker` / `escalationHintMarker` / `EscalationOutcome` | 71-73 / 84-86 / 93 |
 | | `EscalationApprover` / `EscalationApproval` / `EscalationRequest` | 102-109 / 118-129 / 132-141 |
 | | `approveEscalation` | 157-189 |
-| `packages/sandbox/sandbox/src/index.ts` | 升级词表再导出 | 12-20 |
-| `packages/shell/tool-bash/src/index.ts` | 配对校验 / `bashDescription` | 64-66 / 69-92 |
+| [`packages/sandbox/sandbox/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts) | 升级词表再导出 | 12-20 |
+| [`packages/shell/tool-bash/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/index.ts) | 配对校验 / `bashDescription` | 64-66 / 69-92 |
 | | 广告闸门 / `resolveSandboxPolicy` / `approveBashEscalation` | 191-199 / 212-232 |
 | | 条件 schema 字段 / `execute` 的策略替换 | 258-268 / 329-347 |
-| `packages/shell/tool-bash/src/render.ts` | 前台 / 后台标记与提示 | 45-51 / 85-92 |
-| `packages/shell/tool-pwsh/src/render.ts` | 前台 / 后台 | 64,67 / 102,105,107 |
-| `packages/fs/tool-fs/src/sandbox.ts` | 广告闸门 / `schemaFields` / `resolvePolicy` / `mapError` | 43-50 / 59-73 / 87-108 / 124-130 |
-| `packages/fs/tool-fs/src/index.ts` | 单实例构造与两个工具共享 | 76-78 |
+| [`packages/shell/tool-bash/src/render.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/src/render.ts) | 前台 / 后台标记与提示 | 45-51 / 85-92 |
+| [`packages/shell/tool-pwsh/src/render.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-pwsh/src/render.ts) | 前台 / 后台 | 64,67 / 102,105,107 |
+| [`packages/fs/tool-fs/src/sandbox.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts) | 广告闸门 / `schemaFields` / `resolvePolicy` / `mapError` | 43-50 / 59-73 / 87-108 / 124-130 |
+| [`packages/fs/tool-fs/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/index.ts) | 单实例构造与两个工具共享 | 76-78 |
 | `packages/fs/tool-fs/src/{edit,write}.ts` | schema 展开 / resolvePolicy / mapError | 92,117,139 / 78,110,122 |
-| `packages/interaction/permission-presets/src/index.ts` | `Config` 预设表 / 组合守卫 | 165-182 / 196-198 |
+| [`packages/interaction/permission-presets/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/interaction/permission-presets/src/index.ts) | `Config` 预设表 / 组合守卫 | 165-182 / 196-198 |
 | | `apply` 写路径 / `pinInitialPermission` | 386-398 / 406-431 |
-| `packages/interaction/user-approval/src/index.ts` | `OUTCOMES` 词表 / `request` | 48 / 208 |
-| `packages/bundle/base/cordis.patch.yml` | 出厂三档预设 | 229-241 |
+| [`packages/interaction/user-approval/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/interaction/user-approval/src/index.ts) | `OUTCOMES` 词表 / `request` | 48 / 208 |
+| [`packages/bundle/base/cordis.patch.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml) | 出厂三档预设 | 229-241 |

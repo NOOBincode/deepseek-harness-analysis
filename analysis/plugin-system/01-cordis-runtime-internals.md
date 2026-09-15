@@ -34,17 +34,17 @@ constructor() {
 }
 ```
 
-四个可观察事实:`ReflectService.handler`(`reflect.ts:135`)是**静态**的,状态在 `target.reflect.store` / `props`(`reflect.ts:209-211`);根 fiber 以 `runtime = null` 构造(`context.ts:77`),因此属性读走"无 runtime 旁路"、`dispose` 变成 `restart`(`fiber.ts:331`);根 fiber 的 `_disposables` 在末尾清空(`context.ts:82`),根 context 不为自身保留 effect 记录;`Context` 不持有服务实现,`ctx.llm` 这类键不是字段而是代理的解析结果。
+四个可观察事实:`ReflectService.handler`([`reflect.ts:135`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L135))是**静态**的,状态在 `target.reflect.store` / `props`([`reflect.ts:209-211`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L209-L211));根 fiber 以 `runtime = null` 构造([`context.ts:77`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L77)),因此属性读走"无 runtime 旁路"、`dispose` 变成 `restart`([`fiber.ts:331`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L331));根 fiber 的 `_disposables` 在末尾清空([`context.ts:82`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L82)),根 context 不为自身保留 effect 记录;`Context` 不持有服务实现,`ctx.llm` 这类键不是字段而是代理的解析结果。
 
 ### 1.2 作用域三原语
 
 | 原语 | 定义 | 数据结构 | 语义 |
 |---|---|---|---|
-| `extend(meta)` | `context.ts:99-107` | `Object.create(getTraceable(this, this))` + 逐键 `defineProperty` | 子 context 原型继承父的全部属性;`meta` 作 own property 遮蔽;父带 `symbols.shadow` 时再套一层 |
-| `isolate(name, label?)` | `context.ts:121-125` | `Object.create(this[symbols.isolate])` 上写 `shadow[name] = label ?? Symbol(name)` | `name` 在该子树解析到新 label;同 label 两次调用共享作用域 |
-| `intercept(name, config)` | `context.ts:139-145` | `Object.create(this[symbols.intercept])` 上写 `intercept[name] = config` | 子树下所有插件的该服务配置合并这份 intercept |
+| `extend(meta)` | [`context.ts:99-107`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L99-L107) | `Object.create(getTraceable(this, this))` + 逐键 `defineProperty` | 子 context 原型继承父的全部属性;`meta` 作 own property 遮蔽;父带 `symbols.shadow` 时再套一层 |
+| `isolate(name, label?)` | [`context.ts:121-125`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L121-L125) | `Object.create(this[symbols.isolate])` 上写 `shadow[name] = label ?? Symbol(name)` | `name` 在该子树解析到新 label;同 label 两次调用共享作用域 |
+| `intercept(name, config)` | [`context.ts:139-145`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L139-L145) | `Object.create(this[symbols.intercept])` 上写 `intercept[name] = config` | 子树下所有插件的该服务配置合并这份 intercept |
 
-isolate 的真实消费者是 Loader:`loader/src/config/isolate.ts:71-173` 用 `entry.ctx[Context.isolate]` 做 prototype 链 + `swap()` 重写(见 [02](./02-loader-and-composition.md)第四节)。
+isolate 的真实消费者是 Loader:[`loader/src/config/isolate.ts:71-173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/isolate.ts#L71-L173) 用 `entry.ctx[Context.isolate]` 做 prototype 链 + `swap()` 重写(见 [02](./02-loader-and-composition.md)第四节)。
 
 ### 1.3 get trap:服务解析算法本体
 
@@ -73,17 +73,17 @@ get: (target, prop, ctx: Context) => {
 }
 ```
 
-- **`isSpecialProperty`(`reflect.ts:86-91`)是不解析的白名单**:symbol 键、`prototype`、`then`、形如 `0/1/2` 的字符串、`_` 前缀。所以 `ctx[symbols.isolate]` 与 `ctx._x` 永远是普通属性。
-- **上溯是 ancestor-only**(`:155-166`):只走 `fiber.parent.fiber`,**不看兄弟分支**——这是 `docs/postmortem/0001` 里 Bug #2 的机制根源(见 [05](./05-plugin-authoring-guide.md)第四节)。
-- **`ctx.get(name)` 是另一条路径**:`reflect.get` → `_getImpl`(`:233-243`),按 isolate 符号查全局 store,`strict` 默认 true,即要求 `impl.fiber.state === FiberState.ACTIVE`,否则返回 `undefined` 而不是把一个正在拆卸的服务交回来。
-- **两种错误话术对应两种状态**:`without inject` = 该名字不在任何祖先 fiber 的 inject 里(或已走到根);`inactive context` = 声明了 inject 但 provider 尚未 ACTIVE(`:159-162`)。排障时这两句话指向不同结论。
-- **整段解析被 `internal/get` waterfall 包住**(`:153`),框架级插件可以劫持服务读取。
+- **`isSpecialProperty`([`reflect.ts:86-91`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L86-L91))是不解析的白名单**:symbol 键、`prototype`、`then`、形如 `0/1/2` 的字符串、`_` 前缀。所以 `ctx[symbols.isolate]` 与 `ctx._x` 永远是普通属性。
+- **上溯是 ancestor-only**([`:155-166`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L155-L166)):只走 `fiber.parent.fiber`,**不看兄弟分支**——这是 `docs/postmortem/0001` 里 Bug #2 的机制根源(见 [05](./05-plugin-authoring-guide.md)第四节)。
+- **`ctx.get(name)` 是另一条路径**:`reflect.get` → `_getImpl`([`:233-243`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L233-L243)),按 isolate 符号查全局 store,`strict` 默认 true,即要求 `impl.fiber.state === FiberState.ACTIVE`,否则返回 `undefined` 而不是把一个正在拆卸的服务交回来。
+- **两种错误话术对应两种状态**:`without inject` = 该名字不在任何祖先 fiber 的 inject 里(或已走到根);`inactive context` = 声明了 inject 但 provider 尚未 ACTIVE([`:159-162`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L159-L162))。排障时这两句话指向不同结论。
+- **整段解析被 `internal/get` waterfall 包住**([`:153`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L153)),框架级插件可以劫持服务读取。
 
 ### 1.4 set / has 与 mixin
 
-`set`(`:173-197`):特殊属性直通;名字**从未声明为属性**且当前有 runtime → 抛 `cannot set property "x" without provide`;accessor 走自定义 setter(返回 `false` 拒写);否则经 `internal/set` waterfall 转 `reflect.set`。`reflect.set`(`:254-265`)补两条所有权约束:名字未 provide → 抛;provider fiber 不是当前 fiber → 抛 `cannot set property "x" in multiple fibers`。`has`(`:199-205`)只回答"是否已声明",不触发解析。
+`set`([`:173-197`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L173-L197)):特殊属性直通;名字**从未声明为属性**且当前有 runtime → 抛 `cannot set property "x" without provide`;accessor 走自定义 setter(返回 `false` 拒写);否则经 `internal/set` waterfall 转 `reflect.set`。`reflect.set`([`:254-265`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L254-L265))补两条所有权约束:名字未 provide → 抛;provider fiber 不是当前 fiber → 抛 `cannot set property "x" in multiple fibers`。`has`([`:199-205`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L199-L205))只回答"是否已声明",不触发解析。
 
-`ReflectService` 构造末尾做四组 mixin(`reflect.ts:219-222`):`reflect`(get/set/provide/accessor/mixin)、`fiber`(runtime/effect)、`registry`(inject/plugin)、`events`(on/once/parallel/emit/serial/bail/waterfall)。这是 `ctx.on`/`ctx.plugin`/`ctx.effect` 能直接用的原因:`mixin`(`:364-390`)为每个键注册 accessor,get 里 `Reflect.get(service, key, mixin)` 后 `bind`(`:378-380`)。所以 `ctx.on(...)` ≡ `ctx.events.on(...)`——**不是语法糖转发,而是经 accessor 表注册的可撤销属性**,随 fiber 卸载消失。
+`ReflectService` 构造末尾做四组 mixin([`reflect.ts:219-222`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L219-L222)):`reflect`(get/set/provide/accessor/mixin)、`fiber`(runtime/effect)、`registry`(inject/plugin)、`events`(on/once/parallel/emit/serial/bail/waterfall)。这是 `ctx.on`/`ctx.plugin`/`ctx.effect` 能直接用的原因:`mixin`([`:364-390`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L364-L390))为每个键注册 accessor,get 里 `Reflect.get(service, key, mixin)` 后 `bind`([`:378-380`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L378-L380))。所以 `ctx.on(...)` ≡ `ctx.events.on(...)`——**不是语法糖转发,而是经 accessor 表注册的可撤销属性**,随 fiber 卸载消失。
 
 ---
 
@@ -104,9 +104,9 @@ constructor(protected ctx: Context, name: string) {
 }
 ```
 
-四点:**注册发生在构造里**(构造返回即可解析,前提是 fiber ACTIVE);**`check` 是可选可用性谓词**,经 `Service.check`(`service.ts:15`)落到 `Impl.check`(`reflect.ts:124`)并由 `Fiber._checkImpl` 调用(`fiber.ts:601`)——这是"已注册但还不能用"的表达方式,`Loader` 正是这么用的(见 [02](./02-loader-and-composition.md)第四节);**`[Service.invoke]` 让服务可调用**(`ctx.logger('name')` 形态);**必须 `return self`**(`:58`),因为 `new` 的结果可能是 `createCallable` 的可调用包装。
+四点:**注册发生在构造里**(构造返回即可解析,前提是 fiber ACTIVE);**`check` 是可选可用性谓词**,经 `Service.check`([`service.ts:15`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/service.ts#L15))落到 `Impl.check`([`reflect.ts:124`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L124))并由 `Fiber._checkImpl` 调用([`fiber.ts:601`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L601))——这是"已注册但还不能用"的表达方式,`Loader` 正是这么用的(见 [02](./02-loader-and-composition.md)第四节);**`[Service.invoke]` 让服务可调用**(`ctx.logger('name')` 形态);**必须 `return self`**([`:58`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L58)),因为 `new` 的结果可能是 `createCallable` 的可调用包装。
 
-`provide` 本体是一个 effect(`reflect.ts:277-305`):
+`provide` 本体是一个 effect([`reflect.ts:277-305`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L277-L305)):
 
 ```typescript
 // vendor/cordis/src/reflect.ts:286-303(节选)
@@ -149,7 +149,7 @@ export const enum FiberState {
 
 它是 `const enum`,**没有运行时对象**(打印只见数字);数值顺序是 `PENDING=0 … DISPOSED=4, UNLOADING=5`,与上方 JSDoc(`:139-146`,顺序为 …FAILED → UNLOADING → DISPOSED)不一致。任何 `>=`/`<` 比较状态的代码都是错的,框架自己全部用 `===`。
 
-`_getState()`(`fiber.ts:574-579`)定义"由字段推出的状态",优先级固定:**DISPOSED(`uid === null`)> FAILED(`_error`)> ACTIVE(`_runner.epoch !== INACTIVE`)> PENDING**。`LOADING`/`UNLOADING` 不在这里——它们只能由 `_updateState(() => FiberState.XXX)` 显式给出。
+`_getState()`([`fiber.ts:574-579`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L574-L579))定义"由字段推出的状态",优先级固定:**DISPOSED(`uid === null`)> FAILED(`_error`)> ACTIVE(`_runner.epoch !== INACTIVE`)> PENDING**。`LOADING`/`UNLOADING` 不在这里——它们只能由 `_updateState(() => FiberState.XXX)` 显式给出。
 
 ### 3.2 状态转换图
 
@@ -215,7 +215,7 @@ private _setEpoch(epoch: string) {
 ```
 
 1. **epoch 是"每个依赖的 provider uid"拼接串**:换 provider(uid 变)也算 epoch 变化 → `_unload()` + `_reload()`,依赖的实现被换掉时插件真的重装。
-2. **任一 inject 键缺席即 `INACTIVE`**(`:616-619`)——"行序无加载语义"(`packages/bundle/base/cordis.patch.yml:12`)的实现基础。
+2. **任一 inject 键缺席即 `INACTIVE`**(`:616-619`)——"行序无加载语义"([`packages/bundle/base/cordis.patch.yml:12`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml#L12))的实现基础。
 3. **`if (this.inertia) return`(`:629`)是重入保护**:转换进行中的 fiber 只更新 epoch,由在途转换收尾(`:665-672` / `:688-695`)再决定继续 LOADING 还是转 UNLOADING(vendored 加固之一)。
 4. **状态变化会广播**:`_updateState`(`:581-595`)状态真变时 `emit('internal/status', this, oldState)`(`:586`);且只在**跨越 ACTIVE 边界**时(`:589`)找出本 fiber 提供的服务逐个 `notify([name])`(`:590-594`)。
 
@@ -242,8 +242,8 @@ private async _reload() {
 ```
 - **`await Promise.resolve()`(`:650`)是刻意的检查点**:在此之前排队的一个 disposer 可能已让本代失效,此时不得再执行插件代码。
 - **配置解析在依赖就绪之后**(`:655`):`_resolveConfig`(`:641-644`)= `waterfall('internal/config')` + `resolveConfig(runtime, config)`(`:50-62`,Standard Schema 校验)。这是 `!!js` 能"在条目自己的 fiber 里、依赖可用后"求值的机制(见 [02](./02-loader-and-composition.md)第三节)。
-- **启动失败不抛出**:落 `_error` 并回到 INACTIVE(`:659-663`),由 `await()`(`:704-710`)重抛——这就是 `ctx.plugin(...)` 的返回值带 `then` 的原因(`registry.ts:331-335`),也是 Loader 的 `Entry._await()`(`loader/src/config/entry.ts:269-275`)能拿到真实激活错误的路径。
-- **`_unload`(`:675-696`)** 用 `_disposables.clear()`(返回 **reverse 后的数组**,`utils.ts:27-31`)并发 await,所以发起顺序是逆序。
+- **启动失败不抛出**:落 `_error` 并回到 INACTIVE(`:659-663`),由 `await()`(`:704-710`)重抛——这就是 `ctx.plugin(...)` 的返回值带 `then` 的原因(`registry.ts:331-335`),也是 Loader 的 `Entry._await()`([`loader/src/config/entry.ts:269-275`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L269-L275))能拿到真实激活错误的路径。
+- **`_unload`(`:675-696`)** 用 `_disposables.clear()`(返回 **reverse 后的数组**,[`utils.ts:27-31`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/utils.ts#L27-L31))并发 await,所以发起顺序是逆序。
 
 ---
 
@@ -286,9 +286,9 @@ const dispose = () => {
 | 对象 | 表 | 键 | 职责 |
 |---|---|---|---|
 | `RegistryService`(`registry.ts:195`) | `_internal: Map<Function, Plugin.Runtime>`(`:197`) | 插件回调函数 | 哪些插件被挂过、各有几棵 fiber |
-| `ReflectService`(`reflect.ts:133`) | `store: Dict<Impl, symbol>`(`:209`) | isolate 符号 | 某服务名当前由哪棵 fiber 提供、值是什么 |
+| `ReflectService`([`reflect.ts:133`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L133)) | `store: Dict<Impl, symbol>`([`:209`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L209)) | isolate 符号 | 某服务名当前由哪棵 fiber 提供、值是什么 |
 
-`Plugin.Runtime`(`registry.ts:136-145`)= `{ name, callback, fibers: DisposableList<Fiber>, Config }`——**同一插件回调的所有 fiber 共享**;`ctx.plugin(samePlugin)` 两次 = 两个 fiber、一个 runtime。
+`Plugin.Runtime`([`registry.ts:136-145`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/registry.ts#L136-L145))= `{ name, callback, fibers: DisposableList<Fiber>, Config }`——**同一插件回调的所有 fiber 共享**;`ctx.plugin(samePlugin)` 两次 = 两个 fiber、一个 runtime。
 
 ```typescript
 // vendor/cordis/src/registry.ts:316-336(节选)
@@ -341,15 +341,15 @@ notify(names: string[], filter = (ctx, name) => ctx[symbols.isolate][name] === t
 }
 ```
 
-- **遍历 registry 的 runtime,不是"所有 ctx"**:fiber 是 registry 唯一登记的插件实例来源;**根 fiber 不属于任何 runtime,不会被 notify 命中**——所以根 context 上直接 `provide` 的服务(`boot()` 里的 `dshHomePath`,`packages/boot/app-boot/src/index.ts:800`)不参与依赖唤醒。
-- **只对声明了该服务的 fiber 做 `_checkImpl` + `_refresh`**(`:320-326`),没声明的跳过——inject 声明同时是一次性能剪枝。
-- **`internal/service` 带 per-name 过滤载体**(`:330-334`):临时 `Object.create(this.ctx)` 挂 `symbols.filter`,监听器只收到自己 scope 的变动;消费者是 `agent-presets` 与 `gateway`(`docs/event-producer-consumer.md:85`)。
+- **遍历 registry 的 runtime,不是"所有 ctx"**:fiber 是 registry 唯一登记的插件实例来源;**根 fiber 不属于任何 runtime,不会被 notify 命中**——所以根 context 上直接 `provide` 的服务(`boot()` 里的 `dshHomePath`,[`packages/boot/app-boot/src/index.ts:800`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L800))不参与依赖唤醒。
+- **只对声明了该服务的 fiber 做 `_checkImpl` + `_refresh`**([`:320-326`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L320-L326)),没声明的跳过——inject 声明同时是一次性能剪枝。
+- **`internal/service` 带 per-name 过滤载体**([`:330-334`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L330-L334)):临时 `Object.create(this.ctx)` 挂 `symbols.filter`,监听器只收到自己 scope 的变动;消费者是 `agent-presets` 与 `gateway`([`docs/event-producer-consumer.md:85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/event-producer-consumer.md#L85))。
 
 ### 5.3 fiber 构造的发布顺序
 
-`fiber.ts:222-333` 的次序是刻意的:先 `uid` 与 `ctx = parent.extend({ fiber: this })`(`:235-236`)→ inject 覆写 `ctx[Context.intercept]`(`:238-245`)→ `_runner`(`:247-263`)→ `dispose = parent.fiber.effect(...)`(`:265-297`)→ **`emit('internal/plugin', this)`(`:302`)**→ 逐个 `_checkImpl` + `_refresh()`(`:314-319`)。
+[`fiber.ts:222-333`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L222-L333) 的次序是刻意的:先 `uid` 与 `ctx = parent.extend({ fiber: this })`([`:235-236`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L235-L236))→ inject 覆写 `ctx[Context.intercept]`([`:238-245`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L238-L245))→ `_runner`([`:247-263`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L247-L263))→ `dispose = parent.fiber.effect(...)`([`:265-297`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L265-L297))→ **`emit('internal/plugin', this)`([`:302`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L302))**→ 逐个 `_checkImpl` + `_refresh()`([`:314-319`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L314-L319))。
 
-`:300-301` 的注释给出理由:"Publish only after the parent owns a fully assigned disposer. A synchronous observer may dispose either this fiber or its parent." 并且 **`internal/plugin` 的监听者看到 PENDING 视图、且可以修改 `fiber.inject`**——Loader 正是这么做的(`loader/src/index.ts:122`),所以依赖判定必须在发布之后。
+[`:300-301`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L300-L301) 的注释给出理由:"Publish only after the parent owns a fully assigned disposer. A synchronous observer may dispose either this fiber or its parent." 并且 **`internal/plugin` 的监听者看到 PENDING 视图、且可以修改 `fiber.inject`**——Loader 正是这么做的(`loader/src/index.ts:122`),所以依赖判定必须在发布之后。
 
 ---
 
@@ -405,7 +405,7 @@ waterfall(...args: any[]) {
 
 ### 6.3 注册、处置与 `internal/listener` 挂载点
 
-`register()`(`events.ts:254-260`)把监听器注册成一个 effect:`hooks[options.prepend ? 'unshift' : 'push']({ ctx: this.ctx, callback, ...options })`,disposer 是 `() => this.unregister(hooks, callback)`,label 形如 `ctx.on("session/event")`(`:300`)。`unregister`(`:269-275`)按 **callback 引用相等**删除;`once()`(`:312-318`)包一层 wrapper 并在首次调用时 dispose 自己。`on()` 里 `listener = this.ctx.reflect.bind(listener)`(`:295`);`bail(this.ctx, 'internal/listener', ...)`(`:296`)允许 `internal/listener` 返回非空以**替换注册行为本身**——框架用它实现 `internal/update` 的私有链:
+`register()`([`events.ts:254-260`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L254-L260))把监听器注册成一个 effect:`hooks[options.prepend ? 'unshift' : 'push']({ ctx: this.ctx, callback, ...options })`,disposer 是 `() => this.unregister(hooks, callback)`,label 形如 `ctx.on("session/event")`([`:300`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L300))。`unregister`([`:269-275`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L269-L275))按 **callback 引用相等**删除;`once()`([`:312-318`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L312-L318))包一层 wrapper 并在首次调用时 dispose 自己。`on()` 里 `listener = this.ctx.reflect.bind(listener)`([`:295`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L295));`bail(this.ctx, 'internal/listener', ...)`([`:296`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L296))允许 `internal/listener` 返回非空以**替换注册行为本身**——框架用它实现 `internal/update` 的私有链:
 
 ```typescript
 // vendor/cordis/src/events.ts:140-146
@@ -417,19 +417,19 @@ this.on('internal/listener', function (this: Context, name, listener, options: E
 })
 ```
 
-它由 `:148-155` 的全局监听器串进公共 waterfall。**效果**:`ctx.on('internal/update', ...)` 只在本 fiber 的 `fiber.update()` 时触发;要观察所有 fiber 必须 `{ global: true }`。
+它由 [`:148-155`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L148-L155) 的全局监听器串进公共 waterfall。**效果**:`ctx.on('internal/update', ...)` 只在本 fiber 的 `fiber.update()` 时触发;要观察所有 fiber 必须 `{ global: true }`。
 
 ### 6.4 九个内建事件
 
 | 事件 | 模式 | 生产者 | 主要消费者 |
 |---|---|---|---|
-| `internal/plugin` | emit | `fiber.ts:302`(创建)、`:269`(处置) | Loader(`loader/src/index.ts:117`)、`inspector`、`modules`、`lsp-stdio` |
-| `internal/status` | emit | `fiber.ts:586` | `agent`、`inspector` |
-| `internal/config` | waterfall | `fiber.ts:642` | Loader 的 `!!js` 插值(`loader/src/index.ts:92`) |
-| `internal/update` | waterfall | `fiber.ts:748` | Loader 配置写回(`loader/src/index.ts:103,111`)、Group、Include |
-| `internal/get` / `internal/set` | waterfall | `reflect.ts:153`、`:191` | 无内建消费者,留作框架级扩展 |
-| `internal/service` / `internal/dispatch` | emit | `reflect.ts:333`、`events.ts:169` | `agent-presets`、`gateway`;各包 invariant(25 处,`docs/event-producer-consumer.md:83`) |
-| `internal/listener` | bail | `events.ts:296` | `EventsService` 自身(`:140`) |
+| `internal/plugin` | emit | [`fiber.ts:302`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L302)(创建)、[`:269`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L269)(处置) | Loader(`loader/src/index.ts:117`)、`inspector`、`modules`、`lsp-stdio` |
+| `internal/status` | emit | [`fiber.ts:586`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L586) | `agent`、`inspector` |
+| `internal/config` | waterfall | [`fiber.ts:642`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L642) | Loader 的 `!!js` 插值(`loader/src/index.ts:92`) |
+| `internal/update` | waterfall | [`fiber.ts:748`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L748) | Loader 配置写回(`loader/src/index.ts:103,111`)、Group、Include |
+| `internal/get` / `internal/set` | waterfall | [`reflect.ts:153`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L153)、[`:191`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L191) | 无内建消费者,留作框架级扩展 |
+| `internal/service` / `internal/dispatch` | emit | [`reflect.ts:333`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L333)、[`events.ts:169`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L169) | `agent-presets`、`gateway`;各包 invariant(25 处,[`docs/event-producer-consumer.md:83`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/event-producer-consumer.md#L83)) |
+| `internal/listener` | bail | [`events.ts:296`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L296) | `EventsService` 自身([`:140`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L140)) |
 
 ---
 
@@ -437,19 +437,19 @@ this.on('internal/listener', function (this: Context, name, listener, options: E
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `Context` 类 / 构造 / `extend` / `isolate` / `intercept` | `vendor/cordis/src/context.ts:42`、`:71-84`、`:99-107`、`:121-125`、`:139-145` | 代理容器;代理创建(`:74`)、根 fiber(`:77`)、清空根 disposables(`:82`);作用域三原语 |
-| `handler.get` / `set` / `has` | `reflect.ts:136-171`、`:173-197`、`:199-205` | 三个 trap;祖先上溯在 `:155-166`;解析错误话术 `:144`/`:160` |
-| `store` / `props` / mixin 构造 / `get` / `_getImpl` | `reflect.ts:209-223`、`:233-243` | 服务实现表 / 属性表 / `ctx.on` 等转发属性 / `ctx.get(name)` 路径 |
-| `provide` / `notify` / `accessor` / `mixin` | `reflect.ts:277-305`、`:314-336`、`:345-390` | 服务注册 effect 与注销顺序;依赖级联唤醒;计算属性与 mixin |
-| `Service` 类 / 构造 / `resolveConfig` | `service.ts:11`、`:42-59`、`:86-102` | 构造即注册(`:57`)、callable(`:51`)、返回 self(`:58`);intercept 合并 |
-| `Inject` / `Plugin.Base` / `Plugin.Runtime` / `RegistryService.plugin` / `delete` / `inject` | `registry.ts:19`、`:71-88`、`:100-111`、`:136-145`、`:316-336`、`:258-267`、`:300-302` | 依赖声明归一化;插件元数据;共享运行时记录;fiber 创建入口;插件级处置;`ctx.inject` 落点 |
-| `FiberState` / `Fiber` 字段 / 构造 | `fiber.ts:147-154`、`:184-210`、`:222-333` | 六状态;字段;发布顺序与依赖判定时机 |
-| `Fiber._execute` / `effect` | `fiber.ts:356-400`、`:415-561` | effect 五种返回值;逆序 dispose(`:431`)、UNLOADING 拒注册(`:420`)、wrapper/inertia |
-| `_getState` / `_updateState` / `_checkImpl` / `_refresh` / `_setEpoch` | `fiber.ts:574-639` | 状态推导优先级;`internal/status` + ACTIVE 边界 notify;依赖判定与转换触发 |
-| `_reload` / `_unload` / `await` / `restart` | `fiber.ts:646-710`、`:718-723` | 两个异步转换、错误重抛、重启 |
-| `resolveConfig` / `ValidationError` / `DisposableList.clear` | `fiber.ts:19-62`、`vendor/cordis/src/utils.ts:27-31` | Standard Schema 校验落点;逆序 clear 实现 |
-| `EventsService.dispatch` / 五种模式 / `isBailed` | `vendor/cordis/src/events.ts:165-175`、`:183-243`、`:13-15` | 监听器解析 + scope 过滤;五种分发;bail 判据 |
-| `on` / `once` / `register` / `Events` 接口 | `events.ts:254-318`、`:329-352` | 监听器即 effect;九个 `internal/*` 内建事件契约;`internal/*` 消费者清单见 `docs/event-producer-consumer.md:83-86` |
+| `Context` 类 / 构造 / `extend` / `isolate` / `intercept` | [`vendor/cordis/src/context.ts:42`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L42)、[`:71-84`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L71-L84)、[`:99-107`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L99-L107)、[`:121-125`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L121-L125)、[`:139-145`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L139-L145) | 代理容器;代理创建([`:74`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L74))、根 fiber([`:77`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L77))、清空根 disposables([`:82`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts#L82));作用域三原语 |
+| `handler.get` / `set` / `has` | [`reflect.ts:136-171`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L136-L171)、[`:173-197`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L173-L197)、[`:199-205`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L199-L205) | 三个 trap;祖先上溯在 [`:155-166`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L155-L166);解析错误话术 [`:144`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L144)/[`:160`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L160) |
+| `store` / `props` / mixin 构造 / `get` / `_getImpl` | [`reflect.ts:209-223`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L209-L223)、[`:233-243`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L233-L243) | 服务实现表 / 属性表 / `ctx.on` 等转发属性 / `ctx.get(name)` 路径 |
+| `provide` / `notify` / `accessor` / `mixin` | [`reflect.ts:277-305`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L277-L305)、[`:314-336`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L314-L336)、[`:345-390`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L345-L390) | 服务注册 effect 与注销顺序;依赖级联唤醒;计算属性与 mixin |
+| `Service` 类 / 构造 / `resolveConfig` | [`service.ts:11`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/service.ts#L11)、[`:42-59`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/service.ts#L42-L59)、[`:86-102`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/service.ts#L86-L102) | 构造即注册([`:57`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/service.ts#L57))、callable([`:51`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/service.ts#L51))、返回 self([`:58`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/service.ts#L58));intercept 合并 |
+| `Inject` / `Plugin.Base` / `Plugin.Runtime` / `RegistryService.plugin` / `delete` / `inject` | [`registry.ts:19`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/registry.ts#L19)、[`:71-88`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/registry.ts#L71-L88)、[`:100-111`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/registry.ts#L100-L111)、[`:136-145`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/registry.ts#L136-L145)、[`:316-336`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/registry.ts#L316-L336)、[`:258-267`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/registry.ts#L258-L267)、[`:300-302`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/registry.ts#L300-L302) | 依赖声明归一化;插件元数据;共享运行时记录;fiber 创建入口;插件级处置;`ctx.inject` 落点 |
+| `FiberState` / `Fiber` 字段 / 构造 | [`fiber.ts:147-154`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L147-L154)、[`:184-210`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L184-L210)、[`:222-333`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L222-L333) | 六状态;字段;发布顺序与依赖判定时机 |
+| `Fiber._execute` / `effect` | [`fiber.ts:356-400`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L356-L400)、[`:415-561`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L415-L561) | effect 五种返回值;逆序 dispose([`:431`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L431))、UNLOADING 拒注册([`:420`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L420))、wrapper/inertia |
+| `_getState` / `_updateState` / `_checkImpl` / `_refresh` / `_setEpoch` | [`fiber.ts:574-639`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L574-L639) | 状态推导优先级;`internal/status` + ACTIVE 边界 notify;依赖判定与转换触发 |
+| `_reload` / `_unload` / `await` / `restart` | [`fiber.ts:646-710`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L646-L710)、[`:718-723`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L718-L723) | 两个异步转换、错误重抛、重启 |
+| `resolveConfig` / `ValidationError` / `DisposableList.clear` | [`fiber.ts:19-62`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L19-L62)、[`vendor/cordis/src/utils.ts:27-31`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/utils.ts#L27-L31) | Standard Schema 校验落点;逆序 clear 实现 |
+| `EventsService.dispatch` / 五种模式 / `isBailed` | [`vendor/cordis/src/events.ts:165-175`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L165-L175)、[`:183-243`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L183-L243)、[`:13-15`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L13-L15) | 监听器解析 + scope 过滤;五种分发;bail 判据 |
+| `on` / `once` / `register` / `Events` 接口 | [`events.ts:254-318`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L254-L318)、[`:329-352`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L329-L352) | 监听器即 effect;九个 `internal/*` 内建事件契约;`internal/*` 消费者清单见 [`docs/event-producer-consumer.md:83-86`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/event-producer-consumer.md#L83-L86) |
 
 ---
 

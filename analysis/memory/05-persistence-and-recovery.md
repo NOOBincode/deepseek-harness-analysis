@@ -197,7 +197,7 @@ flowchart TD
 
 ## 四、`flush` 屏障与检查点策略
 
-`append` 是 best-effort,`flush` 才是崩溃存活保证,这个分界写在 seam 契约上:事件从 seq 0 连续、永不重写、撕裂的物理尾巴永不返回给读者、未知词汇 fail-closed 拒绝(`session-persistence/src/index.ts:115-134`)。
+`append` 是 best-effort,`flush` 才是崩溃存活保证,这个分界写在 seam 契约上:事件从 seq 0 连续、永不重写、撕裂的物理尾巴永不返回给读者、未知词汇 fail-closed 拒绝([`session-persistence/src/index.ts:115-134`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/index.ts#L115-L134))。
 
 谁来调 `flush`?一个专门的策略插件在**三个语义边界**上发起,而不是每个事件都调:
 
@@ -226,13 +226,13 @@ export function apply(ctx: Context): void {
 }
 ```
 
-模型侧那条是**延迟构造流**而不是先请求再检查——`afterCheckpoint` 返回一个异步生成器,`next()` 在被迭代时才调用,所以检查点失败时 adapter 请求根本没有发出(`session-checkpoint-policy/src/index.ts:29-38`)。工具侧的顺序是"先 flush,再查取消,再执行":工具体可能有副作用,所以取消检查必须在 flush 之后、`next()` 之前,且取消时仍然产出一个**规范的错误结果**而不是抛异常——让这次未发生的调用在日志里也是一个合法结果。服务级 `flush()` 是一次并行屏障,失败的会话被收集起来最后一次性抛出;扫描中途被关闭的句柄算已 flush,因为 close 本身已经排空(`jsonl/storage.ts:508-523`)。
+模型侧那条是**延迟构造流**而不是先请求再检查——`afterCheckpoint` 返回一个异步生成器,`next()` 在被迭代时才调用,所以检查点失败时 adapter 请求根本没有发出([`session-checkpoint-policy/src/index.ts:29-38`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-checkpoint-policy/src/index.ts#L29-L38))。工具侧的顺序是"先 flush,再查取消,再执行":工具体可能有副作用,所以取消检查必须在 flush 之后、`next()` 之前,且取消时仍然产出一个**规范的错误结果**而不是抛异常——让这次未发生的调用在日志里也是一个合法结果。服务级 `flush()` 是一次并行屏障,失败的会话被收集起来最后一次性抛出;扫描中途被关闭的句柄算已 flush,因为 close 本身已经排空(`jsonl/storage.ts:508-523`)。
 
 ---
 
 ## 五、跨进程写所有权
 
-一个会话目录同一时刻只能有一个写者,仲裁者是**内核**而不是文件里的标记位:POSIX 用 `flock(2)` 锁日志旁的 `session.lock`,Windows 用由该路径派生的内核信号量——从不锁文件或句柄,所以读者、搜索与目录删除照常进行。持有者进程死亡时内核自动释放;而一个活着但卡住的持有者**故意没有超时**,因为抢占一个只是慢的写者会让它的恢复追加撕裂日志(`lease.ts:1-19`)。
+一个会话目录同一时刻只能有一个写者,仲裁者是**内核**而不是文件里的标记位:POSIX 用 `flock(2)` 锁日志旁的 `session.lock`,Windows 用由该路径派生的内核信号量——从不锁文件或句柄,所以读者、搜索与目录删除照常进行。持有者进程死亡时内核自动释放;而一个活着但卡住的持有者**故意没有超时**,因为抢占一个只是慢的写者会让它的恢复追加撕裂日志([`lease.ts:1-19`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/lease.ts#L1-L19))。
 
 "锁的是 inode 而不是路径"这条差异在代码里就是一个有界重试:取到锁后再 stat 一次路径,确认还是同一个 inode,否则重开重试。
 
@@ -259,13 +259,13 @@ export function apply(ctx: Context): void {
     }
 ```
 
-释放只是关闭描述符——**锁文件永不删除**,因为它承载着后续加锁者要校验的那个稳定 inode(`lease.ts:118-134`)。进程内还有一层独立声明(`storage.ts:429`),它比内核锁更早挡住同进程的第二次写打开;打开失败时两层都要回滚,且内核锁释放失败不掩盖原始诊断(`jsonl/index.ts:388-406`)。
+释放只是关闭描述符——**锁文件永不删除**,因为它承载着后续加锁者要校验的那个稳定 inode([`lease.ts:118-134`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/lease.ts#L118-L134))。进程内还有一层独立声明([`storage.ts:429`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L429)),它比内核锁更早挡住同进程的第二次写打开;打开失败时两层都要回滚,且内核锁释放失败不掩盖原始诊断(`jsonl/index.ts:388-406`)。
 
 ---
 
 ## 六、撕裂尾巴:读侧过滤,写侧修复
 
-读侧的核心是增量扫描器。"只交出完整行构成的前缀"的实现细节是:换行搜索与字节偏移全在原始 buffer 上做,**只有完整记录才解码成 UTF-8**;跨写入断开的片段会被复制,因为解码器可能在 `write()` 返回后复用输出缓冲(`format.ts:379-442`)。`committedBytes` 是"最后一个完整行之后的偏移",也就是**安全的截断点**,只在完整行被接受后才前进(`format.ts:460-473`)。
+读侧的核心是增量扫描器。"只交出完整行构成的前缀"的实现细节是:换行搜索与字节偏移全在原始 buffer 上做,**只有完整记录才解码成 UTF-8**;跨写入断开的片段会被复制,因为解码器可能在 `write()` 返回后复用输出缓冲([`format.ts:379-442`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L379-L442))。`committedBytes` 是"最后一个完整行之后的偏移",也就是**安全的截断点**,只在完整行被接受后才前进([`format.ts:460-473`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L460-L473))。
 
 坏行有两类——JSON 解析失败、以及能解析但过不了结构校验——两者都不许"静默跳过"。`strict` 模式立即抛出;可恢复模式下被记下来,并且**后续一旦出现 `turn/end` 就立刻把被压下的错误重新抛出**:
 
@@ -315,7 +315,7 @@ export function defineSessionFormatMigration(migration: SessionFormatMigration):
 }
 ```
 
-链条在**构造时**就检查完整性:每个中间版本都必须有一步、不能重复、不能有通向未来的多余声明。这三条把"运行到一半才发现缺一步"变成"装配时就起不来"(`chain.ts:50-77`)。计划函数只判一个方向:比当前版本更高就拒绝读,而不是尝试兼容。
+链条在**构造时**就检查完整性:每个中间版本都必须有一步、不能重复、不能有通向未来的多余声明。这三条把"运行到一半才发现缺一步"变成"装配时就起不来"([`chain.ts:50-77`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-format/src/chain.ts#L50-L77))。计划函数只判一个方向:比当前版本更高就拒绝读,而不是尝试兼容。
 
 ```typescript
 // packages/session/session-format/src/chain.ts:79-87
@@ -341,7 +341,7 @@ export function sessionFormatVersionRefusal(id: string, version: number): string
 }
 ```
 
-版本检查必须在**解码结构之前**发生,否则未来格式会先撞上本构建的结构校验,用户看到的是"损坏"而不是"请升级"(`format.ts:332-345`)。读回旧世代走"准备 / 发布"两段:先在无写所有权的情况下把旧文件解出并校验,拿到写所有权后再**发布**新世代——发布产生的是 `session.v3.jsonl`,旧文件原地不动(`publishStoredMigration` `jsonl/index.ts:643`)。多个调用者同时遇到同一个旧世代时不会各迁移一遍:准备阶段按 id 共享,且最后一个等待者离开才中止它(`waitForPreparation` `jsonl/index.ts:578`)。
+版本检查必须在**解码结构之前**发生,否则未来格式会先撞上本构建的结构校验,用户看到的是"损坏"而不是"请升级"([`format.ts:332-345`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L332-L345))。读回旧世代走"准备 / 发布"两段:先在无写所有权的情况下把旧文件解出并校验,拿到写所有权后再**发布**新世代——发布产生的是 `session.v3.jsonl`,旧文件原地不动(`publishStoredMigration` `jsonl/index.ts:643`)。多个调用者同时遇到同一个旧世代时不会各迁移一遍:准备阶段按 id 共享,且最后一个等待者离开才中止它(`waitForPreparation` `jsonl/index.ts:578`)。
 
 ---
 
@@ -351,11 +351,11 @@ export function sessionFormatVersionRefusal(id: string, version: number): string
 
 | 步骤 | 做什么 | 位置 |
 |---|---|---|
-| ① 取写所有权 | `open(id, 'write')` 排除并发 resume;打开与读取都参与取消竞速,不让不收敛的后端钉住身份 | `index.ts:879` |
-| ② 冷读 | 从 seq 0 读完整日志;后端返回的已经是物理上合法的连续前缀 | `index.ts:889` |
-| ③ 补边界 | 语义修复是 agent 层的职责:为中断的尾部回合合成闭合事件,并当作普通批次追加 | `index.ts:892` |
-| ④ 造 seed | 把"持久事件 + 合成闭合事件"一起作为构造种子,连同 header 与继承切点交给 `prepare` | `index.ts:894` |
-| ⑤ 发布 | 交给 `setupAndPublish(..., 'resume', owned)`,写所有权随句柄转移 | `index.ts:909` |
+| ① 取写所有权 | `open(id, 'write')` 排除并发 resume;打开与读取都参与取消竞速,不让不收敛的后端钉住身份 | [`index.ts:879`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L879) |
+| ② 冷读 | 从 seq 0 读完整日志;后端返回的已经是物理上合法的连续前缀 | [`index.ts:889`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L889) |
+| ③ 补边界 | 语义修复是 agent 层的职责:为中断的尾部回合合成闭合事件,并当作普通批次追加 | [`index.ts:892`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L892) |
+| ④ 造 seed | 把"持久事件 + 合成闭合事件"一起作为构造种子,连同 header 与继承切点交给 `prepare` | [`index.ts:894`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L894) |
+| ⑤ 发布 | 交给 `setupAndPublish(..., 'resume', owned)`,写所有权随句柄转移 | [`index.ts:909`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L909) |
 
 ```typescript
 // packages/core/agent-loop/src/index.ts:877-896(节选)
@@ -415,7 +415,7 @@ export const TOOL_NOT_STARTED = 'TOOL_NOT_STARTED'
 export const TOOL_OUTCOME_UNKNOWN = 'TOOL_OUTCOME_UNKNOWN'
 ```
 
-时间戳复用最后一条真实事件的 `time`,序号从 `last.seq + 1` 连续往下——合成事件因此是**确定性的**:同样的日志无论在哪台机器恢复,补出来的都是同一串事件。最后一步的"恢复锚点"是 loop 实例自己的第一次请求,判据是实例内的布尔量 `requestHeaderLogged` 而不是日志里有没有头,所以从磁盘恢复的会话必然拿到 `resume`(`core/agent-loop/src/agent.ts:570-571`)。
+时间戳复用最后一条真实事件的 `time`,序号从 `last.seq + 1` 连续往下——合成事件因此是**确定性的**:同样的日志无论在哪台机器恢复,补出来的都是同一串事件。最后一步的"恢复锚点"是 loop 实例自己的第一次请求,判据是实例内的布尔量 `requestHeaderLogged` 而不是日志里有没有头,所以从磁盘恢复的会话必然拿到 `resume`([`core/agent-loop/src/agent.ts:570-571`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L570-L571))。
 
 ---
 
@@ -423,31 +423,31 @@ export const TOOL_OUTCOME_UNKNOWN = 'TOOL_OUTCOME_UNKNOWN'
 
 | 符号 | 位置 | 作用 |
 |---|---|---|
-| `SessionPersistence` | `packages/session/session-persistence/src/index.ts:135` | 存储能力缝(五个抽象方法) |
-| `validateStoredEvents` | `packages/session/session-persistence/src/storage-contract.ts:69` | 词汇门与载荷校验 |
-| `assertContiguous` | `packages/session/session-persistence/src/storage-contract.ts:145` | 批次连续性 |
-| `sessionFormatVersionRefusal` | `packages/session/session-persistence/src/errors.ts:133` | 方向相关的版本拒绝文案 |
-| `SessionAlreadyOwnedError` | `packages/session/session-persistence/src/errors.ts:31` | 写所有权冲突 |
-| `sessionFormatLogFilename` | `packages/session/session-format/src/filename.ts:14` | 世代文件名与解析 |
-| `parseSessionFormatLogFilename` | `packages/session/session-format/src/filename.ts:26` | 世代名解析 |
-| `defineSessionFormatMigration` | `packages/session/session-format/src/chain.ts:24` | 相邻迁移声明校验 |
-| `plan` | `packages/session/session-format/src/chain.ts:79` | 更高版本拒绝 |
-| `eventLines` / `eventLine` | `packages/session/session-persistence-jsonl/src/format.ts:312` / `:321` | 一事件一行 |
-| `toHeaderLine` | `packages/session/session-persistence-jsonl/src/format.ts:118` | header 行构造 |
-| `encodeSegment` | `packages/session/session-persistence-jsonl/src/format.ts:198` | 单射路径段编码 |
-| `refuseForeignFormatVersion` | `packages/session/session-persistence-jsonl/src/format.ts:339` | 解码前的版本拒绝 |
-| `SessionLogScanner` / `consumeEventLine` | `packages/session/session-persistence-jsonl/src/format.ts:385` / `:476` | 完整行前缀与坏行止损 |
-| `JsonlSessionHandle` | `packages/session/session-persistence-jsonl/src/storage.ts:85` | 写句柄 |
-| `LIVE_WRITE_BATCH_MAX_DELAY_MS` | `packages/session/session-persistence-jsonl/src/storage.ts:36` | 200 毫秒批量窗口 |
-| `enqueueLive` / `drainBuffered` | `packages/session/session-persistence-jsonl/src/storage.ts:274` / `:294` | 入队与排空 |
-| `persistContiguous` | `packages/session/session-persistence-jsonl/src/storage.ts:319` | 修复顺序与状态推进 |
-| `ensureLease` / `flushAll` / `install` | `packages/session/session-persistence-jsonl/src/storage.ts:352` / `:508` / `:534` | 取锁、耐久屏障、事件路由 |
-| `encodeMaterialization` | `packages/session/session-persistence-jsonl/src/index.ts:1207` | 首行独立帧 |
-| `appendLines` / `repair` | `packages/session/session-persistence-jsonl/src/index.ts:1246` / `:1287` | 追加回滚与截断修复 |
-| `resolveGenerationInDirectory` / `findLog` | `packages/session/session-persistence-jsonl/src/index.ts:1369` / `:1408` | 选代与唯一性 |
-| `prepareStoredMigration` / `publishStoredMigration` | `packages/session/session-persistence-jsonl/src/index.ts:599` / `:643` | 旧世代解码与发布 |
-| `waitForPreparation` | `packages/session/session-persistence-jsonl/src/index.ts:578` | 迁移准备共享与中止 |
-| `SessionWriteLease.acquire` | `packages/session/session-persistence-jsonl/src/lease.ts:70` | 内核写锁与 inode 校验 |
-| `afterCheckpoint` | `packages/session/session-checkpoint-policy/src/index.ts:29` | 延迟构造模型流 |
-| `interruptedTurnClosers` | `packages/core/session/src/repair.ts:29` | 崩溃尾巴的三段闭合 |
-| `AgentLoop.resumeWith` | `packages/core/agent-loop/src/index.ts:853` | resume 五步 |
+| `SessionPersistence` | [`packages/session/session-persistence/src/index.ts:135`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/index.ts#L135) | 存储能力缝(五个抽象方法) |
+| `validateStoredEvents` | [`packages/session/session-persistence/src/storage-contract.ts:69`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L69) | 词汇门与载荷校验 |
+| `assertContiguous` | [`packages/session/session-persistence/src/storage-contract.ts:145`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L145) | 批次连续性 |
+| `sessionFormatVersionRefusal` | [`packages/session/session-persistence/src/errors.ts:133`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/errors.ts#L133) | 方向相关的版本拒绝文案 |
+| `SessionAlreadyOwnedError` | [`packages/session/session-persistence/src/errors.ts:31`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/errors.ts#L31) | 写所有权冲突 |
+| `sessionFormatLogFilename` | [`packages/session/session-format/src/filename.ts:14`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-format/src/filename.ts#L14) | 世代文件名与解析 |
+| `parseSessionFormatLogFilename` | [`packages/session/session-format/src/filename.ts:26`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-format/src/filename.ts#L26) | 世代名解析 |
+| `defineSessionFormatMigration` | [`packages/session/session-format/src/chain.ts:24`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-format/src/chain.ts#L24) | 相邻迁移声明校验 |
+| `plan` | [`packages/session/session-format/src/chain.ts:79`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-format/src/chain.ts#L79) | 更高版本拒绝 |
+| `eventLines` / `eventLine` | [`packages/session/session-persistence-jsonl/src/format.ts:312`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L312) / [`:321`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L321) | 一事件一行 |
+| `toHeaderLine` | [`packages/session/session-persistence-jsonl/src/format.ts:118`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L118) | header 行构造 |
+| `encodeSegment` | [`packages/session/session-persistence-jsonl/src/format.ts:198`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L198) | 单射路径段编码 |
+| `refuseForeignFormatVersion` | [`packages/session/session-persistence-jsonl/src/format.ts:339`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L339) | 解码前的版本拒绝 |
+| `SessionLogScanner` / `consumeEventLine` | [`packages/session/session-persistence-jsonl/src/format.ts:385`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L385) / [`:476`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L476) | 完整行前缀与坏行止损 |
+| `JsonlSessionHandle` | [`packages/session/session-persistence-jsonl/src/storage.ts:85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L85) | 写句柄 |
+| `LIVE_WRITE_BATCH_MAX_DELAY_MS` | [`packages/session/session-persistence-jsonl/src/storage.ts:36`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L36) | 200 毫秒批量窗口 |
+| `enqueueLive` / `drainBuffered` | [`packages/session/session-persistence-jsonl/src/storage.ts:274`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L274) / [`:294`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L294) | 入队与排空 |
+| `persistContiguous` | [`packages/session/session-persistence-jsonl/src/storage.ts:319`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L319) | 修复顺序与状态推进 |
+| `ensureLease` / `flushAll` / `install` | [`packages/session/session-persistence-jsonl/src/storage.ts:352`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L352) / [`:508`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L508) / [`:534`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L534) | 取锁、耐久屏障、事件路由 |
+| `encodeMaterialization` | [`packages/session/session-persistence-jsonl/src/index.ts:1207`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L1207) | 首行独立帧 |
+| `appendLines` / `repair` | [`packages/session/session-persistence-jsonl/src/index.ts:1246`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L1246) / [`:1287`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L1287) | 追加回滚与截断修复 |
+| `resolveGenerationInDirectory` / `findLog` | [`packages/session/session-persistence-jsonl/src/index.ts:1369`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L1369) / [`:1408`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L1408) | 选代与唯一性 |
+| `prepareStoredMigration` / `publishStoredMigration` | [`packages/session/session-persistence-jsonl/src/index.ts:599`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L599) / [`:643`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L643) | 旧世代解码与发布 |
+| `waitForPreparation` | [`packages/session/session-persistence-jsonl/src/index.ts:578`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/index.ts#L578) | 迁移准备共享与中止 |
+| `SessionWriteLease.acquire` | [`packages/session/session-persistence-jsonl/src/lease.ts:70`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/lease.ts#L70) | 内核写锁与 inode 校验 |
+| `afterCheckpoint` | [`packages/session/session-checkpoint-policy/src/index.ts:29`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-checkpoint-policy/src/index.ts#L29) | 延迟构造模型流 |
+| `interruptedTurnClosers` | [`packages/core/session/src/repair.ts:29`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/repair.ts#L29) | 崩溃尾巴的三段闭合 |
+| `AgentLoop.resumeWith` | [`packages/core/agent-loop/src/index.ts:853`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L853) | resume 五步 |

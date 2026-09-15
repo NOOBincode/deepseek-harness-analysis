@@ -10,9 +10,9 @@
 
 | 部件 | 内容 | 位置 |
 |---|---|---|
-| 产物出口 | `package.json` 的 `"./invariant"` 子路径导出 | `packages/core/session/package.json:21` |
-| 编译依赖 | tsconfig 对 `runtime-diagnostics/invariants` 的项目引用 | `packages/core/session/tsconfig.json:30` |
-| 装配入口 | composition 里加载 `@deepseek-ai/dsh-session/invariant` | `packages/bundle/sdk-minimal/cordis.patch.yml:106-107` |
+| 产物出口 | [`package.json`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/package.json) 的 `"./invariant"` 子路径导出 | [`packages/core/session/package.json:21`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/package.json#L21) |
+| 编译依赖 | tsconfig 对 `runtime-diagnostics/invariants` 的项目引用 | [`packages/core/session/tsconfig.json:30`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/tsconfig.json#L30) |
+| 装配入口 | composition 里加载 `@deepseek-ai/dsh-session/invariant` | [`packages/bundle/sdk-minimal/cordis.patch.yml:106-107`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/sdk-minimal/cordis.patch.yml#L106-L107) |
 
 仓库里 39 个包发布了 `"./invariant"`,也恰好有 39 个 `src/invariant.ts`,两个集合一一对应——**没有只发布不实现、也没有只实现不发布**。
 
@@ -41,7 +41,7 @@ export interface InvariantInstaller {
 }
 ```
 
-`InvariantFailure` 的返回类型是 `never`,这不是风格问题:它把"报告失败"定义成一个**必然抛出**的操作,所以任何调用它的代码路径在类型上就已经终止了,不需要再写 `return`。失败对象是 `InvariantError`(`invariants/src/index.ts:50-66`),它带稳定的 `code = 'INVARIANT'` 与 `packageName` 字段,消息形如 `invariant violated by "<包名>": <违反的契约>`,使一条失败信息本身就足以定位责任方。
+`InvariantFailure` 的返回类型是 `never`,这不是风格问题:它把"报告失败"定义成一个**必然抛出**的操作,所以任何调用它的代码路径在类型上就已经终止了,不需要再写 `return`。失败对象是 `InvariantError`([`invariants/src/index.ts:50-66`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/runtime-diagnostics/invariants/src/index.ts#L50-L66)),它带稳定的 `code = 'INVARIANT'` 与 `packageName` 字段,消息形如 `invariant violated by "<包名>": <违反的契约>`,使一条失败信息本身就足以定位责任方。
 
 ### 注册:预留与子纤维
 
@@ -61,11 +61,11 @@ export interface InvariantInstaller {
     // ...(略):重复包名在此处被拒绝
 ```
 
-子纤维的建立与失败回收在同一个 `ctx.effect` 里:安装器抛错就 dispose 这个子纤维,不留半个已安装状态。`inject` 是**安装器自身的属性**而不是函数参数,它被复制到那个临时插件函数上,让 Cordis 的注入机制在子纤维里生效——这就是为什么每个伴生插件的 `install` 都写作 `Object.assign((ctx, fail) => {...}, { inject: ['sessions'] })`(`invariants/src/index.ts:153-175`)。
+子纤维的建立与失败回收在同一个 `ctx.effect` 里:安装器抛错就 dispose 这个子纤维,不留半个已安装状态。`inject` 是**安装器自身的属性**而不是函数参数,它被复制到那个临时插件函数上,让 Cordis 的注入机制在子纤维里生效——这就是为什么每个伴生插件的 `install` 都写作 `Object.assign((ctx, fail) => {...}, { inject: ['sessions'] })`([`invariants/src/index.ts:153-175`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/runtime-diagnostics/invariants/src/index.ts#L153-L175))。
 
 ### 伴生插件的统一形状
 
-与内存状态相关的伴生插件结构完全一致,差别只在 `install` 里检查什么。每个文件导出三个东西:`PACKAGE_NAME`(归属包名,如 `@deepseek-ai/dsh-session`,`core/session/src/invariant.ts:15`)、`name`(Cordis 伴生插件名 `session-invariant`,`:18`)、`inject = ['invariants']`(`:20`,先预留服务再注册),以及入口:
+与内存状态相关的伴生插件结构完全一致,差别只在 `install` 里检查什么。每个文件导出三个东西:`PACKAGE_NAME`(归属包名,如 `@deepseek-ai/dsh-session`,[`core/session/src/invariant.ts:15`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L15))、`name`(Cordis 伴生插件名 `session-invariant`,[`:18`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L18))、`inject = ['invariants']`([`:20`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L20),先预留服务再注册),以及入口:
 
 ```typescript
 // packages/core/session/src/invariant.ts:248-254
@@ -114,7 +114,7 @@ flowchart TD
 | 监听新会话 | `session/created` 时给新会话建基线 | `:225` |
 | 预派发 | `internal/dispatch` 拦截 `session/event`,**纯校验**并把转移暂存起来 | `:237-245` |
 | 提交后 | `session/event` 到达时取出暂存转移并推进轨迹;取不到就判失败 | `:227-235` |
-| 失败归属 | 报告器绑定包名抛 `InvariantError` | `runtime-diagnostics/invariants/src/index.ts:160-164` |
+| 失败归属 | 报告器绑定包名抛 `InvariantError` | [`runtime-diagnostics/invariants/src/index.ts:160-164`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/runtime-diagnostics/invariants/src/index.ts#L160-L164) |
 
 ```typescript
 // packages/core/session/src/invariant.ts:237-245
@@ -147,7 +147,7 @@ flowchart TD
 - **校验是纯函数**。`validateEvent()` 返回一个描述"提交后状态该怎么变"的转移对象,自己不碰 `trace`。所以后续监听者如果否决了这次派发,那个被暂存的转移只是被丢弃,不会留下推进过的状态。
 - **暂存表本身是第二个判据**。`session/event` 分支里"暂存里没有这条事件"本身就是一种不变量违反——它意味着有人绕过了派发路径直接广播了事件。这条检查能抓到"旁路写日志"这种最难排查的问题。
 
-另有两种挂法:只用预校验的(`session-title` 只在 `internal/dispatch` 里校验,因为标题事件一旦落盘就已经错了),以及两种都用的(`compaction`、`goal`、`todo`)。`session-title` 的注释把理由写得很直白:"the session/event listener would only observe the already-committed log"(`session-title/src/invariant.ts:66-72`)。
+另有两种挂法:只用预校验的(`session-title` 只在 `internal/dispatch` 里校验,因为标题事件一旦落盘就已经错了),以及两种都用的(`compaction`、`goal`、`todo`)。`session-title` 的注释把理由写得很直白:"the session/event listener would only observe the already-committed log"([`session-title/src/invariant.ts:66-72`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-title/src/invariant.ts#L66-L72))。
 
 ---
 
@@ -273,7 +273,7 @@ function validateEvent(
 }
 ```
 
-它同时校验"这条消息能不能从它**之前**的日志重建出来"——`goalView()` 检查目标存在、时间戳齐全、处于 `active`、id 与版本一致、轮次正好是下一个且不超预算,任何一条不满足就报"cannot be reconstructed from the preceding durable goal state"(`goal-round-driver/src/invariant.ts:29-43`)。
+它同时校验"这条消息能不能从它**之前**的日志重建出来"——`goalView()` 检查目标存在、时间戳齐全、处于 `active`、id 与版本一致、轮次正好是下一个且不超预算,任何一条不满足就报"cannot be reconstructed from the preceding durable goal state"([`goal-round-driver/src/invariant.ts:29-43`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/goal/goal-round-driver/src/invariant.ts#L29-L43))。
 
 ### todo 与 session-title:持久形状与引用完整性
 
@@ -358,7 +358,7 @@ flowchart TD
     }
 ```
 
-词汇表本身是生成文件(`core/session/src/known-event-types.ts:22`),信封一侧的契约在 `core/session/src/types.ts:473-483`。同一条通道还拦一个"藏在一个已知类型下的已退役形状":`request/header` 的 `reason === 'fallback'`(`storage-contract.ts:83-91`)。写侧另有一道:`surface.ts:244-245` 只允许"不认识 + `ignorable: true`"的事件携带不透明的 surface 元数据。
+词汇表本身是生成文件([`core/session/src/known-event-types.ts:22`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/known-event-types.ts#L22)),信封一侧的契约在 [`core/session/src/types.ts:473-483`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L473-L483)。同一条通道还拦一个"藏在一个已知类型下的已退役形状":`request/header` 的 `reason === 'fallback'`([`storage-contract.ts:83-91`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L83-L91))。写侧另有一道:`surface.ts:244-245` 只允许"不认识 + `ignorable: true`"的事件携带不透明的 surface 元数据。
 
 ### 2. seq 空洞
 
@@ -381,7 +381,7 @@ export function assertContiguous(id: SessionId, events: readonly SessionEvent[],
 }
 ```
 
-其余三处是不变量 `core/session/src/invariant.ts:60-61`(严格递增)、`surface.ts:428-430`(surface 折叠要求"正好是期望值")、`core/session/src/index.ts:570-572`(seed 必须从 0 连续)。磁盘侧那条由 `persistContiguous` 在每次持久写入前调用(`jsonl/storage.ts:323`)。
+其余三处是不变量 [`core/session/src/invariant.ts:60-61`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L60-L61)(严格递增)、[`surface.ts:428-430`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L428-L430)(surface 折叠要求"正好是期望值")、[`core/session/src/index.ts:570-572`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L570-L572)(seed 必须从 0 连续)。磁盘侧那条由 `persistContiguous` 在每次持久写入前调用(`jsonl/storage.ts:323`)。
 
 ### 3. 坏行
 
@@ -399,15 +399,15 @@ export function assertContiguous(id: SessionId, events: readonly SessionEvent[],
       return
 ```
 
-"损坏"与"不支持"是两种不同的错误类型,前者指向数据有问题,后者指向"这份日志是别的构建写的、本身完好"(`session-persistence/src/errors.ts:104-110`)。
+"损坏"与"不支持"是两种不同的错误类型,前者指向数据有问题,后者指向"这份日志是别的构建写的、本身完好"([`session-persistence/src/errors.ts:104-110`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/errors.ts#L104-L110))。
 
 ### 4. 版本不匹配
 
-**语义:方向决定动作。** 更低版本走相邻迁移链升级并发布新世代;更高版本直接拒绝并提示升级 harness。检查必须发生在**解码任何版本相关结构之前**,否则未来格式会先撞上本构建的结构校验,用户看到的是"损坏"而不是"请升级"(`jsonl/format.ts:332-345`)。拒绝文案本身是方向相关的(`session-persistence/src/errors.ts:133-137`),并且被装配侧的版本门复用(`storage-contract.ts:50-52`),保证从装配到读回所有路径给出同一句话。
+**语义:方向决定动作。** 更低版本走相邻迁移链升级并发布新世代;更高版本直接拒绝并提示升级 harness。检查必须发生在**解码任何版本相关结构之前**,否则未来格式会先撞上本构建的结构校验,用户看到的是"损坏"而不是"请升级"(`jsonl/format.ts:332-345`)。拒绝文案本身是方向相关的([`session-persistence/src/errors.ts:133-137`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/errors.ts#L133-L137)),并且被装配侧的版本门复用([`storage-contract.ts:50-52`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L50-L52)),保证从装配到读回所有路径给出同一句话。
 
 ### 5. 并发写
 
-**语义:同一会话同一时刻只有一个写者;其余写打开直接失败,而不是排队或重试。** 两层:`open(..., 'write')` 先做进程内声明(`jsonl/storage.ts:430`),再取内核锁。内核锁的理由是崩溃安全——持有者进程死亡时内核自动释放;反过来,一个活着但卡住的持有者**故意没有超时**,因为抢占一个只是慢的写者会让它的恢复追加撕裂日志(`lease.ts:1-19`)。
+**语义:同一会话同一时刻只有一个写者;其余写打开直接失败,而不是排队或重试。** 两层:`open(..., 'write')` 先做进程内声明(`jsonl/storage.ts:430`),再取内核锁。内核锁的理由是崩溃安全——持有者进程死亡时内核自动释放;反过来,一个活着但卡住的持有者**故意没有超时**,因为抢占一个只是慢的写者会让它的恢复追加撕裂日志([`lease.ts:1-19`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/lease.ts#L1-L19))。
 
 ```typescript
 // packages/session/session-persistence/src/errors.ts:51-58(节选)
@@ -428,16 +428,16 @@ export class SessionOwnershipLostError extends Error {
 
 **语义:任何时刻只允许一个压缩事务;区间边界不得切开工具调用与结果的配对。** 三层防护各管一件事——durable 标记管"跨生命周期",回合所有者管"与回合互斥",配对平衡管"区间本身合法"。
 
-一个具体的竞态是:自动压缩需要先 `await` 一次"取模型容量"的调用,而这次 await 期间可能已有别的压缩开了括号。所以 `assertNoActiveCompaction()` 必须在 await **之后**再查一次——只在入口查是不够的(`compaction-basic/src/index.ts:294-295`)。同一类竞态在摘要阶段之后还有一次:摘要是一次长耗时的模型调用,期间 surface 可能被改写,这时靠世代与逐节点比较来发现(`region.ts:440-452`)。
+一个具体的竞态是:自动压缩需要先 `await` 一次"取模型容量"的调用,而这次 await 期间可能已有别的压缩开了括号。所以 `assertNoActiveCompaction()` 必须在 await **之后**再查一次——只在入口查是不够的([`compaction-basic/src/index.ts:294-295`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L294-L295))。同一类竞态在摘要阶段之后还有一次:摘要是一次长耗时的模型调用,期间 surface 可能被改写,这时靠世代与逐节点比较来发现([`region.ts:440-452`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L440-L452))。
 
 | 失败模式 | 显式语义 | 关键位置 |
 |---|---|---|
-| 未知事件词汇 | 拒绝解释整份日志,除非事件带 `ignorable: true` | `storage-contract.ts:75`、`types.ts:473` |
-| seq 空洞 | 写入侧拒绝整批,读回侧拒绝整段,seed 侧拒绝构造 | `invariant.ts:60`、`surface.ts:428`、`index.ts:570`、`storage-contract.ts:145` |
+| 未知事件词汇 | 拒绝解释整份日志,除非事件带 `ignorable: true` | [`storage-contract.ts:75`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L75)、`types.ts:473` |
+| seq 空洞 | 写入侧拒绝整批,读回侧拒绝整段,seed 侧拒绝构造 | `invariant.ts:60`、[`surface.ts:428`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L428)、[`index.ts:570`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L570)、[`storage-contract.ts:145`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L145) |
 | 坏行 | 不跳过;可恢复模式下遇到回合边界立刻止损 | `format.ts:482`、`format.ts:508` |
-| 版本不匹配 | 更低则迁移,更高则拒绝并提示升级;检查先于解码 | `errors.ts:133`、`format.ts:339`、`storage-contract.ts:50` |
-| 并发写 | 进程内声明 + 内核锁;无超时,崩溃即释放 | `lease.ts:70`、`storage.ts:430`、`errors.ts:31` |
-| 压缩与工具执行竞争 | 单一括号、回合互斥、配对平衡、异步后再复查 | `compaction/invariant.ts:205`、`region.ts:307`、`index.ts:295`、`region.ts:348` |
+| 版本不匹配 | 更低则迁移,更高则拒绝并提示升级;检查先于解码 | [`errors.ts:133`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/errors.ts#L133)、`format.ts:339`、[`storage-contract.ts:50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L50) |
+| 并发写 | 进程内声明 + 内核锁;无超时,崩溃即释放 | [`lease.ts:70`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/lease.ts#L70)、[`storage.ts:430`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L430)、[`errors.ts:31`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/errors.ts#L31) |
+| 压缩与工具执行竞争 | 单一括号、回合互斥、配对平衡、异步后再复查 | `compaction/invariant.ts:205`、[`region.ts:307`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L307)、[`index.ts:295`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L295)、[`region.ts:348`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L348) |
 
 ---
 
@@ -445,17 +445,17 @@ export class SessionOwnershipLostError extends Error {
 
 | 符号 | 位置 | 作用 |
 |---|---|---|
-| `InvariantFailure` / `InvariantInstaller` / `InvariantError` | `packages/runtime-diagnostics/invariants/src/index.ts:29` / `:32` / `:50` | 报告器、安装器契约、带包名归属的失败 |
-| `InvariantRegistry.register` | `packages/runtime-diagnostics/invariants/src/index.ts:136` | 注册与包名预留 |
-| 子纤维与报告器绑定 | `packages/runtime-diagnostics/invariants/src/index.ts:153` | effect + `ctx.plugin` |
-| `PACKAGE_NAME` / `name` / `inject` / `apply` | `packages/core/session/src/invariant.ts:15` / `:18` / `:20` / `:253` | session 伴生插件的归属、装载面与入口 |
-| `SessionTrace` / `validateEvent` / `applyTransition` / `install` | `packages/core/session/src/invariant.ts:23` / `:55` / `:172` / `:193` | 日志关系轨迹、纯校验、提交后推进、两阶段挂法 |
-| `validateTurnBoundary` / `validateCompactionEvent` / 关括号校验 | `packages/compaction/compaction/src/invariant.ts:136` / `:180` / `:246` | 括号不得穿越回合;开括号唯一性;配对与摘要要求 |
-| `cloneState` / `applyChecked` | `packages/goal/goal/src/invariant.ts:17` / `:29` | 校验前的独立副本;复用严格解码器归因 |
-| `validateEvent` / `goalView`(driver) | `packages/goal/goal-round-driver/src/invariant.ts:46` / `:29` | 续跑提示逐字校验;目标可重建性校验 |
-| `validateTodos` / `validateEvent`(todo) | `packages/todo/tool-todo/src/invariant.ts:24` / `:54` | 持久形状;回合内约束 |
-| `validate`(title) / `validateDeliveryAccepted` | `packages/session/session-title/src/invariant.ts:27` / `session-log-deepseek/src/invariant.ts:17` | 标题来源与引用完整性;投递水位不得前向引用 |
-| `SessionFormatUnsupportedError` / `SessionOwnershipLostError` | `packages/session/session-persistence/src/errors.ts:111` / `:59` | "完好但不能解释";为跨进程租约预留的类型 |
-| `SessionWriteLease.acquire` | `packages/session/session-persistence-jsonl/src/lease.ts:70` | 内核写锁 |
-| `claimWrite` / `SessionLogScanner.consumeEventLine` | `packages/session/session-persistence-jsonl/src/storage.ts:429` / `format.ts:476` | 进程内写声明;坏行的两类处理 |
-| `assertCompactionInactive` / `assertNoActiveCompaction` | `packages/compaction/compaction-basic/src/region.ts:307` / `:326` | durable 压缩锁;异步决策后的复查 |
+| `InvariantFailure` / `InvariantInstaller` / `InvariantError` | [`packages/runtime-diagnostics/invariants/src/index.ts:29`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/runtime-diagnostics/invariants/src/index.ts#L29) / [`:32`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/runtime-diagnostics/invariants/src/index.ts#L32) / [`:50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/runtime-diagnostics/invariants/src/index.ts#L50) | 报告器、安装器契约、带包名归属的失败 |
+| `InvariantRegistry.register` | [`packages/runtime-diagnostics/invariants/src/index.ts:136`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/runtime-diagnostics/invariants/src/index.ts#L136) | 注册与包名预留 |
+| 子纤维与报告器绑定 | [`packages/runtime-diagnostics/invariants/src/index.ts:153`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/runtime-diagnostics/invariants/src/index.ts#L153) | effect + `ctx.plugin` |
+| `PACKAGE_NAME` / `name` / `inject` / `apply` | [`packages/core/session/src/invariant.ts:15`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L15) / [`:18`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L18) / [`:20`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L20) / [`:253`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L253) | session 伴生插件的归属、装载面与入口 |
+| `SessionTrace` / `validateEvent` / `applyTransition` / `install` | [`packages/core/session/src/invariant.ts:23`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L23) / [`:55`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L55) / [`:172`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L172) / [`:193`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/invariant.ts#L193) | 日志关系轨迹、纯校验、提交后推进、两阶段挂法 |
+| `validateTurnBoundary` / `validateCompactionEvent` / 关括号校验 | [`packages/compaction/compaction/src/invariant.ts:136`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/invariant.ts#L136) / [`:180`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/invariant.ts#L180) / [`:246`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/invariant.ts#L246) | 括号不得穿越回合;开括号唯一性;配对与摘要要求 |
+| `cloneState` / `applyChecked` | [`packages/goal/goal/src/invariant.ts:17`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/goal/goal/src/invariant.ts#L17) / [`:29`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/goal/goal/src/invariant.ts#L29) | 校验前的独立副本;复用严格解码器归因 |
+| `validateEvent` / `goalView`(driver) | [`packages/goal/goal-round-driver/src/invariant.ts:46`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/goal/goal-round-driver/src/invariant.ts#L46) / [`:29`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/goal/goal-round-driver/src/invariant.ts#L29) | 续跑提示逐字校验;目标可重建性校验 |
+| `validateTodos` / `validateEvent`(todo) | [`packages/todo/tool-todo/src/invariant.ts:24`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/todo/tool-todo/src/invariant.ts#L24) / [`:54`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/todo/tool-todo/src/invariant.ts#L54) | 持久形状;回合内约束 |
+| `validate`(title) / `validateDeliveryAccepted` | [`packages/session/session-title/src/invariant.ts:27`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-title/src/invariant.ts#L27) / [`session-log-deepseek/src/invariant.ts:17`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-log-deepseek/src/invariant.ts#L17) | 标题来源与引用完整性;投递水位不得前向引用 |
+| `SessionFormatUnsupportedError` / `SessionOwnershipLostError` | [`packages/session/session-persistence/src/errors.ts:111`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/errors.ts#L111) / [`:59`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/errors.ts#L59) | "完好但不能解释";为跨进程租约预留的类型 |
+| `SessionWriteLease.acquire` | [`packages/session/session-persistence-jsonl/src/lease.ts:70`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/lease.ts#L70) | 内核写锁 |
+| `claimWrite` / `SessionLogScanner.consumeEventLine` | [`packages/session/session-persistence-jsonl/src/storage.ts:429`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/storage.ts#L429) / [`format.ts:476`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence-jsonl/src/format.ts#L476) | 进程内写声明;坏行的两类处理 |
+| `assertCompactionInactive` / `assertNoActiveCompaction` | [`packages/compaction/compaction-basic/src/region.ts:307`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L307) / [`:326`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L326) | durable 压缩锁;异步决策后的复查 |

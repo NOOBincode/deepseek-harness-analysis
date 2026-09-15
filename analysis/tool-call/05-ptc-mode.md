@@ -1,6 +1,6 @@
 # 05 · PTC(`run_code`)模式:契约、SDK 投影、调度 lane、背压与折叠
 
-> 分析对象 `dbbaa4a37`。核心源码:`packages/core/tools/src/ptc.ts`(678 行)、`ts-types.ts:297`、`py-types.ts:763`、`types.ts`、`index.ts:847-993`(prompt 侧)与 `index.ts:1298-1434`(折叠判定)。
+> 分析对象 `dbbaa4a37`。核心源码:[`packages/core/tools/src/ptc.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts)(678 行)、[`ts-types.ts:297`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ts-types.ts#L297)、[`py-types.ts:763`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L763)、[`types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/types.ts)、[`index.ts:847-993`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L847-L993)(prompt 侧)与 [`index.ts:1298-1434`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1298-L1434)(折叠判定)。
 
 ---
 
@@ -29,7 +29,7 @@ private requireCodeTransport(): ToolDefinition {
   return this.ptcTransport
 }
 ```
-三条设计后果:**per-agent restriction 不能移除它**(`view()` 的过滤循环只遍历 `inherited`,它是在循环之后 `set` 的);**scoped 注册不能遮蔽它**(`register()` 无条件拒绝这个名字,`index.ts:1044-1046`);**惰性铸造**(`??=`)—— 哪个 agent 跑 PTC 在服务构造时还不知道,而传输除了闭包之外无状态。四个 capability 以闭包形式注入(`RunCodeBridgeOptions`)就是 `requireRuntime` idiom:**只有拥有者能铸出的操作留在私有闭包里**。
+三条设计后果:**per-agent restriction 不能移除它**(`view()` 的过滤循环只遍历 `inherited`,它是在循环之后 `set` 的);**scoped 注册不能遮蔽它**(`register()` 无条件拒绝这个名字,[`index.ts:1044-1046`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1044-L1046));**惰性铸造**(`??=`)—— 哪个 agent 跑 PTC 在服务构造时还不知道,而传输除了闭包之外无状态。四个 capability 以闭包形式注入(`RunCodeBridgeOptions`)就是 `requireRuntime` idiom:**只有拥有者能铸出的操作留在私有闭包里**。
 
 ---
 
@@ -63,13 +63,13 @@ export function createRunCodeTool(registry: ToolRuntime, options: RunCodeBridgeO
 
 | 项 | 值 | 说明 |
 |---|---|---|
-| `name` | `'run_code'`(`ptc.ts:20`) | `RUN_CODE_NAME` 常量,`index.ts` 与 `ptc.ts` 共用一个定义 |
+| `name` | `'run_code'`([`ptc.ts:20`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L20)) | `RUN_CODE_NAME` 常量,[`index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts) 与 [`ptc.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts) 共用一个定义 |
 | `code` | `string`,required | **程序体**,是一个 async 函数的 BODY |
-| `description` | `string`,required | UI 标签契约,语言无关(`ptc.ts:93-96`),示例文本写明 "5-10 words (shown in the UI)" |
+| `description` | `string`,required | UI 标签契约,语言无关([`ptc.ts:93-96`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L93-L96)),示例文本写明 "5-10 words (shown in the UI)" |
 | `output.schema` | `{ logs: string[]; result?: json }` | `additionalProperties: false`;`result` 是 `type: 'json'`(作者专用的任意 JSON) |
 | `output.render` | `logs.join('\n')` + 渲染后的 `result` | 两者都空时输出 `(run_code completed with no output)` |
 
-参数**校验**仍以静态 spec 为准(`defineTool` 闭包持有它);注释 `ptc.ts:297-302` 说明理由:校验是语言无关的(一个必需的字符串 `code`),而**描述与参数说明**会被 getter 替换。
+参数**校验**仍以静态 spec 为准(`defineTool` 闭包持有它);注释 [`ptc.ts:297-302`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L297-L302) 说明理由:校验是语言无关的(一个必需的字符串 `code`),而**描述与参数说明**会被 getter 替换。
 
 ### 2.1 语言 flavor 延迟解析
 
@@ -108,7 +108,7 @@ flowchart LR
 
 </details>
 
-用的是 `Object.hasOwn`(`ptc.ts:124`)而不是 `RUN_CODE_FLAVORS[lang] !== undefined`:注释 `:121-122` 说明,一个叫 `toString`/`constructor` 的语言会解析到 `Object.prototype` 的继承成员。同一个防护在 `index.ts:1014` 的 `SDK_RENDERERS` 上重复出现。两张表的键集都被 `satisfies Record<CodeSdkLanguage, …>` 钉住(`ptc.ts:82-85`、`index.ts:53-56`),`CodeSdkLanguage = 'typescript' | 'python'`(`ptc.ts:79`),所以新增语言漏改一张表是 **typecheck 失败**,而不是等运行时报告。
+用的是 `Object.hasOwn`([`ptc.ts:124`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L124))而不是 `RUN_CODE_FLAVORS[lang] !== undefined`:注释 [`:121-122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L121-L122) 说明,一个叫 `toString`/`constructor` 的语言会解析到 `Object.prototype` 的继承成员。同一个防护在 [`index.ts:1014`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1014) 的 `SDK_RENDERERS` 上重复出现。两张表的键集都被 `satisfies Record<CodeSdkLanguage, …>` 钉住([`ptc.ts:82-85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L82-L85)、[`index.ts:53-56`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L53-L56)),`CodeSdkLanguage = 'typescript' | 'python'`([`ptc.ts:79`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L79)),所以新增语言漏改一张表是 **typecheck 失败**,而不是等运行时报告。
 
 ### 2.2 `presentCall` 有,`presentResult` 故意没有
 
@@ -133,17 +133,17 @@ const SDK_RENDERERS: Record<string, (schemas: ToolSdkSchema[]) => string> = {
 } satisfies Record<CodeSdkLanguage, (schemas: ToolSdkSchema[]) => string>
 ```
 
-投影的输入由 `sdkSchemas(scope)`(`index.ts:1229`)产出:取 `view(scope).visible`,**排除 `run_code` 自己**(程序不需要一个调用自己的绑定),每个定义过 `schemaOf(definition, true)` 并附上 `output` schema 的无损快照。关键在于 **SDK 签名包含输出类型**——`ToolSdkSchema`(`ts-types.ts:13-16`)是 `ToolSchema & { output: JsonSchemaNode }`,程序拿到的是 `Promise<ToolOutputMap[K]>` 而不是 `unknown`,这是"值 / 投影分离"在类型层的体现。
+投影的输入由 `sdkSchemas(scope)`([`index.ts:1229`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1229))产出:取 `view(scope).visible`,**排除 `run_code` 自己**(程序不需要一个调用自己的绑定),每个定义过 `schemaOf(definition, true)` 并附上 `output` schema 的无损快照。关键在于 **SDK 签名包含输出类型**——`ToolSdkSchema`([`ts-types.ts:13-16`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ts-types.ts#L13-L16))是 `ToolSchema & { output: JsonSchemaNode }`,程序拿到的是 `Promise<ToolOutputMap[K]>` 而不是 `unknown`,这是"值 / 投影分离"在类型层的体现。
 
-| 性质 | TS(`ts-types.ts:297`) | Python(`py-types.ts:763`) |
+| 性质 | TS([`ts-types.ts:297`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ts-types.ts#L297)) | Python([`py-types.ts:763`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L763)) |
 |---|---|---|
-| 排序 | 按名字典序(`:298`) | 按名字典序(`:764`) |
-| 确定性 | "an unchanged tool set produces byte-identical text across assemblies"(`:288-292`) | 同一契约 |
-| 绑定形态 | `declare const tools: { [K in ToolName]: (args: ToolArgsMap[K]) => Promise<ToolOutputMap[K]> }`(`:313`) | `class Tools` + `async def <name>(self, args: …) -> …`(`:786-787`) |
-| 失败类型 | `declare class ToolCallError extends Error { readonly name: "ToolCallError"; readonly toolName: ToolName }`(`:312`) | 对应的 Python 异常声明 |
-| 异常键名 | `renderKey`(`:22-24`):合法标识符裸写,否则 `JSON.stringify` | `isBareIdentifier` + `RESERVED` 过滤(`:776`) |
+| 排序 | 按名字典序([`:298`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L298)) | 按名字典序([`:764`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L764)) |
+| 确定性 | "an unchanged tool set produces byte-identical text across assemblies"([`:288-292`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L288-L292)) | 同一契约 |
+| 绑定形态 | `declare const tools: { [K in ToolName]: (args: ToolArgsMap[K]) => Promise<ToolOutputMap[K]> }`([`:313`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L313)) | `class Tools` + `async def <name>(self, args: …) -> …`([`:786-787`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L786-L787)) |
+| 失败类型 | `declare class ToolCallError extends Error { readonly name: "ToolCallError"; readonly toolName: ToolName }`([`:312`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L312)) | 对应的 Python 异常声明 |
+| 异常键名 | `renderKey`([`:22-24`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L22-L24)):合法标识符裸写,否则 `JSON.stringify` | `isBareIdentifier` + `RESERVED` 过滤([`:776`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L776)) |
 
-字节确定性不是审美要求:SDK 正文进 system prompt,而 KV-Cache 的前缀复用依赖"工具集不变则文本不变"。字典序是这里唯一可用的稳定序。TS 渲染器还有一个**条件性示例**(`renderBashExample`,`ts-types.ts:271-283`):只有当当前 `bash` 参数 schema 确实接受示例字面量(`command: 'pwd'` 与 `description`)时才渲染那段 `run_code({ code: "return await tools.bash({…})" })`——**提示里的示例本身也是被校验过的**。Python 渲染器有一条不同寻常的注释(`py-types.ts:777-783`):docstring 必须是方法的**第一条语句**,所以它排在 `async def` **之后**;理由很直接——"under `mode: 'ptc'` this SDK is the model's only description of what a tool does"。
+字节确定性不是审美要求:SDK 正文进 system prompt,而 KV-Cache 的前缀复用依赖"工具集不变则文本不变"。字典序是这里唯一可用的稳定序。TS 渲染器还有一个**条件性示例**(`renderBashExample`,[`ts-types.ts:271-283`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ts-types.ts#L271-L283)):只有当当前 `bash` 参数 schema 确实接受示例字面量(`command: 'pwd'` 与 `description`)时才渲染那段 `run_code({ code: "return await tools.bash({…})" })`——**提示里的示例本身也是被校验过的**。Python 渲染器有一条不同寻常的注释([`py-types.ts:777-783`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L777-L783)):docstring 必须是方法的**第一条语句**,所以它排在 `async def` **之后**;理由很直接——"under `mode: 'ptc'` this SDK is the model's only description of what a tool does"。
 
 ---
 
@@ -180,9 +180,9 @@ private collapses(name: string, scope: ScopeKey | undefined, nested: boolean): b
 
 ### 4.1 `nested` 的唯一来源
 
-`resolveExecution(name, scope, nested)` 与 `executionMode` 的 `nested` 都写作 `exec.parent !== undefined`;而 `exec.parent` 在整个仓库里只有一个写入点:`ptc.ts:470-478` 构造子调用 `input` 时的 `parent: exec.token`(`:476`),其余字段是 `callId: subCallId`、`rootCallId: exec.rootCallId`、`name`、`arguments: normalized.dispatched`、可选的 `agent`、以及 `signal: runController.signal`。
+`resolveExecution(name, scope, nested)` 与 `executionMode` 的 `nested` 都写作 `exec.parent !== undefined`;而 `exec.parent` 在整个仓库里只有一个写入点:[`ptc.ts:470-478`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L470-L478) 构造子调用 `input` 时的 `parent: exec.token`([`:476`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L476)),其余字段是 `callId: subCallId`、`rootCallId: exec.rootCallId`、`name`、`arguments: normalized.dispatched`、可选的 `agent`、以及 `signal: runController.signal`。
 
-所以"**同一个工具名,模型直接调用被拒,从程序里调用放行**"这条规则的判据就是一个布尔,而这个布尔只能由 `run_code` 的 bridge 铸出——`ToolExecutionToken` 是不透明的 symbol 品牌(`index.ts:300`),外部无法伪造。读 `modeFor` 而非 `defaultMode` 的理由:读部署默认会让"native 部署下被 preset 赋予 ptc 的 agent"恰好漏网——**宣告一种形态却执行另一种**,正是 collapse 要关掉的旁路。
+所以"**同一个工具名,模型直接调用被拒,从程序里调用放行**"这条规则的判据就是一个布尔,而这个布尔只能由 `run_code` 的 bridge 铸出——`ToolExecutionToken` 是不透明的 symbol 品牌([`index.ts:300`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L300)),外部无法伪造。读 `modeFor` 而非 `defaultMode` 的理由:读部署默认会让"native 部署下被 preset 赋予 ptc 的 agent"恰好漏网——**宣告一种形态却执行另一种**,正是 collapse 要关掉的旁路。
 
 ### 4.2 提示词与执行器共用同一条规则
 
@@ -201,7 +201,7 @@ private collapseSection() {
 const PTC_ONLY_INSTRUCTION = `\`${RUN_CODE_NAME}\` is the only tool you can call directly — a tool call naming any other tool fails. Reach every tool the SDK declares below from inside the program.`
 ```
 
-两侧共用的是 `modeFor(scope) === 'ptc'` 这个条件:提示侧用它决定**是否陈述规则**,执行侧(`collapses`)再加上 `name !== RUN_CODE_NAME` 决定**是否拒绝这个名字**。`both` 渲染空串(`:844`:"native calls do execute there, so the rule is false")。文本本身的设计意图写在 `index.ts:46-50`:"Names the consequence (the call fails) and the route (inside the program), because a rule the model can only discover by being denied is one it corrects too late." 注释在 `:842` 另指出顺序:规则排在各工具的 guidance section **之前**。
+两侧共用的是 `modeFor(scope) === 'ptc'` 这个条件:提示侧用它决定**是否陈述规则**,执行侧(`collapses`)再加上 `name !== RUN_CODE_NAME` 决定**是否拒绝这个名字**。`both` 渲染空串(`:844`:"native calls do execute there, so the rule is false")。文本本身的设计意图写在 [`index.ts:46-50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L46-L50):"Names the consequence (the call fails) and the route (inside the program), because a rule the model can only discover by being denied is one it corrects too late." 注释在 [`:842`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L842) 另指出顺序:规则排在各工具的 guidance section **之前**。
 
 ### 4.3 "模型直呼被拒"返回的是可纠正错误
 
@@ -293,7 +293,7 @@ const drive = (): Promise<void> => {
 
 **有序阶段都在 lane 里**:`await head.start()` 出现在 lane(`:428`),而 `start()` 内部 `await scheduler.prepare(input)`(`:544`)。所以**第 N+1 个子调用的 pre-execute 一定在第 N 个的 pre-execute 落定之后才开始**——与原生 `fillPool` 的 `await startCall` 完全同构。
 
-与原生调度器的逐阶段对照(左 = `tool-calls.ts`,右 = `ptc.ts`):开始事件 `appendToolCall:168` ↔ `tool/ptc-dispatch-start:534`、`prepare` `startCall:170` ↔ `start():544`、`dispatch` `startCall:174` ↔ `start():546`(唯一可重叠,上限 `maxParallel`)、`finalize`/`finish` `commitReady:153-154` ↔ `commit():558-560`、上下文回流 `acceptContext:157` ↔ `exec.deferContext():562-568`。**前两组与后两组都在 lane 内**,不可重叠。
+与原生调度器的逐阶段对照(左 = [`tool-calls.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts),右 = [`ptc.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts)):开始事件 `appendToolCall:168` ↔ `tool/ptc-dispatch-start:534`、`prepare` `startCall:170` ↔ `start():544`、`dispatch` `startCall:174` ↔ `start():546`(唯一可重叠,上限 `maxParallel`)、`finalize`/`finish` `commitReady:153-154` ↔ `commit():558-560`、上下文回流 `acceptContext:157` ↔ `exec.deferContext():562-568`。**前两组与后两组都在 lane 内**,不可重叠。
 
 唯一的**有意差异**:原生把 `tool/result` 的追加放在提交序列里(必须,因为它是提交本身),PTC 把 `tool/ptc-dispatch` 的追加放到 lane **之外**的 `logWork`(`settle():509`),让日志内容监听器不能拖慢程序。
 
@@ -320,13 +320,13 @@ const binding = (name: string): CodeBindingFunction => async (rawArgs: unknown):
 }
 ```
 
-**参数的两个兄弟快照**(`jsonNormalizeArgs`,`ptc.ts:145-166`):先 `snapshotJsonValue` 得 `dispatched`,再对它快照一次得 `logged`。两次快照产出**字节相同但是两个对象**。注释在 `settle()` 里点明用途(`ptc.ts:514-516`):"The SIBLING parse of the dispatched value: byte-identical JSON, but a separate object — a tool mutating its args cannot desync this record from what it actually received."
+**参数的两个兄弟快照**(`jsonNormalizeArgs`,[`ptc.ts:145-166`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L145-L166)):先 `snapshotJsonValue` 得 `dispatched`,再对它快照一次得 `logged`。两次快照产出**字节相同但是两个对象**。注释在 `settle()` 里点明用途([`ptc.ts:514-516`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L514-L516)):"The SIBLING parse of the dispatched value: byte-identical JSON, but a separate object — a tool mutating its args cannot desync this record from what it actually received."
 
-**程序侧的错误收窄**:`DispatchOutcome` 只有两态——失败带 `message`、成功带 `value`。成功时程序拿到的是规范 JSON 值(已经不是 `ToolExecutionResult`,没有 `content`/`meta`);失败时 `throw new Error(outcome.message)` 由 code runtime 包装成 `ToolCallError`,只额外加 `toolName`。原生 `content` 块、`error.info`、`meta` **全部不出现在程序面对的失败契约里**——SDK 指令写得很明确("A FAILED tool call rejects with `ToolCallError`, whose `toolName` identifies the failed tool and whose `message` is human-readable",`ts-types.ts:257`)。
+**程序侧的错误收窄**:`DispatchOutcome` 只有两态——失败带 `message`、成功带 `value`。成功时程序拿到的是规范 JSON 值(已经不是 `ToolExecutionResult`,没有 `content`/`meta`);失败时 `throw new Error(outcome.message)` 由 code runtime 包装成 `ToolCallError`,只额外加 `toolName`。原生 `content` 块、`error.info`、`meta` **全部不出现在程序面对的失败契约里**——SDK 指令写得很明确("A FAILED tool call rejects with `ToolCallError`, whose `toolName` identifies the failed tool and whose `message` is human-readable",[`ts-types.ts:257`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ts-types.ts#L257))。
 
-**`runOver()` 的两道检查**(`:464`、`:591`)产出两条不同文本:`… ; <name> not dispatched` 与 `… ; <name> result discarded`。第二条是关键:**即使子调用成功回来了,运行已结束也不把值交给程序**(注释 `:588-590`)。它是函数而非属性读(`:458-461`),理由与 `index.ts:1870` 的 `isAborted` 相同:跨 await 的真实状态变化不该被控制流窄化。
+**`runOver()` 的两道检查**(`:464`、`:591`)产出两条不同文本:`… ; <name> not dispatched` 与 `… ; <name> result discarded`。第二条是关键:**即使子调用成功回来了,运行已结束也不把值交给程序**(注释 `:588-590`)。它是函数而非属性读(`:458-461`),理由与 [`index.ts:1870`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1870) 的 `isAborted` 相同:跨 await 的真实状态变化不该被控制流窄化。
 
-**绑定表是 null-prototype 的**(`:601-605` 的注释):`const functions = Object.create(null)` + 对 `registry.schemas(exec.agent)` 的每个名字(跳过 `run_code`)`Object.defineProperty(functions, name, { enumerable: true, value: binding(name) })`。两件事同时成立:**绑定集与 SDK 声明集同源**(两者都从 `view(agent)` 派生,所以"prompt 承诺能调的"与"程序真能调的"是同一个集合减去 `run_code`);**`__proto__` 是个普通键**(普通对象赋值会命中原型 setter 从而静默丢掉那个绑定,而 `create(null)` + `defineProperty` 让它成为普通自有属性,与 worker 侧命名空间的构造方式一致)。
+**绑定表是 null-prototype 的**([`:601-605`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L601-L605) 的注释):`const functions = Object.create(null)` + 对 `registry.schemas(exec.agent)` 的每个名字(跳过 `run_code`)`Object.defineProperty(functions, name, { enumerable: true, value: binding(name) })`。两件事同时成立:**绑定集与 SDK 声明集同源**(两者都从 `view(agent)` 派生,所以"prompt 承诺能调的"与"程序真能调的"是同一个集合减去 `run_code`);**`__proto__` 是个普通键**(普通对象赋值会命中原型 setter 从而静默丢掉那个绑定,而 `create(null)` + `defineProperty` 让它成为普通自有属性,与 worker 侧命名空间的构造方式一致)。
 
 ---
 
@@ -353,9 +353,9 @@ const settle = (result: ToolExecutionResult): void => {
 }
 ```
 
-`jsonNormalizeArgs`(`ptc.ts:145-166`)先 `snapshotJsonValue` 得 `dispatched`,再对它快照一次得 `logged`。两次快照产出**字节相同但是两个对象**,`:514-516` 的注释点明用途:"The SIBLING parse of the dispatched value: byte-identical JSON, but a separate object — a tool mutating its args cannot desync this record from what it actually received."
+`jsonNormalizeArgs`([`ptc.ts:145-166`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L145-L166))先 `snapshotJsonValue` 得 `dispatched`,再对它快照一次得 `logged`。两次快照产出**字节相同但是两个对象**,[`:514-516`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L514-L516) 的注释点明用途:"The SIBLING parse of the dispatched value: byte-identical JSON, but a separate object — a tool mutating its args cannot desync this record from what it actually received."
 
-**顺序即设计**:`resolve(...)` 在**第一条语句**。程序立刻拿到值,慢的日志后端不占用派发槽位;但事件追加仍发生在 `run_code` 打开的 turn 内——因为收尾会排空 `logWork`(§8)。`shapeDispatchLog` 是 contained 的(`index.ts:1286-1296`):监听器抛错时记一条 warn 并回落 `dispatch.content`,所以这条 promise 链不会 reject。
+**顺序即设计**:`resolve(...)` 在**第一条语句**。程序立刻拿到值,慢的日志后端不占用派发槽位;但事件追加仍发生在 `run_code` 打开的 turn 内——因为收尾会排空 `logWork`(§8)。`shapeDispatchLog` 是 contained 的([`index.ts:1286-1296`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1286-L1296)):监听器抛错时记一条 warn 并回落 `dispatch.content`,所以这条 promise 链不会 reject。
 
 ```typescript
 // packages/core/tools/src/index.ts:1277 —— 见 :1277-1285 的契约说明
@@ -370,14 +370,14 @@ private async shapeDispatchLog(dispatch: PtcDispatchLog): Promise<ContentBlock[]
 }
 ```
 
-契约(`index.ts:1277-1285`):contained —— 监听器抛错时记一条 warn 并回落 `dispatch.content`,所以这条 promise 链不会 reject。`PtcDispatchLog`(`index.ts:350-363`)携带 `exec`(外层执行,给出 session 所有者与作用域路由)、`agent`、`subCallId`、`name`、`isError`、`content`。`tools/ptc-dispatch-log` 事件声明里的要点(`:168-181`):**只影响日志副本**;程序已拿到完整值,模型两边都看不到;抛错的监听器被包容。
+契约([`index.ts:1277-1285`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1277-L1285)):contained —— 监听器抛错时记一条 warn 并回落 `dispatch.content`,所以这条 promise 链不会 reject。`PtcDispatchLog`([`index.ts:350-363`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L350-L363))携带 `exec`(外层执行,给出 session 所有者与作用域路由)、`agent`、`subCallId`、`name`、`isError`、`content`。`tools/ptc-dispatch-log` 事件声明里的要点([`:168-181`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L168-L181)):**只影响日志副本**;程序已拿到完整值,模型两边都看不到;抛错的监听器被包容。
 
 | 事件 | 追加时机 | 语义 |
 |---|---|---|
-| `tool/ptc-dispatch-start`(`types.ts:40`) | `start()` 内(`ptc.ts:534`) | 真正开始;排队中被放弃的调用不落日志 |
-| `tool/ptc-dispatch`(`types.ts:56`) | `settle()` 的旁路任务(`ptc.ts:509`) | 落定,携带完整 `content` + `isError`,与原生 `tool/result` 同一套词汇 |
+| `tool/ptc-dispatch-start`([`types.ts:40`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/types.ts#L40)) | `start()` 内([`ptc.ts:534`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L534)) | 真正开始;排队中被放弃的调用不落日志 |
+| `tool/ptc-dispatch`([`types.ts:56`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/types.ts#L56)) | `settle()` 的旁路任务([`ptc.ts:509`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L509)) | 落定,携带完整 `content` + `isError`,与原生 `tool/result` 同一套词汇 |
 
-两者都被 `deriveMessages()` 忽略——**子调用永不回到模型上下文**(`types.ts:36-38`、`:50-51`),但持久化与 UI 拿到每一次调用;时间差就是两事件的 `time` 字段。客户端把这一对折成递归子调用树(`packages/client/ui-chat/src/client/model/tool-call-tree.ts:57-102`),见 [06-presentation-and-ui.md](./06-presentation-and-ui.md)。
+两者都被 `deriveMessages()` 忽略——**子调用永不回到模型上下文**([`types.ts:36-38`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/types.ts#L36-L38)、[`:50-51`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/types.ts#L50-L51)),但持久化与 UI 拿到每一次调用;时间差就是两事件的 `time` 字段。客户端把这一对折成递归子调用树([`packages/client/ui-chat/src/client/model/tool-call-tree.ts:57-102`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-chat/src/client/model/tool-call-tree.ts#L57-L102)),见 [06-presentation-and-ui.md](./06-presentation-and-ui.md)。
 
 ```typescript
 // packages/core/tools/src/ptc.ts:555 —— commit():有序提交 + 转发 + 背压（`:577-582` 的完整注释见源码）
@@ -399,9 +399,9 @@ settle(result)
 while (logWork.size > maxParallel) await Promise.race(logWork)
 ```
 
-**背压的位置很重要**:它挂在 `commit()` 的**最后**,也就是 lane 内、`settle()` 之后。于是每个旁路任务持有一份完整结果,`logWork` 的大小就是内存上限;上限是 `maxParallel`(即 `maxParallelSubCalls`,默认 10,`index.ts:768-774` 校验为正整数);超限时**有序 lane 停下**,后续子调用无法启动。它**不会**延迟任何程序已经拿到的值,因为 `settle()` 已经先 `resolve` 了。`inFlight.size < maxParallel` 与 `logWork.size > maxParallel` 用同一个上限覆盖两类资源:**并发 body 数**与**待追加日志数**。
+**背压的位置很重要**:它挂在 `commit()` 的**最后**,也就是 lane 内、`settle()` 之后。于是每个旁路任务持有一份完整结果,`logWork` 的大小就是内存上限;上限是 `maxParallel`(即 `maxParallelSubCalls`,默认 10,[`index.ts:768-774`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L768-L774) 校验为正整数);超限时**有序 lane 停下**,后续子调用无法启动。它**不会**延迟任何程序已经拿到的值,因为 `settle()` 已经先 `resolve` 了。`inFlight.size < maxParallel` 与 `logWork.size > maxParallel` 用同一个上限覆盖两类资源:**并发 body 数**与**待追加日志数**。
 
-图像走**外层** `exec.deferContext` 而不是子结果:子调用永不进模型上下文,所以图像必须被摆渡到 `run_code` 外层结果之后。`concludesTurn` 只有成功结果能转发——`ToolExecutionFailure` 的类型里 `concludesTurn?: never`(`index.ts:569`),所以被策略改写成失败的结果不可能通过一个"恢复了"的程序停掉整个 turn。
+图像走**外层** `exec.deferContext` 而不是子结果:子调用永不进模型上下文,所以图像必须被摆渡到 `run_code` 外层结果之后。`concludesTurn` 只有成功结果能转发——`ToolExecutionFailure` 的类型里 `concludesTurn?: never`([`index.ts:569`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L569)),所以被策略改写成失败的结果不可能通过一个"恢复了"的程序停掉整个 turn。
 
 ---
 
@@ -430,11 +430,11 @@ try {
 } finally { exec.signal.removeEventListener('abort', onOuterAbort) }
 ```
 
-`drainDispatches`(`ptc.ts:447-456`)= `await drive()`(放弃排队未启动项、等在飞池、排空有序提交 lane,含返回时正在进行的那次 `commit()`)+ `while (logWork.size > 0) await Promise.allSettled([...logWork])`(每个 settle 事件都落在打开的 turn 内)。
+`drainDispatches`([`ptc.ts:447-456`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L447-L456))= `await drive()`(放弃排队未启动项、等在飞池、排空有序提交 lane,含返回时正在进行的那次 `commit()`)+ `while (logWork.size > 0) await Promise.allSettled([...logWork])`(每个 settle 事件都落在打开的 turn 内)。
 
-顺序是刻意的三步:①**`runController.abort('run_code settled')`** —— 在飞的子派发被中止(它们的 `signal` 就是这个 controller,`ptc.ts:477`),排队未启动的条目被 `abandon()` 丢弃且**不落日志**;②**`await drainDispatches()`** —— 让 lane 跑到 quiescence(包括程序返回时正在进行的 `commit()`),再等 `logWork` 全部落定;③**然后才返回**。所以"子调用事件的时间戳落在父调用区间内"这条关系是**构造性**成立的,不依赖时间戳比较。`runController`(`ptc.ts:337-339`)是**运行作用域**的信号:`onOuterAbort` 跟随外层中止,`finally` 里 `abort('run_code settled')` 让运行**因任何原因**落定时也中止它。第三层 `finally` 只做一件事:摘掉 `onOuterAbort` 监听器(`:645`)——与 `dispatchToolBody` 的 `finally` 摘 fuse 监听器(`index.ts:1547`)是同一个纪律:**注册表按 dispatch 挂的监听器,必须在 dispatch 结束时摘掉**。
+顺序是刻意的三步:①**`runController.abort('run_code settled')`** —— 在飞的子派发被中止(它们的 `signal` 就是这个 controller,[`ptc.ts:477`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L477)),排队未启动的条目被 `abandon()` 丢弃且**不落日志**;②**`await drainDispatches()`** —— 让 lane 跑到 quiescence(包括程序返回时正在进行的 `commit()`),再等 `logWork` 全部落定;③**然后才返回**。所以"子调用事件的时间戳落在父调用区间内"这条关系是**构造性**成立的,不依赖时间戳比较。`runController`([`ptc.ts:337-339`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L337-L339))是**运行作用域**的信号:`onOuterAbort` 跟随外层中止,`finally` 里 `abort('run_code settled')` 让运行**因任何原因**落定时也中止它。第三层 `finally` 只做一件事:摘掉 `onOuterAbort` 监听器([`:645`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L645))——与 `dispatchToolBody` 的 `finally` 摘 fuse 监听器([`index.ts:1547`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1547))是同一个纪律:**注册表按 dispatch 挂的监听器,必须在 dispatch 结束时摘掉**。
 
-`result.error` 时抛 `CodeRunFailedError`(`ptc.ts:138`,`code: 'CODE_RUN_FAILED'`),模型看到 `Error: code run failed (<kind>): <message>`,后面条件性跟 `Captured output:` 与捕获的行。`CODE_RUN_FAILED` 让重试/沙箱/replay 代码能把它与工具自身的错误区分开。`logs` 是**唯一**进模型视野的程序输出(`render` 里 `value.logs.join('\n')`);`renderJsonValue`(`ptc.ts:184-251`)是迭代式渲染器,带 `MAX_JSON_INDENT_CHARS = 10` 的缩进上限(`:176`),让深层子树的格式化保持对规范 JSON 大小线性。
+`result.error` 时抛 `CodeRunFailedError`([`ptc.ts:138`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L138),`code: 'CODE_RUN_FAILED'`),模型看到 `Error: code run failed (<kind>): <message>`,后面条件性跟 `Captured output:` 与捕获的行。`CODE_RUN_FAILED` 让重试/沙箱/replay 代码能把它与工具自身的错误区分开。`logs` 是**唯一**进模型视野的程序输出(`render` 里 `value.logs.join('\n')`);`renderJsonValue`([`ptc.ts:184-251`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L184-L251))是迭代式渲染器,带 `MAX_JSON_INDENT_CHARS = 10` 的缩进上限([`:176`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L176)),让深层子树的格式化保持对规范 JSON 大小线性。
 
 ---
 
@@ -442,17 +442,17 @@ try {
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `RUN_CODE_NAME` / `CodeSdkLanguage` / `RunCodeFlavor` / `TYPESCRIPT_FLAVOR` / `PYTHON_FLAVOR` / `RUN_CODE_FLAVORS` / `resolveFlavor` | `ptc.ts:20` / `:79` / `:30` / `:43` / `:59` / `:82` / `:112` | 保留名;钉住 flavor 与 renderer 两张表的键集;语言的 `description` + `codeDescription` 单一来源;无 runtime → TS,未知语言 → 抛错(`Object.hasOwn` 守护) |
-| `RUN_CODE_DESCRIPTION_PARAM_DESCRIPTION` / `CodeRunFailedError` / `jsonNormalizeArgs` | `ptc.ts:93` / `:138` / `:150` | 语言无关的参数说明;`code: 'CODE_RUN_FAILED'`;两次快照 → `{ dispatched, logged }` |
-| `renderJsonValue` / `renderValue` / `RunCodeOutput` / `RunCodeBridgeOptions` | `ptc.ts:184` / `:254` / `:259` / `:266` | 迭代式 JSON 渲染,缩进有界(`JSON_INDENT:169`、`MAX_JSON_INDENT_CHARS:176`);`{ logs, result? }`;四个 capability 闭包 |
-| `createRunCodeTool` / 语言 getter | `ptc.ts:293` / `:664-676` | 契约铸造;`Object.defineProperty` 延迟解析 |
-| `PendingDispatch` / 四张结构 / `exclusiveActive` | `ptc.ts:357` / `:371-374` / `:376` | 单条子派发的五个阶段与两个标志;`pendingQueue`/`commitQueue`/`inFlight`/`logWork`;独占屏障标志(覆盖到 commit) |
-| `drive` / `drainDispatches` | `ptc.ts:392` / `:447` | 单条有序 lane 的状态机;`await drive()` + 排空 `logWork` |
-| `runOver` / `binding` / `settle` / `commit` | `ptc.ts:461` / `:463` / `:486` / `:555` | 函数形式 abort 读;程序侧契约;先 resolve 再排日志;有序提交 + 背压 |
-| `functions`(null-prototype 绑定表) / `runController` / `onOuterAbort` | `ptc.ts:606` / `:337-339` | `__proto__` 安全的绑定命名空间;运行作用域信号,跟随外层并随运行落定中止 |
-| `runtime.run` 调用 / 收尾三步 / `presentCall`(无 `presentResult`) | `ptc.ts:619` / `:628-634` / `:650` | `errorClass: { name: 'ToolCallError', memberNameProperty: 'toolName' }`;abort → drain → 关闭本轮;通用卡 + title |
-| `requireCodeTransport` / `view()` 插入 / `collapses` | `index.ts:914` / `:1179` / `:1314` | 惰性铸造;非 native 时插入;折叠谓词的唯一家 |
-| `resolveExecution` / `createExecution` 的 `collapsed` / `ToolNotFoundError` / 折叠拒绝结果 | `index.ts:1211` / `:1371` / `:487` / `:1426-1433` | 两个使用点(能不能执行 / 折叠 vs 未知);`reachableFrom`;路线提示 |
-| `PTC_ONLY_INSTRUCTION` / `collapseSection` / `sdkSection` / `SDK_RENDERERS` | `index.ts:51` / `:847` / `:867` / `:53` | 提示侧规则文本;两个按调用作用域求值的 section;语言→渲染器 |
-| `requireCodeRuntime` / `sdkSchemas` / `shapeDispatchLog` / `PtcDispatchLog` / `resolveMaxParallelSubCalls` | `index.ts:1009` / `:1229` / `:1286` / `:350` / `:768` | 使用期读取;`visible` 减 `run_code`;contained 的日志瀑布调用器;默认 10 |
-| `PtcDispatchStartEventData` / `PtcDispatchEventData` / `renderToolsSdk` / `renderToolsSdkPy` / `ToolCallTree.apply` | `types.ts:11` / `:20`、`ts-types.ts:297`、`py-types.ts:763`、`tool-call-tree.ts:57` | 两个仅日志事件;TS/Python 渲染器;客户端把两个 PTC 事件折成递归子调用树 |
+| `RUN_CODE_NAME` / `CodeSdkLanguage` / `RunCodeFlavor` / `TYPESCRIPT_FLAVOR` / `PYTHON_FLAVOR` / `RUN_CODE_FLAVORS` / `resolveFlavor` | [`ptc.ts:20`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L20) / [`:79`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L79) / [`:30`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L30) / [`:43`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L43) / [`:59`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L59) / [`:82`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L82) / [`:112`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L112) | 保留名;钉住 flavor 与 renderer 两张表的键集;语言的 `description` + `codeDescription` 单一来源;无 runtime → TS,未知语言 → 抛错(`Object.hasOwn` 守护) |
+| `RUN_CODE_DESCRIPTION_PARAM_DESCRIPTION` / `CodeRunFailedError` / `jsonNormalizeArgs` | [`ptc.ts:93`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L93) / [`:138`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L138) / [`:150`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L150) | 语言无关的参数说明;`code: 'CODE_RUN_FAILED'`;两次快照 → `{ dispatched, logged }` |
+| `renderJsonValue` / `renderValue` / `RunCodeOutput` / `RunCodeBridgeOptions` | [`ptc.ts:184`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L184) / [`:254`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L254) / [`:259`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L259) / [`:266`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L266) | 迭代式 JSON 渲染,缩进有界(`JSON_INDENT:169`、`MAX_JSON_INDENT_CHARS:176`);`{ logs, result? }`;四个 capability 闭包 |
+| `createRunCodeTool` / 语言 getter | [`ptc.ts:293`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L293) / [`:664-676`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L664-L676) | 契约铸造;`Object.defineProperty` 延迟解析 |
+| `PendingDispatch` / 四张结构 / `exclusiveActive` | [`ptc.ts:357`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L357) / [`:371-374`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L371-L374) / [`:376`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L376) | 单条子派发的五个阶段与两个标志;`pendingQueue`/`commitQueue`/`inFlight`/`logWork`;独占屏障标志(覆盖到 commit) |
+| `drive` / `drainDispatches` | [`ptc.ts:392`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L392) / [`:447`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L447) | 单条有序 lane 的状态机;`await drive()` + 排空 `logWork` |
+| `runOver` / `binding` / `settle` / `commit` | [`ptc.ts:461`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L461) / [`:463`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L463) / [`:486`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L486) / [`:555`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L555) | 函数形式 abort 读;程序侧契约;先 resolve 再排日志;有序提交 + 背压 |
+| `functions`(null-prototype 绑定表) / `runController` / `onOuterAbort` | [`ptc.ts:606`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L606) / [`:337-339`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L337-L339) | `__proto__` 安全的绑定命名空间;运行作用域信号,跟随外层并随运行落定中止 |
+| `runtime.run` 调用 / 收尾三步 / `presentCall`(无 `presentResult`) | [`ptc.ts:619`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L619) / [`:628-634`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L628-L634) / [`:650`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L650) | `errorClass: { name: 'ToolCallError', memberNameProperty: 'toolName' }`;abort → drain → 关闭本轮;通用卡 + title |
+| `requireCodeTransport` / `view()` 插入 / `collapses` | [`index.ts:914`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L914) / [`:1179`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1179) / [`:1314`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1314) | 惰性铸造;非 native 时插入;折叠谓词的唯一家 |
+| `resolveExecution` / `createExecution` 的 `collapsed` / `ToolNotFoundError` / 折叠拒绝结果 | [`index.ts:1211`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1211) / [`:1371`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1371) / [`:487`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L487) / [`:1426-1433`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1426-L1433) | 两个使用点(能不能执行 / 折叠 vs 未知);`reachableFrom`;路线提示 |
+| `PTC_ONLY_INSTRUCTION` / `collapseSection` / `sdkSection` / `SDK_RENDERERS` | [`index.ts:51`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L51) / [`:847`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L847) / [`:867`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L867) / [`:53`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L53) | 提示侧规则文本;两个按调用作用域求值的 section;语言→渲染器 |
+| `requireCodeRuntime` / `sdkSchemas` / `shapeDispatchLog` / `PtcDispatchLog` / `resolveMaxParallelSubCalls` | [`index.ts:1009`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1009) / [`:1229`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1229) / [`:1286`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1286) / [`:350`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L350) / [`:768`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L768) | 使用期读取;`visible` 减 `run_code`;contained 的日志瀑布调用器;默认 10 |
+| `PtcDispatchStartEventData` / `PtcDispatchEventData` / `renderToolsSdk` / `renderToolsSdkPy` / `ToolCallTree.apply` | [`types.ts:11`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/types.ts#L11) / [`:20`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/types.ts#L20)、[`ts-types.ts:297`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ts-types.ts#L297)、[`py-types.ts:763`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/py-types.ts#L763)、[`tool-call-tree.ts:57`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-chat/src/client/model/tool-call-tree.ts#L57) | 两个仅日志事件;TS/Python 渲染器;客户端把两个 PTC 事件折成递归子调用树 |

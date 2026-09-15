@@ -30,13 +30,13 @@
 
 | 篇 | 主题 | 主要源码 |
 |---|---|---|
-| [01](./01-agent-registry-and-lifecycle.md) | Agent 注册表与生命周期 | `packages/core/agent/src/index.ts`、`runtime-types.ts`、`packages/core/agent-loop/src/index.ts` |
-| [02](./02-subagent-seam-and-providers.md) | 能力缝与 provider | `packages/subagent/subagent/src/{index,types}.ts`、`subagent-in-process-driver/src/index.ts`、`subagent-spawn-in-process/src/index.ts`、`subagent-fork-in-process/src/index.ts` |
-| [03](./03-child-agent-composition.md) | 子 Agent 的"世界"组装 | `packages/subagent/subagent/src/child-agent.ts`、`depth.ts`、`descriptor.ts` |
+| [01](./01-agent-registry-and-lifecycle.md) | Agent 注册表与生命周期 | [`packages/core/agent/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts)、[`runtime-types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts)、[`packages/core/agent-loop/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts) |
+| [02](./02-subagent-seam-and-providers.md) | 能力缝与 provider | `packages/subagent/subagent/src/{index,types}.ts`、[`subagent-in-process-driver/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts)、[`subagent-spawn-in-process/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-spawn-in-process/src/index.ts)、[`subagent-fork-in-process/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-fork-in-process/src/index.ts) |
+| [03](./03-child-agent-composition.md) | 子 Agent 的"世界"组装 | [`packages/subagent/subagent/src/child-agent.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts)、[`depth.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/depth.ts)、[`descriptor.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/descriptor.ts) |
 | [04](./04-continuation-and-control.md) | 续存与管控 | `packages/subagent/subagent/src/{continuation,continuation-activation,control,list-children,assistant-output}.ts`、`tool-subagent-control/src/{index,list-agents}.ts` |
-| [05](./05-workflow-worker-thread.md) | workflow 引擎 | `packages/workflow/workflow-worker-thread/src/{index,runtime,host,realm,protocol}.ts`、`packages/workflow/workflow/src/index.ts` |
-| [06](./06-jobs-and-notifications.md) | jobs 与完成通知 | `packages/jobs/jobs/src/index.ts`、`jobs-local/src/index.ts`、`tool-jobs/src/index.ts` |
-| [07](./07-preset-composition.md) | preset 组合 | `packages/preset/agent-presets/src/{index,mount,preset}.ts`、`presets/standard/agent.cordis.yml` |
+| [05](./05-workflow-worker-thread.md) | workflow 引擎 | `packages/workflow/workflow-worker-thread/src/{index,runtime,host,realm,protocol}.ts`、[`packages/workflow/workflow/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow/src/index.ts) |
+| [06](./06-jobs-and-notifications.md) | jobs 与完成通知 | [`packages/jobs/jobs/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/index.ts)、[`jobs-local/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts)、[`tool-jobs/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts) |
+| [07](./07-preset-composition.md) | preset 组合 | `packages/preset/agent-presets/src/{index,mount,preset}.ts`、[`presets/standard/agent.cordis.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/presets/standard/agent.cordis.yml) |
 
 ---
 
@@ -78,20 +78,20 @@ flowchart LR
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 1 确认调用者 | 工具层要求 `exec.agent` 存在,缺失就直接抛错,不去猜调用者是谁 | `tool-subagent/src/index.ts:472-476` |
-| 2 选路线 | 按 `run_in_background` 与 continuable 配置解析出前台、one-shot 后台或续存三条路线 | `tool-subagent/src/index.ts:287-305` |
-| 3 能力缝校验 | 取出 provider 后逐项核对能力位,再把请求参数与父 Agent 组装成 resolved request | `subagent/subagent/src/index.ts:556-586` |
-| 4 深度与策略 | 子深度等于父深度加一,超过上限直接抛错;委派策略必须在第一个 await 之前抓到 | `subagent-in-process-driver/src/index.ts:111-120` |
-| 5 未发布窗口 | setup 里依次完成策略落日志、join 父 preset、persona 与工具掩码、描述符挂载 | `subagent-in-process-driver/src/index.ts:122-132` |
-| 6 创建 | 经工厂建会话与驱动,setup 结束后提交并发布 | `agent-loop/src/index.ts:826-835` |
-| 7 发布五步 | 会话入表 → Agent 入表 → 广播会话 → 广播 Agent → 发 session-start | `agent-loop/src/index.ts:662-677` |
-| 8 驱动一轮 | 给子 Agent 送第一条 prompt,然后等它闲下来 | `subagent-in-process-driver/src/index.ts:178-182` |
-| 9 读结果 | 取最后一条非空 assistant 消息作为输出,并映射出本轮停因 | `subagent-in-process-driver/src/index.ts:212-238` |
-| 10 前台回流 | 停因不是 completed 就抛错,变成 isError 工具结果,但保留部分输出 | `tool-subagent/src/index.ts:207-237` |
-| 11 后台回流 | one-shot 后台委派被包成一条作业,启动异常折成 killed 或 failed | `tool-subagent/src/index.ts:544-560`、`:143-153` |
-| 12 完成通知 | owner 空闲且唤醒预算没用完就新开一个 turn,否则注入上下文 | `tool-jobs/src/index.ts:278-299` |
-| 13 续存路线 | 子 Agent 的 inbox(它收消息的队列)接受初始 prompt 就立即返回,只回一个 subagentId,不等它跑完 | `subagent/subagent/src/continuation.ts:102-190` |
-| 14 释放 | 结果失败优先于释放失败,两者都失败才合成一个 AggregateError | `tool-subagent/src/index.ts:207-237` |
+| 1 确认调用者 | 工具层要求 `exec.agent` 存在,缺失就直接抛错,不去猜调用者是谁 | [`tool-subagent/src/index.ts:472-476`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L472-L476) |
+| 2 选路线 | 按 `run_in_background` 与 continuable 配置解析出前台、one-shot 后台或续存三条路线 | [`tool-subagent/src/index.ts:287-305`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L287-L305) |
+| 3 能力缝校验 | 取出 provider 后逐项核对能力位,再把请求参数与父 Agent 组装成 resolved request | [`subagent/subagent/src/index.ts:556-586`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/index.ts#L556-L586) |
+| 4 深度与策略 | 子深度等于父深度加一,超过上限直接抛错;委派策略必须在第一个 await 之前抓到 | [`subagent-in-process-driver/src/index.ts:111-120`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts#L111-L120) |
+| 5 未发布窗口 | setup 里依次完成策略落日志、join 父 preset、persona 与工具掩码、描述符挂载 | [`subagent-in-process-driver/src/index.ts:122-132`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts#L122-L132) |
+| 6 创建 | 经工厂建会话与驱动,setup 结束后提交并发布 | [`agent-loop/src/index.ts:826-835`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L826-L835) |
+| 7 发布五步 | 会话入表 → Agent 入表 → 广播会话 → 广播 Agent → 发 session-start | [`agent-loop/src/index.ts:662-677`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L662-L677) |
+| 8 驱动一轮 | 给子 Agent 送第一条 prompt,然后等它闲下来 | [`subagent-in-process-driver/src/index.ts:178-182`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts#L178-L182) |
+| 9 读结果 | 取最后一条非空 assistant 消息作为输出,并映射出本轮停因 | [`subagent-in-process-driver/src/index.ts:212-238`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts#L212-L238) |
+| 10 前台回流 | 停因不是 completed 就抛错,变成 isError 工具结果,但保留部分输出 | [`tool-subagent/src/index.ts:207-237`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L207-L237) |
+| 11 后台回流 | one-shot 后台委派被包成一条作业,启动异常折成 killed 或 failed | [`tool-subagent/src/index.ts:544-560`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L544-L560)、[`:143-153`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L143-L153) |
+| 12 完成通知 | owner 空闲且唤醒预算没用完就新开一个 turn,否则注入上下文 | [`tool-jobs/src/index.ts:278-299`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts#L278-L299) |
+| 13 续存路线 | 子 Agent 的 inbox(它收消息的队列)接受初始 prompt 就立即返回,只回一个 subagentId,不等它跑完 | [`subagent/subagent/src/continuation.ts:102-190`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/continuation.ts#L102-L190) |
+| 14 释放 | 结果失败优先于释放失败,两者都失败才合成一个 AggregateError | [`tool-subagent/src/index.ts:207-237`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L207-L237) |
 
 <details><summary>原图:函数级调用栈</summary>
 
@@ -161,7 +161,7 @@ tool-subagent.execute                                       (tool-subagent/src/i
 
 </details>
 
-结果回流只有两条路:前台把委派结果直接交回工具调用者;后台走作业完成通知,由通知自己决定是给 owner 注入一条消息,还是新开一个 turn(`tool-jobs/src/index.ts:278-299`)。这两条路的代码完全不共用,唯一的共同点是开头那一步——都得先造出一个真 Agent。
+结果回流只有两条路:前台把委派结果直接交回工具调用者;后台走作业完成通知,由通知自己决定是给 owner 注入一条消息,还是新开一个 turn([`tool-jobs/src/index.ts:278-299`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts#L278-L299))。这两条路的代码完全不共用,唯一的共同点是开头那一步——都得先造出一个真 Agent。
 
 ---
 
@@ -173,14 +173,14 @@ tool-subagent.execute                                       (tool-subagent/src/i
 
 ## 五、全模块不变量速查
 
-1. **创建即事务**:`setup` 期间 agent/session 都未发布;`setup` 抛错、commit 抛错、owner 销毁三者任一发生,都回滚且不发布任何 id(`packages/core/agent/src/index.ts:100-118`)。
-2. **所有权是能力**:`AgentHandle.dispose` 只交给创建者;`ctx.agents.get(id)` 只返回裸 `Agent`(`packages/core/agent/src/index.ts:146-163`)。
-3. **存在 ≠ 授权**:`withInitiator` 只做进程内因果归属,跨边界一律显式传主体(`packages/core/agent/src/index.ts:319`)。
-4. **能力先声明后校验**:provider 的 `capabilities` 五元组在 `start()` 里逐项 fail-loud,绝不"接受后忽略"(`packages/subagent/subagent/src/index.ts:641-657`)。
-5. **子 agent 继承的是 preset standing 层,不是父 agent 自己的 scope 层**(`packages/preset/agent-presets/src/mount.ts:243-251`)。
-6. **委派策略在第一个 await 之前捕获**,并以 `source:'delegation'` 写进子会话日志(`child-agent.ts:242-268`)。
+1. **创建即事务**:`setup` 期间 agent/session 都未发布;`setup` 抛错、commit 抛错、owner 销毁三者任一发生,都回滚且不发布任何 id([`packages/core/agent/src/index.ts:100-118`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L100-L118))。
+2. **所有权是能力**:`AgentHandle.dispose` 只交给创建者;`ctx.agents.get(id)` 只返回裸 `Agent`([`packages/core/agent/src/index.ts:146-163`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L146-L163))。
+3. **存在 ≠ 授权**:`withInitiator` 只做进程内因果归属,跨边界一律显式传主体([`packages/core/agent/src/index.ts:319`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L319))。
+4. **能力先声明后校验**:provider 的 `capabilities` 五元组在 `start()` 里逐项 fail-loud,绝不"接受后忽略"([`packages/subagent/subagent/src/index.ts:641-657`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/index.ts#L641-L657))。
+5. **子 agent 继承的是 preset standing 层,不是父 agent 自己的 scope 层**([`packages/preset/agent-presets/src/mount.ts:243-251`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/mount.ts#L243-L251))。
+6. **委派策略在第一个 await 之前捕获**,并以 `source:'delegation'` 写进子会话日志([`child-agent.ts:242-268`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L242-L268))。
 7. **致命错误上抛,普通失败降级**:workflow 的 `parallel`/`pipeline` 只把普通异常降为 `null`(`runtime.ts:414-425,444-458`)。
-8. **结算 first-wins,通知最后发**:`settle()` 先提交记录、释放 waiter,再通知监听者(`jobs-local/src/index.ts:416-440`)。
+8. **结算 first-wins,通知最后发**:`settle()` 先提交记录、释放 waiter,再通知监听者([`jobs-local/src/index.ts:416-440`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L416-L440))。
 9. **preset 挂载两道硬门**:有行未激活整树拒绝;有行把服务发布到 root realm 整树拒绝(`mount.ts:403-413`)。
 
 ---
@@ -189,20 +189,20 @@ tool-subagent.execute                                       (tool-subagent/src/i
 
 | 文件 | 符号 | 本目录中的角色 |
 |---|---|---|
-| `packages/core/agent/src/index.ts` | `AgentRegistry.create/resume` `enter` `announce` `withInitiator` | 创建入口与所有权 |
-| `packages/core/agent/src/runtime-types.ts` | `Agent`(运行面)、`Inbox`、`agent/*` 事件 | Agent 公开契约 |
-| `packages/core/agent-loop/src/index.ts` | `createAgent` `resumeWith` `setupAndPublish` `prepare` | 发布事务 |
-| `packages/core/agent-loop/src/agent.ts` | `ReactLoopAgent`(scope、followup/steer/inject) | 驱动实现 |
-| `packages/subagent/subagent/src/index.ts` | `SubagentRuntime.start/startContinuable/sendMessage/interrupt` | 能力缝 Service Definition |
-| `packages/subagent/subagent/src/types.ts` | `SubagentProvider` `SubagentStartRequest` `SubagentResult` `SubagentRun` | 全字段契约 |
-| `packages/subagent/subagent-in-process-driver/src/index.ts` | `startInProcessRun` `drivePublishedRun` `readResult` | 一次性驱动 |
-| `packages/subagent/subagent/src/child-agent.ts` | `applyChildComposition` `captureDelegatedPolicyOverrides` `childSessionMeta` | 子世界组装 |
-| `packages/subagent/subagent/src/continuation.ts` | `startContinuable` `sendMessage` `coldResume` | 续存编排 |
-| `packages/subagent/subagent/src/continuation-activation.ts` | `materialize` `interrupt` `submitAdmitted` | Activation 图 |
-| `packages/subagent/tool-subagent-control/src/list-agents.ts` | `statusOf` | 状态读取 |
-| `packages/workflow/workflow-worker-thread/src/runtime.ts` | `agent` `parallel` `pipeline` `acquireSlot` | 脚本钩子 |
-| `packages/workflow/workflow-worker-thread/src/host.ts` | `WorkerRun.startChild/cancel/dispose/onResult` | 宿主侧 RPC |
-| `packages/jobs/jobs-local/src/index.ts` | `start` `kill` `wait` `settle` `servesOwner` | 本地实现 |
-| `packages/jobs/tool-jobs/src/index.ts` | `job_output` `job_kill` `onJobDone` 唤醒预算 | 模型侧消费 |
-| `packages/preset/agent-presets/src/index.ts` | `mount` `composeFrom` `ensureStanding` | preset 组合 |
-| `packages/preset/agent-presets/src/mount.ts` | `mountPreset` `inactiveRows` `leakedServices` `standingMountFor` | 两道硬门 |
+| [`packages/core/agent/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts) | `AgentRegistry.create/resume` `enter` `announce` `withInitiator` | 创建入口与所有权 |
+| [`packages/core/agent/src/runtime-types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts) | `Agent`(运行面)、`Inbox`、`agent/*` 事件 | Agent 公开契约 |
+| [`packages/core/agent-loop/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts) | `createAgent` `resumeWith` `setupAndPublish` `prepare` | 发布事务 |
+| [`packages/core/agent-loop/src/agent.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts) | `ReactLoopAgent`(scope、followup/steer/inject) | 驱动实现 |
+| [`packages/subagent/subagent/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/index.ts) | `SubagentRuntime.start/startContinuable/sendMessage/interrupt` | 能力缝 Service Definition |
+| [`packages/subagent/subagent/src/types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts) | `SubagentProvider` `SubagentStartRequest` `SubagentResult` `SubagentRun` | 全字段契约 |
+| [`packages/subagent/subagent-in-process-driver/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts) | `startInProcessRun` `drivePublishedRun` `readResult` | 一次性驱动 |
+| [`packages/subagent/subagent/src/child-agent.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts) | `applyChildComposition` `captureDelegatedPolicyOverrides` `childSessionMeta` | 子世界组装 |
+| [`packages/subagent/subagent/src/continuation.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/continuation.ts) | `startContinuable` `sendMessage` `coldResume` | 续存编排 |
+| [`packages/subagent/subagent/src/continuation-activation.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/continuation-activation.ts) | `materialize` `interrupt` `submitAdmitted` | Activation 图 |
+| [`packages/subagent/tool-subagent-control/src/list-agents.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent-control/src/list-agents.ts) | `statusOf` | 状态读取 |
+| [`packages/workflow/workflow-worker-thread/src/runtime.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts) | `agent` `parallel` `pipeline` `acquireSlot` | 脚本钩子 |
+| [`packages/workflow/workflow-worker-thread/src/host.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts) | `WorkerRun.startChild/cancel/dispose/onResult` | 宿主侧 RPC |
+| [`packages/jobs/jobs-local/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts) | `start` `kill` `wait` `settle` `servesOwner` | 本地实现 |
+| [`packages/jobs/tool-jobs/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts) | `job_output` `job_kill` `onJobDone` 唤醒预算 | 模型侧消费 |
+| [`packages/preset/agent-presets/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts) | `mount` `composeFrom` `ensureStanding` | preset 组合 |
+| [`packages/preset/agent-presets/src/mount.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/mount.ts) | `mountPreset` `inactiveRows` `leakedServices` `standingMountFor` | 两道硬门 |

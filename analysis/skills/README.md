@@ -2,7 +2,7 @@
 
 > 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
 > 上游章节:[第四章:Skills 的技术实现与运行方式](../04-skills.md)
-> 代码面:`packages/skill/`(registry / filesystem provider / badge provider / tool-skill consumer)、`packages/api/session-controller/src/skill-catalog.ts`、`packages/client/ui-skill/`
+> 代码面:`packages/skill/`(registry / filesystem provider / badge provider / tool-skill consumer)、[`packages/api/session-controller/src/skill-catalog.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/skill-catalog.ts)、`packages/client/ui-skill/`
 
 ---
 
@@ -27,11 +27,11 @@
 
 | 文档 | 覆盖范围 | 主源码 |
 |---|---|---|
-| [01 · SKILL.md 契约与发现](./01-skill-format-and-discovery.md) | frontmatter 全字段与校验、两种物理形态、六档发现根与 rank、`list`/`read` 走查、错误降级语义 | `packages/skill/skill-filesystem/src/index.ts` |
-| [02 · Provider Registry](./02-provider-registry.md) | provider 注册与层归属、层间遮蔽与层内三级裁决、rev 缓存与失效、`get()` 校验闸门、运行时注册与 dispose | `packages/skill/skill/src/index.ts` |
-| [03 · 目录与按需加载](./03-catalog-and-loading.md) | 会话目录构造、pre-step 注入路径、`skill` 工具四道闸门、渲染契约、`/name` 手势、digest 与工具可见性绑定 | `packages/skill/tool-skill/src/index.ts` |
-| [04 · 文件监视与失效闭环](./04-watcher-and-invalidation.md) | chokidar 配置与事件去抖、`fs/observed` 直通、invalidate 传播、冷会话 `SessionSkillCatalog`、`ui-skill` 补全 | `packages/skill/skill-filesystem/src/index.ts`、`packages/api/session-controller/src/skill-catalog.ts`、`packages/client/ui-skill/src/client/index.ts` |
-| [05 · 作用域与组合](./05-scope-and-composition.md) | host 层 vs preset/agent 层、与 tools 注册表同构性、preset 挂载片段、合并视图、子 agent 继承、bundled 出货方式 | `packages/core/scope/src/store.ts`、`packages/preset/agent-presets/`、`packages/bundle/*/cordis.patch.yml` |
+| [01 · SKILL.md 契约与发现](./01-skill-format-and-discovery.md) | frontmatter 全字段与校验、两种物理形态、六档发现根与 rank、`list`/`read` 走查、错误降级语义 | [`packages/skill/skill-filesystem/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts) |
+| [02 · Provider Registry](./02-provider-registry.md) | provider 注册与层归属、层间遮蔽与层内三级裁决、rev 缓存与失效、`get()` 校验闸门、运行时注册与 dispose | [`packages/skill/skill/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts) |
+| [03 · 目录与按需加载](./03-catalog-and-loading.md) | 会话目录构造、pre-step 注入路径、`skill` 工具四道闸门、渲染契约、`/name` 手势、digest 与工具可见性绑定 | [`packages/skill/tool-skill/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/tool-skill/src/index.ts) |
+| [04 · 文件监视与失效闭环](./04-watcher-and-invalidation.md) | chokidar 配置与事件去抖、`fs/observed` 直通、invalidate 传播、冷会话 `SessionSkillCatalog`、`ui-skill` 补全 | [`packages/skill/skill-filesystem/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts)、[`packages/api/session-controller/src/skill-catalog.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/skill-catalog.ts)、[`packages/client/ui-skill/src/client/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-skill/src/client/index.ts) |
+| [05 · 作用域与组合](./05-scope-and-composition.md) | host 层 vs preset/agent 层、与 tools 注册表同构性、preset 挂载片段、合并视图、子 agent 继承、bundled 出货方式 | [`packages/core/scope/src/store.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts)、`packages/preset/agent-presets/`、`packages/bundle/*/cordis.patch.yml` |
 
 ---
 

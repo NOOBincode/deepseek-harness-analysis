@@ -1,13 +1,13 @@
 # 02 · 命名算法:`publicToolName()` 完整推演
 
-> 源码:`packages/mcp/mcp-client/src/tools.ts:98-118`(函数)、`tools.ts:46-56`(常量)
+> 源码:[`packages/mcp/mcp-client/src/tools.ts:98-118`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L98-L118)(函数)、[`tools.ts:46-56`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L46-L56)(常量)
 > 上游:第六章 [§1.5](../06-mcp.md)
 
 ---
 
 ## 一、模块契约原文
 
-`tools.ts:6-10` 把命名契约写在模块头:
+[`tools.ts:6-10`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L6-L10) 把命名契约写在模块头:
 
 ```typescript
  * Naming contract (see the mcp-client Agent Note "Naming invariants"): every MCP tool
@@ -25,7 +25,7 @@
 
 ### 2.1 常量
 
-`tools.ts:46-56`:
+[`tools.ts:46-56`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L46-L56):
 
 ```typescript
 /**
@@ -45,7 +45,7 @@ const HASH_LENGTH = 12
 
 ### 2.2 四个步骤
 
-`tools.ts:112-118`:
+[`tools.ts:112-118`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L112-L118):
 
 ```typescript
 export function publicToolName(serverName: string, rawName: string): string {
@@ -96,7 +96,7 @@ flowchart TD
 
 ## 三、输入 → 输出示例表
 
-下表的哈希值由 `SHA-256(serverName + "\0" + rawName)` 的十六进制前 12 位实算得到,可与 `tools.ts:116` 的表达式逐位核对。
+下表的哈希值由 `SHA-256(serverName + "\0" + rawName)` 的十六进制前 12 位实算得到,可与 [`tools.ts:116`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L116) 的表达式逐位核对。
 
 | # | `serverName` | `rawName` | 路径 | 公开名 | 长度 |
 |---|---|---|---|---|---|
@@ -147,11 +147,11 @@ normalized = 'mcp__srv__' + 'w'×64 + '_d'×32       长度 138,内容被改写
 返回值     = 'mcp__srv__' + 'w'×41 + '_86944011ec2f'  长度 64
 ```
 
-两种失败原因(改写、超长)在实现里不需要分别处理,哈希路径一条覆盖。E2E 的 `fixture-server.ts:67-73` 注册的 `admin.reset` 就是这条路径在**真实协议**上的验证(`mcp-client.e2e.ts:134-147`)。
+两种失败原因(改写、超长)在实现里不需要分别处理,哈希路径一条覆盖。E2E 的 `fixture-server.ts:67-73` 注册的 `admin.reset` 就是这条路径在**真实协议**上的验证([`mcp-client.e2e.ts:134-147`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts#L134-L147))。
 
 ### 4.2 跨服务器同名
 
-`mcp-client.spec.ts:207-216` 与 `mcp-client.e2e.ts` 的 `mcp__web__ping` / `mcp__fixture__add` 都是同一事实的证据:两台服务器各自发布 `search`,得到 `mcp__github__search` 与 `mcp__web__search`(上表 #9/#10)。这是 `mcp__<serverName>__` 前缀的**唯一**目的之一——官方注记引用的 Microsoft Research 调查发现 1,470 台服务器中有 775 个重名工具名(`search` 一个词出现在 32 台服务器上),因此前缀是常态化解法而不是兜底。
+[`mcp-client.spec.ts:207-216`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L207-L216) 与 [`mcp-client.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts) 的 `mcp__web__ping` / `mcp__fixture__add` 都是同一事实的证据:两台服务器各自发布 `search`,得到 `mcp__github__search` 与 `mcp__web__search`(上表 #9/#10)。这是 `mcp__<serverName>__` 前缀的**唯一**目的之一——官方注记引用的 Microsoft Research 调查发现 1,470 台服务器中有 775 个重名工具名(`search` 一个词出现在 32 台服务器上),因此前缀是常态化解法而不是兜底。
 
 ### 4.3 归一化坍缩风险与哈希的解法
 
@@ -162,7 +162,7 @@ normalized = 'mcp__srv__' + 'w'×64 + '_d'×32       长度 138,内容被改写
 | `admin.reset` | `mcp__srv__admin_reset` | `3b185f786768` | `mcp__srv__admin_reset_3b185f786768` |
 | `admin_reset` | — (干净路径) | 无 | `mcp__srv__admin_reset` |
 
-`mcp-client.spec.ts:175-181` 把这条不变式钉成测试:
+[`mcp-client.spec.ts:175-181`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L175-L181) 把这条不变式钉成测试:
 
 ```typescript
 const a = publicToolName('srv', 'admin.reset')
@@ -185,22 +185,22 @@ publicToolName('srv', 'admin_reset_3b185f786768')
 
 | 冲突范围 | 检测点 | 后果 |
 |---|---|---|
-| 同一服务器内 | `syncTools` 的 `definitions.has(publicName)`(`tools.ts:158`) | 整表 reject:`server listed tool "…" more than once — invalid tool list`,旧代保留 |
-| 同一进程内的两台服务器 | `ctx.tools.register()` 的重名拒绝(`core/tools/src/index.ts:1022-1023`:"duplicates within one layer … fail")| 半代回滚,`registrationFailure` 决定吞下还是上抛(见 [01 §4](./01-discovery-and-sync.md)) |
+| 同一服务器内 | `syncTools` 的 `definitions.has(publicName)`([`tools.ts:158`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L158)) | 整表 reject:`server listed tool "…" more than once — invalid tool list`,旧代保留 |
+| 同一进程内的两台服务器 | `ctx.tools.register()` 的重名拒绝([`core/tools/src/index.ts:1022-1023`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1022-L1023):"duplicates within one layer … fail")| 半代回滚,`registrationFailure` 决定吞下还是上抛(见 [01 §4](./01-discovery-and-sync.md)) |
 
 因此哈希提供的不是"数学上不可能碰撞"的保证(12 位十六进制 = 48 bit,碰撞概率非零),而是**"任何碰撞都会被注册表的唯一性检查变成一次响亮的拒绝"**。这与仓库"Misconfiguration fails loud"的约定一致。
 
 ### 4.5 `serverName` 长度上限的来历
 
-`serverName` 由 Schema 强制为 `^[A-Za-z0-9_-]{1,32}$`(`index.ts:38`,注释:"Valid `serverName`, kept below the public tool-name budget"):
+`serverName` 由 Schema 强制为 `^[A-Za-z0-9_-]{1,32}$`([`index.ts:38`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L38),注释:"Valid `serverName`, kept below the public tool-name budget"):
 
 ```typescript
 const SERVER_NAME_PATTERN = /^[A-Za-z0-9_-]{1,32}$/
 ```
 
-32 这个数字的作用是**保证每个服务器至少有一段干净名字预算**:`mcp__`(5)+ 32 + `__`(2)= 39 字符固定开销,剩余 25 字符供 rawName 走快路径(上表 #14),超过 25 就走哈希路径。约束同时被 Schema(`index.ts:116,127`)和 ACP 的 `VALID_SERVER_NAME`(`packages/acp/acp/src/mcp.ts:10`)两处独立强制——ACP 侧还会对不合规的名字做归一化并加 8 位摘要(见 [05 §5](./05-transport-and-security.md))。
+32 这个数字的作用是**保证每个服务器至少有一段干净名字预算**:`mcp__`(5)+ 32 + `__`(2)= 39 字符固定开销,剩余 25 字符供 rawName 走快路径(上表 #14),超过 25 就走哈希路径。约束同时被 Schema(`index.ts:116,127`)和 ACP 的 `VALID_SERVER_NAME`([`packages/acp/acp/src/mcp.ts:10`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L10))两处独立强制——ACP 侧还会对不合规的名字做归一化并加 8 位摘要(见 [05 §5](./05-transport-and-security.md))。
 
-`apply.spec.ts:105-118` 验证了越界即拒:
+[`apply.spec.ts:105-118`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts#L105-L118) 验证了越界即拒:
 
 ```typescript
 expect(() => ConfigSchema({ transport: 'stdio', serverName: 'bad name!', command: 'echo' } as never)).toThrow()
@@ -213,17 +213,17 @@ expect(() => ConfigSchema({ transport: 'stdio', serverName: 'x'.repeat(33), comm
 
 ### 5.1 反解的缺席是可 grep 验证的
 
-在整个 `packages/` 下检索 `split('__')`、`startsWith('mcp__')`、以及任何"从公开名解析"的模式,**没有任何匹配**(仅存在测试与文档中的字面量 `mcp__…`)。公开名在仓库里的出现位置只有三类:桥自己构造它(`tools.ts:113`)、测试断言它、注释描述它。**没有任何消费者从它推导 rawName。**
+在整个 `packages/` 下检索 `split('__')`、`startsWith('mcp__')`、以及任何"从公开名解析"的模式,**没有任何匹配**(仅存在测试与文档中的字面量 `mcp__…`)。公开名在仓库里的出现位置只有三类:桥自己构造它([`tools.ts:113`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L113))、测试断言它、注释描述它。**没有任何消费者从它推导 rawName。**
 
 ### 5.2 executor 闭包直接持有 rawName
 
-`createExecutor`(`tools.ts:313-320`)的签名把 `rawName` 作为独立参数接收,`createDefinition` 调用它时传入的是 `tool.name` 原文(`tools.ts:271`):
+`createExecutor`([`tools.ts:313-320`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L313-L320))的签名把 `rawName` 作为独立参数接收,`createDefinition` 调用它时传入的是 `tool.name` 原文([`tools.ts:271`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L271)):
 
 ```typescript
 execute: createExecutor(client, ctx, rawName, taskRequired, opts, projections),
 ```
 
-真正上线的那一行是 `callToolUncached`(`tools.ts:88-90`):
+真正上线的那一行是 `callToolUncached`([`tools.ts:88-90`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L88-L90)):
 
 ```typescript
 return client.request(
@@ -233,7 +233,7 @@ return client.request(
 )
 ```
 
-`params.name` 取的是闭包变量 `rawName`,**不是** `args`/`exec` 里的任何字段,也不是任何从公开名派生的量。`mcp-client.spec.ts:461-477` 用含点的名字直接验证:
+`params.name` 取的是闭包变量 `rawName`,**不是** `args`/`exec` 里的任何字段,也不是任何从公开名派生的量。[`mcp-client.spec.ts:461-477`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L461-L477) 用含点的名字直接验证:
 
 ```typescript
 const publicName = publicToolName('srv', 'admin.reset')   // mcp__srv__admin_reset_3b185f786768
@@ -250,7 +250,7 @@ expect(client.callTool).toHaveBeenCalledWith(
 |---|---|---|
 | `createOutput(rawName, …)` `tools.ts:270,285` | 供 `extractText(content, rawName)` 生成"无可见内容"的诊断文本 | 否,只进模型可见文本 |
 | `createExecutor(... rawName ...)` `tools.ts:271,323` | taskSupport 拒绝消息里点名是哪个工具 | 否 |
-| `callToolUncached(... rawName ...)` `tools.ts:330` | `tools/call` 的 `params.name` | **是** |
+| `callToolUncached(... rawName ...)` [`tools.ts:330`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L330) | `tools/call` 的 `params.name` | **是** |
 
 三处都没有"反向解析"的痕迹:`rawName` 自始至终以变量形式流动。
 
@@ -260,7 +260,7 @@ expect(client.callTool).toHaveBeenCalledWith(
 
 1. **纯函数 ⇒ HMR 安全**。公开名只依赖 `(serverName, rawName)`,与连接代际、注册顺序、其他服务器是否存在全都无关。HMR 热替换若保持 `serverName` 不变,重建出**逐字节相同**的公开名,因此会话历史里的 `tool/call` 名称、权限规则里的 `mcp__github__*` 前缀、遥测聚合全部继续有效。
 2. **注册顺序无关 ⇒ 无静默覆盖**。"先注册者胜"或"后注册者覆盖"这类策略被结构性排除:冲突只会走 `createDefinition` 之后的注册失败分支。
-3. **命名算法是 v1 契约**。`mcp-client/README.md:206` 明确写着"changing it after release would break session history and permission rules";`mcp-client.spec.ts:155-182` 是它的钉子。
+3. **命名算法是 v1 契约**。[`mcp-client/README.md:206`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/README.md#L206) 明确写着"changing it after release would break session history and permission rules";[`mcp-client.spec.ts:155-182`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L155-L182) 是它的钉子。
 
 ---
 
@@ -268,22 +268,22 @@ expect(client.callTool).toHaveBeenCalledWith(
 
 | 符号 / 常量 | 位置 | 说明 |
 |---|---|---|
-| `publicToolName()` | `tools.ts:112` | 算法本体,15 行 |
-| `MAX_PUBLIC_NAME_LENGTH = 64` | `tools.ts:50` | 协议常量,非配置 |
-| `INVALID_NAME_CHARS` | `tools.ts:53` | `/[^A-Za-z0-9_-]/g` 全局替换 |
-| `HASH_LENGTH = 12` | `tools.ts:56` | 身份摘要长度(48 bit) |
-| `SERVER_NAME_PATTERN` | `index.ts:38` | `^[A-Za-z0-9_-]{1,32}$` |
-| `callToolUncached()` 的 `params.name` | `tools.ts:89` | rawName 唯一上线点 |
-| `createOutput()` 的 `render` | `tools.ts:296-299` | 用 rawName 生成占位诊断 |
+| `publicToolName()` | [`tools.ts:112`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L112) | 算法本体,15 行 |
+| `MAX_PUBLIC_NAME_LENGTH = 64` | [`tools.ts:50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L50) | 协议常量,非配置 |
+| `INVALID_NAME_CHARS` | [`tools.ts:53`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L53) | `/[^A-Za-z0-9_-]/g` 全局替换 |
+| `HASH_LENGTH = 12` | [`tools.ts:56`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L56) | 身份摘要长度(48 bit) |
+| `SERVER_NAME_PATTERN` | [`index.ts:38`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L38) | `^[A-Za-z0-9_-]{1,32}$` |
+| `callToolUncached()` 的 `params.name` | [`tools.ts:89`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L89) | rawName 唯一上线点 |
+| `createOutput()` 的 `render` | [`tools.ts:296-299`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts#L296-L299) | 用 rawName 生成占位诊断 |
 | `VALID_SERVER_NAME` / `normalizeServerName()` | `packages/acp/acp/src/mcp.ts:10,111` | ACP 侧另一套 serverName 归一化 |
 
 ### 测试锚点
 
 | 断言 | 位置 |
 |---|---|
-| 干净名原样、含点加哈希、超长截断到 64、确定性与不坍缩 | `mcp-client.spec.ts:155-182` |
-| 公开名上线、rawName 上线 | `mcp-client.spec.ts:440-477` |
-| 跨服务器同名共存 | `mcp-client.spec.ts:207-216` |
-| 与原生同名工具共存 | `mcp-client.spec.ts:218-234` |
-| 真实协议上的含点名归一 | `mcp-client.e2e.ts:134-147` |
-| serverName 模式越界即拒 | `apply.spec.ts:98-127` |
+| 干净名原样、含点加哈希、超长截断到 64、确定性与不坍缩 | [`mcp-client.spec.ts:155-182`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L155-L182) |
+| 公开名上线、rawName 上线 | [`mcp-client.spec.ts:440-477`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L440-L477) |
+| 跨服务器同名共存 | [`mcp-client.spec.ts:207-216`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L207-L216) |
+| 与原生同名工具共存 | [`mcp-client.spec.ts:218-234`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L218-L234) |
+| 真实协议上的含点名归一 | [`mcp-client.e2e.ts:134-147`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts#L134-L147) |
+| serverName 模式越界即拒 | [`apply.spec.ts:98-127`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts#L98-L127) |

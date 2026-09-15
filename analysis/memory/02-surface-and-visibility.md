@@ -167,7 +167,7 @@ export type SurfaceOp =
   | { op: 'replace'; startSeq: SessionSeq; endSeq: SessionSeq }
 ```
 
-"位置区间而非数值区间"这句话有真实后果:一次替换会把一个**序号更大**的新节点放到一个**序号更小**的旧位置上(`splice` 保持位置不变)。所以第二次压缩如果再次覆盖同一段,它的 `startSeq` 可能大于 `endSeq`。压缩结果类型里专门记录了这条——**任何消费方都不能把 `start`/`end` 当作 seq 区间的两个端点去做数值遍历**,`shadowedSeqs` 才是权威集合(`compaction/src/types.ts:107-117`)。这一点在 `replacementRange()` 里是直接体现的:它拿到的 `shadowedSeqs` 来自 `state.nodes.slice()`,即真实被摘掉的节点。
+"位置区间而非数值区间"这句话有真实后果:一次替换会把一个**序号更大**的新节点放到一个**序号更小**的旧位置上(`splice` 保持位置不变)。所以第二次压缩如果再次覆盖同一段,它的 `startSeq` 可能大于 `endSeq`。压缩结果类型里专门记录了这条——**任何消费方都不能把 `start`/`end` 当作 seq 区间的两个端点去做数值遍历**,`shadowedSeqs` 才是权威集合([`compaction/src/types.ts:107-117`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/types.ts#L107-L117))。这一点在 `replacementRange()` 里是直接体现的:它拿到的 `shadowedSeqs` 来自 `state.nodes.slice()`,即真实被摘掉的节点。
 
 ### 两个消费者,两份素材
 
@@ -233,7 +233,7 @@ function assertSystemHeadRewrite(
 
 三个条件缺一不可:**区间从索引 0 开始**、**该节点确实是 `system/message`**、**替换者本身是覆盖恰好一个节点的 `system/message`**。所以模型永远带着系统提示跑,即使某个第三方插件想拿 `user/message` 覆盖整个历史。
 
-这条规则只看节点**位置**,不看节点**序号**:如果历史上发生过替换,今天的节点 0 可能不再是日志里的第一个 `system/message`。而 `system/message` 自身允许"空渲染"——一个内容为空的头节点表示"没有系统提示",而不是"回退到更早的提示"(`core/session/src/types.ts:298-309`)。
+这条规则只看节点**位置**,不看节点**序号**:如果历史上发生过替换,今天的节点 0 可能不再是日志里的第一个 `system/message`。而 `system/message` 自身允许"空渲染"——一个内容为空的头节点表示"没有系统提示",而不是"回退到更早的提示"([`core/session/src/types.ts:298-309`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L298-L309))。
 
 `tool/result` 的改写限制走的是同一条思路的"窄化"版本:允许压缩裁剪工具结果的内容,但不允许借此换掉工具名、参数、错误元数据或调用 id。
 
@@ -263,7 +263,7 @@ function assertToolResultRewrite(
 }
 ```
 
-比较用的是自带的 `isDeepEqualJson()`(`surface.ts:351`)而不是 `node:util` 的 `isDeepStrictEqual`,原因是这个模块要向浏览器导出——文件头明确写了"web clients consume this subpath export, so it must stay free of `node:` imports"(`surface.ts:4`)。
+比较用的是自带的 `isDeepEqualJson()`([`surface.ts:351`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L351))而不是 `node:util` 的 `isDeepStrictEqual`,原因是这个模块要向浏览器导出——文件头明确写了"web clients consume this subpath export, so it must stay free of `node:` imports"([`surface.ts:4`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L4))。
 
 ---
 
@@ -336,7 +336,7 @@ seed 导入走的是同一套 `validateNext`,所以一个 replay/fork 出来的�
       }
 ```
 
-同一个折叠还有第三个入口——`foldSurface()`(`surface.ts:487`),给外部重建者用:拿一段日志前缀,重新算出那时的 surface 与替换历史。三个入口共用 `planSurfaceEvent()` / `applySurfacePlan()`,所以"同一份日志在任何入口折出来的 surface 都一致"是结构性的,不是巧合。
+同一个折叠还有第三个入口——`foldSurface()`([`surface.ts:487`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L487)),给外部重建者用:拿一段日志前缀,重新算出那时的 surface 与替换历史。三个入口共用 `planSurfaceEvent()` / `applySurfacePlan()`,所以"同一份日志在任何入口折出来的 surface 都一致"是结构性的,不是巧合。
 
 ---
 
@@ -424,9 +424,9 @@ export function deriveEventMessage(event: SessionEvent): Message | null {
 
 | 谓词 | 问题 | 位置 |
 |---|---|---|
-| `isSurfaceEligibleType` | 这个**类型**允许进 surface 吗 | `surface.ts:34` |
-| `isSurfaceEvent` | 这个事件**带了标记**吗 | `surface.ts:43` |
-| `isAppendSurfaceEvent` | 它是**原生追加**的,还是替换产物 | `surface.ts:60` |
+| `isSurfaceEligibleType` | 这个**类型**允许进 surface 吗 | [`surface.ts:34`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L34) |
+| `isSurfaceEvent` | 这个事件**带了标记**吗 | [`surface.ts:43`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L43) |
+| `isAppendSurfaceEvent` | 它是**原生追加**的,还是替换产物 | [`surface.ts:60`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L60) |
 
 前两个校验用,第三个是 transcript 与模型可见性的分界。
 
@@ -436,20 +436,20 @@ export function deriveEventMessage(event: SessionEvent): Message | null {
 
 | 符号 | 位置 | 作用 |
 |---|---|---|
-| `SURFACE_EVENT_TYPES` | `packages/core/session/src/surface.ts:22` | 四个 message 类型的运行期集合 |
-| `isSurfaceEligibleType` / `isSurfaceEvent` | `packages/core/session/src/surface.ts:34` / `:43` | 类型级与标记级判定 |
-| `isAppendSurfaceEvent` / `isReplacementSurfaceEvent` | `packages/core/session/src/surface.ts:60` / `:73` | transcript 素材与替换产物 |
-| `deriveEventMessage` | `packages/core/session/src/surface.ts:92` | 唯一的单节点投影规则 |
-| `validateSessionEventData` | `packages/core/session/src/surface.ts:140` | 头字段与工具失败元数据的本地校验 |
-| `SurfaceFoldReplacement` | `packages/core/session/src/surface.ts:170` | 一次替换的完整记录 |
-| `SessionSurface` | `packages/core/session/src/surface.ts:190` | `nodes` + `replaceGeneration` |
-| `isReplaceOp` / `surfaceOpOf` | `packages/core/session/src/surface.ts:229` / `:241` | 替换标记形状与词表闸门 |
-| `assertProvenance` | `packages/core/session/src/surface.ts:269` | 来源引用完整性 |
-| `validateSurfaceMetadata` | `packages/core/session/src/surface.ts:313` | 事件本地 surface 校验入口 |
-| `replacementRange` | `packages/core/session/src/surface.ts:324` | 区间定位与遮蔽集合 |
-| `assertToolResultRewrite` | `packages/core/session/src/surface.ts:365` | 工具结果只能改正文 |
-| `assertSystemHeadRewrite` | `packages/core/session/src/surface.ts:404` | 节点 0 保护 |
-| `planSurfaceEvent` / `applySurfacePlan` | `packages/core/session/src/surface.ts:421` / `:462` | 转移预演与唯一提交点 |
-| `foldSurface` | `packages/core/session/src/surface.ts:487` | 纯函数式全日志折叠 |
-| `SurfaceManager` / `_processDelta` | `packages/core/session/src/surface.ts:504` / `:550` | 增量 surface 视图 |
-| `Session.deriveMessages` / `Session.surface` | `packages/core/session/src/index.ts:832` / `:452` | 派生消息与三元组缓存;只读 surface 面 |
+| `SURFACE_EVENT_TYPES` | [`packages/core/session/src/surface.ts:22`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L22) | 四个 message 类型的运行期集合 |
+| `isSurfaceEligibleType` / `isSurfaceEvent` | [`packages/core/session/src/surface.ts:34`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L34) / [`:43`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L43) | 类型级与标记级判定 |
+| `isAppendSurfaceEvent` / `isReplacementSurfaceEvent` | [`packages/core/session/src/surface.ts:60`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L60) / [`:73`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L73) | transcript 素材与替换产物 |
+| `deriveEventMessage` | [`packages/core/session/src/surface.ts:92`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L92) | 唯一的单节点投影规则 |
+| `validateSessionEventData` | [`packages/core/session/src/surface.ts:140`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L140) | 头字段与工具失败元数据的本地校验 |
+| `SurfaceFoldReplacement` | [`packages/core/session/src/surface.ts:170`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L170) | 一次替换的完整记录 |
+| `SessionSurface` | [`packages/core/session/src/surface.ts:190`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L190) | `nodes` + `replaceGeneration` |
+| `isReplaceOp` / `surfaceOpOf` | [`packages/core/session/src/surface.ts:229`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L229) / [`:241`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L241) | 替换标记形状与词表闸门 |
+| `assertProvenance` | [`packages/core/session/src/surface.ts:269`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L269) | 来源引用完整性 |
+| `validateSurfaceMetadata` | [`packages/core/session/src/surface.ts:313`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L313) | 事件本地 surface 校验入口 |
+| `replacementRange` | [`packages/core/session/src/surface.ts:324`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L324) | 区间定位与遮蔽集合 |
+| `assertToolResultRewrite` | [`packages/core/session/src/surface.ts:365`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L365) | 工具结果只能改正文 |
+| `assertSystemHeadRewrite` | [`packages/core/session/src/surface.ts:404`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L404) | 节点 0 保护 |
+| `planSurfaceEvent` / `applySurfacePlan` | [`packages/core/session/src/surface.ts:421`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L421) / [`:462`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L462) | 转移预演与唯一提交点 |
+| `foldSurface` | [`packages/core/session/src/surface.ts:487`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L487) | 纯函数式全日志折叠 |
+| `SurfaceManager` / `_processDelta` | [`packages/core/session/src/surface.ts:504`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L504) / [`:550`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L550) | 增量 surface 视图 |
+| `Session.deriveMessages` / `Session.surface` | [`packages/core/session/src/index.ts:832`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L832) / [`:452`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L452) | 派生消息与三元组缓存;只读 surface 面 |

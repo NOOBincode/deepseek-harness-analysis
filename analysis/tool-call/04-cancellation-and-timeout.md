@@ -1,6 +1,6 @@
 # 04 · 取消与超时:双信号融合、两个规范码与协作式超时
 
-> 分析对象 `dbbaa4a37`。核心源码:`packages/core/tools/src/index.ts:1500-1549`、`:1870-1934`、`:756-765`、`:800-803`;超时插件 `packages/guard/timeout-policy/src/index.ts`(81 行);共享超时算术 `packages/util/timeout/src/index.ts`(190 行);调度器侧 `packages/core/agent-loop/src/tool-calls.ts:199-260`。
+> 分析对象 `dbbaa4a37`。核心源码:[`packages/core/tools/src/index.ts:1500-1549`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1500-L1549)、[`:1870-1934`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1870-L1934)、[`:756-765`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L756-L765)、[`:800-803`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L800-L803);超时插件 [`packages/guard/timeout-policy/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/guard/timeout-policy/src/index.ts)(81 行);共享超时算术 [`packages/util/timeout/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/timeout/src/index.ts)(190 行);调度器侧 [`packages/core/agent-loop/src/tool-calls.ts:199-260`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L199-L260)。
 > 第五章第七节给了结论。
 
 ---
@@ -11,8 +11,8 @@
 
 | 信号 | 所有者 | 生命周期 | 谁能替换它 |
 |---|---|---|---|
-| **调用者信号**(`callerSignal`) | step 的 `phase.abort`(`agent.ts:243`),经 `executeToolCalls(signal)` 传下来 | 整个 step | **没有人**。它被单独存在 `cancellationStates` WeakMap 里(`index.ts:1409-1412`) |
-| **wrapper 信号**(`exec.signal`) | 当前 `tools/execute` 监听器 | 只在该监听器的委托期内 | `tools/execute` 瀑布里任意 wrapper(`index.ts:145-154` 契约) |
+| **调用者信号**(`callerSignal`) | step 的 `phase.abort`([`agent.ts:243`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L243)),经 `executeToolCalls(signal)` 传下来 | 整个 step | **没有人**。它被单独存在 `cancellationStates` WeakMap 里(`index.ts:1409-1412`) |
+| **wrapper 信号**(`exec.signal`) | 当前 `tools/execute` 监听器 | 只在该监听器的委托期内 | `tools/execute` 瀑布里任意 wrapper([`index.ts:145-154`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L145-L154) 契约) |
 | **融合信号**(fused) | `dispatchToolBody` 内的 `AbortController` | 单次 dispatch | — |
 
 ```typescript
@@ -186,9 +186,9 @@ const returned = await tool.execute(exec.arguments, exec)
 | 判定点 | `cancellationResult` 的 `bodyInvoked === true` 分支 | `bodyInvoked === false` 分支 |
 | 语义 | body 已经跑过,结果被取消取代 | body **从未**被调用 |
 
-两者都把 `prior?.additionalContexts` 带出来。这不只是"少丢点信息":PTC 里子调用把图像经 `exec.deferContext()` 摆渡给外层(`ptc.ts:561-566`),外层 `run_code` 随后被取消时,那些图像必须仍能到达模型——否则"程序已经把图取回来了,只是外层超时"会静默丢掉有效载荷。
+两者都把 `prior?.additionalContexts` 带出来。这不只是"少丢点信息":PTC 里子调用把图像经 `exec.deferContext()` 摆渡给外层([`ptc.ts:561-566`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L561-L566)),外层 `run_code` 随后被取消时,那些图像必须仍能到达模型——否则"程序已经把图取回来了,只是外层超时"会静默丢掉有效载荷。
 
-`info.name: 'AbortError'` 是稳定标签,不对应任何 JS 错误类名;它在三处独立产出(`index.ts:1916`、`:1930`、`tool-calls.ts:257`),值必须一致。
+`info.name: 'AbortError'` 是稳定标签,不对应任何 JS 错误类名;它在三处独立产出(`index.ts:1916`、`:1930`、[`tool-calls.ts:257`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L257)),值必须一致。
 
 ### 3.3 取消检查点全表
 
@@ -202,9 +202,9 @@ const returned = await tool.execute(exec.arguments, exec)
 | 5 | body 成功之后 | `:1541` | `isAborted(signal)`,且 body 返回了成功结果 | `ABORTED`(带 `prior`) |
 | 6 | dispatch 返回前 | `:1582` | `callerCancelled` **且** 结果非错误 | `cancellationResult(exec, result)` |
 | 7 | finalize 返回前 | `:1604` | `callerCancelled` **且** post-execute 结果非错误 | `cancellationResult(exec, postResult)` |
-| 8 | 调度器 `fillPool` 内 | `tool-calls.ts:212` | 每次 `await startCall`/`commitReady` 之后 | `aborted = true`,停止补池 |
-| 9 | 调度器主循环内 | `tool-calls.ts:229` | 每次 `await commitReady`/`Promise.race` 之后 | 同上 |
-| 10 | 调度器组收尾 | `tool-calls.ts:238-242` | `aborted` | 对 `group.slice(started)` 合成结果 |
+| 8 | 调度器 `fillPool` 内 | [`tool-calls.ts:212`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L212) | 每次 `await startCall`/`commitReady` 之后 | `aborted = true`,停止补池 |
+| 9 | 调度器主循环内 | [`tool-calls.ts:229`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L229) | 每次 `await commitReady`/`Promise.race` 之后 | 同上 |
+| 10 | 调度器组收尾 | [`tool-calls.ts:238-242`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L238-L242) | `aborted` | 对 `group.slice(started)` 合成结果 |
 
 检查点 2 有个不显眼的耦合:它只在 `approvalCancelled` 为真时触发(`index.ts:1473`)。一个 pre-execute 监听器返回 `ask`、而调用在审批期间被取消、但审批服务自己报告 `rejected` 时,取消不会在这里被识别——**检查点 3**(`:1490`)在 deny 判定之后兜住它,但结果是 deny 而不是取消。这是"用户拒绝了"与"用户取消了整个 step"之间的语义区分。
 
@@ -239,10 +239,10 @@ dispatchToolBody:
 因此:
 
 - **取消的语义是"不再启动新的 + 等老的落定"**,不是"打断正在跑的"。一个不观察 `exec.signal` 的 body 会跑到底,它的返回值被替换成 `ABORTED`,但它占用的时间与资源不会被回收。JSDoc 的 "cannot hard-kill same-process code" 就是这条限制的原文。
-- **信号是通知,不是机制**(`packages/util/timeout/src/index.ts:3-4` 的模块注释同义:"The library only notifies through abort signals; each capability still owns the mechanism that stops its work")。真正能停下的东西是子进程、worker、网络请求——它们各自把 `exec.signal` 转成自己的终止手段。
-- **工具声明的 `timeoutMs` 因此附带一条义务**(`index.ts:240-247`):"Declaring it asserts this tool forwards `exec.signal` to a cooperative implementation that can reach quiescence when the signal aborts." 声明超时预算 = 承诺可被协作式停止。
+- **信号是通知,不是机制**([`packages/util/timeout/src/index.ts:3-4`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/timeout/src/index.ts#L3-L4) 的模块注释同义:"The library only notifies through abort signals; each capability still owns the mechanism that stops its work")。真正能停下的东西是子进程、worker、网络请求——它们各自把 `exec.signal` 转成自己的终止手段。
+- **工具声明的 `timeoutMs` 因此附带一条义务**([`index.ts:240-247`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L240-L247)):"Declaring it asserts this tool forwards `exec.signal` to a cooperative implementation that can reach quiescence when the signal aborts." 声明超时预算 = 承诺可被协作式停止。
 
-`async` 门(pre-execute 监听器、`serviceAsk`)同理:`index.ts:136-139` 写明 "Async gates must observe `exec.signal`; the registry rechecks cancellation after they settle but never abandons their promise."
+`async` 门(pre-execute 监听器、`serviceAsk`)同理:[`index.ts:136-139`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L136-L139) 写明 "Async gates must observe `exec.signal`; the registry rechecks cancellation after they settle but never abandons their promise."
 
 ### 4.1 PTC 侧的同一条语义
 
@@ -267,17 +267,17 @@ exec.signal.addEventListener('abort', onOuterAbort, { once: true })
 
 `runController` 是**运行作用域**的信号:它跟着外层信号中止,也在运行**因任何原因**落定时中止(`abort('run_code settled')`)。于是:
 
-- 已经在飞的子派发被中止(`binding` 传给子调用的 `signal` 就是它,`ptc.ts:477`);
-- 还在队列里的未启动条目被 `abandon()` 丢弃,**且不落任何日志**(`ptc.ts:530-532`;`tool/ptc-dispatch-start` 只在真正 `start()` 时追加,`ptc.ts:534`);
-- `drainDispatches()`(`ptc.ts:448-456`)先 `await drive()` 让有序 lane 跑到 quiescence,再等 `logWork` 排空——保证每个 settle 事件都落在打开的 turn 内。
+- 已经在飞的子派发被中止(`binding` 传给子调用的 `signal` 就是它,[`ptc.ts:477`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L477));
+- 还在队列里的未启动条目被 `abandon()` 丢弃,**且不落任何日志**([`ptc.ts:530-532`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L530-L532);`tool/ptc-dispatch-start` 只在真正 `start()` 时追加,[`ptc.ts:534`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L534));
+- `drainDispatches()`([`ptc.ts:448-456`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L448-L456))先 `await drive()` 让有序 lane 跑到 quiescence,再等 `logWork` 排空——保证每个 settle 事件都落在打开的 turn 内。
 
-`binding` 里的两处 `runOver()` 检查(`ptc.ts:464`、`:591`)是给程序的反馈:一次在派发前("not dispatched"),一次在结果回来之后("result discarded")。两者都抛普通 `Error`,由 code runtime 包装成 `ToolCallError`。
+`binding` 里的两处 `runOver()` 检查([`ptc.ts:464`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L464)、[`:591`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L591))是给程序的反馈:一次在派发前("not dispatched"),一次在结果回来之后("result discarded")。两者都抛普通 `Error`,由 code runtime 包装成 `ToolCallError`。
 
 ---
 
 ## 五、调度器级取消:合成结果
 
-`fillPool` 的循环条件第一个就是 `!aborted`(`tool-calls.ts:200`),`aborted` 在每个 `await` 之后重读(`:212`、`:229`)。一旦中止:
+`fillPool` 的循环条件第一个就是 `!aborted`([`tool-calls.ts:200`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L200)),`aborted` 在每个 `await` 之后重读([`:212`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L212)、[`:229`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L229))。一旦中止:
 
 ```typescript
 // packages/core/agent-loop/src/tool-calls.ts:238
@@ -291,7 +291,7 @@ if (aborted) {
 
 **已经启动的调用先落定、再补合成**:`.slice(started)` 而不是 `.slice(nextToStart)`,所以那些"prepare 被取消打断"的调用(它们已计入 `started`)拿到的仍是注册表产出的 `ABORTED_BEFORE_DISPATCH`(走检查点 1 或 3),而不是调度器的合成副本。两条路径产出的字节完全一致——因为它们引用同一个常量与同一段文本(见 [03-scheduler-and-concurrency.md](./03-scheduler-and-concurrency.md) §4.2)。
 
-**为什么必须补**:`assistant/message`(含 N 个 `tool-call` 块)已经 durable 落盘(`agent.ts:476`),"每个 `tool/call` 恰有一个 `tool/result`"是 replay 的合法性前提;缺一条,replay 就不合法。
+**为什么必须补**:`assistant/message`(含 N 个 `tool-call` 块)已经 durable 落盘([`agent.ts:476`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L476)),"每个 `tool/call` 恰有一个 `tool/result`"是 replay 的合法性前提;缺一条,replay 就不合法。
 
 ---
 
@@ -301,7 +301,7 @@ if (aborted) {
 
 | 层 | 角色 |
 |---|---|
-| `ToolDefinition.timeoutMs`(`index.ts:247`) | 声明:一个正有限毫秒数,**永不进模型视野**(`schemaOf` 白名单只有 name/description/parameters) |
+| `ToolDefinition.timeoutMs`([`index.ts:247`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L247)) | 声明:一个正有限毫秒数,**永不进模型视野**(`schemaOf` 白名单只有 name/description/parameters) |
 | `register()`(`index.ts:1036-1040`) | 加载期校验:非正、非有限即拒绝 |
 | `@deepseek-ai/dsh-tool-call-timeout-policy`(`packages/guard/timeout-policy`) | 执行:读声明、装死线、替换结果 |
 
@@ -332,9 +332,9 @@ export function apply(ctx: Context): void {
 
 ### 6.1 为什么是 `tools/execute` 而不是 guard
 
-插件名带 `guard/` 前缀,但接的是 **`tools/execute` 瀑布**(`:56`)——因为只有 around 阶段能合法改写 `exec.signal`(`index.ts:145-154`)。`ctx.tools.guard()` 是单调的、同步的、只能返回拒绝理由或 `undefined`(`index.ts:704`),它无法"给 body 一个更早到期的信号"。**"守卫层"描述的是策略强度,不是事件名**。
+插件名带 `guard/` 前缀,但接的是 **`tools/execute` 瀑布**(`:56`)——因为只有 around 阶段能合法改写 `exec.signal`([`index.ts:145-154`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L145-L154))。`ctx.tools.guard()` 是单调的、同步的、只能返回拒绝理由或 `undefined`([`index.ts:704`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L704)),它无法"给 body 一个更早到期的信号"。**"守卫层"描述的是策略强度,不是事件名**。
 
-`ctx.tools.get(exec.name, exec.agent)?.timeoutMs`(`:57`)用的是**呈现无关**的 `get`,不是 `resolveExecution`。这在 PTC 模式下是必须的:一次子派发(`parent` 已设)与一次模型直呼走的是同一个定义,超时策略对两者一致;而 `get` 在两种 mode 下都返回同一个定义。
+`ctx.tools.get(exec.name, exec.agent)?.timeoutMs`([`:57`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L57))用的是**呈现无关**的 `get`,不是 `resolveExecution`。这在 PTC 模式下是必须的:一次子派发(`parent` 已设)与一次模型直呼走的是同一个定义,超时策略对两者一致;而 `get` 在两种 mode 下都返回同一个定义。
 
 ### 6.2 `deadline()` 的实现
 
@@ -420,13 +420,13 @@ body 收到 d.signal,被中止 → 工具自己观察信号、到达 quiescence�
 | 本插件超时 | `Error: tool call timed out after <ms>ms` | `{ name:'ToolTimeoutError', code:'TOOL_TIMEOUT' }` | 文本已足够;`code` 供重试/沙箱插件路由 |
 | 外层 wrapper 超时赢 | 由外层插件决定;本插件读到 `undefined` 后原样委托 | — | 嵌套死线不误报 |
 | pre-execute / guard 拒绝 | `Error: <denialReason>` | **无 `info`** | 拒绝理由是人类文本 |
-| PTC 程序内子调用失败 | `ToolCallError`,`toolName` 标识失败工具(`ptc.ts:624`) | — | 子调用**永不回到模型上下文**(`tool/ptc-dispatch` 是仅日志事件),只有外层 `run_code` 的渲染文本进历史 |
+| PTC 程序内子调用失败 | `ToolCallError`,`toolName` 标识失败工具([`ptc.ts:624`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L624)) | — | 子调用**永不回到模型上下文**(`tool/ptc-dispatch` 是仅日志事件),只有外层 `run_code` 的渲染文本进历史 |
 
 三条对模型设计有直接影响的结论:
 
-1. **模型永远看不到 `info`**。模型内容里只有 `Error: <message>` 文本(`toolErrorResult`,`index.ts:1860-1868`),`error.info` 走的是**持久化事件字段**(`tool-calls.ts:285` 的 `...result.error?.info`)与插件路由。这是一条严格的分离:分类是给代码看的,文本是给模型看的。
+1. **模型永远看不到 `info`**。模型内容里只有 `Error: <message>` 文本(`toolErrorResult`,`index.ts:1860-1868`),`error.info` 走的是**持久化事件字段**([`tool-calls.ts:285`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L285) 的 `...result.error?.info`)与插件路由。这是一条严格的分离:分类是给代码看的,文本是给模型看的。
 2. **"取消"与"拒绝"用不同的措辞**。取消说 "tool call aborted",拒绝说具体理由。两者都是 `isError: true`,都**不结束 turn**(只有 `concludesTurn` 或 LLM 停止才结束),所以模型下一 step 仍能自我纠正。
-3. **PTC 内部失败的信息被刻意收窄**(`ptc.ts:594-598` 注释):"The worker turns a binding rejection into ToolCallError and adds only the binding name. Native content and internal error metadata stay outside the program-facing failure contract." 程序拿到 `toolName` + 人类可读 `message`,拿不到原生 `content` 与 `info`。
+3. **PTC 内部失败的信息被刻意收窄**([`ptc.ts:594-598`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L594-L598) 注释):"The worker turns a binding rejection into ToolCallError and adds only the binding name. Native content and internal error metadata stay outside the program-facing failure contract." 程序拿到 `toolName` + 人类可读 `message`,拿不到原生 `content` 与 `info`。
 
 ---
 
@@ -434,17 +434,17 @@ body 收到 d.signal,被中止 → 工具自己观察信号、到达 quiescence�
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `ToolCancellationState` / `cancellationStates` / `callerCancelled` / `cancellationResult` | `index.ts:756` / `:801` / `:1500` / `:1508` | `{ callerSignal, bodyInvoked }` 的载体(在 wrapper 视野之外的 WeakMap 里);读原始调用者信号;按 `bodyInvoked` 二选一 |
+| `ToolCancellationState` / `cancellationStates` / `callerCancelled` / `cancellationResult` | [`index.ts:756`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L756) / [`:801`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L801) / `:1500` / `:1508` | `{ callerSignal, bodyInvoked }` 的载体(在 wrapper 视野之外的 WeakMap 里);读原始调用者信号;按 `bodyInvoked` 二选一 |
 | `bodyInvoked = true` | `index.ts:1538` | 唯一写入点,在 `resolveExecution` 之后、`execute` 之前 |
-| `FusedToolSignal` / `fuseToolSignals` / `isAborted` | `index.ts:762` / `:1879` / `:1870` | dispatch 作用域信号中继;同对象零开销;预中止时 wrapper 优先;函数形式的属性读避免控制流窄化 |
+| `FusedToolSignal` / `fuseToolSignals` / `isAborted` | [`index.ts:762`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L762) / `:1879` / `:1870` | dispatch 作用域信号中继;同对象零开销;预中止时 wrapper 优先;函数形式的属性读避免控制流窄化 |
 | `dispatchToolBody` | `index.ts:1522` | fuse → body → `finally` 还原 |
-| `TOOL_ABORTED` / `TOOL_ABORTED_BEFORE_DISPATCH` | `index.ts:462` / `:465` | 两个规范码 |
+| `TOOL_ABORTED` / `TOOL_ABORTED_BEFORE_DISPATCH` | [`index.ts:462`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L462) / [`:465`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L465) | 两个规范码 |
 | `toolAbortedResult` / `toolAbortedBeforeDispatchResult` | `index.ts:1909` / `:1923` | 保留 `prior.additionalContexts` |
-| `serviceAsk` 的 `approvalCancelled` / `execute` 的取消契约 / `timeoutMs` 义务 | `index.ts:1711` / `:217-222` / `:240-247` | 只有 `cancelled` 一条带它;"does not abandon this promise, but it cannot hard-kill same-process code";声明超时 = 承诺协作式可达 quiescence |
-| `TOOL_TIMEOUT` / `toolTimeoutResult` / `apply` | `packages/guard/timeout-policy/src/index.ts:25` / `:41` / `:55` | 既是内部 deadline code 也是结果 `info.code`;替换结果;`tools/execute` wrapper 全流程 |
-| `TimeoutReason` / `deadline` / `timeoutOf` / `MAX_TIMER_DELAY_MS` | `packages/util/timeout/src/index.ts:12` / `:91` / `:184` / `:25` | 携带 capability code;`AbortSignal.any` + `Symbol.dispose`;按 code 区分超时与取消;`2147483647` |
-| `runController` / `onOuterAbort` | `packages/core/tools/src/ptc.ts:337-339` | 运行作用域信号,跟随外层并随运行落定中止 |
-| `drainDispatches` | `ptc.ts:448` | `await drive()` + 排空 `logWork` |
-| `runOver()` 两处检查 | `ptc.ts:464`、`:591` | 程序侧 "not dispatched" / "result discarded" |
-| `aborted` 与合成 | `packages/core/agent-loop/src/tool-calls.ts:200-243` | 停止补池 → 排空已启动 → 对 `slice(started)` 合成 |
-| `appendSkippedToolCall` | `tool-calls.ts:250` | 成对补 `tool/call` + `tool/result`,复用 `TOOL_ABORTED_BEFORE_DISPATCH` 常量 |
+| `serviceAsk` 的 `approvalCancelled` / `execute` 的取消契约 / `timeoutMs` 义务 | `index.ts:1711` / [`:217-222`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L217-L222) / [`:240-247`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L240-L247) | 只有 `cancelled` 一条带它;"does not abandon this promise, but it cannot hard-kill same-process code";声明超时 = 承诺协作式可达 quiescence |
+| `TOOL_TIMEOUT` / `toolTimeoutResult` / `apply` | [`packages/guard/timeout-policy/src/index.ts:25`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/guard/timeout-policy/src/index.ts#L25) / [`:41`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/guard/timeout-policy/src/index.ts#L41) / [`:55`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/guard/timeout-policy/src/index.ts#L55) | 既是内部 deadline code 也是结果 `info.code`;替换结果;`tools/execute` wrapper 全流程 |
+| `TimeoutReason` / `deadline` / `timeoutOf` / `MAX_TIMER_DELAY_MS` | [`packages/util/timeout/src/index.ts:12`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/timeout/src/index.ts#L12) / [`:91`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/timeout/src/index.ts#L91) / [`:184`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/timeout/src/index.ts#L184) / [`:25`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/timeout/src/index.ts#L25) | 携带 capability code;`AbortSignal.any` + `Symbol.dispose`;按 code 区分超时与取消;`2147483647` |
+| `runController` / `onOuterAbort` | [`packages/core/tools/src/ptc.ts:337-339`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L337-L339) | 运行作用域信号,跟随外层并随运行落定中止 |
+| `drainDispatches` | [`ptc.ts:448`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L448) | `await drive()` + 排空 `logWork` |
+| `runOver()` 两处检查 | [`ptc.ts:464`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L464)、[`:591`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L591) | 程序侧 "not dispatched" / "result discarded" |
+| `aborted` 与合成 | [`packages/core/agent-loop/src/tool-calls.ts:200-243`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L200-L243) | 停止补池 → 排空已启动 → 对 `slice(started)` 合成 |
+| `appendSkippedToolCall` | [`tool-calls.ts:250`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L250) | 成对补 `tool/call` + `tool/result`,复用 `TOOL_ABORTED_BEFORE_DISPATCH` 常量 |

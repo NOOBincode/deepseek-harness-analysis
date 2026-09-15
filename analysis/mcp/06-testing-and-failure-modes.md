@@ -1,7 +1,7 @@
 # 06 · 测试体系与失败模式
 
-> 源码:`packages/mcp/mcp-client/tests/`(7 个文件)+ `apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts`
-> 官方注记的 Testing 段见 `.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md:206-212`
+> 源码:`packages/mcp/mcp-client/tests/`(7 个文件)+ [`apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts)
+> 官方注记的 Testing 段见 [`.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md:206-212`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md#L206-L212)
 
 ---
 
@@ -11,30 +11,30 @@ MCP 桥接的测试按"能表达该行为的最便宜层级"分布,共五个层�
 
 | 层级 | 文件 | 行数 | 是否 mock SDK | 是否 spawn 进程 | 覆盖什么 |
 |---|---|---|---|---|---|
-| 单元(MCP 桥) | `tests/mcp-client.spec.ts` | 1300 | 手写替身 / `InMemoryTransport` | 否 | 命名、同步、执行、投影、图片准入、传输构造 |
-| 单元(生命周期) | `tests/apply.spec.ts` | 461 | `vi.mock` SDK | 否 | `apply` 的装载语义与通知路径 |
-| 单元(监管器) | `tests/reconnect.spec.ts` | 521 | `vi.mock` SDK | 否 | 监管器的每条失败分支与策略校验 |
-| 装载路径守卫 | `tests/load-path.spec.ts` | 29 | 否(真实 Loader 原型) | 否 | 命名空间插件导出形态 |
-| E2E(协议) | `tests/mcp-client.e2e.ts` | 563 | 否(真实协议) | **是** | stdio / HTTP 真实往返、自治崩溃恢复 |
-| E2E(出口) | `tests/egress.spec.ts` | 41 | 否 | 否(本地假代理) | streamable-http 的代理路由 |
-| Profile 级 | `apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts` | 30 | 否 | **是**(真实 CLI) | 启动诊断文案与退出码 |
+| 单元(MCP 桥) | [`tests/mcp-client.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts) | 1300 | 手写替身 / `InMemoryTransport` | 否 | 命名、同步、执行、投影、图片准入、传输构造 |
+| 单元(生命周期) | [`tests/apply.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts) | 461 | `vi.mock` SDK | 否 | `apply` 的装载语义与通知路径 |
+| 单元(监管器) | [`tests/reconnect.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts) | 521 | `vi.mock` SDK | 否 | 监管器的每条失败分支与策略校验 |
+| 装载路径守卫 | [`tests/load-path.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/load-path.spec.ts) | 29 | 否(真实 Loader 原型) | 否 | 命名空间插件导出形态 |
+| E2E(协议) | [`tests/mcp-client.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts) | 563 | 否(真实协议) | **是** | stdio / HTTP 真实往返、自治崩溃恢复 |
+| E2E(出口) | [`tests/egress.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/egress.spec.ts) | 41 | 否 | 否(本地假代理) | streamable-http 的代理路由 |
+| Profile 级 | [`apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts) | 30 | 否 | **是**(真实 CLI) | 启动诊断文案与退出码 |
 
 夹具与补丁:
 
 | 文件 | 用途 |
 |---|---|
 | `tests/fixture-server.ts`(76) | stdio 夹具服务器:6 个受控工具(含 `.` 名、崩溃工具、图片工具) |
-| `tests/http-fixture.ts`(52) | 无密钥的 stateless Streamable HTTP 端点 |
-| `tests/fixtures/repeated-cursor-server.ts`(18) | 线上重复 cursor 的服务器 |
-| `tests/fixtures/repeated-cursor.patch.yml`(17) | 把该服务器插入 headless profile 的 overlay |
+| [`tests/http-fixture.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/http-fixture.ts)(52) | 无密钥的 stateless Streamable HTTP 端点 |
+| [`tests/fixtures/repeated-cursor-server.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/fixtures/repeated-cursor-server.ts)(18) | 线上重复 cursor 的服务器 |
+| [`tests/fixtures/repeated-cursor.patch.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/fixtures/repeated-cursor.patch.yml)(17) | 把该服务器插入 headless profile 的 overlay |
 
-覆盖率门槛是**每文件 100%**(仓库 CI 门 `pnpm run test:coverage`),这也解释了源码里两处 `/* v8 ignore */` 的存在:`connection.ts:321`(防御性的 `firstAttemptError` 兜底)与 `packages/acp/acp/src/mcp.ts:139`(Schemastery 一定抛 `Error` 的兜底)。两处都写了理由,不是无条件忽略。
+覆盖率门槛是**每文件 100%**(仓库 CI 门 `pnpm run test:coverage`),这也解释了源码里两处 `/* v8 ignore */` 的存在:`connection.ts:321`(防御性的 `firstAttemptError` 兜底)与 [`packages/acp/acp/src/mcp.ts:139`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L139)(Schemastery 一定抛 `Error` 的兜底)。两处都写了理由,不是无条件忽略。
 
 ---
 
 ## 二、各 spec 覆盖内容
 
-### 2.1 `mcp-client.spec.ts`(6 个 describe)
+### 2.1 [`mcp-client.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts)(6 个 describe)
 
 | describe | 位置 | 覆盖 |
 |---|---|---|
@@ -45,7 +45,7 @@ MCP 桥接的测试按"能表达该行为的最便宜层级"分布,共五个层�
 | `createTransport` | `1165-1260` | 三种配置构造、清洗与显式 env 不抛异常 |
 | `tool execution — non-object args fallback` | `1262-1300` | `null` 与裸字符串参数兜底为 `{}` |
 
-其中"SDK 缓存无关性"(`356-430`)是全套里构造最讲究的一个:它用 `InMemoryTransport.createLinkedPair()`(`mcp-client.spec.ts:357`)手工应答 JSON-RPC,让第一页返回**合法**的 `outputSchema`、第二页返回**含 `patternProperties` 的未知词汇**,从而证明"桥的校验权独立于 SDK 的按页缓存":
+其中"SDK 缓存无关性"(`356-430`)是全套里构造最讲究的一个:它用 `InMemoryTransport.createLinkedPair()`([`mcp-client.spec.ts:357`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L357))手工应答 JSON-RPC,让第一页返回**合法**的 `outputSchema`、第二页返回**含 `patternProperties` 的未知词汇**,从而证明"桥的校验权独立于 SDK 的按页缓存":
 
 ```typescript
 const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
@@ -56,14 +56,14 @@ const fallback = await ctx.tools.execute({ …, name: 'mcp__srv__future-schema',
 expect(fallback.value).toEqual({ content: [42, null], structuredContent: ['kept', { nested: true }] })
 ```
 
-### 2.2 `apply.spec.ts`(2 个 describe)
+### 2.2 [`apply.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts)(2 个 describe)
 
 | describe | 位置 | 覆盖 |
 |---|---|---|
 | `mcp-client plugin module exports` | `91-155` | `name`/`inject`/`Config` 导出、`serverName` 缺失与非法、reconnect 默认值与部分覆盖、非法 reconnect 拒绝 |
 | `apply (plugin lifecycle)` | `157-461` | 连接+同步+通知处理器注册、激活阻塞语义、重复 `serverName` 拒绝且首个实例完好、跨 scope 复用命名空间、dispose 释放预订、跨 app root 隔离、连接失败不注册工具、严格启动拒绝、启动期注册冲突、cursor 环导致启动失败、早到通知不消费严格语义、通知重同步、失败重同步保留旧代、环后可继续、**effect disposer 注销"当前"代**、close 抛错不阻断 dispose、HTTP 配置路径 |
 
-"激活阻塞语义"的测试手法值得单独看(`apply.spec.ts:185-202`):它把 `connect` 挂在一个可控 gate 上,然后断言在 gate 打开**之前** fiber 未激活、工具未注册:
+"激活阻塞语义"的测试手法值得单独看([`apply.spec.ts:185-202`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts#L185-L202)):它把 `connect` 挂在一个可控 gate 上,然后断言在 gate 打开**之前** fiber 未激活、工具未注册:
 
 ```typescript
 const fiber = ctx.plugin({ name: 'mcp-client-lifecycle', inject, apply }, stdioConfig)
@@ -75,7 +75,7 @@ await activation
 expect(ctx.tools.get('mcp__srv__remote')).toBeDefined()
 ```
 
-### 2.3 `reconnect.spec.ts`(2 个 describe)
+### 2.3 [`reconnect.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts)(2 个 describe)
 
 | describe | 位置 | 覆盖 |
 |---|---|---|
@@ -84,11 +84,11 @@ expect(ctx.tools.get('mcp__srv__remote')).toBeDefined()
 
 三个可复用的测试手法:
 
-1. **代际计数**:`instances: MockClient[]`(`reconnect.spec.ts:43`)由 mock 构造函数压入,于是 `expect(instances).toHaveLength(2)` 直接就是"起了几个代际"的断言。
-2. **分级日志捕获**(`reconnect.spec.ts:85-93`):覆写 `ctx.logger.warn/error/info` 把消息按级别收集,再用 `warns.some(line => line.includes('reconnecting in 5ms (attempt 1/5)'))` 断言**面向用户的可观测事实**,而不只是内部状态。
+1. **代际计数**:`instances: MockClient[]`([`reconnect.spec.ts:43`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L43))由 mock 构造函数压入,于是 `expect(instances).toHaveLength(2)` 直接就是"起了几个代际"的断言。
+2. **分级日志捕获**([`reconnect.spec.ts:85-93`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L85-L93)):覆写 `ctx.logger.warn/error/info` 把消息按级别收集,再用 `warns.some(line => line.includes('reconnecting in 5ms (attempt 1/5)'))` 断言**面向用户的可观测事实**,而不只是内部状态。
 3. **假定时器精确复现 5 秒窗口**(`reconnect.spec.ts:243-259, 277-297`):`vi.useFakeTimers()` + `vi.advanceTimersByTimeAsync(5_000)` 让"关闭屏障超时"这条路径可确定地触发,而不必真的等 5 秒。
 
-### 2.4 `mcp-client.e2e.ts`(7 个 describe)
+### 2.4 [`mcp-client.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts)(7 个 describe)
 
 | describe | 位置 | 服务器 | 覆盖 |
 |---|---|---|---|
@@ -102,7 +102,7 @@ expect(ctx.tools.get('mcp__srv__remote')).toBeDefined()
 
 两处"证据强度"的设计值得记录:
 
-- **恢复由世界证明,不由返回值证明**(`mcp-client.e2e.ts:274-283`):
+- **恢复由世界证明,不由返回值证明**([`mcp-client.e2e.ts:274-283`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts#L274-L283)):
 
   ```typescript
   // Recovery is proven by the world: a post-crash call round-trips through
@@ -113,7 +113,7 @@ expect(ctx.tools.get('mcp__srv__remote')).toBeDefined()
   }, { timeout: 15_000, interval: 250 })
   ```
 
-- **副作用独立校验**(`mcp-client.e2e.ts:434-436`):`write_file` 之后不信工具结果,直接 `readFile(filePath, 'utf8')` 断言磁盘:
+- **副作用独立校验**([`mcp-client.e2e.ts:434-436`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts#L434-L436)):`write_file` 之后不信工具结果,直接 `readFile(filePath, 'utf8')` 断言磁盘:
 
   ```typescript
   // Assert the filesystem effect independently of the tool result.
@@ -121,16 +121,16 @@ expect(ctx.tools.get('mcp__srv__remote')).toBeDefined()
   expect(onDisk).toBe(content)
   ```
 
-- **图片的双重隔离断言**(`mcp-client.e2e.ts:190-192`):`value` 里有 base64,`content` 里没有:
+- **图片的双重隔离断言**([`mcp-client.e2e.ts:190-192`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts#L190-L192)):`value` 里有 base64,`content` 里没有:
 
   ```typescript
   expect(JSON.stringify(result.value)).toContain('iVBORw0KGgo')
   expect(JSON.stringify(result.content)).not.toContain('iVBORw0KGgo')
   ```
 
-### 2.5 `load-path.spec.ts`:导出形态守卫
+### 2.5 [`load-path.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/load-path.spec.ts):导出形态守卫
 
-`tests/load-path.spec.ts:17-29` 是一个**针对性防御**测试,文件头注释交代了它防的历史事故:
+[`tests/load-path.spec.ts:17-29`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/load-path.spec.ts#L17-L29) 是一个**针对性防御**测试,文件头注释交代了它防的历史事故:
 
 ```typescript
 /**
@@ -153,13 +153,13 @@ expect(unwrapped.name).toBe('mcp-client')
 expect(unwrapped.inject).toEqual(['tools'])
 ```
 
-### 2.6 `egress.spec.ts`:出口最小复现
+### 2.6 [`egress.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/egress.spec.ts):出口最小复现
 
 见 [05 §4.3](./05-transport-and-security.md)。
 
-### 2.7 Profile 级:`mcp-pagination.expected.e2e.ts`
+### 2.7 Profile 级:[`mcp-pagination.expected.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts)
 
-`apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts:11-30` 把故障推进到**真实 CLI 进程**:
+[`apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts:11-30`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts#L11-L30) 把故障推进到**真实 CLI 进程**:
 
 ```typescript
 it('reports a repeated MCP discovery cursor and exits before starting a turn', async () => {
@@ -227,35 +227,35 @@ flowchart TD
 
 | # | 失败模式 | 触发 | 显式语义 | 模型是否可见 | 代码位置 | 测试 |
 |---|---|---|---|---|---|---|
-| 1 | 同一服务器列出同名工具两次 | 服务器返回重复 `rawName`(或归一后撞名) | 整表 reject:`server listed tool "<raw>" more than once — invalid tool list`;**旧代保留**、注册表未动 | 否(旧工具表继续服务) | `tools.ts:158-162` | `mcp-client.spec.ts:236-246` |
-| 2 | 分页 cursor 重复 | 服务器返回已见过的非空 `nextCursor`(含跨空页的环) | 整表 reject:`server repeated a tools/list continuation cursor — invalid tool list`;旧代保留;**下次同步仍可成功** | 否 | `tools.ts:175-183` | `mcp-client.spec.ts:312-354`、`apply.spec.ts:306-326` |
-| 3 | 注册冲突(命名空间被抢占) | 外部注册占用 `mcp__<serverName>__*` | 半代回滚(本服务器**零工具**)+ `logger.error`;`contain` 模式吞下,`throw` 模式向启动路径上抛 | 否(该服务器工具全部消失) | `tools.ts:193-201` | `mcp-client.spec.ts:260-281`、`apply.spec.ts:284-304` |
-| 4 | 首次连接失败 · `failOnStartupError:false` | `connect()` reject | 记 warn、工具零注册、进入重连循环;harness 照常启动 | 该服务器工具不出现 | `connection.ts:279-296`、`index.ts:184-187` | `apply.spec.ts:252-265` |
-| 5 | 首次连接失败 · `failOnStartupError:true` | 同上 | `apply` throw `mcp-client(<n>): initial connection or tool synchronization failed`(带 cause);Cordis 回滚 fiber、已开客户端被关闭 | 整个 harness 不启动 | `index.ts:184-187` | `apply.spec.ts:267-282`、`mcp-pagination.expected.e2e.ts` |
+| 1 | 同一服务器列出同名工具两次 | 服务器返回重复 `rawName`(或归一后撞名) | 整表 reject:`server listed tool "<raw>" more than once — invalid tool list`;**旧代保留**、注册表未动 | 否(旧工具表继续服务) | `tools.ts:158-162` | [`mcp-client.spec.ts:236-246`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L236-L246) |
+| 2 | 分页 cursor 重复 | 服务器返回已见过的非空 `nextCursor`(含跨空页的环) | 整表 reject:`server repeated a tools/list continuation cursor — invalid tool list`;旧代保留;**下次同步仍可成功** | 否 | `tools.ts:175-183` | [`mcp-client.spec.ts:312-354`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L312-L354)、[`apply.spec.ts:306-326`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts#L306-L326) |
+| 3 | 注册冲突(命名空间被抢占) | 外部注册占用 `mcp__<serverName>__*` | 半代回滚(本服务器**零工具**)+ `logger.error`;`contain` 模式吞下,`throw` 模式向启动路径上抛 | 否(该服务器工具全部消失) | `tools.ts:193-201` | [`mcp-client.spec.ts:260-281`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L260-L281)、[`apply.spec.ts:284-304`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts#L284-L304) |
+| 4 | 首次连接失败 · `failOnStartupError:false` | `connect()` reject | 记 warn、工具零注册、进入重连循环;harness 照常启动 | 该服务器工具不出现 | `connection.ts:279-296`、`index.ts:184-187` | [`apply.spec.ts:252-265`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts#L252-L265) |
+| 5 | 首次连接失败 · `failOnStartupError:true` | 同上 | `apply` throw `mcp-client(<n>): initial connection or tool synchronization failed`(带 cause);Cordis 回滚 fiber、已开客户端被关闭 | 整个 harness 不启动 | `index.ts:184-187` | [`apply.spec.ts:267-282`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts#L267-L282)、[`mcp-pagination.expected.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts) |
 | 6 | 重连尝试耗尽预算 | `failedAttempts > maxAttempts` | **注销该服务器全部工具** + `giving up after N consecutive failed reconnect attempts`;恢复只能靠 HMR/重启 | 工具从工具表消失 | `connection.ts:206-214` | `reconnect.spec.ts:173-197,365-382` |
-| 7 | `reconnect.enabled:false` 且掉线 | 断连 | 只记 error(`connection lost and reconnect is disabled`);**工具保留在注册表**,调用必失败 | 工具仍在,调用失败 | `connection.ts:194-200` | `reconnect.spec.ts:325-336` |
-| 8 | 失败代际在 5 秒内不报告关闭 | transport 卡死 | **停止重连**(不注销工具)以防子进程重叠;`reconnect stopped to avoid overlapping server processes` | 视情形(未连上则无工具) | `connection.ts:288-293` | `reconnect.spec.ts:243-259` |
-| 9 | dispose 期间代际不关闭 | 同上 | 只记 `server shutdown may be incomplete`,dispose 继续走完 | 无 | `connection.ts:339-341` | `reconnect.spec.ts:277-297` |
-| 10 | 工具要求任务式执行 | `execution.taskSupport === 'required'` | **调用期** throw;不发起任何网络请求;工具仍注册 | 是:`isError` 结果,消息含 `requires task-based execution` | `tools.ts:322-324` | `mcp-client.spec.ts:892-906` |
+| 7 | `reconnect.enabled:false` 且掉线 | 断连 | 只记 error(`connection lost and reconnect is disabled`);**工具保留在注册表**,调用必失败 | 工具仍在,调用失败 | `connection.ts:194-200` | [`reconnect.spec.ts:325-336`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L325-L336) |
+| 8 | 失败代际在 5 秒内不报告关闭 | transport 卡死 | **停止重连**(不注销工具)以防子进程重叠;`reconnect stopped to avoid overlapping server processes` | 视情形(未连上则无工具) | `connection.ts:288-293` | [`reconnect.spec.ts:243-259`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L243-L259) |
+| 9 | dispose 期间代际不关闭 | 同上 | 只记 `server shutdown may be incomplete`,dispose 继续走完 | 无 | `connection.ts:339-341` | [`reconnect.spec.ts:277-297`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L277-L297) |
+| 10 | 工具要求任务式执行 | `execution.taskSupport === 'required'` | **调用期** throw;不发起任何网络请求;工具仍注册 | 是:`isError` 结果,消息含 `requires task-based execution` | `tools.ts:322-324` | [`mcp-client.spec.ts:892-906`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L892-L906) |
 | 11 | 服务器返回 `isError:true` | 任意形态(text / 非文本 / legacy) | throw → 注册表产出 `isError` 结果,文本为 `Error: <服务器文本>`;**先于任何图片落盘** | 是 | `tools.ts:338,354-356` | `mcp-client.spec.ts:878-890,958-970,1127-1141` |
-| 12 | 图片解码失败(媒体类型 / base64) | 任一块非法 | **整批**降级为诊断文本,零落盘;失败块报自身原因,其余报 `another image in the same result was invalid` | 是(诊断文本) | `tools.ts:389-401,462-470` | `mcp-client.spec.ts:556-607` |
-| 13 | 未挂载附件库 | 无 `ctx.attachments` | 整批降级,原因 `no attachment store is mounted`;规范值仍保留原图 | 是(诊断文本) | `tools.ts:410-411` | `mcp-client.spec.ts:532-554` |
-| 14 | 模型路由不可解析 / 不可验证 | 缺 provider/model/llm,或 `resolveModelInfo` 抛错 | 整批降级,原因分别为 `the current model route could not be resolved` / `… could not be verified` | 是 | `tools.ts:412-424` | `mcp-client.spec.ts:637-687` |
+| 12 | 图片解码失败(媒体类型 / base64) | 任一块非法 | **整批**降级为诊断文本,零落盘;失败块报自身原因,其余报 `another image in the same result was invalid` | 是(诊断文本) | `tools.ts:389-401,462-470` | [`mcp-client.spec.ts:556-607`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L556-L607) |
+| 13 | 未挂载附件库 | 无 `ctx.attachments` | 整批降级,原因 `no attachment store is mounted`;规范值仍保留原图 | 是(诊断文本) | `tools.ts:410-411` | [`mcp-client.spec.ts:532-554`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L532-L554) |
+| 14 | 模型路由不可解析 / 不可验证 | 缺 provider/model/llm,或 `resolveModelInfo` 抛错 | 整批降级,原因分别为 `the current model route could not be resolved` / `… could not be verified` | 是 | `tools.ts:412-424` | [`mcp-client.spec.ts:637-687`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L637-L687) |
 | 15 | 模型未声明图像输入 | `inputModalities` 缺 `image` 或字段缺失 | 整批降级,原因 `model "<m>" does not declare image input` | 是 | `tools.ts:425-427` | `mcp-client.spec.ts:609-627,677-687` |
-| 16 | 取消发生在入库前 | `exec.signal.aborted` | 桥侧拒绝落盘;注册表的取消契约产出 `Error: tool call aborted` | 是 | `tools.ts:428` | `mcp-client.spec.ts:689-704` |
-| 17 | 附件库拒绝批次 | `AttachmentError` 且码属准入集合 | 降级,原因 `image admission rejected the result: <msg>` | 是 | `tools.ts:489-491` | `mcp-client.spec.ts:726-747` |
-| 18 | 附件库存储故障 | 非准入码的异常 | 降级,原因 `durable image storage rejected the result`(与 #17 文案可区分) | 是 | `tools.ts:490-491` | `mcp-client.spec.ts:706-724` |
-| 19 | 服务器发布了不受支持的 `outputSchema` | 含 harness 子集外的词汇 | **不拒绝工具**;`structuredContent` 降级为 `JsonValue`,不参与校验 | 否 | `tools.ts:231-239` | `mcp-client.spec.ts:863-876` |
-| 20 | 服务器声明了受支持 schema 但内容不符 | `structuredContent` 缺字段/类型错 | 注册表判 `INVALID_TOOL_OUTPUT`,`isError` 结果带字段路径 | 是 | `tools.ts:285-295` | `mcp-client.spec.ts:835-861` |
+| 16 | 取消发生在入库前 | `exec.signal.aborted` | 桥侧拒绝落盘;注册表的取消契约产出 `Error: tool call aborted` | 是 | `tools.ts:428` | [`mcp-client.spec.ts:689-704`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L689-L704) |
+| 17 | 附件库拒绝批次 | `AttachmentError` 且码属准入集合 | 降级,原因 `image admission rejected the result: <msg>` | 是 | `tools.ts:489-491` | [`mcp-client.spec.ts:726-747`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L726-L747) |
+| 18 | 附件库存储故障 | 非准入码的异常 | 降级,原因 `durable image storage rejected the result`(与 #17 文案可区分) | 是 | `tools.ts:490-491` | [`mcp-client.spec.ts:706-724`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L706-L724) |
+| 19 | 服务器发布了不受支持的 `outputSchema` | 含 harness 子集外的词汇 | **不拒绝工具**;`structuredContent` 降级为 `JsonValue`,不参与校验 | 否 | `tools.ts:231-239` | [`mcp-client.spec.ts:863-876`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L863-L876) |
+| 20 | 服务器声明了受支持 schema 但内容不符 | `structuredContent` 缺字段/类型错 | 注册表判 `INVALID_TOOL_OUTPUT`,`isError` 结果带字段路径 | 是 | `tools.ts:285-295` | [`mcp-client.spec.ts:835-861`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L835-L861) |
 | 21 | 服务器返回非对象/未知内容块 | `42` / `video` / 缺字段 | 逐个映射为显式诊断文本,规范值保留原块 | 是(诊断文本) | `tools.ts:534-563` | `mcp-client.spec.ts:814-833,1036-1076` |
-| 22 | 模型参数非对象 | `arguments` 为 `null`/字符串/数字 | 兜底为 `{}`,交给服务器产出"缺少必填参数" | 视服务器 | `tools.ts:329` | `mcp-client.spec.ts:1262-1300` |
-| 23 | 插件导出形态被破坏 | 误加 `export default` | 装载期即失败(`inject` 丢失) | 整个 harness 不启动 | `load-path.spec.ts` 守卫的契约 | `load-path.spec.ts:17-29` |
+| 22 | 模型参数非对象 | `arguments` 为 `null`/字符串/数字 | 兜底为 `{}`,交给服务器产出"缺少必填参数" | 视服务器 | `tools.ts:329` | [`mcp-client.spec.ts:1262-1300`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L1262-L1300) |
+| 23 | 插件导出形态被破坏 | 误加 `export default` | 装载期即失败(`inject` 丢失) | 整个 harness 不启动 | [`load-path.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/load-path.spec.ts) 守卫的契约 | [`load-path.spec.ts:17-29`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/load-path.spec.ts#L17-L29) |
 
 ### 3.1 三条横向规律
 
 1. **"发现期"的失败都是全有或全无**,从不产生部分工具表(#1、#2、#3)。因此模型永远不会看到一个"看起来正常但缺了一半"的服务器。
 2. **"执行期"的失败都是显式降级**,从不静默(#10–#22)。诊断文本的固定句式是 `[<什么不可用>: <为什么>; <原始数据在哪>]`,让模型能判断"是服务器没给"还是"harness 不让"。
-3. **失败的消息文本是被测试冻结的产品面**,不是实现细节。它们出现在 `logger.*` 调用、`Error` 消息与快照文件里,`reconnect.spec.ts` 用 `line.includes(...)` 逐条断言、`stderr-cause.txt` 逐字快照。
+3. **失败的消息文本是被测试冻结的产品面**,不是实现细节。它们出现在 `logger.*` 调用、`Error` 消息与快照文件里,[`reconnect.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts) 用 `line.includes(...)` 逐条断言、`stderr-cause.txt` 逐字快照。
 
 ---
 
@@ -263,10 +263,10 @@ flowchart TD
 
 | 未覆盖项 | 原因 / 出处 |
 |---|---|
-| `StdioClientTransport` 实际收到的 env 内容 | `mcp-client.spec.ts:1231-1232` 注释:`StdioClientTransport` 把 env 设为私有;测试只能断言构造不抛异常 |
+| `StdioClientTransport` 实际收到的 env 内容 | [`mcp-client.spec.ts:1231-1232`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L1231-L1232) 注释:`StdioClientTransport` 把 env 设为私有;测试只能断言构造不抛异常 |
 | 桥侧的连接/发现超时 | 不存在该配置;README "Known Limitations" 明确说超时继承自 SDK 的 60 秒请求默认值 |
 | Streamable HTTP 的**连接级**重连 | README 说明 HTTP 失败按请求由 SDK 自身恢复,监管器只响应 transport close |
-| 持续返回**不同** cursor 的服务器 | 官方注记:`2026-07-07-mcp-client-plugin.md:105`——"this detects repeated cursors; it does not bound a server that continually returns distinct cursors" |
+| 持续返回**不同** cursor 的服务器 | 官方注记:[`2026-07-07-mcp-client-plugin.md:105`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-07-mcp-client-plugin.md#L105)——"this detects repeated cursors; it does not bound a server that continually returns distinct cursors" |
 | MCP Resources / Prompts | 未桥接,非缺陷 |
 | 第三方服务器包在快照测试里 | 官方注记:快照必须保持无密钥与确定性,第三方 server 包只在包级 e2e 里启动 |
 
@@ -276,17 +276,17 @@ flowchart TD
 
 | 文件 | 行数 | 定位 |
 |---|---|---|
-| `tests/mcp-client.spec.ts` | 1300 | 桥的全部单元行为 |
-| `tests/reconnect.spec.ts` | 521 | 监管器的全部失败分支 |
-| `tests/apply.spec.ts` | 461 | 插件生命周期与激活语义 |
-| `tests/mcp-client.e2e.ts` | 563 | 真实协议的键路径 e2e |
-| `tests/load-path.spec.ts` | 29 | 导出形态守卫(真实 Loader) |
-| `tests/egress.spec.ts` | 41 | 代理出口 |
-| `tests/fixture-server.ts` | 76 | stdio 夹具(6 个受控工具) |
-| `tests/http-fixture.ts` | 52 | stateless HTTP 夹具 |
-| `tests/fixtures/repeated-cursor-server.ts` | 18 | 重复 cursor 的线上服务器 |
-| `tests/fixtures/repeated-cursor.patch.yml` | 17 | headless profile overlay |
-| `apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts` | 30 | 真实 CLI 的启动诊断 |
+| [`tests/mcp-client.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts) | 1300 | 桥的全部单元行为 |
+| [`tests/reconnect.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts) | 521 | 监管器的全部失败分支 |
+| [`tests/apply.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts) | 461 | 插件生命周期与激活语义 |
+| [`tests/mcp-client.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts) | 563 | 真实协议的键路径 e2e |
+| [`tests/load-path.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/load-path.spec.ts) | 29 | 导出形态守卫(真实 Loader) |
+| [`tests/egress.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/egress.spec.ts) | 41 | 代理出口 |
+| [`tests/fixture-server.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/fixture-server.ts) | 76 | stdio 夹具(6 个受控工具) |
+| [`tests/http-fixture.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/http-fixture.ts) | 52 | stateless HTTP 夹具 |
+| [`tests/fixtures/repeated-cursor-server.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/fixtures/repeated-cursor-server.ts) | 18 | 重复 cursor 的线上服务器 |
+| [`tests/fixtures/repeated-cursor.patch.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/fixtures/repeated-cursor.patch.yml) | 17 | headless profile overlay |
+| [`apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/tests/profiles/headless/tests/mcp-pagination.expected.e2e.ts) | 30 | 真实 CLI 的启动诊断 |
 | `apps/cli/tests/profiles/headless/tests/expected/mcp-pagination/stderr-cause.txt` | 1 | 内层 cause 的逐字快照 |
 
 ### 夹具服务器暴露的工具(`tests/fixture-server.ts`)

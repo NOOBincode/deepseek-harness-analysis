@@ -1,7 +1,7 @@
 # 02 · 能力缝与 provider(函数级走查)
 
-> 源码:`packages/subagent/subagent/src/index.ts`(660 行,Service Definition)、`packages/subagent/subagent/src/types.ts`(390 行,全部契约)
-> 三个 in-process 后端:`subagent-in-process-driver/src/index.ts`、`subagent-spawn-in-process/src/index.ts`、`subagent-fork-in-process/src/index.ts`
+> 源码:[`packages/subagent/subagent/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/index.ts)(660 行,Service Definition)、[`packages/subagent/subagent/src/types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts)(390 行,全部契约)
+> 三个 in-process 后端:[`subagent-in-process-driver/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts)、[`subagent-spawn-in-process/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-spawn-in-process/src/index.ts)、[`subagent-fork-in-process/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-fork-in-process/src/index.ts)
 > 子 agent 内部怎么被组装见 [03](./03-child-agent-composition.md),续存路线见 [04](./04-continuation-and-control.md)。
 
 ---
@@ -122,14 +122,14 @@ if (typeof config.maxDepth === 'number' && !subagentProvider.capabilities.depthL
 }
 ```
 
-`subagent` 工具里那个 `maxDepth: 'provider-managed'` 枚举值就是给这件事留的出口(`tool-subagent/src/index.ts:129`)。
+`subagent` 工具里那个 `maxDepth: 'provider-managed'` 枚举值就是给这件事留的出口([`tool-subagent/src/index.ts:129`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L129))。
 
 ### 1.2 注册表与 provider 生命周期
 
-`registerProvider`(`index.ts:509-525`)用一个 effect 做三件事:**重名即抛 `DUPLICATE_PROVIDER`** → `providers.set(name, provider)` → `yield` 一段移除并 `emitLifecycle('subagent/provider-removed', name)` 的析构 → 最后 `this.ctx.emit('subagent/provider-added', provider)`。注释点明最后一步的特殊性:*A throwing added-listener unwinds the yielded rollback, matching the repository's fail-loud registration semantics*(`:521-522`)。
+`registerProvider`([`index.ts:509-525`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L509-L525))用一个 effect 做三件事:**重名即抛 `DUPLICATE_PROVIDER`** → `providers.set(name, provider)` → `yield` 一段移除并 `emitLifecycle('subagent/provider-removed', name)` 的析构 → 最后 `this.ctx.emit('subagent/provider-added', provider)`。注释点明最后一步的特殊性:*A throwing added-listener unwinds the yielded rollback, matching the repository's fail-loud registration semantics*([`:521-522`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L521-L522))。
 
 - **重名即抛**正是出货 preset 里 `subagents` 注册表必须留在 HOST composition 的原因之一(provider 名只能注册一次,见 [07](./07-preset-composition.md))。
-- 移除 provider **只阻断新 start**,已经交到调用者手上的 run 不受影响(`:503-506` 与 `:146-150` 的事件注释)。
+- 移除 provider **只阻断新 start**,已经交到调用者手上的 run 不受影响([`:503-506`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L503-L506) 与 [`:146-150`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L146-L150) 的事件注释)。
 
 ---
 
@@ -174,7 +174,7 @@ export interface ResolvedSubagentStartRequest extends SubagentStartRequest {
 }
 ```
 
-provider 拿到的**不是**原始请求,而是这个加了一个 `descriptor` 的版本。descriptor 由 service 快照(`index.ts:561-565`),provider 负责把它写进子日志——driver 的做法是在子的**初始 turn 内**、第一个请求之前追加:
+provider 拿到的**不是**原始请求,而是这个加了一个 `descriptor` 的版本。descriptor 由 service 快照([`index.ts:561-565`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L561-L565)),provider 负责把它写进子日志——driver 的做法是在子的**初始 turn 内**、第一个请求之前追加:
 
 ```typescript
 // packages/subagent/subagent-in-process-driver/src/index.ts:81-91
@@ -244,7 +244,7 @@ export interface SubagentStopReasonMap {
 }
 ```
 
-注意注释:*Merge-extensible (a backend may add variants); consumers branch on the known cases and fall through `default`*。工具层据此把未知变体**当作失败**处理(`tool-subagent/src/index.ts:168-172`)。
+注意注释:*Merge-extensible (a backend may add variants); consumers branch on the known cases and fall through `default`*。工具层据此把未知变体**当作失败**处理([`tool-subagent/src/index.ts:168-172`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L168-L172))。
 
 driver 侧的映射只有 10 行:
 
@@ -394,7 +394,7 @@ return {
 
 `dispose()` 用 `Promise.allSettled` **同时等两个**:handle 的销毁与 result 的结算。**结果通道拥有 run 的故障**;dispose 只在"两个都收敛之后,句柄仍未能释放"时 reject。这避免了"dispose 报错把真正的子 agent 失败盖掉"。
 
-**工具层如何把停因翻成工具错误**(`tool-subagent/src/index.ts:207-237`):非 `completed` → 抛错并携带诊断与部分输出,注册表把这次 throw 转成 `isError` 工具结果;`run.dispose()` 与 `run.result` 各自 `Promise.allSettled`,**结果失败优先于 dispose 失败,两者皆失败才 `AggregateError`**。
+**工具层如何把停因翻成工具错误**([`tool-subagent/src/index.ts:207-237`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L207-L237)):非 `completed` → 抛错并携带诊断与部分输出,注册表把这次 throw 转成 `isError` 工具结果;`run.dispose()` 与 `run.result` 各自 `Promise.allSettled`,**结果失败优先于 dispose 失败,两者皆失败才 `AggregateError`**。
 
 ---
 
@@ -437,18 +437,18 @@ sequenceDiagram
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `SubagentRuntime` | `packages/subagent/subagent/src/index.ts:188-658` | 命名 provider 注册表 + 校验型异步 start |
-| `registerProvider` / `expectProvider` / `requireContinuations` | `subagent/src/index.ts:509-525` / `609-615` / `618-626` | 注册与三种查找失败(`DUPLICATE_PROVIDER` / `NO_PROVIDER` / `CONTINUATION_UNAVAILABLE`) |
-| `start` / `assertCapabilities` | `subagent/src/index.ts:556-586` / `641-657` | 校验 → 快照描述符 → 委派 → 目录 → observeRun |
-| `subagent/provider-*` 与 `subagent/start|end` 事件 | `subagent/src/index.ts:138-171` | 注册表变化与运行生命周期对 |
-| `SubagentCapabilities` | `types.ts:130-136` | 五元布尔组,与请求字段一一对位 |
-| `SubagentStartRequest` | `types.ts:145-201` | 九个字段;`signal` 是贯穿前后两阶段的取消通道 |
-| `ResolvedSubagentStartRequest` | `types.ts:207-210` | 请求 + `descriptor` |
-| `ContinuableCreateRequest` / `Spec` | `types.ts:219-244` | 续存创建:provider 只贡献 `seed` 数据 |
-| `SubagentStopReasonMap` / `SubagentResult` | `types.ts:252-266` / `271-297` | 可合并扩展的停因联合;`output`/`structured?`/`diagnostic?`(≤4096B)/`stopReason` |
-| `SubagentRun` / `SubagentProvider` | `types.ts:308-334` / `344-390` | run 四项;provider 六项(含可选 `prepareContinuable`) |
-| `startInProcessRun` / `setup` 闭包 | `subagent-in-process-driver/src/index.ts:104-152` / `122-132` | 深度 → 策略捕获 → setup → create → drive |
+| `SubagentRuntime` | [`packages/subagent/subagent/src/index.ts:188-658`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/index.ts#L188-L658) | 命名 provider 注册表 + 校验型异步 start |
+| `registerProvider` / `expectProvider` / `requireContinuations` | [`subagent/src/index.ts:509-525`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/index.ts#L509-L525) / `609-615` / `618-626` | 注册与三种查找失败(`DUPLICATE_PROVIDER` / `NO_PROVIDER` / `CONTINUATION_UNAVAILABLE`) |
+| `start` / `assertCapabilities` | [`subagent/src/index.ts:556-586`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/index.ts#L556-L586) / `641-657` | 校验 → 快照描述符 → 委派 → 目录 → observeRun |
+| `subagent/provider-*` 与 `subagent/start|end` 事件 | [`subagent/src/index.ts:138-171`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/index.ts#L138-L171) | 注册表变化与运行生命周期对 |
+| `SubagentCapabilities` | [`types.ts:130-136`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts#L130-L136) | 五元布尔组,与请求字段一一对位 |
+| `SubagentStartRequest` | [`types.ts:145-201`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts#L145-L201) | 九个字段;`signal` 是贯穿前后两阶段的取消通道 |
+| `ResolvedSubagentStartRequest` | [`types.ts:207-210`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts#L207-L210) | 请求 + `descriptor` |
+| `ContinuableCreateRequest` / `Spec` | [`types.ts:219-244`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts#L219-L244) | 续存创建:provider 只贡献 `seed` 数据 |
+| `SubagentStopReasonMap` / `SubagentResult` | [`types.ts:252-266`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts#L252-L266) / `271-297` | 可合并扩展的停因联合;`output`/`structured?`/`diagnostic?`(≤4096B)/`stopReason` |
+| `SubagentRun` / `SubagentProvider` | [`types.ts:308-334`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts#L308-L334) / `344-390` | run 四项;provider 六项(含可选 `prepareContinuable`) |
+| `startInProcessRun` / `setup` 闭包 | [`subagent-in-process-driver/src/index.ts:104-152`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts#L104-L152) / `122-132` | 深度 → 策略捕获 → setup → create → drive |
 | `drivePublishedRun` / `readResult` / `toStopReason` | `driver/src/index.ts:158-209` / `212-238` / `50-67` | 一轮 followup→whenIdle→readResult + dispose;停因映射与 `cancelled` 覆盖规则 |
-| `attachDescriptorAppend` / `attachStructuredRuntime` | `driver/src/index.ts:81-91` / `structured.ts:49-141` | 初始 turn 内追加描述符;`structured_output` 工具 + 守卫 + `captured()` |
-| `SpawnInProcessProvider` | `subagent-spawn-in-process/src/index.ts:41-66` | `inheritsParentContext = false`,无 seed |
-| `ForkInProcessProvider` / `completedTurnPrefix` | `subagent-fork-in-process/src/index.ts:63-92` / `48-55` | `inheritsParentContext = true`,平衡 turn 前缀 |
+| `attachDescriptorAppend` / `attachStructuredRuntime` | `driver/src/index.ts:81-91` / [`structured.ts:49-141`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/structured.ts#L49-L141) | 初始 turn 内追加描述符;`structured_output` 工具 + 守卫 + `captured()` |
+| `SpawnInProcessProvider` | [`subagent-spawn-in-process/src/index.ts:41-66`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-spawn-in-process/src/index.ts#L41-L66) | `inheritsParentContext = false`,无 seed |
+| `ForkInProcessProvider` / `completedTurnPrefix` | [`subagent-fork-in-process/src/index.ts:63-92`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-fork-in-process/src/index.ts#L63-L92) / `48-55` | `inheritsParentContext = true`,平衡 turn 前缀 |

@@ -47,7 +47,7 @@ declare module '@deepseek-ai/dsh-session/types' {
     'compaction/start': { compactionId: CompactionId; sourceCommandId?: CommandId; turn: number | null }
 ```
 
-同类扩展还出现在:`session/title`(`session-title/src/index.ts`)、`todo/write`(`tool-todo/src/types.ts`)、`goal/change`(`goal/src/domain.ts`)、`sandbox/mode`(`sandbox-policy/src/session-mode.ts`)、`plan/mode`、`schedule/change` 等等。**新增一个普通事件类型不 bump 格式版本**——`SESSION_FORMAT_VERSION` 只在结构性变化(header 形状、事件信封、核心事件语义、surface 机制)时递增,词汇增长由信封上的 `ignorable` 标记兜底:
+同类扩展还出现在:`session/title`([`session-title/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-title/src/index.ts))、`todo/write`([`tool-todo/src/types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/todo/tool-todo/src/types.ts))、`goal/change`([`goal/src/domain.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/goal/goal/src/domain.ts))、`sandbox/mode`([`sandbox-policy/src/session-mode.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox-policy/src/session-mode.ts))、`plan/mode`、`schedule/change` 等等。**新增一个普通事件类型不 bump 格式版本**——`SESSION_FORMAT_VERSION` 只在结构性变化(header 形状、事件信封、核心事件语义、surface 机制)时递增,词汇增长由信封上的 `ignorable` 标记兜底:
 
 ```typescript
 // packages/core/session/src/types.ts:66-88
@@ -360,23 +360,23 @@ function surfaceOpOf(event: SessionEvent): SurfaceOp | undefined {
 
 | 符号 | 位置 | 作用 |
 |---|---|---|
-| `SESSION_FORMAT_VERSION` | `packages/core/session/src/types.ts:88` | 当前逻辑格式版本,值为 `3` |
-| `SessionEventMap` | `packages/core/session/src/types.ts:269` | 可合并扩展的事件词表 |
-| `SessionEventType` | `packages/core/session/src/types.ts:404` | 词表的键联合 |
-| `SurfaceEventType` | `packages/core/session/src/types.ts:412` | 四个可进 surface 的事件类型 |
-| `SurfaceOp` | `packages/core/session/src/types.ts:434` | `'append'` 或区间 `replace` |
-| `SurfaceIntent` | `packages/core/session/src/types.ts:442` | surface 元数据的条件类型 |
-| `SessionEvent` | `packages/core/session/src/types.ts:465` | 判别式联合信封 |
-| `KNOWN_SESSION_EVENT_TYPES` | `packages/core/session/src/known-event-types.ts:22` | 生成的本构建词汇表(56 项) |
-| `Session.append` | `packages/core/session/src/index.ts:710` | 唯一写入入口 |
-| `collectSessionCallbacks` | `packages/core/session/src/index.ts:398` | 提交前解析监听者快照 |
-| `invokeContainedSessionObservers` | `packages/core/session/src/index.ts:403` | 逐监听者隔离通知 |
-| `adoptSessionEvent` | `packages/core/session/src/index.ts:166` | 独占所有权下的就地校验与冻结 |
-| `snapshotSessionEvent` | `packages/core/session/src/index.ts:194` | 跨边界事件的克隆后校验 |
-| `assertSessionEventEnvelope` | `packages/core/session/src/index.ts:199` | seed/加载边界的信封校验 |
-| `surfaceOpOf` | `packages/core/session/src/surface.ts:241` | surface 元数据的写侧词表闸门 |
-| `validateStoredEvents` | `packages/session/session-persistence/src/storage-contract.ts:69` | 读侧 fail-closed 词表闸门 |
-| `assertContiguous` | `packages/session/session-persistence/src/storage-contract.ts:145` | 批次 seq 连续性 |
-| `assertVersion` | `packages/session/session-persistence/src/storage-contract.ts:46` | header 版本门 |
-| `materializeAppendBatch` | `packages/session/session-persistence/src/storage-contract.ts:131` | 追加批次的单次遍历物化 |
-| `'session/event'` 事件声明 | `packages/core/session/src/index.ts:72` | 提交后 fire-and-forget 广播 |
+| `SESSION_FORMAT_VERSION` | [`packages/core/session/src/types.ts:88`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L88) | 当前逻辑格式版本,值为 `3` |
+| `SessionEventMap` | [`packages/core/session/src/types.ts:269`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L269) | 可合并扩展的事件词表 |
+| `SessionEventType` | [`packages/core/session/src/types.ts:404`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L404) | 词表的键联合 |
+| `SurfaceEventType` | [`packages/core/session/src/types.ts:412`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L412) | 四个可进 surface 的事件类型 |
+| `SurfaceOp` | [`packages/core/session/src/types.ts:434`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L434) | `'append'` 或区间 `replace` |
+| `SurfaceIntent` | [`packages/core/session/src/types.ts:442`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L442) | surface 元数据的条件类型 |
+| `SessionEvent` | [`packages/core/session/src/types.ts:465`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L465) | 判别式联合信封 |
+| `KNOWN_SESSION_EVENT_TYPES` | [`packages/core/session/src/known-event-types.ts:22`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/known-event-types.ts#L22) | 生成的本构建词汇表(56 项) |
+| `Session.append` | [`packages/core/session/src/index.ts:710`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L710) | 唯一写入入口 |
+| `collectSessionCallbacks` | [`packages/core/session/src/index.ts:398`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L398) | 提交前解析监听者快照 |
+| `invokeContainedSessionObservers` | [`packages/core/session/src/index.ts:403`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L403) | 逐监听者隔离通知 |
+| `adoptSessionEvent` | [`packages/core/session/src/index.ts:166`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L166) | 独占所有权下的就地校验与冻结 |
+| `snapshotSessionEvent` | [`packages/core/session/src/index.ts:194`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L194) | 跨边界事件的克隆后校验 |
+| `assertSessionEventEnvelope` | [`packages/core/session/src/index.ts:199`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L199) | seed/加载边界的信封校验 |
+| `surfaceOpOf` | [`packages/core/session/src/surface.ts:241`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L241) | surface 元数据的写侧词表闸门 |
+| `validateStoredEvents` | [`packages/session/session-persistence/src/storage-contract.ts:69`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L69) | 读侧 fail-closed 词表闸门 |
+| `assertContiguous` | [`packages/session/session-persistence/src/storage-contract.ts:145`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L145) | 批次 seq 连续性 |
+| `assertVersion` | [`packages/session/session-persistence/src/storage-contract.ts:46`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L46) | header 版本门 |
+| `materializeAppendBatch` | [`packages/session/session-persistence/src/storage-contract.ts:131`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-persistence/src/storage-contract.ts#L131) | 追加批次的单次遍历物化 |
+| `'session/event'` 事件声明 | [`packages/core/session/src/index.ts:72`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L72) | 提交后 fire-and-forget 广播 |

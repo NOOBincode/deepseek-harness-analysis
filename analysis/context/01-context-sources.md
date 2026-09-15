@@ -36,14 +36,14 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 段落注册 | 插件把提示正文段落登记进按作用域分层的注册表 | `section()`(`packages/core/system-prompt/src/index.ts:448`) |
-| 上下文注册 | 插件把会变的运行时事实登记成带名字的贡献 | `context()`(`packages/core/system-prompt/src/index.ts:483`) |
-| 每步组装 | 合并 scope 链上的层,求值变量与段落,聚合工具 schema | `assemble()`(`packages/core/system-prompt/src/index.ts:552-627`) |
-| 提示渲染 | 插值变量、丢弃空段落、用空行拼成正文 | `renderPrompt()`(`packages/core/system-prompt/src/index.ts:273-278`) |
-| 快照渲染 | 保留具名贡献,拼成带抬头的整份快照 | `renderContextSections()` / `joinContextSections()`(`packages/core/system-prompt/src/index.ts:312-316`、`297-301`) |
-| 快照去重 | 与上次真正落盘的文本比对,相同就不产生任何事件 | `RuntimeContextProjection.project()`(`packages/core/agent-loop/src/runtime-context.ts:147-158`) |
-| 落盘 | 提示走 `system/message`,快照与用户批次走 `user/message` | `session.append()`(`packages/core/agent-loop/src/agent.ts:370-377`) |
-| 派生请求 | 请求的 `messages` 与日志逐字一致,提示只能是 surface 节点 0 | `session.deriveMessages()`(`packages/core/agent-loop/src/agent.ts:603`)、`invariant.ts:40-51` |
+| 段落注册 | 插件把提示正文段落登记进按作用域分层的注册表 | `section()`([`packages/core/system-prompt/src/index.ts:448`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/src/index.ts#L448)) |
+| 上下文注册 | 插件把会变的运行时事实登记成带名字的贡献 | `context()`([`packages/core/system-prompt/src/index.ts:483`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/src/index.ts#L483)) |
+| 每步组装 | 合并 scope 链上的层,求值变量与段落,聚合工具 schema | `assemble()`([`packages/core/system-prompt/src/index.ts:552-627`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/src/index.ts#L552-L627)) |
+| 提示渲染 | 插值变量、丢弃空段落、用空行拼成正文 | `renderPrompt()`([`packages/core/system-prompt/src/index.ts:273-278`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/src/index.ts#L273-L278)) |
+| 快照渲染 | 保留具名贡献,拼成带抬头的整份快照 | `renderContextSections()` / `joinContextSections()`([`packages/core/system-prompt/src/index.ts:312-316`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/src/index.ts#L312-L316)、`297-301`) |
+| 快照去重 | 与上次真正落盘的文本比对,相同就不产生任何事件 | `RuntimeContextProjection.project()`([`packages/core/agent-loop/src/runtime-context.ts:147-158`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/runtime-context.ts#L147-L158)) |
+| 落盘 | 提示走 `system/message`,快照与用户批次走 `user/message` | `session.append()`([`packages/core/agent-loop/src/agent.ts:370-377`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L370-L377)) |
+| 派生请求 | 请求的 `messages` 与日志逐字一致,提示只能是 surface 节点 0 | `session.deriveMessages()`([`packages/core/agent-loop/src/agent.ts:603`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L603))、[`invariant.ts:40-51`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/invariant.ts#L40-L51) |
 
 <details><summary>来源与落点的对应关系</summary>
 
@@ -80,7 +80,7 @@ export function renderPrompt(assembly: PromptAssembly): string {
 }
 ```
 
-段落位置不由注册顺序决定:一等贡献者向服务要具名位置,序表集中在 `SECTION_ORDERS`(`index.ts:121-154`),取值入口是 `getSectionOrder()`(`index.ts:464-466`)。渲染按 `order` 升序、同序号按名字的码元序确定。
+段落位置不由注册顺序决定:一等贡献者向服务要具名位置,序表集中在 `SECTION_ORDERS`([`index.ts:121-154`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L121-L154)),取值入口是 `getSectionOrder()`([`index.ts:464-466`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L464-L466))。渲染按 `order` 升序、同序号按名字的码元序确定。
 
 一个容易误判的边界:**技能目录不是段落**。`tool-skill` 把 `<available_skills>` 当作本步的一条用户消息发布,因为它是"整体替换的清单",语义与"每步重渲染的段落"不同。
 
@@ -90,7 +90,7 @@ export function renderPrompt(assembly: PromptAssembly): string {
 
 **谁产生**:需要把"会变的策略/位置事实"告诉模型的插件,注册入口是 `context()`。
 
-**什么时候产生**:同样在每次组装时求值,但排序用另一张序表 `CONTEXT_ORDERS`(`index.ts:159-163`),只有 `SANDBOX_POLICY: 110`、`APPROVAL_POLICY: 115`、`SUBAGENT_DELEGATION: 120` 三个具名位置。
+**什么时候产生**:同样在每次组装时求值,但排序用另一张序表 `CONTEXT_ORDERS`([`index.ts:159-163`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L159-L163)),只有 `SANDBOX_POLICY: 110`、`APPROVAL_POLICY: 115`、`SUBAGENT_DELEGATION: 120` 三个具名位置。
 
 **如何进入请求**:组装结果不拼进提示正文,而是保留成"具名贡献"列表,再合成一条独立的用户角色消息。
 
@@ -112,15 +112,15 @@ export function joinContextSections(sections: readonly ContextSnapshotSection[])
 }
 ```
 
-保留成具名二元组(`ContextSnapshotSection` 是 `{ name, text }`,`packages/llm/llm/src/message.ts:65-70`)不是为了排序,而是为了让 UI 把一段散文拆回来源而**不需要重新分词**。抬头那句"本快照取代此前的运行时快照"则是模型侧的去歧义声明。
+保留成具名二元组(`ContextSnapshotSection` 是 `{ name, text }`,[`packages/llm/llm/src/message.ts:65-70`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/message.ts#L65-L70))不是为了排序,而是为了让 UI 把一段散文拆回来源而**不需要重新分词**。抬头那句"本快照取代此前的运行时快照"则是模型侧的去歧义声明。
 
-真实贡献者的写法值得抄一遍:审批策略把**当前值**放进 contexts 而不是 sections,理由是"切换策略不该改写稳定的提示缓存前缀"(`packages/interaction/user-approval/src/index.ts:153-155`);无 agent 时返回空串,裸 `assemble()` 的测试与诊断场景因此拿到空贡献。
+真实贡献者的写法值得抄一遍:审批策略把**当前值**放进 contexts 而不是 sections,理由是"切换策略不该改写稳定的提示缓存前缀"([`packages/interaction/user-approval/src/index.ts:153-155`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/interaction/user-approval/src/index.ts#L153-L155));无 agent 时返回空串,裸 `assemble()` 的测试与诊断场景因此拿到空贡献。
 
 | 贡献者 | 名字 | 位置 | 代码 |
 |---|---|---|---|
-| 沙箱策略 | `sandbox:policy` | 110 | `packages/sandbox/sandbox-policy/src/index.ts:140-151` |
-| 审批策略 | `approval:policy` | 115 | `packages/interaction/user-approval/src/index.ts:155-167` |
-| 子 agent 委派说明 | `subagent:delegation` | 120 | `packages/subagent/subagent/src/child-agent.ts:205-209` |
+| 沙箱策略 | `sandbox:policy` | 110 | [`packages/sandbox/sandbox-policy/src/index.ts:140-151`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox-policy/src/index.ts#L140-L151) |
+| 审批策略 | `approval:policy` | 115 | [`packages/interaction/user-approval/src/index.ts:155-167`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/interaction/user-approval/src/index.ts#L155-L167) |
+| 子 agent 委派说明 | `subagent:delegation` | 120 | [`packages/subagent/subagent/src/child-agent.ts:205-209`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L205-L209) |
 
 ---
 
@@ -166,7 +166,7 @@ export function joinContextSections(sections: readonly ContextSnapshotSection[])
 
 ## 四、工具结果附带的上下文:经收件箱进入下一步
 
-**谁产生**:工具体与后置监听器。`ToolExecutionResult` 与 `PostToolDecision` 两处都能带 `additionalContexts`(`packages/core/tools/src/index.ts:556`、`568`),所以"拒绝执行 + 附带说明"也能注入上下文。
+**谁产生**:工具体与后置监听器。`ToolExecutionResult` 与 `PostToolDecision` 两处都能带 `additionalContexts`([`packages/core/tools/src/index.ts:556`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L556)、`568`),所以"拒绝执行 + 附带说明"也能注入上下文。
 
 **什么时候产生**:工具结果提交的那一刻,但**消费在下一次 step**。
 
@@ -188,13 +188,13 @@ export function joinContextSections(sections: readonly ContextSnapshotSection[])
         )
 ```
 
-顺序是稳定的:同一次工具提交里的多条上下文按 `additionalContexts` 的数组序追加,先于下一步任何新到达的消息。`spill-policy` 是这条通道的典型消费者——它把超限的纯文本结果换成预览加通知,同时**原样透传**下游已经声明的附加上下文(`packages/spill/spill-policy/src/index.ts:203`)。
+顺序是稳定的:同一次工具提交里的多条上下文按 `additionalContexts` 的数组序追加,先于下一步任何新到达的消息。`spill-policy` 是这条通道的典型消费者——它把超限的纯文本结果换成预览加通知,同时**原样透传**下游已经声明的附加上下文([`packages/spill/spill-policy/src/index.ts:203`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/spill/spill-policy/src/index.ts#L203))。
 
 ---
 
 ## 五、插件在步边界投递的消息:`agent/pre-step`
 
-**谁产生**:注册在 `agent/pre-step` 上的监听器(`packages/core/agent/src/runtime-types.ts:330`)。
+**谁产生**:注册在 `agent/pre-step` 上的监听器([`packages/core/agent/src/runtime-types.ts:330`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts#L330))。
 
 **什么时候产生**:每个 step 的第一步,即 `preStep` 里那段瀑布。
 
@@ -204,19 +204,19 @@ export function joinContextSections(sections: readonly ContextSnapshotSection[])
 
 | 插件 | 插入位置 | 触发条件 | 代码 |
 |---|---|---|---|
-| `time-context` | 追加到尾部 | 每个合格 step,受刷新间隔约束 | `packages/context/time-context/src/index.ts:211-220` |
-| `tmux-context` | 插到头部 | 只在乎 `step === 1`,且渲染状态与上次不同 | `packages/context/tmux-context/src/index.ts:254-263` |
-| `tool-skill` | 追加到尾部 | 目录摘要变化时追加,否则删掉旧目录消息 | `packages/skill/tool-skill/src/index.ts:242-250` |
-| `session-reference` | 紧跟被引用的那条消息之后 | 该消息是用户直接输入且含规范化引用 | `packages/context/session-reference/src/index.ts:153-177` |
-| `agent-instructions` | 正好插在认领批次之后 | 工作区指令有变化 | `packages/context/agent-instructions/src/index.ts:336-340` |
+| `time-context` | 追加到尾部 | 每个合格 step,受刷新间隔约束 | [`packages/context/time-context/src/index.ts:211-220`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/time-context/src/index.ts#L211-L220) |
+| `tmux-context` | 插到头部 | 只在乎 `step === 1`,且渲染状态与上次不同 | [`packages/context/tmux-context/src/index.ts:254-263`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/tmux-context/src/index.ts#L254-L263) |
+| `tool-skill` | 追加到尾部 | 目录摘要变化时追加,否则删掉旧目录消息 | [`packages/skill/tool-skill/src/index.ts:242-250`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/tool-skill/src/index.ts#L242-L250) |
+| `session-reference` | 紧跟被引用的那条消息之后 | 该消息是用户直接输入且含规范化引用 | [`packages/context/session-reference/src/index.ts:153-177`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L153-L177) |
+| `agent-instructions` | 正好插在认领批次之后 | 工作区指令有变化 | [`packages/context/agent-instructions/src/index.ts:336-340`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/agent-instructions/src/index.ts#L336-L340) |
 
 顺序不是靠插件自觉:瀑布按注册顺序包裹,`{ prepend: true }` 决定谁在外层;包装型监听器统一用 `{ ...decision, messages }` 保留 `startsRequestSeries` 之类的声明(`agent.ts:363`)。
 
 三条最容易踩的边界:
 
-1. **`step === 1 && decision.messages.length === 0` 时不能投递**。`agent-instructions` 用这个判断避免把纯上下文变成一次独立请求,而是留在收件箱等真正的输入(`index.ts:326-329`)。
-2. **投递的消息必须自己声明来源**。`session-reference` 用 `{ kind: 'session-reference', form: 'recall', version: 1, … }`,带完整保留统计,便于 UI 说明"这段是从别的会话搬来的、还删了多少"(`index.ts:339-351`)。
-3. **一次投递不等于一次请求**。瀑布的返回值只决定本步要落盘什么;是否真的发起调用由主循环在认领批次为空时另行判断(`agent.ts:294-300`)。
+1. **`step === 1 && decision.messages.length === 0` 时不能投递**。`agent-instructions` 用这个判断避免把纯上下文变成一次独立请求,而是留在收件箱等真正的输入([`index.ts:326-329`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L326-L329))。
+2. **投递的消息必须自己声明来源**。`session-reference` 用 `{ kind: 'session-reference', form: 'recall', version: 1, … }`,带完整保留统计,便于 UI 说明"这段是从别的会话搬来的、还删了多少"([`index.ts:339-351`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L339-L351))。
+3. **一次投递不等于一次请求**。瀑布的返回值只决定本步要落盘什么;是否真的发起调用由主循环在认领批次为空时另行判断([`agent.ts:294-300`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L294-L300))。
 
 ---
 
@@ -259,7 +259,7 @@ export function joinContextSections(sections: readonly ContextSnapshotSection[])
 
 | 文件 | 符号 | 行 | 本模块用途 |
 |---|---|---|---|
-| `packages/core/system-prompt/src/index.ts` | `SECTION_ORDERS` | 121-154 | 提示段落的具名位置表 |
+| [`packages/core/system-prompt/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/src/index.ts) | `SECTION_ORDERS` | 121-154 | 提示段落的具名位置表 |
 | 同上 | `CONTEXT_ORDERS` | 159-163 | 动态上下文的具名位置表 |
 | 同上 | `renderPrompt` | 273-278 | 段落插值、丢空、拼接 |
 | 同上 | `renderContextSnapshot` | 285-287 | 动态上下文整份渲染的便捷入口 |
@@ -267,15 +267,15 @@ export function joinContextSections(sections: readonly ContextSnapshotSection[])
 | 同上 | `renderContextSections` | 312-316 | 保留归属性地渲染上下文 |
 | 同上 | `section` / `context` / `tools` / `variable` | 448 / 483 / 515 / 531 | 四类贡献的注册入口 |
 | 同上 | `assemble` | 552-627 | 每步一次的编排 |
-| `packages/core/agent-loop/src/agent.ts` | `preStep` | 240-259 | 合流点 |
+| [`packages/core/agent-loop/src/agent.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts) | `preStep` | 240-259 | 合流点 |
 | 同上 | `step` | 352-497 | 落盘与派生请求 |
 | 同上 | `buildRequest` | 553-618 | `request/header` 与 `request/context` |
-| `packages/core/agent-loop/src/runtime-context.ts` | `SOURCE` / `CLEARED` | 14-15 | 快照来源标识与清空哨兵 |
+| [`packages/core/agent-loop/src/runtime-context.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/runtime-context.ts) | `SOURCE` / `CLEARED` | 14-15 | 快照来源标识与清空哨兵 |
 | 同上 | `isOwned` / `textOf` | 17-24 | 判定快照归属、取单块文本 |
 | 同上 | `RuntimeContextProjection.project` | 147-158 | 快照去重 |
-| `packages/core/agent-loop/src/tool-calls.ts` | `commitReady` | 147-161 | 结果提交与附加上下文回流 |
-| `packages/core/agent-loop/src/invariant.ts` | `install` | 19-57 | 请求必须由日志重建 |
-| `packages/llm/llm/src/message.ts` | `ContextSnapshotSection` | 65-70 | 具名贡献的二元组 |
+| [`packages/core/agent-loop/src/tool-calls.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts) | `commitReady` | 147-161 | 结果提交与附加上下文回流 |
+| [`packages/core/agent-loop/src/invariant.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/invariant.ts) | `install` | 19-57 | 请求必须由日志重建 |
+| [`packages/llm/llm/src/message.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/message.ts) | `ContextSnapshotSection` | 65-70 | 具名贡献的二元组 |
 | 同上 | `ContextFormed` | 81-96 | `instructions` / `catalog` / `snapshot` / `notice` / `relay` / `recall` 词表 |
-| `packages/core/agent/src/runtime-types.ts` | `agent/pre-step` | 330 | 步边界扩展点声明 |
-| `packages/core/agent/src/dispatch.ts` | `assembleContextFor` | 174-176 | agent 与 scope 一并设置 |
+| [`packages/core/agent/src/runtime-types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts) | `agent/pre-step` | 330 | 步边界扩展点声明 |
+| [`packages/core/agent/src/dispatch.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/dispatch.ts) | `assembleContextFor` | 174-176 | agent 与 scope 一并设置 |

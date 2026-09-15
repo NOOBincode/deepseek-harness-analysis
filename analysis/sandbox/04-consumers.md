@@ -64,7 +64,7 @@ export class SandboxBashExecutor extends LocalBashExecutor {
   override get sandboxMode(): SandboxMode { return this.mode }
 ```
 
-`Config` 直接复用本地执行器(`export type Config = LocalConfig`,`:36`),因为沙箱默认值不在这里:"沙箱策略——默认模式与回退 `workspace-write` 根——**不**在这里:它住在 `ctx.sandboxPolicy` 上"(`:29-35`)。`mode` 取自 `ctx.sandboxPolicy.defaultMode`(`:72`),只给工具层的广告当能力事实。注意它是**部署默认模式而非有效模式**:基类 JSDoc 明确"会话覆盖可能让有效模式更窄或更宽,所以严格更宽的检查是逐调用做的"(`packages/shell/shell/src/index.ts:94-102`)。
+`Config` 直接复用本地执行器(`export type Config = LocalConfig`,`:36`),因为沙箱默认值不在这里:"沙箱策略——默认模式与回退 `workspace-write` 根——**不**在这里:它住在 `ctx.sandboxPolicy` 上"(`:29-35`)。`mode` 取自 `ctx.sandboxPolicy.defaultMode`(`:72`),只给工具层的广告当能力事实。注意它是**部署默认模式而非有效模式**:基类 JSDoc 明确"会话覆盖可能让有效模式更窄或更宽,所以严格更宽的检查是逐调用做的"([`packages/shell/shell/src/index.ts:94-102`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/shell/src/index.ts#L94-L102))。
 
 ### 2.2 `resolve`:把策略落进 spec
 
@@ -100,7 +100,7 @@ override async run(spec: ShellExecSpec): Promise<ShellRunResult> {
 }
 ```
 
-三个顺序决策:**`danger-full-access` 在 `confine` 之前分流**(`:92-95`),它刻意绕过 `ctx.sandbox`——"它是显式的无约束模式,不是更宽的沙箱 profile"(`bash-sandbox/README.md:174`);**abort 优先于 runner 归因**(`:101-102`),"上游的中止即使阻止了 spawn 也仍然是取消";**runner 失败抛错,拒绝写字段**(`:110-114`)——前者是基础设施错误,后者是策略结果。
+三个顺序决策:**`danger-full-access` 在 `confine` 之前分流**(`:92-95`),它刻意绕过 `ctx.sandbox`——"它是显式的无约束模式,不是更宽的沙箱 profile"([`bash-sandbox/README.md:174`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/bash-sandbox/README.md#L174));**abort 优先于 runner 归因**([`:101-102`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/bash-sandbox/README.md#L101-L102)),"上游的中止即使阻止了 spawn 也仍然是取消";**runner 失败抛错,拒绝写字段**([`:110-114`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/bash-sandbox/README.md#L110-L114))——前者是基础设施错误,后者是策略结果。
 
 ### 2.4 `start`:per-process facts
 
@@ -152,7 +152,7 @@ protected override onProcessDone(proc: ShellProcess, stderr: string, providerRej
 
 三点:**provider 拒绝时只能靠 `isRunnerSpawnFailure` 归因**——注释解释"provider 拒绝不暴露公开的失败阶段",所以只有错误本身独立指名 `argv[0]` 才归给执行器(`:156-157`);**已结算的 runner 失败优先于类拒绝诊断**(三元的两分支互斥);**`denied` 在 runnerFailed 时被显式压成 `false`**,"执行器坏了"不会被同时报成"被拦住"。facts 读完立刻 `delete`。
 
-三类分类器全在 `helpers.ts`(细节见 [02 篇第三节](02-platform-backends.md#第三节拒绝方言与执行器失败规则))。bash 特有的一点:归因结果成为 `SandboxUnavailableError` 的第二参数,最终拼成 ` Runner failure: <detail>`(`sandbox/src/index.ts:139`)。
+三类分类器全在 [`helpers.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/bash-sandbox/src/helpers.ts)(细节见 [02 篇第三节](02-platform-backends.md#第三节拒绝方言与执行器失败规则))。bash 特有的一点:归因结果成为 `SandboxUnavailableError` 的第二参数,最终拼成 ` Runner failure: <detail>`([`sandbox/src/index.ts:139`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L139))。
 
 ---
 
@@ -170,9 +170,9 @@ protected override onProcessDone(proc: ShellProcess, stderr: string, providerRej
 | 基类 | `LocalBashExecutor` | `PwshLocalExecutor` |
 | confine 的 argv 来源 | `this.confine(spec.command, …)` 内部拼 `['bash','-c',command]`(`bash-sandbox:179-181`) | `this.ctx.sandbox.confine(this.argv(spec), policy)`(`pwsh-sandbox:184-186`) |
 
-差异根源是"shell 形态"不同:bash 消费者的命令是**一段 shell 源码**(`ShellExecSpec.command`),所以自己合成 `bash -c <source>`;pwsh 的 argv 由本地执行器算好。这正好印证缝契约的措辞:"shell 形态的消费者**自己**传 `['bash','-c',command]`"(`sandbox/src/index.ts:167-169`)。
+差异根源是"shell 形态"不同:bash 消费者的命令是**一段 shell 源码**(`ShellExecSpec.command`),所以自己合成 `bash -c <source>`;pwsh 的 argv 由本地执行器算好。这正好印证缝契约的措辞:"shell 形态的消费者**自己**传 `['bash','-c',command]`"([`sandbox/src/index.ts:167-169`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L167-L169))。
 
-其余全部同构:同样的 `inject`(`:53`)、`mode = ctx.sandboxPolicy.defaultMode`(`:79`)、`sandboxMode` getter(`:83-85`)、`resolve` 的 `??`(`:92-94`)、`run` 四步(`:96-122`)、`processFacts` 结构(`:66-73`)、`onProcessDone`(`:156-174`)。`helpers.ts` 也是镜像,只包了函数体(`:9,120`)。平台分工由出厂组合的 `disabled` 条件表达(`packages/bundle/base/cordis.patch.yml:214-222`):bash-sandbox 在 win32 禁用,pwsh-sandbox 在非 win32 禁用。
+其余全部同构:同样的 `inject`([`:53`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L53))、`mode = ctx.sandboxPolicy.defaultMode`([`:79`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L79))、`sandboxMode` getter([`:83-85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L83-L85))、`resolve` 的 `??`([`:92-94`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L92-L94))、`run` 四步([`:96-122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L96-L122))、`processFacts` 结构([`:66-73`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L66-L73))、`onProcessDone`([`:156-174`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L156-L174))。[`helpers.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/bash-sandbox/src/helpers.ts) 也是镜像,只包了函数体(`:9,120`)。平台分工由出厂组合的 `disabled` 条件表达([`packages/bundle/base/cordis.patch.yml:214-222`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml#L214-L222)):bash-sandbox 在 win32 禁用,pwsh-sandbox 在非 win32 禁用。
 
 ---
 
@@ -222,9 +222,9 @@ private async checkedTarget(target: FsTarget, sandboxPolicy?: SandboxExecutionPo
 | `read-only` | 直接抛,不检查路径 | `:126-128` |
 | `workspace-write` | 重新 `resolve` 得到 `fresh`,对 `writableRoots(policy)` 逐根做包含判定,通过则**返回 `fresh`** | `:129-143` |
 
-返回 `fresh` 而非原 `target` 是**收窄 TOCTOU 的具体手段**:注释写"`resolve` 会 realpath 最深的已存在祖先,反映一个并发换过的符号链接",而"变更委托用的是**这个**新鲜 target,永远不是陈旧的"(`:111-121,129-131`)。同一段注释承认残余风险:"resolve 到 syscall 之间的 TOCTOU 被就地重新 canonical 化收窄,但未消除;对抗性宿主进程不在威胁模型内"(`:15-18`)。可写根用 `writableRoots(policy)`(`sandbox/src/roots.ts:52`)——与 Seatbelt profile 同一份列表。
+返回 `fresh` 而非原 `target` 是**收窄 TOCTOU 的具体手段**:注释写"`resolve` 会 realpath 最深的已存在祖先,反映一个并发换过的符号链接",而"变更委托用的是**这个**新鲜 target,永远不是陈旧的"(`:111-121,129-131`)。同一段注释承认残余风险:"resolve 到 syscall 之间的 TOCTOU 被就地重新 canonical 化收窄,但未消除;对抗性宿主进程不在威胁模型内"(`:15-18`)。可写根用 `writableRoots(policy)`([`sandbox/src/roots.ts:52`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/roots.ts#L52))——与 Seatbelt profile 同一份列表。
 
-### 4.3 `containment.ts`:两级包含判定
+### 4.3 [`containment.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/fs-sandbox/src/containment.ts):两级包含判定
 
 ```typescript
 // packages/fs/fs-sandbox/src/containment.ts:58-75
@@ -250,7 +250,7 @@ export async function isPathUnder(path: string, root: string, caseSensitive = pr
 
 第二级从 target 本身向上走祖先链,`statIfPresent` 把 `ENOENT`/`ENOTDIR` 转成 `undefined` 继续往上(`:12-17,31-40`),遇到 `dirname(ancestor) === ancestor` 返回 `false`。所以"目标文件还不存在"也能判定——只要某个已存在的祖先是可写根本身或在其下。`statIfPresent` 的两处 `/* v8 ignore */` 暴露了真实假设:stat 的非缺失类失败需要"resolve 已经到过这个祖先后宿主出现权限或 I/O 故障",即实际不可达(`:35-38`)。
 
-fs 面的 fail-closed 与 bash 面**形态不同**:它是可信代码里的检查,所以拒绝是结构化 `FsError('FS_SANDBOX_DENIED')` 而非 stderr 推断——"进程内围栏确切知道自己拒了什么"(`fs-sandbox/README.md:79`)。
+fs 面的 fail-closed 与 bash 面**形态不同**:它是可信代码里的检查,所以拒绝是结构化 `FsError('FS_SANDBOX_DENIED')` 而非 stderr 推断——"进程内围栏确切知道自己拒了什么"([`fs-sandbox/README.md:79`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/fs-sandbox/README.md#L79))。
 
 ---
 
@@ -261,7 +261,7 @@ fs 面的 fail-closed 与 bash 面**形态不同**:它是可信代码里的检�
 export const inject = ['terminals', 'sandboxPolicy', 'sessionProjections', 'subprocess']
 ```
 
-注意**没有 `sandbox`**:它用 `ctx.get('sandbox')` 读可选服务(`:103`)。
+注意**没有 `sandbox`**:它用 `ctx.get('sandbox')` 读可选服务([`:103`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/fs-sandbox/README.md#L103))。
 
 ### 5.1 `spawnArgv`:与执行器同构的分流
 
@@ -389,7 +389,7 @@ sequenceDiagram
 
 </details>
 
-顺序是**先观察策略、后沙箱围栏**:`fs/edit-intent` 在 `tool-fs/src/edit.ts:127`,`ctx.fs.editText` 在 `:128`,两者在同一个 `try` 里,任一拒绝都走同一段错误映射(`:135-140`)。另外 `:118` 的 `sessionResolveOptions(exec, input.filePath, sandboxPolicy?.workspaceRoot)` 让策略解析出的工作区根**优先于**会话 cwd 作为路径解析基准(`tool-fs/src/session-cwd.ts:35-45`)。
+顺序是**先观察策略、后沙箱围栏**:`fs/edit-intent` 在 [`tool-fs/src/edit.ts:127`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/edit.ts#L127),`ctx.fs.editText` 在 [`:128`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/edit.ts#L128),两者在同一个 `try` 里,任一拒绝都走同一段错误映射([`:135-140`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/edit.ts#L135-L140))。另外 [`:118`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/edit.ts#L118) 的 `sessionResolveOptions(exec, input.filePath, sandboxPolicy?.workspaceRoot)` 让策略解析出的工作区根**优先于**会话 cwd 作为路径解析基准([`tool-fs/src/session-cwd.ts:35-45`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/session-cwd.ts#L35-L45))。
 
 ---
 
@@ -421,7 +421,7 @@ class MutationPolicy {
 | 差异 | `tool-fs` | `tool-str-replace-editor` |
 |---|---|---|
 | 广告闸门 | 有 `escalationModes` 字段 | **没有**——不广告升级字段 |
-| 拒绝映射文案 | 标记 **+ 升级提示**两行(`sandbox.ts:129`) | **只有标记**(`:85`) |
+| 拒绝映射文案 | 标记 **+ 升级提示**两行([`sandbox.ts:129`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L129)) | **只有标记**([`:85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts#L85)) |
 | 解析入参 | `ToolExecution` + 升级参数 | `ToolRunContext`,无升级参数 |
 
 即 `str_replace_editor` 能**被沙箱拦住**,但**不能升级**;它与 `tool-fs` 共享同一套 `sandboxDenialMarker` 文本,所以模型在两处看到的拒绝形态一致。
@@ -444,18 +444,18 @@ class MutationPolicy {
 
 | 文件 | 关键符号 | 行号 |
 |---|---|---|
-| `packages/shell/bash-sandbox/src/index.ts` | `inject` / `mode` / `processFacts` / `sandboxMode` / `resolve` | 46 / 52 / 59-66 / 76-78 / 85-87 |
+| [`packages/shell/bash-sandbox/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/bash-sandbox/src/index.ts) | `inject` / `mode` / `processFacts` / `sandboxMode` / `resolve` | 46 / 52 / 59-66 / 76-78 / 85-87 |
 | | `run` / `start` / `onProcessDone` / `confine` | 89-115 / 117-145 / 151-169 / 179-181 |
-| `packages/shell/bash-sandbox/src/helpers.ts` | `isUsableWorkdir` / `isRunnerSpawnFailure` | 15-23 / 39-53 |
+| [`packages/shell/bash-sandbox/src/helpers.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/bash-sandbox/src/helpers.ts) | `isUsableWorkdir` / `isRunnerSpawnFailure` | 15-23 / 39-53 |
 | | `classifyDenial` / `classifyRunnerFailure` / `matchesSignature` | 67-69 / 81-103 / 112-116 |
-| `packages/shell/pwsh-sandbox/src/index.ts` | 类定义 / `inject` / `resolve` / `run` / `start` / `onProcessDone` / `confine` | 52-187 / 53 / 92-94 / 96-122 / 124-150 / 156-174 / 184-186 |
-| `packages/fs/fs-sandbox/src/index.ts` | `SandboxedFileSystem` / `sandboxMode` / `writeText` / `editText` / `checkedTarget` | 55-67 / 64-67 / 80-88 / 101-109 / 122-144 |
-| `packages/fs/fs-sandbox/src/containment.ts` | `isLexicallyUnder` / `sameIdentity` / `isPathUnder` | 23-29 / 42-44 / 58-75 |
-| `packages/terminal/terminal-bash/src/index.ts` | `inject` / `sandboxModeFences` / `ensureSandboxModeFence` / `spawnArgv` / `spawn` | 27 / 35 / 37-62 / 100-109 / 191-218 |
-| `packages/fs/fs-observation-policy/src/index.ts` | `ObservedStateGate` / `writeIntent` / `editIntent` / `observe` | 21-95 / 65-71 / 78-88 / 91-94 |
+| [`packages/shell/pwsh-sandbox/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/pwsh-sandbox/src/index.ts) | 类定义 / `inject` / `resolve` / `run` / `start` / `onProcessDone` / `confine` | 52-187 / 53 / 92-94 / 96-122 / 124-150 / 156-174 / 184-186 |
+| [`packages/fs/fs-sandbox/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/fs-sandbox/src/index.ts) | `SandboxedFileSystem` / `sandboxMode` / `writeText` / `editText` / `checkedTarget` | 55-67 / 64-67 / 80-88 / 101-109 / 122-144 |
+| [`packages/fs/fs-sandbox/src/containment.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/fs-sandbox/src/containment.ts) | `isLexicallyUnder` / `sameIdentity` / `isPathUnder` | 23-29 / 42-44 / 58-75 |
+| [`packages/terminal/terminal-bash/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/terminal/terminal-bash/src/index.ts) | `inject` / `sandboxModeFences` / `ensureSandboxModeFence` / `spawnArgv` / `spawn` | 27 / 35 / 37-62 / 100-109 / 191-218 |
+| [`packages/fs/fs-observation-policy/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/fs-observation-policy/src/index.ts) | `ObservedStateGate` / `writeIntent` / `editIntent` / `observe` | 21-95 / 65-71 / 78-88 / 91-94 |
 | | `apply` 三个监听器 | 106-130 |
-| `packages/fs/tool-str-replace-editor/src/index.ts` | `MutationPolicy` / `resolveTarget` | 66-87 / 89-99 |
+| [`packages/fs/tool-str-replace-editor/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-str-replace-editor/src/index.ts) | `MutationPolicy` / `resolveTarget` | 66-87 / 89-99 |
 | | `createFile` / `replaceInFile` / `insertInFile` | 240-273 / 275-327 / 329-369 |
-| `packages/fs/tool-fs/src/edit.ts` | resolvePolicy → resolve → editText → mapError | 117 / 118 / 128-134 / 139 |
-| `packages/fs/tool-fs/src/session-cwd.ts` | `sessionCwd` / `sessionResolveOptions` | 22-26 / 35-45 |
-| `packages/bundle/base/cordis.patch.yml` | 平台条件装配 | 214-222 |
+| [`packages/fs/tool-fs/src/edit.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/edit.ts) | resolvePolicy → resolve → editText → mapError | 117 / 118 / 128-134 / 139 |
+| [`packages/fs/tool-fs/src/session-cwd.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/session-cwd.ts) | `sessionCwd` / `sessionResolveOptions` | 22-26 / 35-45 |
+| [`packages/bundle/base/cordis.patch.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml) | 平台条件装配 | 214-222 |

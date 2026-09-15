@@ -88,13 +88,13 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 无模型裁剪先跑 | 溢出路径无条件先裁;压力路径在跨过阈值后才裁,裁完重新测量 | `compaction-basic/src/index.ts:285-288`、`:309-313` |
-| 容量与阈值 | 从适配器取真实上下文窗口,按比例算出阈值与保留预算;`retainTokens >= thresholdTokens` 直接报配置错误 | `resolveCompactSpec` `config.ts:133`、`:144-154` |
-| 表面一致性 | 计量器的节点必须与当前 surface 逐位相同,否则说明两个折叠已经分叉 | `selectCompactableRange` `region.ts:125-129` |
-| 起点 | 节点 0 是 `system/message` 时从索引 1 起,否则从 0 起 | `region.ts:131` |
-| 尾部预算 | 从末尾向前累加,累计达到保留预算就停下,得到保留起点 | `region.ts:133-140` |
-| 配对回退 | 保留起点不是配对平衡切点时**向前逐格回退**,直到平衡或退到起点 | `region.ts:143-148` |
-| 多轮 | 一次压缩后重新测量;仍高于阈值就再压,直到 `compactionRetries` 用尽 | `index.ts:316-332` |
+| 无模型裁剪先跑 | 溢出路径无条件先裁;压力路径在跨过阈值后才裁,裁完重新测量 | [`compaction-basic/src/index.ts:285-288`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L285-L288)、[`:309-313`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L309-L313) |
+| 容量与阈值 | 从适配器取真实上下文窗口,按比例算出阈值与保留预算;`retainTokens >= thresholdTokens` 直接报配置错误 | `resolveCompactSpec` [`config.ts:133`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/config.ts#L133)、[`:144-154`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/config.ts#L144-L154) |
+| 表面一致性 | 计量器的节点必须与当前 surface 逐位相同,否则说明两个折叠已经分叉 | `selectCompactableRange` [`region.ts:125-129`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L125-L129) |
+| 起点 | 节点 0 是 `system/message` 时从索引 1 起,否则从 0 起 | [`region.ts:131`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L131) |
+| 尾部预算 | 从末尾向前累加,累计达到保留预算就停下,得到保留起点 | [`region.ts:133-140`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L133-L140) |
+| 配对回退 | 保留起点不是配对平衡切点时**向前逐格回退**,直到平衡或退到起点 | [`region.ts:143-148`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L143-L148) |
+| 多轮 | 一次压缩后重新测量;仍高于阈值就再压,直到 `compactionRetries` 用尽 | [`index.ts:316-332`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L316-L332) |
 
 ```typescript
 // packages/compaction/compaction-basic/src/region.ts:107-155
@@ -148,7 +148,7 @@ function eventDelta(event: SessionEvent): number {
 }
 ```
 
-一条 `assistant/message` 里可能有零到多个 `tool-call` 块,所以增量是**块的数量**而不是 1。`cutBalanced` 是"每条边界的平衡位图",长度恰好是节点数加一——这就是为什么它的索引可以直接回答"某条边界是不是安全切点"。缓存用 `generation` 与长度双判据失效,并且**在改动活缓存之前先校验要追加的尾部**,这样一条损坏的 surface 不会留下半个推进过的新状态(`extendCache` `tool-pairing.ts:41-69`,校验循环在 `:52-63`)。
+一条 `assistant/message` 里可能有零到多个 `tool-call` 块,所以增量是**块的数量**而不是 1。`cutBalanced` 是"每条边界的平衡位图",长度恰好是节点数加一——这就是为什么它的索引可以直接回答"某条边界是不是安全切点"。缓存用 `generation` 与长度双判据失效,并且**在改动活缓存之前先校验要追加的尾部**,这样一条损坏的 surface 不会留下半个推进过的新状态(`extendCache` [`tool-pairing.ts:41-69`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/tool-pairing.ts#L41-L69),校验循环在 [`:52-63`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/tool-pairing.ts#L52-L63))。
 
 两个错误分支都指向"surface 坏了":引用了不存在的日志事件,或者出现了没有对应调用的结果。这类情况不该被"当成不平衡"静默处理,因为那会把一个更严重的状态损坏伪装成一次普通的选不到区间。
 
@@ -208,7 +208,7 @@ function assertCompactionInactive(
       && latestEndSeedSeq > unmatchedCompactionStart.seq)) return
 ```
 
-那条 seed 边界豁免解决了一个真实问题:一个崩溃在压缩中途的会话被 resume 以后,日志里会留下一个永远配不上对的开始标记。`session/end-seed` 事件(`core/session/src/types.ts:400`)在这里被当作"上一个生命周期到此为止"的凭证——**在它之前的未配对标记属于已经结束的生命周期,不构成活锁**。这也是 `session/end-seed` 文档里"独立开合括号的持有者要读它"那句话的落点。区间校验除了存在性与顺序,还就地检查两条边界是否配对平衡:
+那条 seed 边界豁免解决了一个真实问题:一个崩溃在压缩中途的会话被 resume 以后,日志里会留下一个永远配不上对的开始标记。`session/end-seed` 事件([`core/session/src/types.ts:400`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L400))在这里被当作"上一个生命周期到此为止"的凭证——**在它之前的未配对标记属于已经结束的生命周期,不构成活锁**。这也是 `session/end-seed` 文档里"独立开合括号的持有者要读它"那句话的落点。区间校验除了存在性与顺序,还就地检查两条边界是否配对平衡:
 
 ```typescript
 // packages/compaction/compaction-basic/src/region.ts:335-357(节选)
@@ -341,12 +341,12 @@ export type ManualCompactionErrorCode =
 
 | 分类 | 触发条件 | 位置 |
 |---|---|---|
-| `busy` | 已有未配对的 `compaction/start`,或空闲会话上还有开着回合,或 agent 不空闲 | `region.ts:315`、`:194`、`index.ts:416` |
-| `cancelled` | 取消信号来自 agent 自身的空闲任务,而不是调用方信号 | `index.ts:403-408` |
-| `changed` | 摘要完成后区间已被改写(`SurfaceChangedError`) | `region.ts:286-292` |
-| `summary` | 摘要生成本身失败 | `region.ts:293-297` |
-| `commit` | 提交段或关锁追加失败 | `region.ts:279-285` |
-| `persistence` | 关锁后的耐久检查点失败 | `region.ts:265-271` |
+| `busy` | 已有未配对的 `compaction/start`,或空闲会话上还有开着回合,或 agent 不空闲 | [`region.ts:315`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L315)、[`:194`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L194)、[`index.ts:416`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L416) |
+| `cancelled` | 取消信号来自 agent 自身的空闲任务,而不是调用方信号 | [`index.ts:403-408`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L403-L408) |
+| `changed` | 摘要完成后区间已被改写(`SurfaceChangedError`) | [`region.ts:286-292`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L286-L292) |
+| `summary` | 摘要生成本身失败 | [`region.ts:293-297`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L293-L297) |
+| `commit` | 提交段或关锁追加失败 | [`region.ts:279-285`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L279-L285) |
+| `persistence` | 关锁后的耐久检查点失败 | [`region.ts:265-271`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L265-L271) |
 
 手动压缩先占用 agent 的空闲窗口,把"忙"从异步路径里挤到同步门口:
 
@@ -434,17 +434,17 @@ export type ManualCompactionErrorCode =
 
 | 符号 | 位置 | 作用 |
 |---|---|---|
-| `CompactionTrigger` / `ManualCompactionErrorCode` / `ManualCompactionError` | `packages/compaction/compaction/src/index.ts:25`、`:28`、`:41` | 两个触发值、六种失败分类与带分类的失败 |
-| `CompactionEngine.compactIfNeeded` / `compactNow` / `compactRegion` | `packages/compaction/compaction/src/index.ts:113`、`:139`、`:164` | 自动、手动与指定区间三个入口 |
-| `compaction/*` 事件声明 / `CompactionResult` | `packages/compaction/compaction/src/types.ts:17`、`:94` | 四个 log-only 词汇与结果(含位置区间语义) |
-| `compactCheckpointSource` / `isCompactCheckpointSource` | `packages/compaction/compaction/src/checkpoint.ts:33`、`:49` | 后端无关的替换消息溯源与持久化检查点识别 |
-| `toolPairingBalancedBefore` / `toolPairingBalancedAfter` / `BalanceCache` | `packages/compaction/compaction/src/tool-pairing.ts:112`、`:124`、`:11` | 前后边界平衡判定与平衡位图增量状态 |
-| `BasicCompactionEngine` / `_registerAutomaticCompaction` | `packages/compaction/compaction-basic/src/index.ts:104`、`:138` | 基础后端与两个触发监听 |
-| `compactIfNeeded` / `compactNow` | `packages/compaction/compaction-basic/src/index.ts:259`、`:369` | 阈值判定与多轮压缩 / 空闲窗口与失败分类 |
-| `resolveCompactSpec` / `selectCompactableRange` / `compactSurfaceRegion` | `packages/compaction/compaction-basic/src/config.ts:133`、`region.ts:117`、`:173` | 容量换算为预算 / 选区算法 / 事务主干 |
-| `assertCompactionInactive` / `assertNoActiveCompaction` | `packages/compaction/compaction-basic/src/region.ts:307`、`:326` | durable 锁判定与异步决策后的复查 |
-| `validateSurfaceRegion` / `prepareCompaction` | `packages/compaction/compaction-basic/src/region.ts:336`、`:360` | 区间与边界校验 / 两种定价的快照 |
-| `summarizeCompaction` / `assertWholeSurfaceUnchanged` / `assertSelectedSpanStable` | `packages/compaction/compaction-basic/src/region.ts:386`、`:416`、`:432` | 摘要与"必须更小"闸门 / 自动与手动的稳定性断言 |
-| `commitCompactionBody` / `buildSummarizationInput` | `packages/compaction/compaction-basic/src/region.ts:456`、`:529` | 摘要记录 + 替换消息 / 复用会话前缀 |
-| `summarizeWithLlm` / `frameSummary` | `packages/compaction/compaction-basic/src/summarizer.ts:119`、`:186` | 单次流式摘要调用与摘要文本框架 |
-| `ToolResultPruner.pruneSession` / `pruneContent` | `packages/compaction/compaction-tool-result-pruner/src/index.ts:136`、`:83` | 无模型裁剪与码点级掐头去尾 |
+| `CompactionTrigger` / `ManualCompactionErrorCode` / `ManualCompactionError` | [`packages/compaction/compaction/src/index.ts:25`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/index.ts#L25)、[`:28`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/index.ts#L28)、[`:41`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/index.ts#L41) | 两个触发值、六种失败分类与带分类的失败 |
+| `CompactionEngine.compactIfNeeded` / `compactNow` / `compactRegion` | [`packages/compaction/compaction/src/index.ts:113`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/index.ts#L113)、[`:139`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/index.ts#L139)、[`:164`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/index.ts#L164) | 自动、手动与指定区间三个入口 |
+| `compaction/*` 事件声明 / `CompactionResult` | [`packages/compaction/compaction/src/types.ts:17`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/types.ts#L17)、[`:94`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/types.ts#L94) | 四个 log-only 词汇与结果(含位置区间语义) |
+| `compactCheckpointSource` / `isCompactCheckpointSource` | [`packages/compaction/compaction/src/checkpoint.ts:33`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/checkpoint.ts#L33)、[`:49`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/checkpoint.ts#L49) | 后端无关的替换消息溯源与持久化检查点识别 |
+| `toolPairingBalancedBefore` / `toolPairingBalancedAfter` / `BalanceCache` | [`packages/compaction/compaction/src/tool-pairing.ts:112`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/tool-pairing.ts#L112)、[`:124`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/tool-pairing.ts#L124)、[`:11`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/tool-pairing.ts#L11) | 前后边界平衡判定与平衡位图增量状态 |
+| `BasicCompactionEngine` / `_registerAutomaticCompaction` | [`packages/compaction/compaction-basic/src/index.ts:104`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L104)、[`:138`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L138) | 基础后端与两个触发监听 |
+| `compactIfNeeded` / `compactNow` | [`packages/compaction/compaction-basic/src/index.ts:259`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L259)、[`:369`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L369) | 阈值判定与多轮压缩 / 空闲窗口与失败分类 |
+| `resolveCompactSpec` / `selectCompactableRange` / `compactSurfaceRegion` | [`packages/compaction/compaction-basic/src/config.ts:133`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/config.ts#L133)、[`region.ts:117`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L117)、[`:173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L173) | 容量换算为预算 / 选区算法 / 事务主干 |
+| `assertCompactionInactive` / `assertNoActiveCompaction` | [`packages/compaction/compaction-basic/src/region.ts:307`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L307)、[`:326`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L326) | durable 锁判定与异步决策后的复查 |
+| `validateSurfaceRegion` / `prepareCompaction` | [`packages/compaction/compaction-basic/src/region.ts:336`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L336)、[`:360`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L360) | 区间与边界校验 / 两种定价的快照 |
+| `summarizeCompaction` / `assertWholeSurfaceUnchanged` / `assertSelectedSpanStable` | [`packages/compaction/compaction-basic/src/region.ts:386`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L386)、[`:416`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L416)、[`:432`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L432) | 摘要与"必须更小"闸门 / 自动与手动的稳定性断言 |
+| `commitCompactionBody` / `buildSummarizationInput` | [`packages/compaction/compaction-basic/src/region.ts:456`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L456)、[`:529`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L529) | 摘要记录 + 替换消息 / 复用会话前缀 |
+| `summarizeWithLlm` / `frameSummary` | [`packages/compaction/compaction-basic/src/summarizer.ts:119`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/summarizer.ts#L119)、[`:186`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/summarizer.ts#L186) | 单次流式摘要调用与摘要文本框架 |
+| `ToolResultPruner.pruneSession` / `pruneContent` | [`packages/compaction/compaction-tool-result-pruner/src/index.ts:136`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-tool-result-pruner/src/index.ts#L136)、[`:83`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-tool-result-pruner/src/index.ts#L83) | 无模型裁剪与码点级掐头去尾 |

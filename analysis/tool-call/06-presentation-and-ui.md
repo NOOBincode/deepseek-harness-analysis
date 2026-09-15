@@ -1,6 +1,6 @@
 # 06 · 展示层:Host presenter 的纯函数约束与 Web 卡片的真实派生链
 
-> 分析对象 `dbbaa4a37`。核心源码:`packages/core/tools/src/presentation.ts`(389 行)、`index.ts:203-295` + `:1783-1813`;Web 侧:`packages/client/ui-tool/`、`packages/client/ui-chat/src/client/conversation-nodes/tool.ts`、`packages/client/ui-conversation/src/client/contract/records.ts`;工具侧真实投影器样例:`packages/fs/tool-fs/src/read.ts`、`packages/web/tool-web/src/search.ts`、`packages/fs/tool-fs-search/src/presentation.ts`。
+> 分析对象 `dbbaa4a37`。核心源码:[`packages/core/tools/src/presentation.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/presentation.ts)(389 行)、[`index.ts:203-295`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L203-L295) + [`:1783-1813`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1783-L1813);Web 侧:`packages/client/ui-tool/`、[`packages/client/ui-chat/src/client/conversation-nodes/tool.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-chat/src/client/conversation-nodes/tool.ts)、[`packages/client/ui-conversation/src/client/contract/records.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-conversation/src/client/contract/records.ts);工具侧真实投影器样例:[`packages/fs/tool-fs/src/read.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/read.ts)、[`packages/web/tool-web/src/search.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/web/tool-web/src/search.ts)、[`packages/fs/tool-fs-search/src/presentation.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs-search/src/presentation.ts)。
 
 ---
 
@@ -23,11 +23,11 @@
 A tool can retain pure `presentCall()` and `presentResult()` methods for Host-local consumers. The built-in Web Client does not consume those values. It selects a renderer through `tool.call.toolview` and derives card props from raw call arguments, result content, failure state, and persisted metadata. The [Client-derived presentation decision](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/architecture/2026-08-23-client-derived-tool-presentation.md) owns this transport split.
 ```
 
-`packages/client/AGENTS.md` 的分层红线也有同一句部署约束:"Tool cards derive in the Client from raw call/event material and persisted result metadata. Unknown or malformed tool data falls back to the generic form." **为什么拆成两套**:路径 A 的输入里有 `ToolResult`(一个已归一化、冻结、含 `meta` 的对象),它只存在于 Host 进程;路径 B 的输入是**会话日志事件**,它要能被重放——只有完全由日志决定的派生链,才能保证"刷新页面看到的卡片"与"当时看到的卡片"一致。反过来,路径 A 的条件是"纯函数",所以它**只能依赖 args**(见 §三)。
+[`packages/client/AGENTS.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/AGENTS.md) 的分层红线也有同一句部署约束:"Tool cards derive in the Client from raw call/event material and persisted result metadata. Unknown or malformed tool data falls back to the generic form." **为什么拆成两套**:路径 A 的输入里有 `ToolResult`(一个已归一化、冻结、含 `meta` 的对象),它只存在于 Host 进程;路径 B 的输入是**会话日志事件**,它要能被重放——只有完全由日志决定的派生链,才能保证"刷新页面看到的卡片"与"当时看到的卡片"一致。反过来,路径 A 的条件是"纯函数",所以它**只能依赖 args**(见 §三)。
 
 ---
 
-## 二、`presentation.ts`:render intent 词表
+## 二、[`presentation.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-commands/src/client/presentation.ts):render intent 词表
 
 ```typescript
 // packages/core/tools/src/presentation.ts:10
@@ -97,11 +97,11 @@ presentResult?(args: unknown, result: ToolResult): ToolResultView | undefined
 
 | 规则 | 由什么保证 | 反例会被谁抓到 |
 |---|---|---|
-| `presentCall` 只依赖 `args` | 签名里根本没有别的输入 | `packages/fs/tool-fs/tests/tools.spec.ts:597-599` 用"replay 时的原始 logged args"直接调用它 |
-| 参数非法时返回 `undefined` 而不抛 | "纯且无副作用"的必然要求;`args` 类型是 `unknown` | `packages/shell/tool-bash/tests/tools.spec.ts:1064-1068`:缺 `description` 返回 `undefined` |
-| `presentResult` 对畸形 `meta` 返回 `undefined`(或整体降级) | 回放可能读到过期/手改日志 | `packages/fs/tool-fs/tests/tools.spec.ts:680-694`、`packages/fs/tool-fs-search/tests/tools.spec.ts:1180` |
+| `presentCall` 只依赖 `args` | 签名里根本没有别的输入 | [`packages/fs/tool-fs/tests/tools.spec.ts:597-599`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/tests/tools.spec.ts#L597-L599) 用"replay 时的原始 logged args"直接调用它 |
+| 参数非法时返回 `undefined` 而不抛 | "纯且无副作用"的必然要求;`args` 类型是 `unknown` | [`packages/shell/tool-bash/tests/tools.spec.ts:1064-1068`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/shell/tool-bash/tests/tools.spec.ts#L1064-L1068):缺 `description` 返回 `undefined` |
+| `presentResult` 对畸形 `meta` 返回 `undefined`(或整体降级) | 回放可能读到过期/手改日志 | [`packages/fs/tool-fs/tests/tools.spec.ts:680-694`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/tests/tools.spec.ts#L680-L694)、[`packages/fs/tool-fs-search/tests/tools.spec.ts:1180`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs-search/tests/tools.spec.ts#L1180) |
 
-结果态的输入 `ToolResult`(`index.ts:282-295`)只有三个字段:
+结果态的输入 `ToolResult`([`index.ts:282-295`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L282-L295))只有三个字段:
 
 ```typescript
 export interface ToolResult {
@@ -160,7 +160,7 @@ if (exec.parent === undefined && tool.output.presentationMeta !== undefined) {
 }
 ```
 
-`exec.parent === undefined` 的判据就是"这是模型直呼的根调用,不是 `run_code` 的子派发"(见 [05-ptc-mode.md](./05-ptc-mode.md) §4.1)。客户端对此有显式处理:`packages/client/ui-tool/src/client/tool/models/image-card-model.ts:36-38` 的注释写着"Root calls persist it; a nested call (a `read_image` dispatched from inside `run_code`) settles without `meta`, so the card falls back to the call's own `file_path` argument for the label."
+`exec.parent === undefined` 的判据就是"这是模型直呼的根调用,不是 `run_code` 的子派发"(见 [05-ptc-mode.md](./05-ptc-mode.md) §4.1)。客户端对此有显式处理:[`packages/client/ui-tool/src/client/tool/models/image-card-model.ts:36-38`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/image-card-model.ts#L36-L38) 的注释写着"Root calls persist it; a nested call (a `read_image` dispatched from inside `run_code`) settles without `meta`, so the card falls back to the call's own `file_path` argument for the label."
 
 返回值过两道关:`snapshotProjection`(`:523-534`)要求无损 JSON,失败抛 `ToolOutputError`(`output.presentationMeta returned non-lossless JSON`,`:527`);`materializeFinalResult`(`:1840`)把它放进 `presentation` 对象整体 `deepFreeze`。投影器自身抛错则变成 `output.presentationMeta failed: <msg>`(`projectionError`,`:518-520`)。三条失败路径都归到 `INVALID_TOOL_OUTPUT`,与 `render` 完全对称。**投影器只在成功结果上运行**——失败分支(`toolErrorResult`,`:1860-1868`)从不调用它,所以工具不能靠 `meta` 给失败卡片传结构化数据。
 
@@ -207,17 +207,17 @@ function rootResult(match: ConversationMatch, previous?: RunningToolCall): ToolR
 }
 ```
 
-`meta` 在 `ToolResultNode` 上的类型是 `unknown`(`records.ts:170`)。**`unknown` 而不是 `JsonValue` 是刻意的**:回放可能读到旧版本或手改过的日志,每个字段都必须在窄化时才被信任。`image-card-model.ts:77-79` 的注释是这条纪律的原文:"Every field arrives unvalidated on replay (an obsolete or hand-edited log reaches here), so any mismatch declines."
+`meta` 在 `ToolResultNode` 上的类型是 `unknown`([`records.ts:170`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-conversation/src/client/contract/records.ts#L170))。**`unknown` 而不是 `JsonValue` 是刻意的**:回放可能读到旧版本或手改过的日志,每个字段都必须在窄化时才被信任。[`image-card-model.ts:77-79`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/image-card-model.ts#L77-L79) 的注释是这条纪律的原文:"Every field arrives unvalidated on replay (an obsolete or hand-edited log reaches here), so any mismatch declines."
 
 ### 4.4 五个真实的 Client 消费点
 
 | 卡片模型 | 行 | 读的字段 |
 |---|---|---|
-| `read-card-model.ts` | `:107` | `readMeta(block.meta)` → `path` / `offset` / `lines` / `totalLines` / `lang` |
-| `search-card-model.ts` | `:86-99` | 形状检查 → `paths` / 分组匹配 / `truncated` / `total` |
-| `diff-card-model.ts` | `:115` | `appliedDiffs(block.meta)` → 已应用的上下文 hunk |
-| `web-card-model.ts` | `:61-62` | `sources` / `answer` / `url` / `statusCode` / `truncated` |
-| `image-card-model.ts` | `:224` | `imageMeta(block.meta)?.path`(**只有路径**;附件引用刻意从 `content` 读,理由见 `:40-45`) |
+| [`read-card-model.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/read-card-model.ts) | [`:107`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/read-card-model.ts#L107) | `readMeta(block.meta)` → `path` / `offset` / `lines` / `totalLines` / `lang` |
+| [`search-card-model.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/search-card-model.ts) | [`:86-99`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/search-card-model.ts#L86-L99) | 形状检查 → `paths` / 分组匹配 / `truncated` / `total` |
+| [`diff-card-model.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/diff-card-model.ts) | [`:115`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/diff-card-model.ts#L115) | `appliedDiffs(block.meta)` → 已应用的上下文 hunk |
+| [`web-card-model.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/web-card-model.ts) | [`:61-62`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/web-card-model.ts#L61-L62) | `sources` / `answer` / `url` / `statusCode` / `truncated` |
+| [`image-card-model.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/image-card-model.ts) | [`:224`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/image-card-model.ts#L224) | `imageMeta(block.meta)?.path`(**只有路径**;附件引用刻意从 `content` 读,理由见 [`:40-45`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/image-card-model.ts#L40-L45)) |
 
 这五个模型是"Host 侧 `presentResult` 曾经承担的工作"在 Client 的对应实现。以 `read` 为例,两侧用同一份数据、不同代码:
 
@@ -281,7 +281,7 @@ ctx.slots.inject('conversation.chat.node', () => ctx.slots.register({
 }, ToolCallTree))
 ```
 
-`children` 是**声明 + 授权**(`packages/client/AGENTS.md` 第 2 条):`ToolCallTree` 渲染的 slot 必须在这里声明,而声明冲突在加载期就失败——所以"谁在渲染工具卡"在装配期就是确定的。注册者是各自业务的包,一个 `key` 一个工具名:
+`children` 是**声明 + 授权**([`packages/client/AGENTS.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/AGENTS.md) 第 2 条):`ToolCallTree` 渲染的 slot 必须在这里声明,而声明冲突在加载期就失败——所以"谁在渲染工具卡"在装配期就是确定的。注册者是各自业务的包,一个 `key` 一个工具名:
 
 ```typescript
 // packages/client/ui-tool/src/client/tool/toolviews/search-row.tsx:43
@@ -296,7 +296,7 @@ export const searchToolview = {
 }
 ```
 
-`apply.ts:43-50` 挂载八个内置 toolview 插件、覆盖十个工具名(`bash` / `read` / `read_image` / `edit`+`write` / `grep`+`glob` / `web_search`+`web_fetch` / `todo_write` / `ask_user_question`);`packages/client/ui-skill/src/client/index.ts:72` 与 `packages/extensions/ui-cordis/src/client/index.ts:118` 注册各自工具的 key;`packages/client/ui-deliverables/src/client/index.ts:61` 用 `key: 'present'` 接管一个非工具来源的行。用 `ctx.slots.inject(...)` 而不是直接 `register` 的理由(`packages/client/AGENTS.md` 第 4 条):它等待真实声明出现、在声明消失时移除贡献、重声明后重跑,并随调用者的 plugin fiber 一起退出;`function*` 形式用于"多个注册必须原子安装与回滚"的场合。
+[`apply.ts:43-50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-chat/src/client/apply.ts#L43-L50) 挂载八个内置 toolview 插件、覆盖十个工具名(`bash` / `read` / `read_image` / `edit`+`write` / `grep`+`glob` / `web_search`+`web_fetch` / `todo_write` / `ask_user_question`);[`packages/client/ui-skill/src/client/index.ts:72`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-skill/src/client/index.ts#L72) 与 [`packages/extensions/ui-cordis/src/client/index.ts:118`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/extensions/ui-cordis/src/client/index.ts#L118) 注册各自工具的 key;[`packages/client/ui-deliverables/src/client/index.ts:61`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-deliverables/src/client/index.ts#L61) 用 `key: 'present'` 接管一个非工具来源的行。用 `ctx.slots.inject(...)` 而不是直接 `register` 的理由([`packages/client/AGENTS.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/AGENTS.md) 第 4 条):它等待真实声明出现、在声明消失时移除贡献、重声明后重跑,并随调用者的 plugin fiber 一起退出;`function*` 形式用于"多个注册必须原子安装与回滚"的场合。
 
 ### 5.2 渲染:root + 递归子调用 + 通用回落
 
@@ -313,7 +313,7 @@ return (
 )
 ```
 
-四个要点:**`entryKey: toolName`**(`:40`)—— 分发键就是**线上工具名**,名字拼错不会编译失败,只是永远不渲染(slot 的 JSDoc 已声明这个代价);**`fallback` 是 `GenericToolCard`**(`:41`)—— 未注册的 key 落到通用卡,所以**工具不需要注册也能被渲染**,这是"工具插件与 UI 插件独立演进"的前提;**递归**—— `ToolCallBranch`(`:48-86`)对 `block.subCalls` 逐个再走同一个组件,所以 PTC 子派发用的是**完全相同的分发路径**,一个业务包注册 `key: 'grep'` 就同时覆盖原生 `grep` 与 `run_code` 里的 `grep`;**owner props 是"turn 已经知道的一切"**(`ToolCallOwnerProps`,`slots.ts:55-81`:`callId` / `toolName` / `block` / `cwd` / `home` / `openFile` / `loadImage` / `inspect`),**没有 `ctx`,没有服务对象,没有 hook 制造权**。
+四个要点:**`entryKey: toolName`**(`:40`)—— 分发键就是**线上工具名**,名字拼错不会编译失败,只是永远不渲染(slot 的 JSDoc 已声明这个代价);**`fallback` 是 `GenericToolCard`**(`:41`)—— 未注册的 key 落到通用卡,所以**工具不需要注册也能被渲染**,这是"工具插件与 UI 插件独立演进"的前提;**递归**—— `ToolCallBranch`(`:48-86`)对 `block.subCalls` 逐个再走同一个组件,所以 PTC 子派发用的是**完全相同的分发路径**,一个业务包注册 `key: 'grep'` 就同时覆盖原生 `grep` 与 `run_code` 里的 `grep`;**owner props 是"turn 已经知道的一切"**(`ToolCallOwnerProps`,[`slots.ts:55-81`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-approval/src/client/contract/slots.ts#L55-L81):`callId` / `toolName` / `block` / `cwd` / `home` / `openFile` / `loadImage` / `inspect`),**没有 `ctx`,没有服务对象,没有 hook 制造权**。
 
 ### 5.3 派生:纯模型函数
 
@@ -378,13 +378,13 @@ apply(event: SessionEvent): boolean {
 
 两个 PTC 事件是**仅日志**的(见 [05-ptc-mode.md](./05-ptc-mode.md) §7),但它们带着完整的 `content` + `isError`,所以客户端能用与原生 `tool/result` **同一套词汇**渲染子调用。`acceptEdge`(`:163-183`)做环检测与深度上限(`MAX_TOOL_CALL_TREE_DEPTH = 256`,`:14`),注释说明动机:"a malformed wire/history edge is consumed without hiding the rest of the session."
 
-`packages/client/ui-tool/README.md:12` 概括了职责边界:"Business UI packages register only their wire Tool names and atomic views — they do not pair Session events, rebuild the transcript, or own root/subcall topology, because the Runtime remains authoritative for call/result pairing, lifecycle, and recursive `subCalls` projection."
+[`packages/client/ui-tool/README.md:12`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/README.md#L12) 概括了职责边界:"Business UI packages register only their wire Tool names and atomic views — they do not pair Session events, rebuild the transcript, or own root/subcall topology, because the Runtime remains authoritative for call/result pairing, lifecycle, and recursive `subCalls` projection."
 
 ---
 
 ## 六、Host presenter 到底还有没有消费者
 
-全仓检索的结论很明确:**只有工具定义声明 `presentCall`/`presentResult`,没有一处产品代码调用它们**。它们出现在每个工具的 `defineTool({...})` 里(约 20 个包)、`packages/core/tools/src/index.ts` 的类型定义与 `testing.ts` 夹具、`packages/extensions/tool-cordis/src/api-catalog.ts`(生成的服务目录把类型签名当文档)、各包的 `tests/`,以及 `scripts/gen-doc-graphs.ts`。
+全仓检索的结论很明确:**只有工具定义声明 `presentCall`/`presentResult`,没有一处产品代码调用它们**。它们出现在每个工具的 `defineTool({...})` 里(约 20 个包)、[`packages/core/tools/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts) 的类型定义与 [`testing.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/testing.ts) 夹具、[`packages/extensions/tool-cordis/src/api-catalog.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/extensions/tool-cordis/src/api-catalog.ts)(生成的服务目录把类型签名当文档)、各包的 `tests/`,以及 [`scripts/gen-doc-graphs.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/scripts/gen-doc-graphs.ts)。
 
 所以这条路径当前的定位是**为 Host 本地消费方保留的接口**,而不是 Web 的实现路径。这条取舍被写成了一条仓库级约定:
 
@@ -395,7 +395,7 @@ apply(event: SessionEvent): boolean {
 
 ### 6.1 `agent-tool-presentation` 不是卡片包
 
-名字容易误导:`packages/core/agent-tool-presentation/src/index.ts` **不涉及任何展示代码**。它是 agent 平面的**呈现模式选择器**:
+名字容易误导:[`packages/core/agent-tool-presentation/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-tool-presentation/src/index.ts) **不涉及任何展示代码**。它是 agent 平面的**呈现模式选择器**:
 
 ```typescript
 // packages/core/agent-tool-presentation/src/index.ts:54
@@ -409,7 +409,7 @@ export function apply(ctx: Context, config: Config): void {
 }
 ```
 
-这里的 "presentation" 指 `native` / `ptc` / `both`——**模型看到哪种形态的工具面**,与 UI 卡片无关。它薄封装了 `ctx.tools.presentAs()`(见 [01-registry-and-visibility.md](./01-registry-and-visibility.md) §5.2);存在的理由是让 preset 能声明"这个组合里的 agent 跑 PTC",而注册表本身必须留在 host 平面(模块头注释 `:3-17`:调度器、API 代理、每个工具插件都是它的消费者,它搬不进 preset)。
+这里的 "presentation" 指 `native` / `ptc` / `both`——**模型看到哪种形态的工具面**,与 UI 卡片无关。它薄封装了 `ctx.tools.presentAs()`(见 [01-registry-and-visibility.md](./01-registry-and-visibility.md) §5.2);存在的理由是让 preset 能声明"这个组合里的 agent 跑 PTC",而注册表本身必须留在 host 平面(模块头注释 [`:3-17`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-tool-presentation/src/index.ts#L3-L17):调度器、API 代理、每个工具插件都是它的消费者,它搬不进 preset)。
 
 ---
 
@@ -429,23 +429,23 @@ export function apply(ctx: Context, config: Config): void {
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `ToolCallKind` / `FileLocation` / `FileDiff` / `ReadFileLine` | `presentation.ts:15` / `:23` / `:34` / `:127` | 图标词汇;跟随定位;单文件变更(`oldText` 可为 `null`);行数据 |
-| `ToolCallView`(三臂) / `ToolResultView`(六臂) | `presentation.ts:46` / `:140` | `card` 判别式联合 |
-| `GenericCallView` / `TerminalCallView` / `DiffCallView` | `presentation.ts:53` / `:84` / `:110` | 调用态各臂 |
+| `ToolCallKind` / `FileLocation` / `FileDiff` / `ReadFileLine` | [`presentation.ts:15`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-commands/src/client/presentation.ts#L15) / [`:23`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-commands/src/client/presentation.ts#L23) / [`:34`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-commands/src/client/presentation.ts#L34) / `:127` | 图标词汇;跟随定位;单文件变更(`oldText` 可为 `null`);行数据 |
+| `ToolCallView`(三臂) / `ToolResultView`(六臂) | [`presentation.ts:46`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-commands/src/client/presentation.ts#L46) / `:140` | `card` 判别式联合 |
+| `GenericCallView` / `TerminalCallView` / `DiffCallView` | [`presentation.ts:53`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-commands/src/client/presentation.ts#L53) / [`:84`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-commands/src/client/presentation.ts#L84) / `:110` | 调用态各臂 |
 | `GenericResultView` / `TerminalResultView` / `DiffResultView` | `presentation.ts:146` / `:163` / `:184` | 通用 / 终端 / diff 结果 |
 | `SearchMatchesResultView` / `SearchPathsResultView` / `SearchResultView` | `presentation.ts:216` / `:238` / `:267` | `shape` 两个变体;`truncated`/`total` 信号 |
 | `ReadResultView` / `WebSource` / `WebResultView` | `presentation.ts:281` / `:319` / `:347` | 行号化代码视图(带降级 `content?`);检索源;检索结果(无 `content` 副本) |
-| `ToolOutputDefinition.presentationMeta` / `ToolResult` | `index.ts:210` / `:282` | 顶层调用的可重放展示投影;presenter 的结果态输入 |
-| `presentCall` / `presentResult` 契约 | `index.ts:262-279` | 纯函数、无副作用、畸形输入返回 `undefined` |
-| 顶层判定 / `snapshotProjection` / `projectionError` / `materializeFinalResult` | `index.ts:1796` / `:523` / `:518` / `:1837` | `exec.parent === undefined` 才计算 `meta`;无损快照与错误归类;`meta` 进冻结外壳(`:1840`) |
-| `appendToolResult` 的 `meta`(唯一落点) / `session.append('tool/result', …)` | `packages/core/agent-loop/src/tool-calls.ts:288` / `:282` | 持久化 `meta`;`surfaceOp: 'append'` + `sourceEventSeqs: [callSeq]` |
-| `rootResult` / `ToolResultNode` / `RunningToolCall` / `ToolCallBlock` | `packages/client/ui-chat/src/client/conversation-nodes/tool.ts:52` / `packages/client/ui-conversation/src/client/contract/records.ts:155` / `:265` / `:280` | 事件 → 节点(`meta` 在 `tool.ts:65`);`meta?: unknown`(`records.ts:170`);三者联合 |
-| `tool.call.toolview` slot 声明 / `ToolCallOwnerProps` | `packages/client/ui-tool/src/client/contract/slots.ts:26` / `:55` | keyed、session scope;组件能拿到的全部数据与回调 |
-| `apply`(children 声明 + 挂载) / `ToolCallTree` / `ToolCallBranch` | `packages/client/ui-tool/src/client/apply.ts:27` / `:94` / `:48` | `:38` 声明 slot,`:43-50` 挂八个 toolview;递归渲染 root 与子调用 |
-| `renderSlot(..., { entryKey, fallback })` | `ToolCallTree.tsx:39` | 按工具名分发;未注册回落 `GenericToolCard`(`:41`) |
-| `toolRowModel` / `classifyTool` / `TOOL_VARIANTS` / `resultText` / `formatToolBody` | `tool-call-model.ts:220` / `:86` / `:41` / `:117` / `:199` | 通用行唯一派生入口;工具名→变体;内容扁平化;code 行展开体是程序本身 |
-| 五个读 `meta` 的卡片模型 | `read-card-model.ts:107`、`search-card-model.ts:86`、`diff-card-model.ts:115`、`web-card-model.ts:61`、`image-card-model.ts:224` | 分别消费行窗口 / 分组匹配 / 已应用 hunk / 引用列表 / 图片路径 |
-| `ToolCallTree.apply` / `acceptEdge` / `MAX_TOOL_CALL_TREE_DEPTH` | `packages/client/ui-chat/src/client/model/tool-call-tree.ts:57` / `:163` / `:14` | 两个仅日志事件 → 递归子调用树;环检测与深度上限 256 |
-| `presentationMeta`(read) / `presentResult`(read) | `packages/fs/tool-fs/src/read.ts:124` / `:173` | 行窗口投影;四次防御性 `return undefined` |
-| `presentationMeta`(grep / glob) / `searchMetaFromValue` | `packages/fs/tool-fs-search/src/grep.ts:319`、`glob.ts:338` / `packages/web/tool-web/src/search.ts:360` | 分组匹配与路径列表;检索源投影 |
-| `apply`(agent 面 mode) | `packages/core/agent-tool-presentation/src/index.ts:59` | 与 UI 无关;`presentAs` 的 preset 封装 |
+| `ToolOutputDefinition.presentationMeta` / `ToolResult` | [`index.ts:210`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L210) / [`:282`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L282) | 顶层调用的可重放展示投影;presenter 的结果态输入 |
+| `presentCall` / `presentResult` 契约 | [`index.ts:262-279`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L262-L279) | 纯函数、无副作用、畸形输入返回 `undefined` |
+| 顶层判定 / `snapshotProjection` / `projectionError` / `materializeFinalResult` | [`index.ts:1796`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1796) / [`:523`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L523) / [`:518`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L518) / [`:1837`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1837) | `exec.parent === undefined` 才计算 `meta`;无损快照与错误归类;`meta` 进冻结外壳([`:1840`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1840)) |
+| `appendToolResult` 的 `meta`(唯一落点) / `session.append('tool/result', …)` | [`packages/core/agent-loop/src/tool-calls.ts:288`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L288) / [`:282`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L282) | 持久化 `meta`;`surfaceOp: 'append'` + `sourceEventSeqs: [callSeq]` |
+| `rootResult` / `ToolResultNode` / `RunningToolCall` / `ToolCallBlock` | [`packages/client/ui-chat/src/client/conversation-nodes/tool.ts:52`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-chat/src/client/conversation-nodes/tool.ts#L52) / [`packages/client/ui-conversation/src/client/contract/records.ts:155`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-conversation/src/client/contract/records.ts#L155) / [`:265`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-conversation/src/client/contract/records.ts#L265) / [`:280`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-conversation/src/client/contract/records.ts#L280) | 事件 → 节点(`meta` 在 [`tool.ts:65`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-chat/src/client/conversation-nodes/tool.ts#L65));`meta?: unknown`([`records.ts:170`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-conversation/src/client/contract/records.ts#L170));三者联合 |
+| `tool.call.toolview` slot 声明 / `ToolCallOwnerProps` | [`packages/client/ui-tool/src/client/contract/slots.ts:26`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/contract/slots.ts#L26) / [`:55`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/contract/slots.ts#L55) | keyed、session scope;组件能拿到的全部数据与回调 |
+| `apply`(children 声明 + 挂载) / `ToolCallTree` / `ToolCallBranch` | [`packages/client/ui-tool/src/client/apply.ts:27`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/apply.ts#L27) / `:94` / [`:48`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/apply.ts#L48) | [`:38`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/apply.ts#L38) 声明 slot,[`:43-50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/apply.ts#L43-L50) 挂八个 toolview;递归渲染 root 与子调用 |
+| `renderSlot(..., { entryKey, fallback })` | [`ToolCallTree.tsx:39`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/ToolCallTree.tsx#L39) | 按工具名分发;未注册回落 `GenericToolCard`([`:41`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/ToolCallTree.tsx#L41)) |
+| `toolRowModel` / `classifyTool` / `TOOL_VARIANTS` / `resultText` / `formatToolBody` | [`tool-call-model.ts:220`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/tool-call-model.ts#L220) / [`:86`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/tool-call-model.ts#L86) / [`:41`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/tool-call-model.ts#L41) / [`:117`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/tool-call-model.ts#L117) / [`:199`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/tool-call-model.ts#L199) | 通用行唯一派生入口;工具名→变体;内容扁平化;code 行展开体是程序本身 |
+| 五个读 `meta` 的卡片模型 | [`read-card-model.ts:107`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/read-card-model.ts#L107)、[`search-card-model.ts:86`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/search-card-model.ts#L86)、[`diff-card-model.ts:115`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/diff-card-model.ts#L115)、[`web-card-model.ts:61`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/web-card-model.ts#L61)、[`image-card-model.ts:224`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-tool/src/client/tool/models/image-card-model.ts#L224) | 分别消费行窗口 / 分组匹配 / 已应用 hunk / 引用列表 / 图片路径 |
+| `ToolCallTree.apply` / `acceptEdge` / `MAX_TOOL_CALL_TREE_DEPTH` | [`packages/client/ui-chat/src/client/model/tool-call-tree.ts:57`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-chat/src/client/model/tool-call-tree.ts#L57) / [`:163`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-chat/src/client/model/tool-call-tree.ts#L163) / [`:14`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-chat/src/client/model/tool-call-tree.ts#L14) | 两个仅日志事件 → 递归子调用树;环检测与深度上限 256 |
+| `presentationMeta`(read) / `presentResult`(read) | [`packages/fs/tool-fs/src/read.ts:124`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/read.ts#L124) / [`:173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/read.ts#L173) | 行窗口投影;四次防御性 `return undefined` |
+| `presentationMeta`(grep / glob) / `searchMetaFromValue` | [`packages/fs/tool-fs-search/src/grep.ts:319`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs-search/src/grep.ts#L319)、[`glob.ts:338`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs-search/src/glob.ts#L338) / [`packages/web/tool-web/src/search.ts:360`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/web/tool-web/src/search.ts#L360) | 分组匹配与路径列表;检索源投影 |
+| `apply`(agent 面 mode) | [`packages/core/agent-tool-presentation/src/index.ts:59`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-tool-presentation/src/index.ts#L59) | 与 UI 无关;`presentAs` 的 preset 封装 |

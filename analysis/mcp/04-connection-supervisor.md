@@ -1,13 +1,13 @@
 # 04 · 连接监管器:`connection.ts` 函数级走查
 
-> 源码:`packages/mcp/mcp-client/src/connection.ts`(351 行)
+> 源码:[`packages/mcp/mcp-client/src/connection.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts)(351 行)
 > 上游:第六章 [§三](../06-mcp.md)
 
 ---
 
 ## 一、状态模型:一个闭包里的九个变量
 
-`startConnection()`(`connection.ts:123`)整个生命周期只有**一份闭包状态**:
+`startConnection()`([`connection.ts:123`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L123))整个生命周期只有**一份闭包状态**:
 
 | 变量 | 声明 | 写入点 | 不变量 |
 |---|---|---|---|
@@ -24,7 +24,7 @@
 
 ## 二、`resolveReconnectPolicy()`:默认值与边界的唯一裁决点
 
-`connection.ts:55-90`。JSDoc 第一段就点明存在理由:
+[`connection.ts:55-90`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L55-L90)。JSDoc 第一段就点明存在理由:
 
 ```typescript
  * The one explicit resolve step from raw reconnect config to the policy the
@@ -33,30 +33,30 @@
  * fails the plugin instance at load.
 ```
 
-默认值在 `RECONNECT_DEFAULTS`(`connection.ts:40-45`),已 `Object.freeze`:`enabled: true`、`initialDelayMs: 500`、`maxDelayMs: 30_000`、`maxAttempts: 10`。
+默认值在 `RECONNECT_DEFAULTS`([`connection.ts:40-45`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L40-L45)),已 `Object.freeze`:`enabled: true`、`initialDelayMs: 500`、`maxDelayMs: 30_000`、`maxAttempts: 10`。
 
-| # | 检查(`connection.ts:66-88`) | 拒绝消息 | 测试 |
+| # | 检查([`connection.ts:66-88`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L66-L88)) | 拒绝消息 | 测试 |
 |---|---|---|---|
-| 1 | 未知键:`!Object.hasOwn(RECONNECT_DEFAULTS, key)` | `<path>.<key> is not a reconnect option` | `reconnect.spec.ts:495-498` |
-| 2 | `initialDelayMs` 有限、`>0`、`<= MAX_TIMER_DELAY_MS` | `<path>.initialDelayMs must be a positive finite number no greater than 2147483647` | `:500-504` |
-| 3 | `maxDelayMs` 同上 | `<path>.maxDelayMs must be …` | `:503` |
-| 4 | `initialDelayMs <= maxDelayMs` | `<path>.initialDelayMs must be less than or equal to maxDelayMs` | `:506-509` |
-| 5 | `maxAttempts` 为整数且 `>= 1` | `<path>.maxAttempts must be a positive integer` | `:511-514` |
-| 6 | 返回 `Object.freeze({...})` | — | `:482-486` |
+| 1 | 未知键:`!Object.hasOwn(RECONNECT_DEFAULTS, key)` | `<path>.<key> is not a reconnect option` | [`reconnect.spec.ts:495-498`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L495-L498) |
+| 2 | `initialDelayMs` 有限、`>0`、`<= MAX_TIMER_DELAY_MS` | `<path>.initialDelayMs must be a positive finite number no greater than 2147483647` | [`:500-504`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L500-L504) |
+| 3 | `maxDelayMs` 同上 | `<path>.maxDelayMs must be …` | [`:503`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L503) |
+| 4 | `initialDelayMs <= maxDelayMs` | `<path>.initialDelayMs must be less than or equal to maxDelayMs` | [`:506-509`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L506-L509) |
+| 5 | `maxAttempts` 为整数且 `>= 1` | `<path>.maxAttempts must be a positive integer` | [`:511-514`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L511-L514) |
+| 6 | 返回 `Object.freeze({...})` | — | [`:482-486`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L482-L486) |
 
 三点:
 
 1. **第 1 条拒绝未知键而非忽略**——打错的 `jitterRatio` 不会被静默当成"没配"。
-2. **上界来自共享常量** `MAX_TIMER_DELAY_MS = 2_147_483_647`(`packages/util/timeout/src/index.ts:25`),即 Node 定时器的 32 位有符号上限;超过它的 `setTimeout` 会被截断成 1ms,变成忙循环。
+2. **上界来自共享常量** `MAX_TIMER_DELAY_MS = 2_147_483_647`([`packages/util/timeout/src/index.ts:25`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/timeout/src/index.ts#L25)),即 Node 定时器的 32 位有符号上限;超过它的 `setTimeout` 会被截断成 1ms,变成忙循环。
 3. 校验段被 `jscpd:ignore-start/end` 包裹(`connection.ts:75,88`),注释说明它与 llm 的 retry-policy 校验"parallels … not extractable"——领域不同,不强抽公共函数。
 
-`apply` 的调用点把路径前缀拼好(`index.ts:150`),因此用户看到 `mcp-client(srv): reconnect.initialDelayMs must be less than or equal to maxDelayMs`;`reconnect.spec.ts:516-520` 验证它在**加载期**抛出。
+`apply` 的调用点把路径前缀拼好([`index.ts:150`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/timeout/src/index.ts#L150)),因此用户看到 `mcp-client(srv): reconnect.initialDelayMs must be less than or equal to maxDelayMs`;[`reconnect.spec.ts:516-520`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L516-L520) 验证它在**加载期**抛出。
 
 ---
 
 ## 三、代际与幂等闸门:`isCurrent()`
 
-`connection.ts:152-153`:
+[`connection.ts:152-153`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L152-L153):
 
 ```typescript
 /** A generation may act only while it is the current one on a live plugin. */
@@ -76,13 +76,13 @@ const isCurrent = (generation: Client): boolean => !disposed && client === gener
 | 成功分支 `275,299,302` | 同步期间代际被替换/关闭 → 不写 `connectedAt` |
 | 预算耗尽注销 `209-212` | 与在途 swap 竞争(队列内再判一次) |
 
-最直接的证据是 `reconnect.spec.ts:261-275`:dispose 期间 connect 才 reject,日志里**不能**出现 `connection attempt failed`,且代际数保持 1。
+最直接的证据是 [`reconnect.spec.ts:261-275`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L261-L275):dispose 期间 connect 才 reject,日志里**不能**出现 `connection attempt failed`,且代际数保持 1。
 
 ---
 
 ## 四、`connectGeneration()`:一次尝试的每条失败分支
 
-JSDoc(`connection.ts:227-236`)先交代四条契约:每次尝试都是**全新** transport + client、startup 标志属于**尝试**而非共享队列、每条失败都汇入 `generationDown`、**永不 reject**。
+JSDoc([`connection.ts:227-236`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L227-L236))先交代四条契约:每次尝试都是**全新** transport + client、startup 标志属于**尝试**而非共享队列、每条失败都汇入 `generationDown`、**永不 reject**。
 
 ### 4.1 建代与两个信号钩子(`238-270`)
 
@@ -106,7 +106,7 @@ generation.setNotificationHandler(ToolListChangedNotificationSchema, async () =>
 
 - **每次尝试都 `new Client`**:MCP SDK 把一个 Protocol 终身绑定到一个 transport,重连无法复用。
 - **`capabilities: {}`**:桥不声明任何客户端能力,只用 `tools/list` 与 `tools/call`。
-- **`attemptSettled` 是"谁负责关闭屏障"的开关**。`connect()` 进行中关闭 → `onclose` 只置位不调度;等 catch 分支走完屏障再统一 `generationDown`。这是 `reconnect.spec.ts:384-404` 断言"每次尝试恰好一次重试"的实现基础(`expect(instances).toHaveLength(4)`)。
+- **`attemptSettled` 是"谁负责关闭屏障"的开关**。`connect()` 进行中关闭 → `onclose` 只置位不调度;等 catch 分支走完屏障再统一 `generationDown`。这是 [`reconnect.spec.ts:384-404`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L384-L404) 断言"每次尝试恰好一次重试"的实现基础(`expect(instances).toHaveLength(4)`)。
 - **通知处理器先于 `connect()` 注册**,理由见 [01 §6](./01-discovery-and-sync.md)。
 
 ### 4.2 主 try 与失败 catch(`271-296`)
@@ -138,7 +138,7 @@ try {
 
 | 行 | 行为 | 为什么 |
 |---|---|---|
-| `273-277` | connect 成功但已观测到关闭 → 直接 down,不进同步 | `reconnect.spec.ts:406-419` 断言这类死代际**从不发起 `tools/list`** |
+| `273-277` | connect 成功但已观测到关闭 → 直接 down,不进同步 | [`reconnect.spec.ts:406-419`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L406-L419) 断言这类死代际**从不发起 `tools/list`** |
 | `280` | 只记第一个错误 | `ready` 报告"首次尝试"的真实原因 |
 | `283` | `isCurrent` 才 warn | dispose 期间的 reject 是预期路径,不刷日志 |
 | `284` | close 吞异常,`try` 只有一句 | 空 catch 有注释点名吞掉什么 |
@@ -146,7 +146,7 @@ try {
 | `288-293` | **5 秒内未关闭 → 停止重连** | "宁可不恢复也不重叠子进程":旧 stdio 子进程可能还在跑,起新的会变成两个进程争同一份资源 |
 | `294` | 统一出口 `generationDown` | 所有失败路径收敛到一处 |
 
-`reconnect.spec.ts:243-259` 用假定时器精确复现"永不关闭":`mockClose.mockResolvedValue(undefined)` 后 `advanceTimersByTimeAsync(5_000)`,断言 `instances` 仍为 1 且日志含 `reconnect stopped to avoid overlapping server processes`。反向场景在 `:225-241`:`mockClose` 解析但未 `onclose` 时,`instances` 仍是 1,直到手动触发 `onclose` 才变成 2——**新代际必须等旧代确认关闭**。
+[`reconnect.spec.ts:243-259`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L243-L259) 用假定时器精确复现"永不关闭":`mockClose.mockResolvedValue(undefined)` 后 `advanceTimersByTimeAsync(5_000)`,断言 `instances` 仍为 1 且日志含 `reconnect stopped to avoid overlapping server processes`。反向场景在 [`:225-241`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L225-L241):`mockClose` 解析但未 `onclose` 时,`instances` 仍是 1,直到手动触发 `onclose` 才变成 2——**新代际必须等旧代确认关闭**。
 
 ### 4.3 成功收尾(`297-304`)
 
@@ -164,7 +164,7 @@ if (failedAttempts > 0) ctx.logger.info(`${label}: reconnected and re-synced too
 
 ## 五、`generationDown()` 与 `scheduleReconnect()`:预算与稳定窗口
 
-### 5.1 `generationDown()`(`connection.ts:172-178`)
+### 5.1 `generationDown()`([`connection.ts:172-178`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L172-L178))
 
 ```typescript
 /** One disconnect decision per generation: the isCurrent guard makes racing close/error signals idempotent. */
@@ -178,7 +178,7 @@ function generationDown(generation: Client): void {
 
 先清空代际所有权,再调度重连;此后到达的该代任何回调都变成 no-op。
 
-### 5.2 `scheduleReconnect()` 逐行(`connection.ts:192-225`)
+### 5.2 `scheduleReconnect()` 逐行([`connection.ts:192-225`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L192-L225))
 
 | 行 | 行为 | 说明 |
 |---|---|---|
@@ -190,7 +190,7 @@ function generationDown(generation: Client): void {
 | `209-212` | 注销动作排到 `syncChain` 之后 | 注释原文:"so it cannot race an in-flight sync's phase-2 swap (which checks isCurrent inside the queue)" |
 | `216` | `Math.min(maxDelayMs, initialDelayMs * 2 ** (failedAttempts - 1))` | 首次 = `initialDelayMs`,逐次翻倍,封顶 `maxDelayMs` |
 | `217-218` | 两条日志动词:`connection lost; reconnecting` / `connection failed; retrying` | 用户可区分"掉线重连"与"从未连上" |
-| `224` | `reconnectTimer.unref()` | 退避等待不能单独吊住 Node 进程;`reconnect.spec.ts:299-309` 验证 dispose 不必等完 60 秒退避 |
+| `224` | `reconnectTimer.unref()` | 退避等待不能单独吊住 Node 进程;[`reconnect.spec.ts:299-309`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L299-L309) 验证 dispose 不必等完 60 秒退避 |
 
 预算算式:设 `d = initialDelayMs`、`M = maxDelayMs`、`N = maxAttempts`,则第 k 次重试延迟 `min(M, d × 2^(k-1))`(`k = 1..N`),总尝试次数 `1 + N`(含初始)。默认值下延迟序列为 `500, 1000, 2000, 4000, 8000, 16000, 30000, 30000, 30000, 30000`,合计约 151.5 秒。
 
@@ -198,7 +198,7 @@ function generationDown(generation: Client): void {
 
 ## 六、`waitForClose()`:有界关闭屏障
 
-`connection.ts:180-190`:
+[`connection.ts:180-190`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L180-L190):
 
 ```typescript
 /** Wait for the transport-owned close signal without letting a broken transport wedge teardown forever. */
@@ -214,7 +214,7 @@ function waitForClose(closed: Promise<void>): Promise<boolean> {
 }
 ```
 
-`GENERATION_CLOSE_TIMEOUT_MS = 5_000`(`connection.ts:50`),来历写在注释里(`47-49`):
+`GENERATION_CLOSE_TIMEOUT_MS = 5_000`([`connection.ts:50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L50)),来历写在注释里(`47-49`):
 
 ```typescript
 // The SDK's stdio transport owns two two-second termination grace periods.
@@ -226,14 +226,14 @@ function waitForClose(closed: Promise<void>): Promise<boolean> {
 
 | 调用点 | 超时后果 | 测试 |
 |---|---|---|
-| 失败尝试 `285` | `false` → **停止重连**并报错,防重叠子进程 | `reconnect.spec.ts:243-259` |
-| `dispose()` `339` | `false` → **只记 error**,dispose 继续走完(否则拆卸永久卡住) | `reconnect.spec.ts:277-297` |
+| 失败尝试 `285` | `false` → **停止重连**并报错,防重叠子进程 | [`reconnect.spec.ts:243-259`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L243-L259) |
+| `dispose()` `339` | `false` → **只记 error**,dispose 继续走完(否则拆卸永久卡住) | [`reconnect.spec.ts:277-297`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L277-L297) |
 
 ---
 
 ## 七、`dispose()`:平息(quiesce)而不是请求
 
-`connection.ts:325-350`,七步顺序与每步的理由:
+[`connection.ts:325-350`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L325-L350),七步顺序与每步的理由:
 
 | 序 | 动作(`行`) | 为什么必须在这一步 |
 |---|---|---|
@@ -252,11 +252,11 @@ function waitForClose(closed: Promise<void>): Promise<boolean> {
 // sync before settling, so awaiting both leaves `disposers` final.
 ```
 
-`reconnect.spec.ts:421-440` 覆盖最难的一种:dispose 期间一次在途同步才落定并完成 swap,断言它的结果**也**被注销(`mcp__srv__remote` 与 `mcp__srv__late` 均为 `undefined`)。
+[`reconnect.spec.ts:421-440`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L421-L440) 覆盖最难的一种:dispose 期间一次在途同步才落定并完成 swap,断言它的结果**也**被注销(`mcp__srv__remote` 与 `mcp__srv__late` 均为 `undefined`)。
 
 ### 7.1 `ready` 的语义与一个微任务细节
 
-`connection.ts:310-323`:
+[`connection.ts:310-323`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L310-L323):
 
 ```typescript
 const ready: Promise<ConnectionOutcome> = settling.then(() => {
@@ -269,7 +269,7 @@ const ready: Promise<ConnectionOutcome> = settling.then(() => {
 })
 ```
 
-`settling` 永不 reject(所有路径都在 try/catch 内),所以 `ready` 也永不 reject——它用 `{ error }` 报告失败,由 `apply` 决定是否致命(`index.ts:184-187`)。上述注释解释了一个真实竞态:若 `onclose` 是同步回调,`client` 可能在 `.then` 之前被清空,导致"明明连上了却报初始连接失败"。
+`settling` 永不 reject(所有路径都在 try/catch 内),所以 `ready` 也永不 reject——它用 `{ error }` 报告失败,由 `apply` 决定是否致命([`index.ts:184-187`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/timeout/src/index.ts#L184-L187))。上述注释解释了一个真实竞态:若 `onclose` 是同步回调,`client` 可能在 `.then` 之前被清空,导致"明明连上了却报初始连接失败"。
 
 ---
 
@@ -309,7 +309,7 @@ sequenceDiagram
 
 ### 8.2 崩溃循环(短暂连上又崩,仍在稳定窗口内)
 
-对应 `reconnect.spec.ts:365-382`(`maxDelayMs: 10_000`、`maxAttempts: 1`):
+对应 [`reconnect.spec.ts:365-382`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L365-L382)(`maxDelayMs: 10_000`、`maxAttempts: 1`):
 
 ```text
 t0  启动:connectedAt = t0,failedAttempts = 0
@@ -326,7 +326,7 @@ t3  再次崩溃(t3 - t2 < 10s)
 结果:instances 停在 2,mcp__srv__remote 从注册表消失
 ```
 
-**一次短暂成功的连接不能"洗白"预算**。若每次崩溃都重置计数,一台 10 秒崩一次的服务器就能无限重启。稳定窗口取 `maxDelayMs` 的深意正在于:只有"比最长退避还活得久"才算真正脱离上一次 outage。反方向由 `reconnect.spec.ts:347-363` 覆盖:存活超过 `maxDelayMs` 后再崩,`errors` 长度为 0,即预算已重置。
+**一次短暂成功的连接不能"洗白"预算**。若每次崩溃都重置计数,一台 10 秒崩一次的服务器就能无限重启。稳定窗口取 `maxDelayMs` 的深意正在于:只有"比最长退避还活得久"才算真正脱离上一次 outage。反方向由 [`reconnect.spec.ts:347-363`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L347-L363) 覆盖:存活超过 `maxDelayMs` 后再崩,`errors` 长度为 0,即预算已重置。
 
 ### 8.3 预算耗尽与 `enabled:false` 的两种终态
 
@@ -361,7 +361,7 @@ flowchart TD
 | `reconnect.enabled: false` | **在** | 调用失败(transport 已断) | HMR / 重启 Host |
 | 预算耗尽 | **不在** | 模型看不到这些工具 | HMR / 重启 Host |
 
-耗尽早必须注销,是因为"工具已注册但调用必失败"是一个**部分可用态**,会长期误导模型反复尝试。而 `enabled: false` 是用户显式选择的手动模式,保留注册是"pre-reconnect contract"的既定行为(`reconnect.spec.ts:333` 的注释原文)。
+耗尽早必须注销,是因为"工具已注册但调用必失败"是一个**部分可用态**,会长期误导模型反复尝试。而 `enabled: false` 是用户显式选择的手动模式,保留注册是"pre-reconnect contract"的既定行为([`reconnect.spec.ts:333`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L333) 的注释原文)。
 
 ---
 
@@ -369,30 +369,30 @@ flowchart TD
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `ReconnectConfig` | `connection.ts:28` | 四个字段的公开配置面 |
-| `RECONNECT_DEFAULTS` | `connection.ts:40` | `enabled/500/30000/10`,已冻结 |
-| `GENERATION_CLOSE_TIMEOUT_MS` | `connection.ts:50` | 5 秒关闭屏障(SDK 2+2 秒宽限 + 1 秒) |
-| `resolveReconnectPolicy()` | `connection.ts:65` | 唯一解析与校验入口 |
+| `ReconnectConfig` | [`connection.ts:28`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L28) | 四个字段的公开配置面 |
+| `RECONNECT_DEFAULTS` | [`connection.ts:40`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L40) | `enabled/500/30000/10`,已冻结 |
+| `GENERATION_CLOSE_TIMEOUT_MS` | [`connection.ts:50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L50) | 5 秒关闭屏障(SDK 2+2 秒宽限 + 1 秒) |
+| `resolveReconnectPolicy()` | [`connection.ts:65`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L65) | 唯一解析与校验入口 |
 | `ConnectionOutcome` / `ConnectionHandle` | `connection.ts:93,99` | `{ error? }` 与 `{ ready, dispose }` |
-| `startConnection()` | `connection.ts:123` | 监管器全部状态的创建点 |
-| `isCurrent()` | `connection.ts:153` | 幂等闸门 |
-| `enqueueSync()` / `syncChain` | `connection.ts:161-170` | 同步串行化 |
-| `generationDown()` | `connection.ts:173` | 单次断连决策 |
-| `waitForClose()` | `connection.ts:181` | 有界关闭屏障 |
-| `scheduleReconnect()` | `connection.ts:192` | 预算、稳定窗口、退避、give-up |
-| `connectGeneration()` | `connection.ts:237` | 一次尝试的全部失败分支 |
-| `ready` | `connection.ts:313` | 启动期结果(永不 reject) |
-| `dispose()` | `connection.ts:327` | 七步平息顺序 |
+| `startConnection()` | [`connection.ts:123`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L123) | 监管器全部状态的创建点 |
+| `isCurrent()` | [`connection.ts:153`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L153) | 幂等闸门 |
+| `enqueueSync()` / `syncChain` | [`connection.ts:161-170`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L161-L170) | 同步串行化 |
+| `generationDown()` | [`connection.ts:173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L173) | 单次断连决策 |
+| `waitForClose()` | [`connection.ts:181`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L181) | 有界关闭屏障 |
+| `scheduleReconnect()` | [`connection.ts:192`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L192) | 预算、稳定窗口、退避、give-up |
+| `connectGeneration()` | [`connection.ts:237`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L237) | 一次尝试的全部失败分支 |
+| `ready` | [`connection.ts:313`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L313) | 启动期结果(永不 reject) |
+| `dispose()` | [`connection.ts:327`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts#L327) | 七步平息顺序 |
 
 ### 测试锚点(按主题分组)
 
 | 主题 | 位置 |
 |---|---|
-| 重连换代与旧代不泄漏、可继续调用、迟到 close 被忽略 | `reconnect.spec.ts:140-171` |
+| 重连换代与旧代不泄漏、可继续调用、迟到 close 被忽略 | [`reconnect.spec.ts:140-171`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L140-L171) |
 | 触顶注销 / 放弃与在途同步竞态 / 每次尝试恰好一次重试 | `reconnect.spec.ts:173-223,384-404` |
-| 关闭屏障的三种走向(必等、永不关、dispose 有界) | `reconnect.spec.ts:225-297` |
+| 关闭屏障的三种走向(必等、永不关、dispose 有界) | [`reconnect.spec.ts:225-297`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L225-L297) |
 | dispose:取消退避、后置 onclose 无操作、平息在途同步、失败静默 | `reconnect.spec.ts:299-323,421-460` |
-| `enabled:false` 的两种终态 / 稳定窗口 / 崩溃循环 | `reconnect.spec.ts:325-382` |
+| `enabled:false` 的两种终态 / 稳定窗口 / 崩溃循环 | [`reconnect.spec.ts:325-382`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L325-L382) |
 | 死代际不发起同步 / 过期通知被忽略 | `reconnect.spec.ts:406-419,462-474` |
-| 策略解析的全部拒绝路径 + 加载期硬失败 | `reconnect.spec.ts:479-520` |
+| 策略解析的全部拒绝路径 + 加载期硬失败 | [`reconnect.spec.ts:479-520`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts#L479-L520) |
 | 真实 stdio 崩溃后自动恢复 / 卸载不等退避 | `mcp-client.e2e.ts:257-291,293-320` |

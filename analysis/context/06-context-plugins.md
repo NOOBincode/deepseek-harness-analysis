@@ -32,13 +32,13 @@ flowchart TD
 
 | 包 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| `session-reference` | 把用户消息里的规范化引用改写成"直接消息 + 紧随其后的跨会话快照" | `prepareDirectMessages()`(`session-reference/src/index.ts:153-177`) |
-| 同上 | 记录本步解析出的路由,用于派生字节预算 | `system-prompt/assemble` 预置监听(`index.ts:127-134`) |
-| `time-context` | 每个合格步追加一条时间读数与浏览器时区策略 | `apply()` 的 pre-step 监听(`time-context/src/index.ts:181-221`) |
-| `tmux-context` | 只在首步、且渲染状态变化时,把终端位置插到批次头部 | `apply()` 的 pre-step 监听(`tmux-context/src/index.ts:236-264`) |
-| `agent-instructions` | 首步注入工作区指令基线;文件工具触碰后增量重投影 | `compose()`(`agent-instructions/src/index.ts:108-225`)、`projectTouch()`(`:296-305`) |
-| `file-reference` | 只声明可取消的文件引用发现能力 | `FileReferenceService`(`file-reference/src/index.ts:26-43`) |
-| `file-reference-local` | 提供本地实现,并按 agent 登记一段提示段落 | `LocalFileReferenceService`(`file-reference-local/src/index.ts:44-125`) |
+| `session-reference` | 把用户消息里的规范化引用改写成"直接消息 + 紧随其后的跨会话快照" | `prepareDirectMessages()`([`session-reference/src/index.ts:153-177`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L153-L177)) |
+| 同上 | 记录本步解析出的路由,用于派生字节预算 | `system-prompt/assemble` 预置监听([`index.ts:127-134`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L127-L134)) |
+| `time-context` | 每个合格步追加一条时间读数与浏览器时区策略 | `apply()` 的 pre-step 监听([`time-context/src/index.ts:181-221`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/time-context/src/index.ts#L181-L221)) |
+| `tmux-context` | 只在首步、且渲染状态变化时,把终端位置插到批次头部 | `apply()` 的 pre-step 监听([`tmux-context/src/index.ts:236-264`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/tmux-context/src/index.ts#L236-L264)) |
+| `agent-instructions` | 首步注入工作区指令基线;文件工具触碰后增量重投影 | `compose()`([`agent-instructions/src/index.ts:108-225`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/agent-instructions/src/index.ts#L108-L225))、`projectTouch()`([`:296-305`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/agent-instructions/src/index.ts#L296-L305)) |
+| `file-reference` | 只声明可取消的文件引用发现能力 | `FileReferenceService`([`file-reference/src/index.ts:26-43`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/file-reference/src/index.ts#L26-L43)) |
+| `file-reference-local` | 提供本地实现,并按 agent 登记一段提示段落 | `LocalFileReferenceService`([`file-reference-local/src/index.ts:44-125`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/file-reference-local/src/index.ts#L44-L125)) |
 
 ---
 
@@ -60,9 +60,9 @@ flowchart TD
     }, { prepend: true })
 ```
 
-放在 `next()` 之后,意味着它拿到的是所有下游监听器都已经改写过、真正会进入请求的那个批次。每条含引用的消息产出两条消息:改写后的直接消息,与一条带 `{ kind: 'session-reference', form: 'recall', version: 1, … }` 来源的快照(`index.ts:352-356`)。`form: 'recall'` 是 `ContextFormed` 词表里的一个值,语义是"从别处搬来、可能在途中被削减过的材料"(`packages/llm/llm/src/message.ts:61-62`)。
+放在 `next()` 之后,意味着它拿到的是所有下游监听器都已经改写过、真正会进入请求的那个批次。每条含引用的消息产出两条消息:改写后的直接消息,与一条带 `{ kind: 'session-reference', form: 'recall', version: 1, … }` 来源的快照([`index.ts:352-356`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L352-L356))。`form: 'recall'` 是 `ContextFormed` 词表里的一个值,语义是"从别处搬来、可能在途中被削减过的材料"([`packages/llm/llm/src/message.ts:61-62`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/message.ts#L61-L62))。
 
-**开关与配置**。`static inject = ['sessionQuery']`;服务名 `sessionReferenceResolver`。四个配置项各有职责(`index.ts:87-92`):
+**开关与配置**。`static inject = ['sessionQuery']`;服务名 `sessionReferenceResolver`。四个配置项各有职责([`index.ts:87-92`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L87-L92)):
 
 | 配置 | 默认 | 作用 |
 |---|---|---|
@@ -71,7 +71,7 @@ flowchart TD
 | `maxReferenceBytes` | 省略则按容量派生 | 单个引用渲染后的 UTF-8 字节上限 |
 | `referenceContextFraction` | 0.2 | 派生预算时占窗口的比例 |
 
-字节预算的派生链值得单独记一遍(`index.ts:359-376`):显式配置优先;否则用本步组装时记下的路由(`system-prompt/assemble` 监听器在 `next()` 之后读 `assembly.variables.provider/model`);拿不到路由就用 agent 选项;`resolveModelInfo()` 抛 `NO_ADAPTER` 时回退到 64 KiB 下限;有容量则按"每 token 四字节"折算并取 `max(64 KiB, contextWindow × 4 × fraction)`。
+字节预算的派生链值得单独记一遍([`index.ts:359-376`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L359-L376)):显式配置优先;否则用本步组装时记下的路由(`system-prompt/assemble` 监听器在 `next()` 之后读 `assembly.variables.provider/model`);拿不到路由就用 agent 选项;`resolveModelInfo()` 抛 `NO_ADAPTER` 时回退到 64 KiB 下限;有容量则按"每 token 四字节"折算并取 `max(64 KiB, contextWindow × 4 × fraction)`。
 
 **失败时的降级**。这个包是六个里最严格的:
 
@@ -85,9 +85,9 @@ flowchart TD
 | 取消 | 抛 `SESSION_REFERENCE_CANCELLED`;即使存储操作在取消后才完成,也不发布上下文 |
 | 路由没有适配器 | 回退 64 KiB,功能继续可用 |
 
-前六行都是 `SessionReferenceError`,带稳定的 `code` 供宿主协议映射(`config.ts:22-42`)。严格的理由是明确的:**引用的内容是不可信的他人材料**,截断到无法解析只会让模型看到一段语法坏掉的 JSON,比直接失败更糟。
+前六行都是 `SessionReferenceError`,带稳定的 `code` 供宿主协议映射([`config.ts:22-42`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/config.ts#L22-L42))。严格的理由是明确的:**引用的内容是不可信的他人材料**,截断到无法解析只会让模型看到一段语法坏掉的 JSON,比直接失败更糟。
 
-截断本身是可用的,但必须留痕:预览里省掉的字节数与消息数会被记进 `ReferenceRetentionStats`,并在提示里另附一段 `## Reference omissions`,说明完整快照存在哪(溢写定位符)或为什么取不到(`status: 'unavailable'`,见 [03-runtime-context.md](./03-runtime-context.md) 第七节)。保留策略优先丢中间的消息、保留最新一条,再对最长的可见消息做头尾截断(`projection.ts:93-128`)。
+截断本身是可用的,但必须留痕:预览里省掉的字节数与消息数会被记进 `ReferenceRetentionStats`,并在提示里另附一段 `## Reference omissions`,说明完整快照存在哪(溢写定位符)或为什么取不到(`status: 'unavailable'`,见 [03-runtime-context.md](./03-runtime-context.md) 第七节)。保留策略优先丢中间的消息、保留最新一条,再对最长的可见消息做头尾截断([`projection.ts:93-128`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/projection.ts#L93-L128))。
 
 ---
 
@@ -105,7 +105,7 @@ flowchart TD
     + `Elapsed since the preceding ${baseline}: ${elapsed}.`
 ```
 
-**注入形态**。`agent/pre-step` 上以 `{ prepend: true }` 注册,`next()` 之后把新消息**追加到尾部**(`index.ts:211-220`)。来源带 `form: 'snapshot'` 与单个具名贡献 `{ name, text }`——即使它走的是 pre-step 而不是注册表,也保留了归属性,UI 可以把它渲染成一条有来源的上下文行。
+**注入形态**。`agent/pre-step` 上以 `{ prepend: true }` 注册,`next()` 之后把新消息**追加到尾部**([`index.ts:211-220`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L211-L220))。来源带 `form: 'snapshot'` 与单个具名贡献 `{ name, text }`——即使它走的是 pre-step 而不是注册表,也保留了归属性,UI 可以把它渲染成一条有来源的上下文行。
 
 **开关与配置**。`static inject = ['agents', 'sessionProjections']`;两个配置项:
 
@@ -114,7 +114,7 @@ flowchart TD
 | `timeZone` | 省略则用进程时区 | 打开回合没有唯一浏览器时区时的回退显示区 |
 | `refreshIntervalMs` | 省略或 0 则每个合格步都注入 | 同一会话两次持久注入之间的最小毫秒间隔 |
 
-时区优先级:先从上一步与已进入的用户消息里推导浏览器时区,唯一时才用它;冲突或缺失则用回退区(`index.ts:200-210`)。诊断入口是独立的投影:
+时区优先级:先从上一步与已进入的用户消息里推导浏览器时区,唯一时才用它;冲突或缺失则用回退区([`index.ts:200-210`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L200-L210))。诊断入口是独立的投影:
 
 ```typescript
 // packages/context/time-context/src/index.ts:33-40
@@ -132,7 +132,7 @@ const timeContextStateSchema = zod.object({
 
 **失败时的降级**。分两类,界限很清晰:
 
-- **装载期硬失败**:`refreshIntervalMs` 非负安全整数校验失败抛 `TypeError`;`timeZone` 解析不出抛错,错误信息区分"系统时区解析失败"与"提供的 IANA 时区非法"(`index.ts:132-141`)。配置错误必须让部署失败,而不是让每一步都渲染一个错的时间。
+- **装载期硬失败**:`refreshIntervalMs` 非负安全整数校验失败抛 `TypeError`;`timeZone` 解析不出抛错,错误信息区分"系统时区解析失败"与"提供的 IANA 时区非法"([`index.ts:132-141`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L132-L141))。配置错误必须让部署失败,而不是让每一步都渲染一个错的时间。
 - **运行期不失败**:信号已中止、或决策被拒绝时原样返回;节流窗口内不注入。渲染用正则约束的固定格式,由包自带的不变式校验。
 
 不变式做的事比"格式检查"多:`preparationPosition()` 重放历史算出本步应有的 `turn/step` 并比对读取里写的数字(`invariant.ts:28-105`);来源必须恰好带四个键、`form === 'snapshot'`、恰好一个具名贡献且文本与块文本相同(`invariant.ts:116-125`)——这条防的是"时间读数被当成请求权威来用"。浏览器时区文本要能与当前回合的用户消息重新推导一致(`invariant.ts:126-131`),渲染出的时间戳不能晚于它落盘的 `event.time`(`invariant.ts:139-143`)。
@@ -141,7 +141,7 @@ const timeContextStateSchema = zod.object({
 
 ## 三、`tmux-context`:终端位置
 
-**贡献什么**。本进程所在的 tmux 会话、窗口、窗格标识,加上窗口的窗格树布局。渲染成"稳定的状态块 + 易变的回合前导行"两段(`index.ts:164-175`),前者用于变化抑制比较,后者不进比较。
+**贡献什么**。本进程所在的 tmux 会话、窗口、窗格标识,加上窗口的窗格树布局。渲染成"稳定的状态块 + 易变的回合前导行"两段([`index.ts:164-175`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L164-L175)),前者用于变化抑制比较,后者不进比较。
 
 **注入形态**。`agent/pre-step` 上以 `{ prepend: true }` 注册,但只在乎首步,且把读数**插到批次头部**:
 
@@ -163,7 +163,7 @@ const timeContextStateSchema = zod.object({
 
 插到头部而不是尾部,是因为它是"环境位置"而不是"事件产物":位置信息应该先于具体内容被读到。
 
-**"真的在 tmux 里吗"这一问有一处专门设计**。只看 `$TMUX_PANE` 不够——从 tmux 里启动的终端(例如 VS Code 集成终端、桌面启动器)会继承 `$TMUX` 与 `$TMUX_PANE`,但进程并不在那个窗格里。所以查询命令额外把窗格的 `#{pane_tty}` 与本进程的控制终端(`ps -o tty=`)比对,只在匹配时才输出字段(`index.ts:116-123`)。不匹配就读作"不在 tmux 里",什么都不注入。
+**"真的在 tmux 里吗"这一问有一处专门设计**。只看 `$TMUX_PANE` 不够——从 tmux 里启动的终端(例如 VS Code 集成终端、桌面启动器)会继承 `$TMUX` 与 `$TMUX_PANE`,但进程并不在那个窗格里。所以查询命令额外把窗格的 `#{pane_tty}` 与本进程的控制终端(`ps -o tty=`)比对,只在匹配时才输出字段([`index.ts:116-123`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L116-L123))。不匹配就读作"不在 tmux 里",什么都不注入。
 
 **开关与配置**。`static inject = ['agents', 'sessionProjections']`;唯一配置项 `refreshIntervalMs`,语义与 `time-context` 相同,非法值同样是装载期 `TypeError`。
 
@@ -177,19 +177,19 @@ const timeContextStateSchema = zod.object({
 | 非零退出、超时、中止 | 读数为 `undefined`,不注入 |
 | 位置与上次相同 | 不注入 |
 
-注释把这条取舍写在了函数 JSDoc 里——"位置是可选的上下文,所以执行器拒绝是一次失败的查询,不是一次回合失败"(`index.ts:98-101`)。
+注释把这条取舍写在了函数 JSDoc 里——"位置是可选的上下文,所以执行器拒绝是一次失败的查询,不是一次回合失败"([`index.ts:98-101`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L98-L101))。
 
 ---
 
 ## 四、`agent-instructions`:工作区指令
 
-**贡献什么**。`AGENTS.md` 一类的指令文件链。基线在首次请求前进入,之后文件工具触碰会在下一步增量重投影:嵌套目录发现了新指令、指令被改写、或被删除。
+**贡献什么**。[`AGENTS.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/AGENTS.md) 一类的指令文件链。基线在首次请求前进入,之后文件工具触碰会在下一步增量重投影:嵌套目录发现了新指令、指令被改写、或被删除。
 
 **注入形态**。三处通道同时用:
 
-1. **`agent/pre-step`** 折叠出本步该带的指令上下文,并**正好插在认领批次之后**(`index.ts:336-340`)——直接提示在前,指令上下文居中,驱动追加的运行时快照在后。
-2. **收件箱**。文件触碰发生在回合之外时,投影结果先留在收件箱等真正的输入;`syncInbox()` 负责去重与替换(`index.ts:227-252`)。
-3. **延迟到步结束**。回合进行中触碰的文件被暂存,到 `step/end` 才排入投影队列,保证提交点是稳定的(`index.ts:296-313`)。
+1. **`agent/pre-step`** 折叠出本步该带的指令上下文,并**正好插在认领批次之后**([`index.ts:336-340`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L336-L340))——直接提示在前,指令上下文居中,驱动追加的运行时快照在后。
+2. **收件箱**。文件触碰发生在回合之外时,投影结果先留在收件箱等真正的输入;`syncInbox()` 负责去重与替换([`index.ts:227-252`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L227-L252))。
+3. **延迟到步结束**。回合进行中触碰的文件被暂存,到 `step/end` 才排入投影队列,保证提交点是稳定的([`index.ts:296-313`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L296-L313))。
 
 ```typescript
 // packages/context/agent-instructions/src/index.ts:324-339
@@ -228,11 +228,11 @@ const timeContextStateSchema = zod.object({
 
 **失败时的降级**。三处静默降级,都有明确条件:
 
-- **没有 `ctx.fs`**:`compose()` 直接返回 `undefined`,整个包成为 no-op(`index.ts:119-120`)。这解释了为什么"无文件系统提供者的产品可以直接挂载它"。
+- **没有 `ctx.fs`**:`compose()` 直接返回 `undefined`,整个包成为 no-op([`index.ts:119-120`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L119-L120))。这解释了为什么"无文件系统提供者的产品可以直接挂载它"。
 - **`maxBytes <= 0` 或非有限值**:同样返回 `undefined`。用一个明确的数值关闭这条通道,而不是让它在无从预算的情况下乱跑。
-- **投影失败**:`queueProjection()` 的 `catch` 记 warning,不影响回合(`index.ts:272-274`)。
+- **投影失败**:`queueProjection()` 的 `catch` 记 warning,不影响回合([`index.ts:272-274`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L272-L274))。
 
-一条容易忽略的正面规则也在降级之列:`compose()` 在"没有触碰路径、但收件箱里已有待发上下文"时直接返回 `pending[0]`,不重算(`index.ts:121`)。文件没有变化就不产生新事件。
+一条容易忽略的正面规则也在降级之列:`compose()` 在"没有触碰路径、但收件箱里已有待发上下文"时直接返回 `pending[0]`,不重算([`index.ts:121`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L121))。文件没有变化就不产生新事件。
 
 ---
 
@@ -305,32 +305,32 @@ export const FILE_REFERENCE_PROMPT = 'Tokens prefixed with @ are workspace paths
 
 | 文件 | 符号 | 行 | 本模块用途 |
 |---|---|---|---|
-| `packages/context/session-reference/src/index.ts` | `SessionReferenceResolver` | 85-143 | 服务、配置校验、两个监听器 |
+| [`packages/context/session-reference/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts) | `SessionReferenceResolver` | 85-143 | 服务、配置校验、两个监听器 |
 | 同上 | `prepareDirectMessages` | 153-177 | 引用改写与快照紧随 |
 | 同上 | `prepare` | 298-357 | 读取、渲染、遗漏通知、来源构造 |
 | 同上 | `referenceBudget` | 359-376 | 字节预算的派生与 `NO_ADAPTER` 回退 |
 | 同上 | `renderSources` | 378-394 | 预算超限抛错 |
-| `packages/context/session-reference/src/config.ts` | 常量与错误码 | 4-43 | `MAX_REFERENCES` = 3、64 KiB 下限、七个稳定 code |
-| `packages/context/session-reference/src/projection.ts` | `retainReferencedSession` | 72-145 | 先丢消息、再头尾截断 |
-| `packages/context/session-reference/src/spill.ts` | `prepareReferenceOmission` | 23-50 | 完整快照的 `saved` / `unavailable` |
-| `packages/context/time-context/src/index.ts` | `apply` | 128-221 | 投影注册、pre-step 监听、节流 |
+| [`packages/context/session-reference/src/config.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/config.ts) | 常量与错误码 | 4-43 | `MAX_REFERENCES` = 3、64 KiB 下限、七个稳定 code |
+| [`packages/context/session-reference/src/projection.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/projection.ts) | `retainReferencedSession` | 72-145 | 先丢消息、再头尾截断 |
+| [`packages/context/session-reference/src/spill.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/spill.ts) | `prepareReferenceOmission` | 23-50 | 完整快照的 `saved` / `unavailable` |
+| [`packages/context/time-context/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/time-context/src/index.ts) | `apply` | 128-221 | 投影注册、pre-step 监听、节流 |
 | 同上 | `renderText` | 93-108 | 三行读数与 `unavailable` 耗时 |
 | 同上 | `requestMessages` | 80-91 | 收集本回合已进入与待发的用户消息 |
-| `packages/context/time-context/src/request-zone.ts` | `deriveBrowserTimeZoneContext` | 48-59 | 唯一、冲突、缺失三态 |
+| [`packages/context/time-context/src/request-zone.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/time-context/src/request-zone.ts) | `deriveBrowserTimeZoneContext` | 48-59 | 唯一、冲突、缺失三态 |
 | 同上 | `renderBrowserTimeZoneContext` | 66-81 | 三态对应的模型指令 |
-| `packages/context/time-context/src/invariant.ts` | `READING` 正则与校验 | 14-20、100-159 | 位置、来源形状、时区文本一致性 |
-| `packages/context/tmux-context/src/index.ts` | `queryTmuxLocation` | 109-157 | 命令构造、tty 比对、失败即 `undefined` |
+| [`packages/context/time-context/src/invariant.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/time-context/src/invariant.ts) | `READING` 正则与校验 | 14-20、100-159 | 位置、来源形状、时区文本一致性 |
+| [`packages/context/tmux-context/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/tmux-context/src/index.ts) | `queryTmuxLocation` | 109-157 | 命令构造、tty 比对、失败即 `undefined` |
 | 同上 | `renderState` / `renderReading` | 164-175 | 稳定块与易变前导分离 |
 | 同上 | `apply` | 215-264 | 投影注册与 pre-step 监听 |
-| `packages/context/agent-instructions/src/index.ts` | `apply` | 84-360 | 生命周期、四个监听器 |
+| [`packages/context/agent-instructions/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/agent-instructions/src/index.ts) | `apply` | 84-360 | 生命周期、四个监听器 |
 | 同上 | `compose` | 108-225 | 基线判定、加载、增量对账 |
 | 同上 | `syncInbox` | 227-252 | 收件箱去重与替换 |
 | 同上 | `projectTouch` / `queueProjection` | 266-313 | 触碰排队与步边界提交 |
-| `packages/context/agent-instructions/src/config.ts` | `Config` / `workspaceBaselineIdentity` | 18-95 | 六个配置项与基线身份 |
-| `packages/context/agent-instructions/src/render.ts` | `renderWorkspaceContext` | 356-361 | 按预算渲染基线 |
-| `packages/context/agent-instructions/src/files.ts` | `findProjectRoot` / `loadBaselineInstructionSet` | 181 / 414 | 项目根发现与基线装载 |
-| `packages/context/file-reference/src/index.ts` | `FILE_REFERENCE_PROMPT` | 17 | 模型可见的固定指引 |
+| [`packages/context/agent-instructions/src/config.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/agent-instructions/src/config.ts) | `Config` / `workspaceBaselineIdentity` | 18-95 | 六个配置项与基线身份 |
+| [`packages/context/agent-instructions/src/render.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/agent-instructions/src/render.ts) | `renderWorkspaceContext` | 356-361 | 按预算渲染基线 |
+| [`packages/context/agent-instructions/src/files.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/agent-instructions/src/files.ts) | `findProjectRoot` / `loadBaselineInstructionSet` | 181 / 414 | 项目根发现与基线装载 |
+| [`packages/context/file-reference/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/file-reference/src/index.ts) | `FILE_REFERENCE_PROMPT` | 17 | 模型可见的固定指引 |
 | 同上 | `FileReferenceService` | 26-43 | 抽象能力与 `list` 契约 |
-| `packages/context/file-reference-local/src/index.ts` | `LocalFileReferenceService` | 44-125 | 段落登记、索引缓存、失效与撤销 |
+| [`packages/context/file-reference-local/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/file-reference-local/src/index.ts) | `LocalFileReferenceService` | 44-125 | 段落登记、索引缓存、失效与撤销 |
 | 同上 | `list` | 113-124 | 按 agent 惰性建索引 |
-| `packages/context/file-reference-local/src/search.ts` | `WorkspaceFileSearch` | 84-114 | 目录遍历与候选排序 |
+| [`packages/context/file-reference-local/src/search.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/file-reference-local/src/search.ts) | `WorkspaceFileSearch` | 84-114 | 目录遍历与候选排序 |

@@ -12,7 +12,7 @@ DSH 的 Skill 系统是**一条"提示级"能力缝(capability seam),而不是�
 
 关键架构事实:
 
-1. **三角色分离**。`@deepseek-ai/dsh-skill` 是 Service Definition(`ctx.skills` 注册表,只做合并、裁决、校验);`dsh-skill-filesystem` / `dsh-skill-badge` 是 Service Provider(决定 skill 从哪来);`dsh-tool-skill` 是 Consumer(渲染会话目录 + 注册 `skill` 加载工具 + 识别 `/name` 手势)。注册表本身不含任何 skill 内容(`packages/skill/skill/README.md:12`)。
+1. **三角色分离**。`@deepseek-ai/dsh-skill` 是 Service Definition(`ctx.skills` 注册表,只做合并、裁决、校验);`dsh-skill-filesystem` / `dsh-skill-badge` 是 Service Provider(决定 skill 从哪来);`dsh-tool-skill` 是 Consumer(渲染会话目录 + 注册 `skill` 加载工具 + 识别 `/name` 手势)。注册表本身不含任何 skill 内容([`packages/skill/skill/README.md:12`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/README.md#L12))。
 2. **发现是 pull 式、无协议的**。与 MCP 的"连接 + `tools/list` 协议发现"完全不同:skill 发现就是 provider 的 `list(options)` 方法返回候选数组,本地 provider 扫目录、解析 YAML frontmatter;没有握手、没有通知协议,变更靠 provider 自调 `invalidate()` 和文件 watcher。
 3. **模型可见性走会话消息,不走 system prompt**。目录是 `agent/pre-step` 瀑布注入的 durable user 消息(source kind `skill-catalog`),随 step 落 `user/message` 会话事件——满足仓库"模型可见 ⟺ 已落日志"的不变式,但完全不经过 `systemPrompt.assemble()` 的 section 体系。
 4. **注册表是 host+per-scope 分层**(与 tools 注册表同构):preset 里挂载的 provider 落在该 preset 的层,agent 读的是全局层 + 自己作用域链的合并视图。
@@ -52,7 +52,7 @@ flowchart TD
 
 ### 1.1 两种物理形态与命名语法
 
-本地 provider 接受且仅接受两种形态(`packages/skill/skill-filesystem/src/index.ts:728-733` 的 `discoverRoot`):
+本地 provider 接受且仅接受两种形态([`packages/skill/skill-filesystem/src/index.ts:728-733`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L728-L733) 的 `discoverRoot`):
 
 ```typescript
 const locator = entry.type === 'directory'
@@ -62,13 +62,13 @@ const locator = entry.type === 'directory'
     : undefined
 ```
 
-- **目录 bundle**:`<name>/SKILL.md` 是入口,同目录可放 `references/`、`templates/`、`scripts/` 等附属资源(如 `.agents/skills/dsh-doc/` 有 5 个 references + 4 个 templates;`.agents/skills/record-browser-gif/scripts/` 带 Python 脚本)。bundle 目录路径会成为该 skill 的 `resourceBase: { kind: 'directory', path }`(`skill-filesystem/src/index.ts:745`),模型加载后被告知"相对路径相对此目录解析、按需读取"。
-- **扁平 Markdown**:`<name>.md` 直接挂在根下,`resourceBase` 退化为根目录。**不支持 `**/SKILL.md` 递归嵌套**(`docs/subsystems/skills.md:85`)。
-- **名称语法**:kebab-case,`SKILL_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/`(`packages/skill/skill/src/index.ts:21`)。frontmatter 里的 `name` 不合语法则整个文件被忽略并告警(`skill-filesystem/src/index.ts:820-823`);**文件/目录名本身不做名称来源**,名称只认 frontmatter。
+- **目录 bundle**:`<name>/SKILL.md` 是入口,同目录可放 `references/`、`templates/`、`scripts/` 等附属资源(如 `.agents/skills/dsh-doc/` 有 5 个 references + 4 个 templates;`.agents/skills/record-browser-gif/scripts/` 带 Python 脚本)。bundle 目录路径会成为该 skill 的 `resourceBase: { kind: 'directory', path }`([`skill-filesystem/src/index.ts:745`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L745)),模型加载后被告知"相对路径相对此目录解析、按需读取"。
+- **扁平 Markdown**:`<name>.md` 直接挂在根下,`resourceBase` 退化为根目录。**不支持 `**/SKILL.md` 递归嵌套**([`docs/subsystems/skills.md:85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/subsystems/skills.md#L85))。
+- **名称语法**:kebab-case,`SKILL_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/`([`packages/skill/skill/src/index.ts:21`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L21))。frontmatter 里的 `name` 不合语法则整个文件被忽略并告警([`skill-filesystem/src/index.ts:820-823`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L820-L823));**文件/目录名本身不做名称来源**,名称只认 frontmatter。
 
 ### 1.2 frontmatter 契约
 
-以仓库真实 skill `.agents/skills/dsh-pre-push-checks/SKILL.md:1-4` 为例:
+以仓库真实 skill [`.agents/skills/dsh-pre-push-checks/SKILL.md:1-4`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/skills/dsh-pre-push-checks/SKILL.md#L1-L4) 为例:
 
 ```markdown
 ---
@@ -80,7 +80,7 @@ description: Use before pushing, force-pushing, marking ready for review, ...
 ...(Markdown 正文,即模型最终看到的指令体)...
 ```
 
-frontmatter 解析(`parseFrontmatter`,`skill-filesystem/src/index.ts:917`)是**首行必须恰为 `---`、逐行找闭合 `---`** 的窄实现,中间段交给 `yaml` 包解析;非对象(数组/标量)直接判无 frontmatter。字段契约(`parseSkillFile`,`skill-filesystem/src/index.ts:797-840`):
+frontmatter 解析(`parseFrontmatter`,[`skill-filesystem/src/index.ts:917`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L917))是**首行必须恰为 `---`、逐行找闭合 `---`** 的窄实现,中间段交给 `yaml` 包解析;非对象(数组/标量)直接判无 frontmatter。字段契约(`parseSkillFile`,[`skill-filesystem/src/index.ts:797-840`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L797-L840)):
 
 | 字段 | 必填 | 处理 |
 |---|---|---|
@@ -93,13 +93,13 @@ frontmatter 解析(`parseFrontmatter`,`skill-filesystem/src/index.ts:917`)是**�
 
 三个值得记录的边界决策:
 
-1. **布尔宽容但失败关闭**:`frontmatterBoolean`(`skill-filesystem/src/index.ts:1018-1037`)接受 YAML 布尔、`1`/`0`、大小写不敏感的 `true/false/yes/no/on/off`(对齐 Claude skills 的实践形式);但非法值会让**整个 skill 从发现中消失**而非默认放行——调用策略出错时默认即授权,会暴露被禁入口(Agent Note `2026-07-28-skill-invocation-policy.md:19`)。
-2. **无 camelCase 别名**:`rejectLegacyInvocationKey`(`skill-filesystem/src/index.ts:1012-1016`)对 `disableModelInvocation`/`modelInvocable`/`userInvocable` 直接抛错,导向 kebab-case 正名。pre-release 仓库不留磁盘兼容别名。
-3. **正文是 frontmatter 之后的全部内容**,`content: parsed.body.trim()`(`skill-filesystem/src/index.ts:838`)。模型看到的是纯 Markdown 指令体,frontmatter 被剥掉。
+1. **布尔宽容但失败关闭**:`frontmatterBoolean`([`skill-filesystem/src/index.ts:1018-1037`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L1018-L1037))接受 YAML 布尔、`1`/`0`、大小写不敏感的 `true/false/yes/no/on/off`(对齐 Claude skills 的实践形式);但非法值会让**整个 skill 从发现中消失**而非默认放行——调用策略出错时默认即授权,会暴露被禁入口(Agent Note [`2026-07-28-skill-invocation-policy.md:19`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-28-skill-invocation-policy.md#L19))。
+2. **无 camelCase 别名**:`rejectLegacyInvocationKey`([`skill-filesystem/src/index.ts:1012-1016`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L1012-L1016))对 `disableModelInvocation`/`modelInvocable`/`userInvocable` 直接抛错,导向 kebab-case 正名。pre-release 仓库不留磁盘兼容别名。
+3. **正文是 frontmatter 之后的全部内容**,`content: parsed.body.trim()`([`skill-filesystem/src/index.ts:838`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L838))。模型看到的是纯 Markdown 指令体,frontmatter 被剥掉。
 
 ### 1.3 发现根与优先级表
 
-`FileSystemSkillProvider.roots()`(`skill-filesystem/src/index.ts:245-265`)按固定 rank 构造根列表:
+`FileSystemSkillProvider.roots()`([`skill-filesystem/src/index.ts:245-265`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L245-L265))按固定 rank 构造根列表:
 
 | Rank | Source | 根 | 备注 |
 |---|---|---|---|
@@ -111,17 +111,17 @@ frontmatter 解析(`parseFrontmatter`,`skill-filesystem/src/index.ts:917`)是**�
 | 500 | `user-agents` | `<agentsHome>/skills` | `$DSH_AGENTS_HOME` 或 `~/.agents` |
 | 600 | `bundled` | `Config.bundledSkillDir` / `$DSH_BUNDLED_SKILL_DIR` | `trustedHost: true`,绕过 `ctx.fs` 直读宿主机 |
 
-项目根取"含 `.git` 的最近祖先",找不到就退回 cwd 本身(`findProjectRoot`,`skill-filesystem/src/index.ts:945-955`)。当 `ctx.fs` 存在时,`.git` 探测走文件系统服务,沙箱或远程工作区不会落回宿主机边界。
+项目根取"含 `.git` 的最近祖先",找不到就退回 cwd 本身(`findProjectRoot`,[`skill-filesystem/src/index.ts:945-955`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L945-L955))。当 `ctx.fs` 存在时,`.git` 探测走文件系统服务,沙箱或远程工作区不会落回宿主机边界。
 
-rank 数字是"层内同名裁决"的权重,**小的赢**:project(100/200)> custom(300)> user(400/500)> bundled(600)。这个方向与 Claude Code 的 project > user 一致。`source` 字段只是提示可见的元数据,本身不参与裁决——源码注释写得很直接:prompt-visible metadata, not precedence by itself(`skill/src/index.ts:39`)。
+rank 数字是"层内同名裁决"的权重,**小的赢**:project(100/200)> custom(300)> user(400/500)> bundled(600)。这个方向与 Claude Code 的 project > user 一致。`source` 字段只是提示可见的元数据,本身不参与裁决——源码注释写得很直接:prompt-visible metadata, not precedence by itself([`skill/src/index.ts:39`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L39))。
 
-读取路径分双轨(`readSkillText`,`skill-filesystem/src/index.ts:846-860`):非 `trustedHost` 根且存在 `ctx.fs` 服务时走 `fs.resolve/stat/readText`(受沙箱策略约束);`bundled` 根或没有 fs 服务时走 Node `realpath + readFile`。`FS_NOT_TEXT`(二进制)等错误只让该文件被忽略,不炸整个发现(`skill-filesystem/src/index.ts:884-892`)。
+读取路径分双轨(`readSkillText`,[`skill-filesystem/src/index.ts:846-860`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L846-L860)):非 `trustedHost` 根且存在 `ctx.fs` 服务时走 `fs.resolve/stat/readText`(受沙箱策略约束);`bundled` 根或没有 fs 服务时走 Node `realpath + readFile`。`FS_NOT_TEXT`(二进制)等错误只让该文件被忽略,不炸整个发现([`skill-filesystem/src/index.ts:884-892`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L884-L892))。
 
 ---
 
 ## 第二节 Provider Registry:注册、合并与裁决
 
-`SkillRegistry`(`packages/skill/skill/src/index.ts:356`)是 Cordis Service,通过声明合并挂到 `ctx.skills`(`index.ts:283-286`),只做四件事:**收 provider、收运行时 skill、合并出目录、按名加载正文**。
+`SkillRegistry`([`packages/skill/skill/src/index.ts:356`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L356))是 Cordis Service,通过声明合并挂到 `ctx.skills`([`index.ts:283-286`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L283-L286)),只做四件事:**收 provider、收运行时 skill、合并出目录、按名加载正文**。
 
 ### 2.1 Provider 契约与注册
 
@@ -136,15 +136,15 @@ export interface SkillProvider {
 }
 ```
 
-- **注册同步、发现异步**:`registerProvider(create)`(`index.ts:390`)要求工厂同步返回 provider 对象;远程初始化、鉴权、扫描全部推到被 await 的 `list()` 里。`runtime` 是保留名,占用即抛(`index.ts:406-408`)。
-- **工厂拿到注册作用域的 `SkillProviderControl`**(`index.ts:394-402`):`signal` 在注册失败或该注册被 dispose 时 abort;`invalidate()` 只在**产出它的那次确切注册仍存活**时清缓存并广播(对比对象 identity,防止同名替换 provider 被旧回调误清)。
-- **注册是 Cordis effect**:经 `this.layers.effect(...)`(`index.ts:411-423`)落入调用上下文的层;fiber 处置(HMR 热替换、preset 卸载)自动注销并失效缓存——符合仓库"registrations are effects"的元规则。
-- **`SkillCandidate.locator` 是不透明句柄**(`index.ts:80-81`):注册表只存它、加载时原样还给胜出 provider 的 `get()`。本地 provider 的 locator 是 `{ path, directory }`(`skill-filesystem/src/index.ts:119-122`);badge provider 的 locator 是打包资源的 `URL`(`skill-badge/src/index.ts:33`)。
-- **`list()` 返回纯数组 = 完整发现的速记**;返回 `{ candidates, complete: false }` 观测则表示"这些候选可用,但本次发现不权威"——可用但不许缓存(`normalizeProviderObservation`,`index.ts:662-674`)。
+- **注册同步、发现异步**:`registerProvider(create)`([`index.ts:390`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L390))要求工厂同步返回 provider 对象;远程初始化、鉴权、扫描全部推到被 await 的 `list()` 里。`runtime` 是保留名,占用即抛([`index.ts:406-408`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L406-L408))。
+- **工厂拿到注册作用域的 `SkillProviderControl`**([`index.ts:394-402`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L394-L402)):`signal` 在注册失败或该注册被 dispose 时 abort;`invalidate()` 只在**产出它的那次确切注册仍存活**时清缓存并广播(对比对象 identity,防止同名替换 provider 被旧回调误清)。
+- **注册是 Cordis effect**:经 `this.layers.effect(...)`([`index.ts:411-423`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L411-L423))落入调用上下文的层;fiber 处置(HMR 热替换、preset 卸载)自动注销并失效缓存——符合仓库"registrations are effects"的元规则。
+- **`SkillCandidate.locator` 是不透明句柄**([`index.ts:80-81`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L80-L81)):注册表只存它、加载时原样还给胜出 provider 的 `get()`。本地 provider 的 locator 是 `{ path, directory }`([`skill-filesystem/src/index.ts:119-122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L119-L122));badge provider 的 locator 是打包资源的 `URL`([`skill-badge/src/index.ts:33`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-badge/src/index.ts#L33))。
+- **`list()` 返回纯数组 = 完整发现的速记**;返回 `{ candidates, complete: false }` 观测则表示"这些候选可用,但本次发现不权威"——可用但不许缓存(`normalizeProviderObservation`,[`index.ts:662-674`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L662-L674))。
 
 ### 2.2 合并裁决:层间遮蔽 + 层内三级排序
 
-读取的合并规则(`collectFresh`,`index.ts:551-565`):
+读取的合并规则(`collectFresh`,[`index.ts:551-565`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L551-L565)):
 
 ```typescript
 // Global first, then existing chain overlays farthest ancestor first and
@@ -157,7 +157,7 @@ for (const layer of layers) {
 }
 ```
 
-层内裁决(`compareIndexedCandidates`,`index.ts:807-811`):
+层内裁决(`compareIndexedCandidates`,[`index.ts:807-811`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L807-L811)):
 
 ```typescript
 return left.candidate.rank - right.candidate.rank        // 1. rank 小者赢(project 100 > bundled 600)
@@ -165,11 +165,11 @@ return left.candidate.rank - right.candidate.rank        // 1. rank 小者赢(pr
   || left.localOrder - right.localOrder                  // 3. provider 内部顺序
 ```
 
-排序后同名首个胜出,其余记 warn 丢弃(`collectLayer`,`index.ts:572-580`)。即:**跨层是无条件遮蔽,层内才讲 rank**——preset 层的同名 skill 永远赢全局层,不管 rank。
+排序后同名首个胜出,其余记 warn 丢弃(`collectLayer`,[`index.ts:572-580`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L572-L580))。即:**跨层是无条件遮蔽,层内才讲 rank**——preset 层的同名 skill 永远赢全局层,不管 rank。
 
 ### 2.3 缓存、修订号与失效
 
-`collect()`(`index.ts:519-549`)是注册表唯一的缓存点,伪代码改写:
+`collect()`([`index.ts:519-549`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L519-L549))是注册表唯一的缓存点,伪代码改写:
 
 ```text
 collect(options):
@@ -184,17 +184,17 @@ collect(options):
     return result
 ```
 
-- **缓存键显式携带作用域链**(`collectCacheKey`,`index.ts:643-645`),scope key 是身份比较的不透明对象,用 WeakMap 发稳定 id(`index.ts:633-641`)。注释说明原因:blank-session 重组合会给既有 scope 换父(换 preset),只有链在键里,下一次读才能看到新 preset(`index.ts:524-526`)。
-- **失效只有三条路**:provider 自调 `invalidate()`、运行时注册/注销、注册表条目变质(见 2.5)。**没有 TTL**——远程源变了只能靠 provider 自己的观测机制(`skill/README.md:138` 已知限制)。每次失效 `revision++`、清空缓存、广播 `skills/change`(`invalidateCache`,`index.ts:621-625`)。
-- **`skills/change` 是无差异通知**(`index.ts:289-296`):不带 diff,监听者自己带 lookup options 重新 `snapshot()`;监听器异常被逐条 containment,不能否决注册表变更(`notifyChange`,`index.ts:648-659`)。值得记录的事实:全仓库**生产代码里没有人监听这个事件**(grep 仅命中测试与 API 目录生成器)——目录消费者 tool-skill 选择在每个 pre-step 重新快照 + digest 比对(见 4.2),事件只留给外部消费者。
+- **缓存键显式携带作用域链**(`collectCacheKey`,[`index.ts:643-645`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L643-L645)),scope key 是身份比较的不透明对象,用 WeakMap 发稳定 id([`index.ts:633-641`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L633-L641))。注释说明原因:blank-session 重组合会给既有 scope 换父(换 preset),只有链在键里,下一次读才能看到新 preset([`index.ts:524-526`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L524-L526))。
+- **失效只有三条路**:provider 自调 `invalidate()`、运行时注册/注销、注册表条目变质(见 2.5)。**没有 TTL**——远程源变了只能靠 provider 自己的观测机制(`skill/README.md:138` 已知限制)。每次失效 `revision++`、清空缓存、广播 `skills/change`(`invalidateCache`,[`index.ts:621-625`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L621-L625))。
+- **`skills/change` 是无差异通知**([`index.ts:289-296`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L289-L296)):不带 diff,监听者自己带 lookup options 重新 `snapshot()`;监听器异常被逐条 containment,不能否决注册表变更(`notifyChange`,[`index.ts:648-659`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L648-L659))。值得记录的事实:全仓库**生产代码里没有人监听这个事件**(grep 仅命中测试与 API 目录生成器)——目录消费者 tool-skill 选择在每个 pre-step 重新快照 + digest 比对(见 4.2),事件只留给外部消费者。
 
 ### 2.4 运行时注册:`ctx.skills.register()`
 
-`register(skill)`(`index.ts:439-460`)接收内存中的完整定义(`SkillRegistration`),补默认 invocation `{ modelInvocable: true, userInvocable: true }` 和 provider 标签 `runtime`,以 **rank 250** 参与层内裁决(`runtimeCandidate`,`index.ts:691-705`)——即运行时条目输给 project(100/200)、赢过 custom/user/bundled(300+)。同层同名 first-wins,后到者收 warn + 空 disposer(`index.ts:443-446`),保证后注册者无法误删胜者。当前仓库中该入口主要由测试与各包编排代码使用;生产 skill 主要来自文件系统 provider。
+`register(skill)`([`index.ts:439-460`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L439-L460))接收内存中的完整定义(`SkillRegistration`),补默认 invocation `{ modelInvocable: true, userInvocable: true }` 和 provider 标签 `runtime`,以 **rank 250** 参与层内裁决(`runtimeCandidate`,[`index.ts:691-705`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L691-L705))——即运行时条目输给 project(100/200)、赢过 custom/user/bundled(300+)。同层同名 first-wins,后到者收 warn + 空 disposer([`index.ts:443-446`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L443-L446)),保证后注册者无法误删胜者。当前仓库中该入口主要由测试与各包编排代码使用;生产 skill 主要来自文件系统 provider。
 
 ### 2.5 加载路径:选择 → 取消重查 → 校验 → 名字复核
 
-`get(name, options)`(`index.ts:500-517`):
+`get(name, options)`([`index.ts:500-517`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L500-L517)):
 
 ```typescript
 if (!isSkillName(name)) return undefined                    // 非法名静默 undefined,不抛
@@ -211,13 +211,13 @@ if (definition.name !== match.candidate.name) {             // 发现与加载�
 }
 ```
 
-两个要点:**定义永不缓存**——每次 `get()` 都让胜出 provider 重读当前正文(`skill/README.md:99`),所以只改正文不动 frontmatter 的编辑对下一次加载立即可见;**加载与取消赛跑**(`waitWithAbort`,`index.ts:819-842`),不配合的 provider 无法挂死调用方。`ctx.skills.get()` 本身是**策略中立的受信加载器**, invocation 策略由消费者在自己的边界执行——这是 Agent Note 明确拒绝"在 get() 里做过滤"的结果(note 第 40 行:get() 无法知道调用方是模型工具、人类命令还是受信编排)。
+两个要点:**定义永不缓存**——每次 `get()` 都让胜出 provider 重读当前正文(`skill/README.md:99`),所以只改正文不动 frontmatter 的编辑对下一次加载立即可见;**加载与取消赛跑**(`waitWithAbort`,[`index.ts:819-842`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L819-L842)),不配合的 provider 无法挂死调用方。`ctx.skills.get()` 本身是**策略中立的受信加载器**, invocation 策略由消费者在自己的边界执行——这是 Agent Note 明确拒绝"在 get() 里做过滤"的结果(note 第 40 行:get() 无法知道调用方是模型工具、人类命令还是受信编排)。
 
 ---
 
 ## 第三节 本地 Provider:监视与失效闭环
 
-`skill-filesystem` 的另一半价值是让"改磁盘"变成"目录失效"。其 `apply()`(`skill-filesystem/src/index.ts:134-147`)做三件事:
+`skill-filesystem` 的另一半价值是让"改磁盘"变成"目录失效"。其 `apply()`([`skill-filesystem/src/index.ts:134-147`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L134-L147))做三件事:
 
 ```typescript
 export function apply(ctx: Context, config: Config = {}): void {
@@ -236,30 +236,30 @@ export function apply(ctx: Context, config: Config = {}): void {
 
 失效输入有两路:
 
-1. **宿主 watcher**(`SkillWatchManager`,`skill-filesystem/src/index.ts:288-601`):对每个根解析监视锚点——根存在用 chokidar 直挂(`depth: 1`、`awaitWriteFinish` 默认稳定阈值 200ms);根不存在则从最近现存祖先逐段 `watchFile` 跟住下一级路径,直到根出现可以挂载(`resolveRootWatchMode`,`index.ts:629-654`)。事件过滤极窄(`isRelevantWatchEvent`,`index.ts:662-679`):只认根的一级子项增删、一级 `.md` 文件、二级 `SKILL.md` 的 add/change/unlink——**bundle 内部的 resources 变化不构成目录变更**。项目级 watcher 有界 LRU(默认 128 个项目根,`watchMaxProjects`),驱逐即失效。watcher 失败不藏候选:本次观测标记 `complete: false`,可读候选照常返回(`list()`,`index.ts:186-202`)。
-2. **第一方变更直通**:`fs/observed` 事件里 actor 是 `write`/`edit` 工具且目标落在某个根的潜在 skill 路径上(`isPotentialSkillPath`,`index.ts:681-688`),同步调 `invalidate()`——模型自己写的 skill 下一步就能用,不等 chokidar 的稳定窗口。
+1. **宿主 watcher**(`SkillWatchManager`,[`skill-filesystem/src/index.ts:288-601`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L288-L601)):对每个根解析监视锚点——根存在用 chokidar 直挂(`depth: 1`、`awaitWriteFinish` 默认稳定阈值 200ms);根不存在则从最近现存祖先逐段 `watchFile` 跟住下一级路径,直到根出现可以挂载(`resolveRootWatchMode`,[`index.ts:629-654`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L629-L654))。事件过滤极窄(`isRelevantWatchEvent`,[`index.ts:662-679`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L662-L679)):只认根的一级子项增删、一级 `.md` 文件、二级 `SKILL.md` 的 add/change/unlink——**bundle 内部的 resources 变化不构成目录变更**。项目级 watcher 有界 LRU(默认 128 个项目根,`watchMaxProjects`),驱逐即失效。watcher 失败不藏候选:本次观测标记 `complete: false`,可读候选照常返回(`list()`,[`index.ts:186-202`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L186-L202))。
+2. **第一方变更直通**:`fs/observed` 事件里 actor 是 `write`/`edit` 工具且目标落在某个根的潜在 skill 路径上(`isPotentialSkillPath`,[`index.ts:681-688`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L681-L688)),同步调 `invalidate()`——模型自己写的 skill 下一步就能用,不等 chokidar 的稳定窗口。
 
-所有失效都经 `control.invalidate()` 回到注册表的统一失效语义(2.3);provider dispose 是平息式的:清 roots/projects、等 opening 中的 watcher、逐个 close(`index.ts:343-355`)。
+所有失效都经 `control.invalidate()` 回到注册表的统一失效语义(2.3);provider dispose 是平息式的:清 roots/projects、等 opening 中的 watcher、逐个 close([`index.ts:343-355`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L343-L355))。
 
 这里有两条降级路径,必须区分开(函数级细节见 [`skills/01-skill-format-and-discovery.md`](./skills/01-skill-format-and-discovery.md))。
 
 第一条是 watcher 启动失败。`list()` 里的 try 只包住 watcher 启动这一段,可读候选照常返回,只是本次观测被标记为 `complete: false`。结果叫**部分视界**。
 
-第二条是目录扫描抛出非"路径不存在"的错误。这时异常会穿出 `list()`,由注册表的 `listLayerCandidates`(`packages/skill/skill/src/index.ts:604-608`)兜住,变成"该 provider 本轮零候选且不完整"。结果叫**整层缺席**。
+第二条是目录扫描抛出非"路径不存在"的错误。这时异常会穿出 `list()`,由注册表的 `listLayerCandidates`([`packages/skill/skill/src/index.ts:604-608`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L604-L608))兜住,变成"该 provider 本轮零候选且不完整"。结果叫**整层缺席**。
 
 下游依赖 skill 目录的判断,应据此区分"扫不全"和"根本没有"。
 
-另一个打包 provider 的最小样本是 `dsh-skill-badge`(`skill-badge/src/index.ts:36-50`):整个 provider 是一个常量候选 + `get()` 里 `readFile` 打包资产,说明**provider 契约小到一个对象两个字面量方法就能实现**——远程 registry 型 provider 也面对同一契约。
+另一个打包 provider 的最小样本是 `dsh-skill-badge`([`skill-badge/src/index.ts:36-50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-badge/src/index.ts#L36-L50)):整个 provider 是一个常量候选 + `get()` 里 `readFile` 打包资产,说明**provider 契约小到一个对象两个字面量方法就能实现**——远程 registry 型 provider 也面对同一契约。
 
 ---
 
 ## 第四节 Catalog 与 Loader:模型如何按需拿到完整指令
 
-Consumer 包 `dsh-tool-skill`(`packages/skill/tool-skill/src/index.ts`,`inject = ['agents', 'tools', 'skills']`)把注册表翻译成三样东西:一个工具、两条 `agent/pre-step` 瀑布监听器。
+Consumer 包 `dsh-tool-skill`([`packages/skill/tool-skill/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/tool-skill/src/index.ts),`inject = ['agents', 'tools', 'skills']`)把注册表翻译成三样东西:一个工具、两条 `agent/pre-step` 瀑布监听器。
 
 ### 4.1 `skill` 加载工具
 
-`defineTool({ name: 'skill', ... })`(`tool-skill/src/index.ts:81-161`)注册进普通工具注册表。描述明确写出用法契约:"Load the full instructions for an available skill. Call this with the exact skill name from the session skill catalog before acting on a task that names or clearly matches that skill."(`index.ts:83`)。执行体(`index.ts:127-156`)四道闸门:
+`defineTool({ name: 'skill', ... })`([`tool-skill/src/index.ts:81-161`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/tool-skill/src/index.ts#L81-L161))注册进普通工具注册表。描述明确写出用法契约:"Load the full instructions for an available skill. Call this with the exact skill name from the session skill catalog before acting on a task that names or clearly matches that skill."([`index.ts:83`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L83))。执行体([`index.ts:127-156`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L127-L156))四道闸门:
 
 ```text
 execute({ name }, exec):
@@ -272,7 +272,7 @@ execute({ name }, exec):
   5. 返回 { name, provider, resourceBase?, content }
 ```
 
-输出经 `output.render` 渲染为单个文本块(`index.ts:125`):`renderSkillContent(value)`。这是 seam 内共享的唯一渲染器(`skill/src/index.ts:170-183`):
+输出经 `output.render` 渲染为单个文本块([`index.ts:125`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L125)):`renderSkillContent(value)`。这是 seam 内共享的唯一渲染器([`skill/src/index.ts:170-183`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L170-L183)):
 
 ```typescript
 export function renderSkillContent(skill: ...): string {
@@ -291,7 +291,7 @@ export function renderSkillContent(skill: ...): string {
 }
 ```
 
-工具结果与 `/name` 注入共用这一段输出,模型在两条路径上看到**同一个 `<skill_content>` 形状**。`resourceBase` 只给"基准目录/URL + 按需解析"的指引,**不枚举、不代取** skill 目录里的文件——resources 是指引而非附件(`tool-skill/README.md:245` 已知限制)。正文无大小上限(同上,`:244`)。
+工具结果与 `/name` 注入共用这一段输出,模型在两条路径上看到**同一个 `<skill_content>` 形状**。`resourceBase` 只给"基准目录/URL + 按需解析"的指引,**不枚举、不代取** skill 目录里的文件——resources 是指引而非附件([`tool-skill/README.md:245`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/tool-skill/README.md#L245) 已知限制)。正文无大小上限(同上,[`:244`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/tool-skill/README.md#L244))。
 
 ### 4.2 会话目录:durable、digest 比对、随可见性同生共死
 
@@ -324,21 +324,21 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 监听器注册 | 目录监听器挂在 `agent/pre-step` 上,注册在手势监听器之后,所以它是内层 | `ctx.on('agent/pre-step', ...)`(`packages/skill/tool-skill/src/index.ts:213`) |
-| 先让内层走完 | 调用 `next()` 拿到默认末端产出的"已认领消息 + 上下文";`reject` 分支直接返回 | `index.ts:217-219` |
-| 判断工具可见性 | 比对的是本插件注册的那个定义对象本身,不是按名字查到的东西 | `ctx.tools.get('skill', agent) === skillTool`(`index.ts:220`) |
-| 取快照 | 以 agent 为 scope key,向注册表要一份该 agent 能看到的合并视图 | `ctx.skills.snapshot()`(`index.ts:221-223`) |
-| 快照不完整就放行 | 观测不完整时原样返回,保留上一次的好视图,不缓存的中间态不上屏 | `index.ts:225` |
-| 过滤 | 只留 `invocation.modelInvocable === true` 的条目 | `filter(isModelInvocable)`(`index.ts:226`) |
-| 投影 | 每条只保留 `name` 和 `description`,丢掉路径、来源、provider 等字段 | `catalogSourceEntries()`(`index.ts:224`、`50-58`) |
-| 截断 | 连续空白(含换行)压成单个空格,超长再截断并补省略号 | `catalogDescription()`(`index.ts:391-394`) |
-| 算指纹 | 逐条序列化后换行拼接再做 sha256;**算在条目上,不算在渲染文本上** | `digestCatalogEntries()`(`index.ts:228`、`328-335`) |
-| 找历史基准 | 从日志最新一条往旧扫,取第一条"可读且仍在 surface 上"的目录当基准 | `catalogHistory()`(`index.ts:229`、`361-378`) |
-| 找本步候选 | 在本步消息列表里找已有的目录消息,供原地替换用 | `catalogMessage()`(`index.ts:230`、`380-389`) |
-| 分支:无变化 | 指纹与历史一致就不重发;若本步消息里混进了旧目录消息,顺手剔掉避免重复 | `index.ts:231-235` |
-| 分支:本步已同款 | 本步候选目录的条目指纹和当前一致,直接放行,不做无意义的替换 | `index.ts:236` |
-| 分支:从未发布且为空 | 没有模型可见的 skill,且历史上从未发布过目录 → 保持沉默 | `index.ts:237-241` |
-| 分支:发布 | 发布过就用整表替换模板,首次发布用首版模板;已有候选则原地替换以保住消息位置 | `renderCatalogUpdate()` / `renderCatalogMessage()`(`index.ts:242-250`、`254-311`) |
+| 监听器注册 | 目录监听器挂在 `agent/pre-step` 上,注册在手势监听器之后,所以它是内层 | `ctx.on('agent/pre-step', ...)`([`packages/skill/tool-skill/src/index.ts:213`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/tool-skill/src/index.ts#L213)) |
+| 先让内层走完 | 调用 `next()` 拿到默认末端产出的"已认领消息 + 上下文";`reject` 分支直接返回 | [`index.ts:217-219`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L217-L219) |
+| 判断工具可见性 | 比对的是本插件注册的那个定义对象本身,不是按名字查到的东西 | `ctx.tools.get('skill', agent) === skillTool`([`index.ts:220`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L220)) |
+| 取快照 | 以 agent 为 scope key,向注册表要一份该 agent 能看到的合并视图 | `ctx.skills.snapshot()`([`index.ts:221-223`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L221-L223)) |
+| 快照不完整就放行 | 观测不完整时原样返回,保留上一次的好视图,不缓存的中间态不上屏 | [`index.ts:225`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L225) |
+| 过滤 | 只留 `invocation.modelInvocable === true` 的条目 | `filter(isModelInvocable)`([`index.ts:226`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L226)) |
+| 投影 | 每条只保留 `name` 和 `description`,丢掉路径、来源、provider 等字段 | `catalogSourceEntries()`([`index.ts:224`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L224)、`50-58`) |
+| 截断 | 连续空白(含换行)压成单个空格,超长再截断并补省略号 | `catalogDescription()`([`index.ts:391-394`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L391-L394)) |
+| 算指纹 | 逐条序列化后换行拼接再做 sha256;**算在条目上,不算在渲染文本上** | `digestCatalogEntries()`([`index.ts:228`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L228)、`328-335`) |
+| 找历史基准 | 从日志最新一条往旧扫,取第一条"可读且仍在 surface 上"的目录当基准 | `catalogHistory()`([`index.ts:229`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L229)、`361-378`) |
+| 找本步候选 | 在本步消息列表里找已有的目录消息,供原地替换用 | `catalogMessage()`([`index.ts:230`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L230)、`380-389`) |
+| 分支:无变化 | 指纹与历史一致就不重发;若本步消息里混进了旧目录消息,顺手剔掉避免重复 | [`index.ts:231-235`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L231-L235) |
+| 分支:本步已同款 | 本步候选目录的条目指纹和当前一致,直接放行,不做无意义的替换 | [`index.ts:236`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L236) |
+| 分支:从未发布且为空 | 没有模型可见的 skill,且历史上从未发布过目录 → 保持沉默 | [`index.ts:237-241`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L237-L241) |
+| 分支:发布 | 发布过就用整表替换模板,首次发布用首版模板;已有候选则原地替换以保住消息位置 | `renderCatalogUpdate()` / `renderCatalogMessage()`([`index.ts:242-250`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L242-L250)、`254-311`) |
 
 <details><summary>原图</summary>
 
@@ -363,12 +363,12 @@ catalog listener(agent, signal):
 
 关键设计:
 
-- **目录是 durable 的会话消息,不是每步重渲染的瞬态文本**。注入的消息是 user 角色、`<system-reminder>` 包裹 `<available_skills>` 列表(`renderCatalogMessage`,`index.ts:254-277`),同时 source 里以结构化 `entries` 记录本次发布的确切内容(`SkillCatalogSource`,`index.ts:34-41`)——**呈现层不许回 parse `<available_skills>` 文本**,展示与非模型消费者都读 source。
-- **digest 算在条目上而不是渲染文本上**(`digestCatalogEntries`,`index.ts:328-335`):`<system-reminder>` 框架文案的改动永远不会触发重发;条目级的变化(增删、描述变、可见性变)才追加一条**整表替换**消息(`renderCatalogUpdate`,`index.ts:279-311`),清空所有 skill 也会追加一条显式空目录,退休旧名字。
-- **目录与 `skill` 工具的可见性严格绑定**(`index.ts:220`):比对的是本插件注册的那个定义对象本身——任何 restriction 或同层同名遮蔽把 `skill` 工具换掉,目录连同调用指引一起消失,不会出现"目录还在但工具没了"的半可用态。已发布过目录的会话则会收到一条空替换目录显式退休。
-- **压缩(compaction)藏掉全部历史目录后**,下一个 complete 快照会重新建立当前目录;空视图且从未发布则保持沉默(`index.ts:236-241` 分支)。
+- **目录是 durable 的会话消息,不是每步重渲染的瞬态文本**。注入的消息是 user 角色、`<system-reminder>` 包裹 `<available_skills>` 列表(`renderCatalogMessage`,[`index.ts:254-277`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L254-L277)),同时 source 里以结构化 `entries` 记录本次发布的确切内容(`SkillCatalogSource`,[`index.ts:34-41`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L34-L41))——**呈现层不许回 parse `<available_skills>` 文本**,展示与非模型消费者都读 source。
+- **digest 算在条目上而不是渲染文本上**(`digestCatalogEntries`,[`index.ts:328-335`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L328-L335)):`<system-reminder>` 框架文案的改动永远不会触发重发;条目级的变化(增删、描述变、可见性变)才追加一条**整表替换**消息(`renderCatalogUpdate`,[`index.ts:279-311`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L279-L311)),清空所有 skill 也会追加一条显式空目录,退休旧名字。
+- **目录与 `skill` 工具的可见性严格绑定**([`index.ts:220`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L220)):比对的是本插件注册的那个定义对象本身——任何 restriction 或同层同名遮蔽把 `skill` 工具换掉,目录连同调用指引一起消失,不会出现"目录还在但工具没了"的半可用态。已发布过目录的会话则会收到一条空替换目录显式退休。
+- **压缩(compaction)藏掉全部历史目录后**,下一个 complete 快照会重新建立当前目录;空视图且从未发布则保持沉默([`index.ts:236-241`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L236-L241) 分支)。
 
-目录文案里有两条行为规范值得引用,因为它们定义了模型的使用方式(`index.ts:266-267`):
+目录文案里有两条行为规范值得引用,因为它们定义了模型的使用方式([`index.ts:266-267`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L266-L267)):
 
 > "This catalog contains summaries only; do not infer or follow a skill's instructions until it has been loaded."
 > "A user may also invoke a skill directly; its `<skill_content>` block then appears in this conversation. Follow it, and do not call the `skill` tool again for that skill."
@@ -377,19 +377,19 @@ catalog listener(agent, signal):
 
 ### 4.3 `/name` 用户显式调用
 
-第一个监听器(`tool-skill/src/index.ts:177-204`)扫描**本步认领的 user 消息**里空白边界的 `/name` token(`SKILL_GESTURE`,`index.ts:409`;`/usr/bin`、`5/8` 这类因边界规则不匹配),对每个名字 `ctx.skills.get()` 加载、查 `isUserInvocable`,通过则把 `renderSkillContent` 输出包成 `source.kind = 'skill-invocation'`、`form: 'instructions'` 的 user 消息**追加到本步所有注入的最后**——背景(工作区规则、运行时策略、目录)在前,模型要执行的材料离它的回答最近。注册顺序保证这个位置确定:手势监听器先注册,瀑布把"已含目录的消息列表"递给它扩展(`index.ts:163-176` 注释)。
+第一个监听器([`tool-skill/src/index.ts:177-204`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/tool-skill/src/index.ts#L177-L204))扫描**本步认领的 user 消息**里空白边界的 `/name` token(`SKILL_GESTURE`,[`index.ts:409`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L409);`/usr/bin`、`5/8` 这类因边界规则不匹配),对每个名字 `ctx.skills.get()` 加载、查 `isUserInvocable`,通过则把 `renderSkillContent` 输出包成 `source.kind = 'skill-invocation'`、`form: 'instructions'` 的 user 消息**追加到本步所有注入的最后**——背景(工作区规则、运行时策略、目录)在前,模型要执行的材料离它的回答最近。注册顺序保证这个位置确定:手势监听器先注册,瀑布把"已含目录的消息列表"递给它扩展([`index.ts:163-176`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L163-L176) 注释)。
 
 三个边界事实:
 
-- **只扫 `source.kind === 'user'` 的消息**——外部文本(工具结果、注入内容)无法伪造手势(`index.ts:421`)。
+- **只扫 `source.kind === 'user'` 的消息**——外部文本(工具结果、注入内容)无法伪造手势([`index.ts:421`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L421))。
 - 查无此名或用户禁用的名字**保持普通散文**,不报错、不注入。
-- 这是 `disable-model-invocation` skill 的**唯一入口**:目录和 `skill` 工具对它们不可见,但用户 `/name` 仍可注入(`index.ts:175-176`;浏览器端 `ui-skill` 的 `/` 补全落的是字面 `/name ` 文本,确定性全部留在宿主这一边界,`packages/client/ui-skill/src/client/index.ts:7-12`)。
+- 这是 `disable-model-invocation` skill 的**唯一入口**:目录和 `skill` 工具对它们不可见,但用户 `/name` 仍可注入([`index.ts:175-176`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L175-L176);浏览器端 `ui-skill` 的 `/` 补全落的是字面 `/name ` 文本,确定性全部留在宿主这一边界,[`packages/client/ui-skill/src/client/index.ts:7-12`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-skill/src/client/index.ts#L7-L12))。
 
 ---
 
 ## 第五节 与系统提示组装的衔接:skill 不走 systemPrompt
 
-主循环每个 step 的入口 `preStep`(`packages/core/agent-loop/src/agent.ts:240-259`)按固定顺序做四件事:
+主循环每个 step 的入口 `preStep`([`packages/core/agent-loop/src/agent.ts:240-259`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L240-L259))按固定顺序做四件事:
 
 ```typescript
 const claimed = this.inbox.claim(target, position.turn)                        // 1. 认领收件箱
@@ -400,7 +400,7 @@ const decision = await this.dispatch.waterfall('agent/pre-step', { messages: cla
   () => Promise.resolve({ kind: 'enter', messages: context === undefined ? claimed : [...claimed, context] }))
 ```
 
-随后在 `step()` 首次尝试里,`decision.messages` 全部落 `user/message` 会话事件(`agent.ts:373-377`):
+随后在 `step()` 首次尝试里,`decision.messages` 全部落 `user/message` 会话事件([`agent.ts:373-377`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L373-L377)):
 
 ```typescript
 if (firstAttempt) {
@@ -428,13 +428,13 @@ if (firstAttempt) {
 
 ## 第六节 作用域行为:agent / preset 分层
 
-`SkillRegistry` 的分层直接复用 `dsh-scope` 的 `ScopedLayers`(`packages/core/scope/src/store.ts:159`):注册时 `scopeOf(ctx)` 决定落哪一层;读时 `[global, ...chainLayers(scope)]` 合并(`chainLayers`,`store.ts:192-199`,最远祖先在前、精确 scope 最后,近层后写赢同名)。skill 系统里这表现为:
+`SkillRegistry` 的分层直接复用 `dsh-scope` 的 `ScopedLayers`([`packages/core/scope/src/store.ts:159`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L159)):注册时 `scopeOf(ctx)` 决定落哪一层;读时 `[global, ...chainLayers(scope)]` 合并(`chainLayers`,[`store.ts:192-199`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L192-L199),最远祖先在前、精确 scope 最后,近层后写赢同名)。skill 系统里这表现为:
 
-1. **注册表服务本体在宿主平面**,preset 不重挂。web-app bundle 明确关闭宿主行的 `skill-filesystem` 与 `tool-skill`,把发现与模型入口交给 preset(`packages/bundle/web-app/cordis.patch.yml:393-406` 注释:"The `skill` REGISTRY stays in the host plane ... each agent reads the merged catalog its scope chain selects")。
-2. **preset 的 standing composition 里挂的 provider 落在该 preset 的层**。`standard` preset 的 `agent.cordis.yml:84-88` 挂载 `skill-filesystem` + `tool-skill` 两行,注释说明:"these rows register into THIS preset's layer ... the merged catalog also carries whatever the deployment registered globally"。同一 provider 名在不同 preset 层可以各注册一次(重名唯一性是**每层**而非进程级,`skill/src/index.ts:333-337`)。
-3. **tool-skill 挂在哪个作用域,目录和工具就只属于哪个作用域的 agent**:监听器注册在 preset 上下文里,只对该 preset 的 agent 触发;`ctx.tools.get('skill', agent)` 的可见性判定也以 agent 为 scope key。同理 `skill` 工具 execute 里 `scope: exec.agent`(`tool-skill/src/index.ts:133`)。
-4. **冷会话(未激活 agent)也能列目录**:`SessionSkillCatalog`(`packages/api/session-controller/src/skill-catalog.ts:36-90`)从 session header 读 cwd 与记录的 preset,活 agent 用其 scoped registry,冷会话用 preset 的 standing scope key(`standingKeyFor`),全部失败退回全局注册表;只回 `isUserInvocable` 的条目,且不加载正文。浏览器 `ui-skill` 经 `skills/list` RPC 拉这份目录做 `/` 补全,按会话缓存、单飞(`client/ui-skill/src/client/index.ts:98-122`)。
-5. **空作用域(无 preset 编排)= 只读全局层**(`SkillViewOptions.scope` 省略即如此,`skill/src/index.ts:116-119`)。
+1. **注册表服务本体在宿主平面**,preset 不重挂。web-app bundle 明确关闭宿主行的 `skill-filesystem` 与 `tool-skill`,把发现与模型入口交给 preset([`packages/bundle/web-app/cordis.patch.yml:393-406`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/web-app/cordis.patch.yml#L393-L406) 注释:"The `skill` REGISTRY stays in the host plane ... each agent reads the merged catalog its scope chain selects")。
+2. **preset 的 standing composition 里挂的 provider 落在该 preset 的层**。`standard` preset 的 `agent.cordis.yml:84-88` 挂载 `skill-filesystem` + `tool-skill` 两行,注释说明:"these rows register into THIS preset's layer ... the merged catalog also carries whatever the deployment registered globally"。同一 provider 名在不同 preset 层可以各注册一次(重名唯一性是**每层**而非进程级,[`skill/src/index.ts:333-337`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L333-L337))。
+3. **tool-skill 挂在哪个作用域,目录和工具就只属于哪个作用域的 agent**:监听器注册在 preset 上下文里,只对该 preset 的 agent 触发;`ctx.tools.get('skill', agent)` 的可见性判定也以 agent 为 scope key。同理 `skill` 工具 execute 里 `scope: exec.agent`([`tool-skill/src/index.ts:133`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/tool-skill/src/index.ts#L133))。
+4. **冷会话(未激活 agent)也能列目录**:`SessionSkillCatalog`([`packages/api/session-controller/src/skill-catalog.ts:36-90`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/skill-catalog.ts#L36-L90))从 session header 读 cwd 与记录的 preset,活 agent 用其 scoped registry,冷会话用 preset 的 standing scope key(`standingKeyFor`),全部失败退回全局注册表;只回 `isUserInvocable` 的条目,且不加载正文。浏览器 `ui-skill` 经 `skills/list` RPC 拉这份目录做 `/` 补全,按会话缓存、单飞([`client/ui-skill/src/client/index.ts:98-122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-skill/src/client/index.ts#L98-L122))。
+5. **空作用域(无 preset 编排)= 只读全局层**(`SkillViewOptions.scope` 省略即如此,[`skill/src/index.ts:116-119`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts#L116-L119))。
 
 ---
 
@@ -442,21 +442,21 @@ if (firstAttempt) {
 
 | 文件 | 职责 |
 |---|---|
-| `packages/skill/skill/src/index.ts` | Service Definition:`SkillRegistry`(registerProvider/register/list/snapshot/get)、分层合并与 rank 裁决、修订号缓存、`renderSkillContent`、invocation 策略类型 |
-| `packages/skill/skill-filesystem/src/index.ts` | 本地 provider:六档根与 rank、frontmatter 解析、双轨读取(ctx.fs / Node)、chokidar watcher 与 `fs/observed` 直通失效 |
-| `packages/skill/skill-badge/src/index.ts` | 最小打包 provider 样本:常量候选 + 打包资产正文(默认禁用) |
-| `packages/skill/tool-skill/src/index.ts` | Consumer:`skill` 加载工具、目录 pre-step 监听器(digest 整表替换)、`/name` 手势监听器 |
-| `packages/core/agent-loop/src/agent.ts` | `preStep` 瀑布与 `step()` 的 `user/message` 落日志:skill 目录/注入进入模型视野的唯一通道 |
-| `packages/core/scope/src/store.ts` | `ScopedLayers`:global + per-scope 层、`chainLayers` 合并序 |
-| `packages/api/session-controller/src/skill-catalog.ts` | 冷会话可读的 `skills/list` Remote(user 视角目录) |
-| `packages/client/ui-skill/src/client/index.ts` | 浏览器 `/` 补全源与 `skill` 工具行视图 |
-| `packages/bundle/base/cordis.patch.yml` | 宿主平面四行 skill 组合(registry / filesystem / badge(禁用)/ tool-skill) |
-| `packages/bundle/web-app/cordis.patch.yml` | web profile 关闭宿主 `skill-filesystem`/`tool-skill`,改由 preset 拥有 |
-| `packages/preset/agent-presets/presets/standard/agent.cordis.yml` | preset 层挂载 `skill-filesystem` + `tool-skill` 的实例 |
-| `.agents/skills/dsh-pre-push-checks/SKILL.md` | 真实目录-bundle skill 样本(frontmatter + 正文) |
+| [`packages/skill/skill/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill/src/index.ts) | Service Definition:`SkillRegistry`(registerProvider/register/list/snapshot/get)、分层合并与 rank 裁决、修订号缓存、`renderSkillContent`、invocation 策略类型 |
+| [`packages/skill/skill-filesystem/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts) | 本地 provider:六档根与 rank、frontmatter 解析、双轨读取(ctx.fs / Node)、chokidar watcher 与 `fs/observed` 直通失效 |
+| [`packages/skill/skill-badge/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-badge/src/index.ts) | 最小打包 provider 样本:常量候选 + 打包资产正文(默认禁用) |
+| [`packages/skill/tool-skill/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/tool-skill/src/index.ts) | Consumer:`skill` 加载工具、目录 pre-step 监听器(digest 整表替换)、`/name` 手势监听器 |
+| [`packages/core/agent-loop/src/agent.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts) | `preStep` 瀑布与 `step()` 的 `user/message` 落日志:skill 目录/注入进入模型视野的唯一通道 |
+| [`packages/core/scope/src/store.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts) | `ScopedLayers`:global + per-scope 层、`chainLayers` 合并序 |
+| [`packages/api/session-controller/src/skill-catalog.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/skill-catalog.ts) | 冷会话可读的 `skills/list` Remote(user 视角目录) |
+| [`packages/client/ui-skill/src/client/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-skill/src/client/index.ts) | 浏览器 `/` 补全源与 `skill` 工具行视图 |
+| [`packages/bundle/base/cordis.patch.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml) | 宿主平面四行 skill 组合(registry / filesystem / badge(禁用)/ tool-skill) |
+| [`packages/bundle/web-app/cordis.patch.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/web-app/cordis.patch.yml) | web profile 关闭宿主 `skill-filesystem`/`tool-skill`,改由 preset 拥有 |
+| [`packages/preset/agent-presets/presets/standard/agent.cordis.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/presets/standard/agent.cordis.yml) | preset 层挂载 `skill-filesystem` + `tool-skill` 的实例 |
+| [`.agents/skills/dsh-pre-push-checks/SKILL.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/skills/dsh-pre-push-checks/SKILL.md) | 真实目录-bundle skill 样本(frontmatter + 正文) |
 | `.agents/skills/dsh-doc/` | 带 `references/` 与 `templates/` 附属资源的多文件 bundle 样本 |
-| `docs/subsystems/skills.md` | 官方子系统参考(类型契约与语义) |
-| `.agents/notes/implemented/feature/2026-07-28-skill-invocation-policy.md` | invocation 双布尔策略的设计裁决与被拒方案 |
+| [`docs/subsystems/skills.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/subsystems/skills.md) | 官方子系统参考(类型契约与语义) |
+| [`.agents/notes/implemented/feature/2026-07-28-skill-invocation-policy.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/.agents/notes/implemented/feature/2026-07-28-skill-invocation-policy.md) | invocation 双布尔策略的设计裁决与被拒方案 |
 
 ---
 

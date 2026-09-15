@@ -1,7 +1,7 @@
 # 03 · 子 Agent 的"世界"如何被组装(函数级走查)
 
-> 源码:`packages/subagent/subagent/src/child-agent.ts`(280 行)、`depth.ts`、`descriptor.ts`
-> 装配点:`packages/subagent/subagent-in-process-driver/src/index.ts:122-132`(一次性)与 `packages/subagent/subagent/src/continuation-activation.ts`(续存,同一批函数)
+> 源码:[`packages/subagent/subagent/src/child-agent.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts)(280 行)、[`depth.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/depth.ts)、[`descriptor.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/descriptor.ts)
+> 装配点:[`packages/subagent/subagent-in-process-driver/src/index.ts:122-132`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts#L122-L132)(一次性)与 [`packages/subagent/subagent/src/continuation-activation.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/continuation-activation.ts)(续存,同一批函数)
 > 对应[第十章第 2.3 节](../10-multi-agent.md);preset 侧的两道硬门见 [07](./07-preset-composition.md)。
 
 ---
@@ -46,18 +46,18 @@ flowchart LR
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 1 量深度 | 子深度等于父深度加一,超过 maxDepth 抛 SubagentDepthError,错误里带尝试深度与上限 | `subagent/subagent/src/child-agent.ts:49-58` |
-| 2 抓策略快照 | 只取父会话的显式 sandbox 覆盖,审批一律钉死 never;必须在第一个 await 之前完成 | `subagent/subagent/src/child-agent.ts:242-247` |
-| 3 策略落日志 | 以 source 为 delegation 写进子会话日志,位置在 fork seed 之后、发布之前 | `subagent/subagent/src/child-agent.ts:258-268` |
-| 4 加入组合 | 把子 Agent 的 scope 父键绑到父 preset 的 standing 组合上 | `preset/agent-presets/src/index.ts:477-486` |
-| 5 委派声明 | 写入"你的权限范围在启动时就固定了"这段运行时上下文,不改变 system prompt 的分段 | `subagent/subagent/src/child-agent.ts:171-175` |
-| 6 persona 遮蔽 | 段名与部署 persona 完全相同,而子的作用域在链上更近,所以近者胜 | `subagent/subagent/src/child-agent.ts:199-218` |
-| 7 工具掩码 | toolFilter 落成 tools.restrict;空过滤器、保留名、未知全局名都会被拒绝 | `core/tools/src/index.ts:1061-1088` |
-| 8 结构化输出 | 把 structured_output 工具注册进子自己的层,因此不会被 toolFilter 裁掉 | `subagent-in-process-driver/src/index.ts:122-132` |
-| 9 描述符 | 只挂一个 pre-step 监听,真正的 append 延迟到子的初始 turn | `subagent/subagent/src/child-agent.ts:199-218` |
-| 10 会话元数据 | 六个持久字段:cwd、agentPreset、parentSession、isSeeded、origin、delegationDepth | `subagent/subagent/src/child-agent.ts:138-156` |
-| 11 读取 preset | agentPreset 读父的 live scope 链而不是会话头,因为父可能在空会话期间换过 preset | `preset/agent-presets/src/index.ts:497-499` |
-| 12 失败回滚 | setup 内任何一步抛错都落到创建事务的回滚上,子 Agent 不会被发布 | `agent-loop/src/index.ts:826` |
+| 1 量深度 | 子深度等于父深度加一,超过 maxDepth 抛 SubagentDepthError,错误里带尝试深度与上限 | [`subagent/subagent/src/child-agent.ts:49-58`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L49-L58) |
+| 2 抓策略快照 | 只取父会话的显式 sandbox 覆盖,审批一律钉死 never;必须在第一个 await 之前完成 | [`subagent/subagent/src/child-agent.ts:242-247`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L242-L247) |
+| 3 策略落日志 | 以 source 为 delegation 写进子会话日志,位置在 fork seed 之后、发布之前 | [`subagent/subagent/src/child-agent.ts:258-268`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L258-L268) |
+| 4 加入组合 | 把子 Agent 的 scope 父键绑到父 preset 的 standing 组合上 | [`preset/agent-presets/src/index.ts:477-486`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L477-L486) |
+| 5 委派声明 | 写入"你的权限范围在启动时就固定了"这段运行时上下文,不改变 system prompt 的分段 | [`subagent/subagent/src/child-agent.ts:171-175`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L171-L175) |
+| 6 persona 遮蔽 | 段名与部署 persona 完全相同,而子的作用域在链上更近,所以近者胜 | [`subagent/subagent/src/child-agent.ts:199-218`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L199-L218) |
+| 7 工具掩码 | toolFilter 落成 tools.restrict;空过滤器、保留名、未知全局名都会被拒绝 | [`core/tools/src/index.ts:1061-1088`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1061-L1088) |
+| 8 结构化输出 | 把 structured_output 工具注册进子自己的层,因此不会被 toolFilter 裁掉 | [`subagent-in-process-driver/src/index.ts:122-132`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts#L122-L132) |
+| 9 描述符 | 只挂一个 pre-step 监听,真正的 append 延迟到子的初始 turn | [`subagent/subagent/src/child-agent.ts:199-218`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L199-L218) |
+| 10 会话元数据 | 六个持久字段:cwd、agentPreset、parentSession、isSeeded、origin、delegationDepth | [`subagent/subagent/src/child-agent.ts:138-156`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L138-L156) |
+| 11 读取 preset | agentPreset 读父的 live scope 链而不是会话头,因为父可能在空会话期间换过 preset | [`preset/agent-presets/src/index.ts:497-499`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L497-L499) |
+| 12 失败回滚 | setup 内任何一步抛错都落到创建事务的回滚上,子 Agent 不会被发布 | [`agent-loop/src/index.ts:826`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L826) |
 
 <details><summary>原图</summary>
 
@@ -116,7 +116,7 @@ const handle = await parent.ctx.agents.create({
 | `applyChildComposition` | `setup` 内 | 需要 `childCtx`(scoped context)与父 Agent 两个参数;见第四节 |
 | `attachDescriptorAppend` | `setup` 内 | 只挂一个 `agent/pre-step` 监听,真正的 append 延迟到初始 turn |
 
-`setup` 的契约(它**只组合、不驱动**)在 `AgentSetup` 的 JSDoc 里:`packages/core/agent/src/index.ts:100-118`——"everything registered through `agentCtx` … exists before `session/created`, `agent/created`, `agent/session-start`, and the first prompt assembly";以及 *Setup composes, it never drives*。
+`setup` 的契约(它**只组合、不驱动**)在 `AgentSetup` 的 JSDoc 里:[`packages/core/agent/src/index.ts:100-118`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L100-L118)——"everything registered through `agentCtx` … exists before `session/created`, `agent/created`, `agent/session-start`, and the first prompt assembly";以及 *Setup composes, it never drives*。
 
 ---
 
@@ -147,13 +147,13 @@ export function resolveChildDepth(parent: Agent, maxDepth: number | undefined): 
 }
 ```
 
-`maxDepth` 是**绝对值**而不是"还能再往下几层"。超限抛 `SubagentDepthError`(`child-agent.ts:32-37`),它携带 `attemptedDepth` 与 `maxDepth` 两个字段,便于工具层写成人类可读的诊断。`maxDepth` 的默认值来自工具配置 `tool-subagent` 的 `maxDepth`(默认 `3`,`tool-subagent/src/index.ts:129`)。
+`maxDepth` 是**绝对值**而不是"还能再往下几层"。超限抛 `SubagentDepthError`([`child-agent.ts:32-37`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L32-L37)),它携带 `attemptedDepth` 与 `maxDepth` 两个字段,便于工具层写成人类可读的诊断。`maxDepth` 的默认值来自工具配置 `tool-subagent` 的 `maxDepth`(默认 `3`,[`tool-subagent/src/index.ts:129`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L129))。
 
 深度在三个地方冗余保存,互为校验:
 
 1. **会话头的 `delegationDepth`** —— 耐久真源,作为单调下界(上文的 `Math.max`);
 2. **`AgentOptions.subagentDepth`** —— 运行期值,只能**加深**;
-3. **子会话 meta 的 `delegationDepth`** —— 由 `childSessionMeta` 写入(`child-agent.ts:153-154`,注释 *Durable: the recursion budget must survive persistence and resume*)。
+3. **子会话 meta 的 `delegationDepth`** —— 由 `childSessionMeta` 写入([`child-agent.ts:153-154`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L153-L154),注释 *Durable: the recursion budget must survive persistence and resume*)。
 
 ---
 
@@ -197,7 +197,7 @@ export function childSessionMeta(
 
 > *The preset is read from the parent's LIVE scope chain rather than from its header, because a parent that switched preset while blank runs on the newer composition and its header still names the older one. Recording it is what makes a child's history reconstructable: without it a cold read of the child resolves the deployment default and rebuilds turns under a tool set the child never had.*
 
-即:**父 agent 可能在空会话期间换过 preset**,此时它的 header 仍写着旧 id,但实际 scope 已经挂在新的 standing 组上。`composedPreset` 读的正是 scope 链(`packages/preset/agent-presets/src/index.ts:497-499`):
+即:**父 agent 可能在空会话期间换过 preset**,此时它的 header 仍写着旧 id,但实际 scope 已经挂在新的 standing 组上。`composedPreset` 读的正是 scope 链([`packages/preset/agent-presets/src/index.ts:497-499`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L497-L499)):
 
 ```typescript
 composedPreset(agentCtx: Context): string | undefined {
@@ -205,7 +205,7 @@ composedPreset(agentCtx: Context): string | undefined {
 }
 ```
 
-`origin: 'subagent'` 只用于 `listChildren` 的候选过滤(`list-children.ts:90-91` 判 `header.parentSession === parentSessionId && header.origin === 'subagent'`);模式(label、能否续存)的真源是描述符——注释在 `:150-151` 明确写了这条分工。
+`origin: 'subagent'` 只用于 `listChildren` 的候选过滤([`list-children.ts:90-91`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/list-children.ts#L90-L91) 判 `header.parentSession === parentSessionId && header.origin === 'subagent'`);模式(label、能否续存)的真源是描述符——注释在 [`:150-151`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/list-children.ts#L150-L151) 明确写了这条分工。
 
 ---
 
@@ -237,13 +237,13 @@ export function applyChildComposition(
 
 ### 4.1 用 `ctx.get` 而不是 `ctx.agentPresets`
 
-`childCtx.get('agentPresets')?.` 是**可选**读取(documented `ctx.get` pattern,`child-agent.ts:23-28` 的注释):没有 preset roster 的部署里,模型可见的行本来就坐在 host 平面,子 agent 通过工具注册表的 global layer 已经看得到,所以**没有 join 也不是错误**。
+`childCtx.get('agentPresets')?.` 是**可选**读取(documented `ctx.get` pattern,[`child-agent.ts:23-28`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L23-L28) 的注释):没有 preset roster 的部署里,模型可见的行本来就坐在 host 平面,子 agent 通过工具注册表的 global layer 已经看得到,所以**没有 join 也不是错误**。
 
-这行代码有一个容易被忽略的性质:**`composeFrom` 是同步的**(`agent-presets/src/index.ts:477-486` 没有 `async`)。这正是 driver 能在同步 `setup` 里调它的前提——preset 的 JSDoc 写明了这一点(*Synchronous, and with no composition failure mode of its own*,`index.ts:463-467`)。
+这行代码有一个容易被忽略的性质:**`composeFrom` 是同步的**([`agent-presets/src/index.ts:477-486`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L477-L486) 没有 `async`)。这正是 driver 能在同步 `setup` 里调它的前提——preset 的 JSDoc 写明了这一点(*Synchronous, and with no composition failure mode of its own*,[`index.ts:463-467`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L463-L467))。
 
 ### 4.2 join 必须在子自己的注册之前
 
-函数 JSDoc(`:177-198`)把理由写成了显式设计:
+函数 JSDoc([`:177-198`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L177-L198))把理由写成了显式设计:
 
 > *The join comes first and the child's own registrations second, which is the order the layering already implies — the nearest scope wins a name, and a per-child restriction intersects with everything its chain admits — but stating it here keeps the two steps from being read as independent.*
 
@@ -268,7 +268,7 @@ export const SUBAGENT_DELEGATION_CONTEXT
 
 ### 4.5 `toolFilter` 落成 `tools.restrict()`
 
-`restrict()` 的拒绝面非常严格(`packages/core/tools/src/index.ts:1061-1088`):
+`restrict()` 的拒绝面非常严格([`packages/core/tools/src/index.ts:1061-1088`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1061-L1088)):
 
 | 拒绝条件 | 错误文案要点 |
 |---|---|
@@ -308,11 +308,11 @@ export function standingMountFor(agentCtx: Context): JoinedPresetMount | undefin
 }
 ```
 
-`bindScopeParent` 是 dsh-scope 里**唯一的重连能力**(`packages/core/scope/src/index.ts:72`),而持有它的是 preset roster 私有 `bindings` WeakMap(`index.ts:415-421`)。**父 agent 的 scope 键在子 agent 的链上根本不出现**——它是兄弟关系,不是父子关系。
+`bindScopeParent` 是 dsh-scope 里**唯一的重连能力**([`packages/core/scope/src/index.ts:72`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/index.ts#L72)),而持有它的是 preset roster 私有 `bindings` WeakMap([`index.ts:415-421`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L415-L421))。**父 agent 的 scope 键在子 agent 的链上根本不出现**——它是兄弟关系,不是父子关系。
 
 ### 5.2 后果一:工具面来自"preset 层 + 自己的层"
 
-工具可见面在 `view()` 里一次遍历算完(`packages/core/tools/src/index.ts:1142-1173`):
+工具可见面在 `view()` 里一次遍历算完([`packages/core/tools/src/index.ts:1142-1173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1142-L1173)):
 
 ```typescript
 // packages/core/tools/src/index.ts:1148-1166(节选)
@@ -335,11 +335,11 @@ for (const [name, definition] of inherited) {
 
 1. **父子差异 = 子自己的 `toolFilter` + 两侧 preset 的差异**。子 agent 的工具面来自"preset standing 层 + 自己的层",**不是"父 agent 层"**。
 2. **链上限制求交**:preset 层若 `restrict` 掉某工具,该 preset 下所有 agent(含其子)都看不到。
-3. **不可见与拒绝执行是同一条**:被裁掉的工具既不在提示里,也不在派发表里(`subagent/src/types.ts:185-192` 的 `toolFilter` 契约 + `tools/index.ts:1194-1196`)。
+3. **不可见与拒绝执行是同一条**:被裁掉的工具既不在提示里,也不在派发表里([`subagent/src/types.ts:185-192`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts#L185-L192) 的 `toolFilter` 契约 + `tools/index.ts:1194-1196`)。
 
 ### 5.3 后果二:MCP 工具不继承
 
-ACP 路径对每台服务器做 `agentCtx.plugin(McpClient, config)`(`packages/acp/acp/src/mcp.ts:26-33`),工具落在**该 agent 自己的 scope 层**;命名空间预订也按作用域隔离(`packages/mcp/mcp-client/src/index.ts:45,155-159`)。
+ACP 路径对每台服务器做 `agentCtx.plugin(McpClient, config)`([`packages/acp/acp/src/mcp.ts:26-33`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L26-L33)),工具落在**该 agent 自己的 scope 层**;命名空间预订也按作用域隔离(`packages/mcp/mcp-client/src/index.ts:45,155-159`)。
 
 结合 5.2:**agent 私有的 MCP 工具不会被它的子 agent 继承**。要让一批 agent 共享 MCP,正确位置是 host composition 或 preset 组合。"父 agent 装了 MCP,子 agent 就该看得见"这个直觉在这里是错的。
 
@@ -349,8 +349,8 @@ ACP 路径对每台服务器做 `agentCtx.plugin(McpClient, config)`(`packages/a
 
 ### 5.5 后果四:事件方向只向上
 
-一句话:事件只能沿作用域链往上走——子 Agent 看不见祖先层上的监听器,而父级的组合能看见它下面每一个 Agent。机制是 `scopeTarget` 只允许事件沿链向上,排在 dispatch key 之下的监听器会被直接排除(`packages/core/scope/src/index.ts:158-180`)。
-所以一份 preset standing composition **能观察它下面的每个 agent**,反之不行。委派生命周期事件正是靠这个性质分发的:carrier 由**委派父**决定,故父级监听器只看到自己的委派(`subagent/src/lifecycle.ts:86-90,134-163`;`subagent/src/index.ts:151-170` 的事件注释)。
+一句话:事件只能沿作用域链往上走——子 Agent 看不见祖先层上的监听器,而父级的组合能看见它下面每一个 Agent。机制是 `scopeTarget` 只允许事件沿链向上,排在 dispatch key 之下的监听器会被直接排除([`packages/core/scope/src/index.ts:158-180`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/index.ts#L158-L180))。
+所以一份 preset standing composition **能观察它下面的每个 agent**,反之不行。委派生命周期事件正是靠这个性质分发的:carrier 由**委派父**决定,故父级监听器只看到自己的委派(`subagent/src/lifecycle.ts:86-90,134-163`;[`subagent/src/index.ts:151-170`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/index.ts#L151-L170) 的事件注释)。
 
 ![流程图：03-child-agent-composition](../assets/diagrams/multi-agent__03-child-agent-composition-308.svg)
 
@@ -408,16 +408,16 @@ export function appendDelegatedPolicyOverrides(
 落日志的三个时序性质(`:249-257` 的 JSDoc):
 
 - 位置在**任何 fork seed 之后** → 新鲜策略压过 seed 里的旧状态;
-- 位置在**发布之前** → 属于"发布前未存后缀",由 `appendUnstoredSuffix` 冲进写句柄(`agent-loop/src/index.ts:749-757`);
+- 位置在**发布之前** → 属于"发布前未存后缀",由 `appendUnstoredSuffix` 冲进写句柄([`agent-loop/src/index.ts:749-757`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L749-L757));
 - **子之后的切换仍然胜过这些事件** → 这些是初始值,不是锁。
 
-**这就是模型可见文案"your permission scope was fixed when you were started"的实现依据**:子会话单凭自己的日志就能重建有效策略,不需要父会话在场。注意 `ctx.get('sandboxPolicy')` / `ctx.get('approval')` 都是**可选**读取(`child-agent.ts:17-22` 的 type-only import 注释说明了这个刻意的 opportunistic 用法)。
+**这就是模型可见文案"your permission scope was fixed when you were started"的实现依据**:子会话单凭自己的日志就能重建有效策略,不需要父会话在场。注意 `ctx.get('sandboxPolicy')` / `ctx.get('approval')` 都是**可选**读取([`child-agent.ts:17-22`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L17-L22) 的 type-only import 注释说明了这个刻意的 opportunistic 用法)。
 
 ---
 
 ## 第七节 descriptor:子会话自述的"我是什么"
 
-描述符版本固定为 3(`descriptor.ts:48`),两种形状:
+描述符版本固定为 3([`descriptor.ts:48`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/descriptor.ts#L48)),两种形状:
 
 ```typescript
 // packages/subagent/subagent/src/descriptor.ts:61-86(节选)
@@ -441,11 +441,11 @@ export interface ContinuableSubagentDescriptorData extends SubagentDescriptorBas
 两个刻意的**不存**:
 
 - **不存 `subagentDepth`**——深度以持久 header 为单调下界(第二节);
-- **不存 `outputSchema`**——schema 只属于某一次 activation(`descriptor.ts:8-19`)。
+- **不存 `outputSchema`**——schema 只属于某一次 activation([`descriptor.ts:8-19`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/descriptor.ts#L8-L19))。
 
-续存分支之所以要存 `agentProvider` / `agentModel` / `agentReasoningEffort` / `persona` / `toolFilter`,是因为冷恢复时**不再派发任何 provider**(`continuation.ts:400-402` 的 JSDoc:*The descriptor supplies every reconstruction input; no subagent provider is dispatched*),这些值必须从日志里读回来。详见 [04](./04-continuation-and-control.md)。
+续存分支之所以要存 `agentProvider` / `agentModel` / `agentReasoningEffort` / `persona` / `toolFilter`,是因为冷恢复时**不再派发任何 provider**([`continuation.ts:400-402`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/continuation.ts#L400-L402) 的 JSDoc:*The descriptor supplies every reconstruction input; no subagent provider is dispatched*),这些值必须从日志里读回来。详见 [04](./04-continuation-and-control.md)。
 
-读取侧是 `foldSubagentDescriptor`(`descriptor.ts:317`),版本不匹配时返回 `undefined`——即"这个子会话不可续存"。
+读取侧是 `foldSubagentDescriptor`([`descriptor.ts:317`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/descriptor.ts#L317)),版本不匹配时返回 `undefined`——即"这个子会话不可续存"。
 
 ---
 
@@ -453,26 +453,26 @@ export interface ContinuableSubagentDescriptorData extends SubagentDescriptorBas
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `SubagentDepthError` | `packages/subagent/subagent/src/child-agent.ts:32-37` | 携带 `attemptedDepth` / `maxDepth` |
-| `resolveChildDepth` | `child-agent.ts:49-58` | 父深度 +1;可选绝对上限;安全整数校验 |
-| `delegationDepthOf` | `depth.ts:28-36` | `Math.max(header, options)` 单调下界 |
-| `assertSubagentMaxDepth` | `depth.ts`(导出) | 校验 `maxDepth` 本身可表示 |
-| `parentAgentOptionsForDelegation` | `child-agent.ts:68-85` | 最新请求头拥有 provider/model/effort;创建选项只留 maxTokens |
-| `resolveChildAgentOptions` | `child-agent.ts:98-119` | 合并父路由 + 请求覆盖 + 盖上 `subagentDepth`;换路由且未指 effort 时清掉 effort |
-| `childSessionMeta` | `child-agent.ts:138-156` | 六个持久字段;`agentPreset` 读 **live scope 链** |
-| `ChildComposition` | `child-agent.ts:159-164` | `{persona?, toolFilter?}` |
-| `SUBAGENT_DELEGATION_CONTEXT` | `child-agent.ts:171-175` | 固定委派作用域声明(文案逐字固定) |
-| `applyChildComposition` | `child-agent.ts:199-218` | join → 声明 → persona → restrict,顺序有语义 |
-| `DelegatedPolicyOverrides` | `child-agent.ts:221-230` | `sandboxMode` + `approvalPolicy: 'never' \| undefined` |
-| `captureDelegatedPolicyOverrides` | `child-agent.ts:242-247` | 只取父的**显式**覆盖;审批钉死 |
-| `appendDelegatedPolicyOverrides` | `child-agent.ts:258-268` | 以 `source:'delegation'` 落子日志 |
-| setup 闭包 | `subagent-in-process-driver/src/index.ts:122-132` | 四步装配的实际调用点 |
+| `SubagentDepthError` | [`packages/subagent/subagent/src/child-agent.ts:32-37`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L32-L37) | 携带 `attemptedDepth` / `maxDepth` |
+| `resolveChildDepth` | [`child-agent.ts:49-58`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L49-L58) | 父深度 +1;可选绝对上限;安全整数校验 |
+| `delegationDepthOf` | [`depth.ts:28-36`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/depth.ts#L28-L36) | `Math.max(header, options)` 单调下界 |
+| `assertSubagentMaxDepth` | [`depth.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/depth.ts)(导出) | 校验 `maxDepth` 本身可表示 |
+| `parentAgentOptionsForDelegation` | [`child-agent.ts:68-85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L68-L85) | 最新请求头拥有 provider/model/effort;创建选项只留 maxTokens |
+| `resolveChildAgentOptions` | [`child-agent.ts:98-119`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L98-L119) | 合并父路由 + 请求覆盖 + 盖上 `subagentDepth`;换路由且未指 effort 时清掉 effort |
+| `childSessionMeta` | [`child-agent.ts:138-156`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L138-L156) | 六个持久字段;`agentPreset` 读 **live scope 链** |
+| `ChildComposition` | [`child-agent.ts:159-164`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L159-L164) | `{persona?, toolFilter?}` |
+| `SUBAGENT_DELEGATION_CONTEXT` | [`child-agent.ts:171-175`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L171-L175) | 固定委派作用域声明(文案逐字固定) |
+| `applyChildComposition` | [`child-agent.ts:199-218`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L199-L218) | join → 声明 → persona → restrict,顺序有语义 |
+| `DelegatedPolicyOverrides` | [`child-agent.ts:221-230`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L221-L230) | `sandboxMode` + `approvalPolicy: 'never' \| undefined` |
+| `captureDelegatedPolicyOverrides` | [`child-agent.ts:242-247`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L242-L247) | 只取父的**显式**覆盖;审批钉死 |
+| `appendDelegatedPolicyOverrides` | [`child-agent.ts:258-268`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L258-L268) | 以 `source:'delegation'` 落子日志 |
+| setup 闭包 | [`subagent-in-process-driver/src/index.ts:122-132`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent-in-process-driver/src/index.ts#L122-L132) | 四步装配的实际调用点 |
 | `attachStructuredRuntime` | `driver/src/structured.ts:49-141` | 子自己层里的 `structured_output` 工具 + 守卫 |
-| `SUBAGENT_DESCRIPTOR_VERSION` | `subagent/src/descriptor.ts:48` | = 3 |
-| `ContinuableSubagentDescriptorData` | `descriptor.ts:72-85` | 冷恢复所需的全部重建输入 |
-| `foldSubagentDescriptor` | `descriptor.ts:317` | 版本不匹配返回 `undefined` |
-| `composeFrom` / `composedPreset` | `packages/preset/agent-presets/src/index.ts:477-486` / `497-499` | 同步 join;按 scope 读 preset |
-| `standingMountFor` | `packages/preset/agent-presets/src/mount.ts:243-251` | 用 scope 父键找 standing 组合 |
-| `bindScopeParent` / `scopeParentOf` / `scopeOf` | `packages/core/scope/src/index.ts:72` / `89` / `154` | 唯一的重连能力与两个读取 |
-| `ScopedLayers.peek` / `chainLayers` / `merge` | `packages/core/scope/src/store.ts:180` / `192` / `208` | 本层 vs 带继承,刻意分开 |
-| `ToolRegistry.view` / `restrict` | `packages/core/tools/src/index.ts:1142-1173` / `1061-1088` | 继承面过滤 + own layer 例外;严格拒绝面 |
+| `SUBAGENT_DESCRIPTOR_VERSION` | [`subagent/src/descriptor.ts:48`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/descriptor.ts#L48) | = 3 |
+| `ContinuableSubagentDescriptorData` | [`descriptor.ts:72-85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/descriptor.ts#L72-L85) | 冷恢复所需的全部重建输入 |
+| `foldSubagentDescriptor` | [`descriptor.ts:317`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/descriptor.ts#L317) | 版本不匹配返回 `undefined` |
+| `composeFrom` / `composedPreset` | [`packages/preset/agent-presets/src/index.ts:477-486`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L477-L486) / `497-499` | 同步 join;按 scope 读 preset |
+| `standingMountFor` | [`packages/preset/agent-presets/src/mount.ts:243-251`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/mount.ts#L243-L251) | 用 scope 父键找 standing 组合 |
+| `bindScopeParent` / `scopeParentOf` / `scopeOf` | [`packages/core/scope/src/index.ts:72`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/index.ts#L72) / `89` / `154` | 唯一的重连能力与两个读取 |
+| `ScopedLayers.peek` / `chainLayers` / `merge` | [`packages/core/scope/src/store.ts:180`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L180) / `192` / `208` | 本层 vs 带继承,刻意分开 |
+| `ToolRegistry.view` / `restrict` | [`packages/core/tools/src/index.ts:1142-1173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1142-L1173) / `1061-1088` | 继承面过滤 + own layer 例外;严格拒绝面 |

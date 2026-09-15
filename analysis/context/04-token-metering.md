@@ -32,17 +32,17 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 逐块定价 | 文本与推理按字数、工具调用按名字与参数、工具结果递归 | `estimateContent()`(`packages/llm/token-meter/src/estimate.ts:37-61`) |
-| 单条定价 | 系统角色走专用入口,其余按内容加 role 框架开销 | `estimateMessage()`(`estimate.ts:86-89`) |
-| 工具 schema 定价 | 请求信封里只有 tools 需要单独计价 | `estimateToolsTokens()`(`estimate.ts:97-100`) |
-| 增量折叠 | 每条可见面事件算出有符号差值,先计划后提交 | `planSurfaceTokens()` / `commitSurfaceTokens()`(`surface-fold.ts:112-133`、`141-147`) |
-| 重放 | 每会话一份状态,从已消费偏移追上日志尾 | `_sync()` / `_foldEvent()`(`index.ts:218-239`、`246-316`) |
-| 锚点建立 | 折叠 `assistant/message` 时记下落盘前的可见面与本次输出价 | `index.ts:279-308` |
-| 路由定价 | 按当前路由的图片计价替换附件块的启发式价 | `priceSurface()`(`route-pricing.ts:32-76`) |
-| 测量 | 算 baseline、有符号差值与总量,返回深冻结快照 | `measure()`(`index.ts:145-190`) |
-| 占用投影 | 采样 prompt 侧用量,叠加其后的可见面净变化 | `contextPressureProjectionDefinition`(`usage-projection.ts:173-218`) |
-| 公布 | wire 视图暴露容量、采样压力与下一次预计占用 | `usage-projection.ts:208-217` |
-| 落日志 | 路由或容量变化时写一条 `request/context` | `buildRequest()`(`packages/core/agent-loop/src/agent.ts:584-598`) |
+| 逐块定价 | 文本与推理按字数、工具调用按名字与参数、工具结果递归 | `estimateContent()`([`packages/llm/token-meter/src/estimate.ts:37-61`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/estimate.ts#L37-L61)) |
+| 单条定价 | 系统角色走专用入口,其余按内容加 role 框架开销 | `estimateMessage()`([`estimate.ts:86-89`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/estimate.ts#L86-L89)) |
+| 工具 schema 定价 | 请求信封里只有 tools 需要单独计价 | `estimateToolsTokens()`([`estimate.ts:97-100`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/estimate.ts#L97-L100)) |
+| 增量折叠 | 每条可见面事件算出有符号差值,先计划后提交 | `planSurfaceTokens()` / `commitSurfaceTokens()`([`surface-fold.ts:112-133`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/surface-fold.ts#L112-L133)、`141-147`) |
+| 重放 | 每会话一份状态,从已消费偏移追上日志尾 | `_sync()` / `_foldEvent()`([`index.ts:218-239`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/index.ts#L218-L239)、`246-316`) |
+| 锚点建立 | 折叠 `assistant/message` 时记下落盘前的可见面与本次输出价 | [`index.ts:279-308`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/index.ts#L279-L308) |
+| 路由定价 | 按当前路由的图片计价替换附件块的启发式价 | `priceSurface()`([`route-pricing.ts:32-76`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/route-pricing.ts#L32-L76)) |
+| 测量 | 算 baseline、有符号差值与总量,返回深冻结快照 | `measure()`([`index.ts:145-190`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/index.ts#L145-L190)) |
+| 占用投影 | 采样 prompt 侧用量,叠加其后的可见面净变化 | `contextPressureProjectionDefinition`([`usage-projection.ts:173-218`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/usage-projection.ts#L173-L218)) |
+| 公布 | wire 视图暴露容量、采样压力与下一次预计占用 | [`usage-projection.ts:208-217`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/usage-projection.ts#L208-L217) |
+| 落日志 | 路由或容量变化时写一条 `request/context` | `buildRequest()`([`packages/core/agent-loop/src/agent.ts:584-598`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L584-L598)) |
 
 <details><summary>锚点选择与总量计算</summary>
 
@@ -70,7 +70,7 @@ flowchart TD
 
 ## 一、固定启发式:三个常量与它们的依据
 
-计量器是**无配置**服务:构造时 `validateConfigKeys()` 逐个键检查配置对象,任何键都抛 `unknown key … (no settings are supported)`(`index.ts:86-91`)。理由是计量结果要被压缩策略、UI 与跨会话引用三方共用,若它可以被部署配置成不同的数,三方对"同一份日志花了多少"就会得出不同答案。
+计量器是**无配置**服务:构造时 `validateConfigKeys()` 逐个键检查配置对象,任何键都抛 `unknown key … (no settings are supported)`([`index.ts:86-91`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/index.ts#L86-L91))。理由是计量结果要被压缩策略、UI 与跨会话引用三方共用,若它可以被部署配置成不同的数,三方对"同一份日志花了多少"就会得出不同答案。
 
 启发式集中在三个常量上:
 
@@ -119,9 +119,9 @@ export const ROLE_OVERHEAD = 4
     }
 ```
 
-四条读法:文本与推理块同价;工具调用按名字加参数的字符数;工具结果递归并再加一层块开销;未知块退化为"`BLOCK_OVERHEAD` 加整个 JSON 串的字符价"(`estimate.ts:28-30`)。图片引用走最后这条默认分支,因为它的真实价格由路由决定。
+四条读法:文本与推理块同价;工具调用按名字加参数的字符数;工具结果递归并再加一层块开销;未知块退化为"`BLOCK_OVERHEAD` 加整个 JSON 串的字符价"([`estimate.ts:28-30`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/estimate.ts#L28-L30))。图片引用走最后这条默认分支,因为它的真实价格由路由决定。
 
-系统提示有独立入口 `estimateSystemMessage()`(`estimate.ts:71-78`),差别在于**不加逐块开销**:它按块累计字符数(文本取 `text.length`,其他类型取 `JSON.stringify` 长度),除密度后只加一次 `ROLE_OVERHEAD`,空 content 返回 0 对应"这次没有系统提示"。依据是适配器把提示当**纯字符串**序列化——系统角色消息或请求的 system 字段,而不是带类型的 content 块数组,所以没有逐块 JSON 框架可算。
+系统提示有独立入口 `estimateSystemMessage()`([`estimate.ts:71-78`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/estimate.ts#L71-L78)),差别在于**不加逐块开销**:它按块累计字符数(文本取 `text.length`,其他类型取 `JSON.stringify` 长度),除密度后只加一次 `ROLE_OVERHEAD`,空 content 返回 0 对应"这次没有系统提示"。依据是适配器把提示当**纯字符串**序列化——系统角色消息或请求的 system 字段,而不是带类型的 content 块数组,所以没有逐块 JSON 框架可算。
 
 ---
 
@@ -155,7 +155,7 @@ export function commitSurfaceTokens<Node>(nodes: Node[], plan: SurfaceTokenPlan<
 }
 ```
 
-提交是一句 `push` 或一句 `splice`,自身没有任何分支能失败。分工的理由写在模块头(`surface-fold.ts:7-11`):**所有可能失败的步骤都在只读阶段跑完,提交不可失败**。于是不存在"半个事件被应用"的可见面,同一条坏事件在每次重试时都以相同方式失败。
+提交是一句 `push` 或一句 `splice`,自身没有任何分支能失败。分工的理由写在模块头([`surface-fold.ts:7-11`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/surface-fold.ts#L7-L11)):**所有可能失败的步骤都在只读阶段跑完,提交不可失败**。于是不存在"半个事件被应用"的可见面,同一条坏事件在每次重试时都以相同方式失败。
 
 增量的符号语义:
 
@@ -165,9 +165,9 @@ export function commitSurfaceTokens<Node>(nodes: Node[], plan: SurfaceTokenPlan<
 | 用一条摘要替换整段区间 | `新价 − 被替换区间价`(通常为负) |
 | 定位不到区间 | 抛错——已提交日志在追加时就被 surface 校验过,定位不到说明日志损坏 |
 
-两个价并存不是冗余。`measure()` 返回的每个节点同时带 `tokens`(按当前路由计价)与 `heuristicTokens`(与路由无关的固定价,`types.ts:38-53`):触发判定、尾部保留、区间选择读前者;影子价协议(下称 shadow price,指"被替换区间的价格由紧邻其前的一条计量事件声明")读后者,以保证 O(1) 投影与自己的追加口径一致。
+两个价并存不是冗余。`measure()` 返回的每个节点同时带 `tokens`(按当前路由计价)与 `heuristicTokens`(与路由无关的固定价,[`types.ts:38-53`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/types.ts#L38-L53)):触发判定、尾部保留、区间选择读前者;影子价协议(下称 shadow price,指"被替换区间的价格由紧邻其前的一条计量事件声明")读后者,以保证 O(1) 投影与自己的追加口径一致。
 
-路由定价里有一处硬校验(`route-pricing.ts:47-52`):`pricing.priceImages(images)` 返回的价格条数与图片出现次数不等就抛错,而不是尽量对齐——错位会把价格贴到别的节点上,静默地把每个节点都算错。
+路由定价里有一处硬校验([`route-pricing.ts:47-52`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/route-pricing.ts#L47-L52)):`pricing.priceImages(images)` 返回的价格条数与图片出现次数不等就抛错,而不是尽量对齐——错位会把价格贴到别的节点上,静默地把每个节点都算错。
 
 ---
 
@@ -196,7 +196,7 @@ interface ReplayState {
 }
 ```
 
-`_sync()` 把状态从已消费偏移推到当前日志尾(`index.ts:218-239`),`_foldEvent()` 处理单条事件。锚点在折叠 `assistant/message` 时建立:
+`_sync()` 把状态从已消费偏移推到当前日志尾([`index.ts:218-239`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/index.ts#L218-L239)),`_foldEvent()` 处理单条事件。锚点在折叠 `assistant/message` 时建立:
 
 ```typescript
 // packages/llm/token-meter/src/index.ts:287-299
@@ -215,13 +215,13 @@ interface ReplayState {
         }
 ```
 
-关键在 `nodes: [...state.surface]`:记的是**该消息落盘之前**的可见面快照。provider 报的 prompt 用量对应那一份内容,不是加上这次输出之后的内容。而 `anchorSurfaceTokens` 里又含了 `assistantTokens`(`index.ts:161-162`),因为 provider 的 `usage` 同时包含输入与输出。
+关键在 `nodes: [...state.surface]`:记的是**该消息落盘之前**的可见面快照。provider 报的 prompt 用量对应那一份内容,不是加上这次输出之后的内容。而 `anchorSurfaceTokens` 里又含了 `assistantTokens`([`index.ts:161-162`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/index.ts#L161-L162)),因为 provider 的 `usage` 同时包含输入与输出。
 
-用量求和的口径是四个不相交桶相加,且**不重复计推理输出**:`usageTokens()`(`index.ts:69-75`)就是 `inputTokens + cacheReadTokens + cacheWriteTokens + outputTokens`,推理 token 已经包含在 `outputTokens` 里,不再单独累加。
+用量求和的口径是四个不相交桶相加,且**不重复计推理输出**:`usageTokens()`([`index.ts:69-75`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/index.ts#L69-L75))就是 `inputTokens + cacheReadTokens + cacheWriteTokens + outputTokens`,推理 token 已经包含在 `outputTokens` 里,不再单独累加。
 
-**什么时候信 provider**:报过用量,且报出来的总量**不低于**同一路由下的完整启发式价(`index.ts:164-169`)。第二条是防"有符号差值不再保守"——若 provider 报的数比启发式还小,说明启发式对这份内容高估了,在它之上做加减会系统性把真实压力算低。退回启发式锚点后,后续增量与锚点用的是同一把尺子。
+**什么时候信 provider**:报过用量,且报出来的总量**不低于**同一路由下的完整启发式价([`index.ts:164-169`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/index.ts#L164-L169))。第二条是防"有符号差值不再保守"——若 provider 报的数比启发式还小,说明启发式对这份内容高估了,在它之上做加减会系统性把真实压力算低。退回启发式锚点后,后续增量与锚点用的是同一把尺子。
 
-同一条路由的判定用 `optionalHeaderEquals()`,因为它要能表达"两边都没有 header"这种情况(`index.ts:77-84`)。header 不匹配意味着换了路由,锚点与当前面不可比,此时要么退化为纯启发式总量,要么在完全空的状态下给出 `kind: 'none'`。
+同一条路由的判定用 `optionalHeaderEquals()`,因为它要能表达"两边都没有 header"这种情况([`index.ts:77-84`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/index.ts#L77-L84))。header 不匹配意味着换了路由,锚点与当前面不可比,此时要么退化为纯启发式总量,要么在完全空的状态下给出 `kind: 'none'`。
 
 ---
 
@@ -252,7 +252,7 @@ const pressureFrom = (usage: TokenUsage): number =>
   },
 ```
 
-三个对外字段的语义(完整契约在 `projection.ts:30-48`):
+三个对外字段的语义(完整契约在 [`projection.ts:30-48`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/projection.ts#L30-L48)):
 
 | 字段 | 含义 | 何时缺失 |
 |---|---|---|
@@ -262,7 +262,7 @@ const pressureFrom = (usage: TokenUsage): number =>
 
 `projectedTokens` 回答的是"下一次",不是"上一次"。这个区别在压缩之后立刻显现:压缩把一段区间换成摘要,`pressureTokens` 因为没人报用量而纹丝不动,而 `projectedTokens` 会立刻下降。
 
-两个字段的**采样时机**是错开的,这也是 `projection.ts` 强调"不是一次原子请求观测"的原因:
+两个字段的**采样时机**是错开的,这也是 [`projection.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/projection.ts) 强调"不是一次原子请求观测"的原因:
 
 ```typescript
 // packages/llm/token-meter/src/usage-projection.ts:192-201
@@ -302,11 +302,11 @@ const pressureFrom = (usage: TokenUsage): number =>
 
 三种边界被显式处理:
 
-1. **没有待用声明的替换 ⇒ 零增量**。折叠的是协议引入之前记录的历史会话,有界状态无法重建被替换区间的价,于是选择"退化为漂移"而不是让重放失败(`surface-projection.ts:84-88`)。
-2. **声明存在但区间对不上 ⇒ 抛错**。相邻事件互相矛盾只可能是活着的生产者违约,不能静默漂移(`surface-projection.ts:89-94`)。
+1. **没有待用声明的替换 ⇒ 零增量**。折叠的是协议引入之前记录的历史会话,有界状态无法重建被替换区间的价,于是选择"退化为漂移"而不是让重放失败([`surface-projection.ts:84-88`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/surface-projection.ts#L84-L88))。
+2. **声明存在但区间对不上 ⇒ 抛错**。相邻事件互相矛盾只可能是活着的生产者违约,不能静默漂移([`surface-projection.ts:89-94`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/surface-projection.ts#L89-L94))。
 3. **待用声明会被任何非计量事件作废**。协议规定计量事件与替换必须同步相邻,所以只要下一个事件不是它,声明就过期。
 
-还有一份给 UI 拆解构成的折叠 `contextBreakdown`(`breakdown-projection.ts:48-81`),按 system / tools / messages 三类给出启发式构成。它与 `contextPressure` 的口径**刻意不同**:前者全是启发式,后者锚在 provider 上,所以两者的数字不会相等,`projection.ts:50-58` 明确要求它们只能作为"构成近似"呈现,不能相加当成总量。
+还有一份给 UI 拆解构成的折叠 `contextBreakdown`([`breakdown-projection.ts:48-81`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/breakdown-projection.ts#L48-L81)),按 system / tools / messages 三类给出启发式构成。它与 `contextPressure` 的口径**刻意不同**:前者全是启发式,后者锚在 provider 上,所以两者的数字不会相等,[`projection.ts:50-58`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/projection.ts#L50-L58) 明确要求它们只能作为"构成近似"呈现,不能相加当成总量。
 
 ---
 
@@ -342,9 +342,9 @@ export interface LlmModelContext {
 
 | 消费者 | 位置 | 用法 |
 |---|---|---|
-| 压力阈值折算 | `packages/compaction/compaction-basic/src/config.ts:144-147` | `thresholdTokens = floor(contextWindow × thresholdRatio)`,`retainTokens` 同理 |
-| 上下文占用公布 | `packages/llm/token-meter/src/usage-projection.ts:181-191` | 从 `request/context` 记下容量,与 `projectedTokens` 一起供 UI 算占用率 |
-| 跨会话引用预算 | `packages/context/session-reference/src/index.ts:373-375` | 单个引用的字节预算按容量派生,带 64 KiB 下限 |
+| 压力阈值折算 | [`packages/compaction/compaction-basic/src/config.ts:144-147`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/config.ts#L144-L147) | `thresholdTokens = floor(contextWindow × thresholdRatio)`,`retainTokens` 同理 |
+| 上下文占用公布 | [`packages/llm/token-meter/src/usage-projection.ts:181-191`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/usage-projection.ts#L181-L191) | 从 `request/context` 记下容量,与 `projectedTokens` 一起供 UI 算占用率 |
+| 跨会话引用预算 | [`packages/context/session-reference/src/index.ts:373-375`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L373-L375) | 单个引用的字节预算按容量派生,带 64 KiB 下限 |
 
 跨会话引用这一处最能说明"预算是派生量"而不是拍脑袋常数:
 
@@ -402,7 +402,7 @@ UI 侧同时消费两个投影,分工写在注释里——**整体长度用 prov
     : ROWS.map(row => ({ key: row.key, color: row.color, width: percent * breakdown[row.key] / breakdownTotal }))
 ```
 
-容量缺失时组件整体不渲染(`ContextMeter.tsx:87`),而不是显示一个没有分母的百分比。
+容量缺失时组件整体不渲染([`ContextMeter.tsx:87`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-conversation/src/client/skeleton/ContextMeter.tsx#L87)),而不是显示一个没有分母的百分比。
 
 ---
 
@@ -410,13 +410,13 @@ UI 侧同时消费两个投影,分工写在注释里——**整体长度用 prov
 
 | 文件 | 符号 | 行 | 本模块用途 |
 |---|---|---|---|
-| `packages/llm/token-meter/src/estimate.ts` | 三个常量 | 12-19 | 固定启发式的全部可调参数 |
+| [`packages/llm/token-meter/src/estimate.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/estimate.ts) | 三个常量 | 12-19 | 固定启发式的全部可调参数 |
 | 同上 | `estimateStructuralBlock` | 28-30 | 未知块与图片引用的结构价 |
 | 同上 | `estimateContent` | 37-61 | 逐块递归定价 |
 | 同上 | `estimateSystemMessage` | 71-78 | 系统提示专用口径 |
 | 同上 | `estimateMessage` | 86-89 | 单条消息定价 |
 | 同上 | `estimateToolsTokens` | 97-100 | 工具 schema 定价 |
-| `packages/llm/token-meter/src/index.ts` | `MeasurementAnchor` / `ReplayState` | 51-67 | 锚点与重放状态 |
+| [`packages/llm/token-meter/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/index.ts) | `MeasurementAnchor` / `ReplayState` | 51-67 | 锚点与重放状态 |
 | 同上 | `usageTokens` | 69-75 | 四个不相交桶求和 |
 | 同上 | `optionalHeaderEquals` | 77-84 | 可缺省信封的比较 |
 | 同上 | `validateConfigKeys` | 86-91 | 无配置校验 |
@@ -424,20 +424,20 @@ UI 侧同时消费两个投影,分工写在注释里——**整体长度用 prov
 | 同上 | `measure` | 145-190 | 锚点、增量、总量 |
 | 同上 | `_sync` | 218-239 | 追平日志尾 |
 | 同上 | `_foldEvent` | 246-316 | 单事件折叠、步边界配对校验、锚点建立 |
-| `packages/llm/token-meter/src/surface-fold.ts` | `MeterSurfaceNode` | 26-39 | 带附件出现位置的定价节点 |
+| [`packages/llm/token-meter/src/surface-fold.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/surface-fold.ts) | `MeterSurfaceNode` | 26-39 | 带附件出现位置的定价节点 |
 | 同上 | `SurfaceTokenPlan` | 42-51 | 只读计划对象 |
 | 同上 | `planSurfaceTokens` | 112-133 | 计划与有符号增量 |
 | 同上 | `commitSurfaceTokens` | 141-147 | 不可失败的原地提交 |
-| `packages/llm/token-meter/src/surface-projection.ts` | `ShadowPriceClaim` | 29-36 | 待用影子价声明 |
+| [`packages/llm/token-meter/src/surface-projection.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/surface-projection.ts) | `ShadowPriceClaim` | 29-36 | 待用影子价声明 |
 | 同上 | `foldSurfaceProjection` | 64-96 | O(1) 可见面总量折叠 |
-| `packages/llm/token-meter/src/usage-projection.ts` | `pressureFrom` / `usageOf` | 78-86 | prompt 侧采样 |
+| [`packages/llm/token-meter/src/usage-projection.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/usage-projection.ts) | `pressureFrom` / `usageOf` | 78-86 | prompt 侧采样 |
 | 同上 | `tokenUsageProjectionDefinition` | 117-150 | 累计用量投影 |
 | 同上 | `contextPressureProjectionDefinition` | 173-218 | 占用率状态与 wire 视图 |
-| `packages/llm/token-meter/src/route-pricing.ts` | `priceSurface` | 32-76 | 按路由替换附件块价格 |
-| `packages/llm/token-meter/src/breakdown-projection.ts` | `contextBreakdownProjectionDefinition` | 48-81 | system / tools / messages 构成 |
-| `packages/llm/token-meter/src/projection.ts` | 三个对外契约 | 13-77 | 用量、占用、构成 |
-| `packages/llm/token-meter/src/types.ts` | `TokenMeasurement` / `TokenSurfaceNode` | 22-54 | 测量结果与双价节点 |
-| `packages/llm/llm/src/types.ts` | `LlmModelContext` | 314-318 | 容量契约 |
-| `packages/llm/llm/src/index.ts` | `resolveModelInfo` 校验 | 767-773 | 正整数校验与 `INVALID_MODEL_CONTEXT` |
-| `packages/core/agent-loop/src/agent.ts` | `buildRequest` | 553-618 | `request/header` 与 `request/context` 落盘 |
-| `packages/client/ui-conversation/src/client/skeleton/ContextMeter.tsx` | `ContextMeter` | 55-104 | 占用率与构成分段的呈现分工 |
+| [`packages/llm/token-meter/src/route-pricing.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/route-pricing.ts) | `priceSurface` | 32-76 | 按路由替换附件块价格 |
+| [`packages/llm/token-meter/src/breakdown-projection.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/breakdown-projection.ts) | `contextBreakdownProjectionDefinition` | 48-81 | system / tools / messages 构成 |
+| [`packages/llm/token-meter/src/projection.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/projection.ts) | 三个对外契约 | 13-77 | 用量、占用、构成 |
+| [`packages/llm/token-meter/src/types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/token-meter/src/types.ts) | `TokenMeasurement` / `TokenSurfaceNode` | 22-54 | 测量结果与双价节点 |
+| [`packages/llm/llm/src/types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/types.ts) | `LlmModelContext` | 314-318 | 容量契约 |
+| [`packages/llm/llm/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/index.ts) | `resolveModelInfo` 校验 | 767-773 | 正整数校验与 `INVALID_MODEL_CONTEXT` |
+| [`packages/core/agent-loop/src/agent.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts) | `buildRequest` | 553-618 | `request/header` 与 `request/context` 落盘 |
+| [`packages/client/ui-conversation/src/client/skeleton/ContextMeter.tsx`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-conversation/src/client/skeleton/ContextMeter.tsx) | `ContextMeter` | 55-104 | 占用率与构成分段的呈现分工 |

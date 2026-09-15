@@ -24,17 +24,17 @@ packages/e2b/
 
 | 包 | ctx key | 职责边界 |
 |---|---|---|
-| `dsh-e2b` | `ctx.e2b` | 只负责"一个远端 Linux 沙箱句柄";它不注册模型上下文(`e2b/e2b/README.md:115`) |
-| `dsh-fs-e2b` / `dsh-subprocess-e2b` | `ctx.fs` / `ctx.subprocess` | 读写/编辑/列举都在远端,"宿主机文件从不被触碰"(`fs-e2b/README.md:12`);命令与交互终端都在远端,宿主环境与凭据被排除 |
+| `dsh-e2b` | `ctx.e2b` | 只负责"一个远端 Linux 沙箱句柄";它不注册模型上下文([`e2b/e2b/README.md:115`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/README.md#L115)) |
+| `dsh-fs-e2b` / `dsh-subprocess-e2b` | `ctx.fs` / `ctx.subprocess` | 读写/编辑/列举都在远端,"宿主机文件从不被触碰"([`fs-e2b/README.md:12`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/fs-e2b/README.md#L12));命令与交互终端都在远端,宿主环境与凭据被排除 |
 
-装配顺序是硬约束:**owner 先加载、provider 后加载,拆卸顺序相反**——"每个 adapter 都在 await 同一个句柄"(`e2b/e2b/README.md:94`)。共享点是这一行:
+装配顺序是硬约束:**owner 先加载、provider 后加载,拆卸顺序相反**——"每个 adapter 都在 await 同一个句柄"([`e2b/e2b/README.md:94`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/README.md#L94))。共享点是这一行:
 
 ```typescript
 // packages/e2b/e2b/src/index.ts:105
 this.runtimeRoot = posix.join(this.cwd, '.dsh-e2b')
 ```
 
-两个 adapter 都从 `ctx.e2b.runtimeRoot` 下开状态目录:`processes/<uuid>`(`subprocess-e2b/src/index.ts:173`)与 `terminals/<uuid>`(`:195`)。
+两个 adapter 都从 `ctx.e2b.runtimeRoot` 下开状态目录:`processes/<uuid>`([`subprocess-e2b/src/index.ts:173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/index.ts#L173))与 `terminals/<uuid>`([`:195`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/index.ts#L195))。
 
 ---
 
@@ -95,7 +95,7 @@ export class E2BFileSystem extends FileSystem {
   static inject = ['e2b']
 ```
 
-对比本地实现:`SandboxedFileSystem` 明确覆写并返回部署默认模式(`fs-sandbox/src/index.ts:64-67`)。基类默认返回 `undefined`:
+对比本地实现:`SandboxedFileSystem` 明确覆写并返回部署默认模式([`fs-sandbox/src/index.ts:64-67`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/fs-sandbox/src/index.ts#L64-L67))。基类默认返回 `undefined`:
 
 ```typescript
 // packages/fs/fs/src/index.ts:103-105
@@ -116,7 +116,7 @@ if (defaultMode !== undefined && this.policy === undefined) {
 }
 ```
 
-于是 E2B 组合下 `write`/`edit` 的 schema 里**没有** `sandbox_permissions` 字段(`tool-fs/src/write.ts:78`、`edit.ts:92` 的条件展开都走 `{}` 分支);模型若硬塞这个字段,组合守卫会拒绝:
+于是 E2B 组合下 `write`/`edit` 的 schema 里**没有** `sandbox_permissions` 字段([`tool-fs/src/write.ts:78`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/write.ts#L78)、[`edit.ts:92`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/edit.ts#L92) 的条件展开都走 `{}` 分支);模型若硬塞这个字段,组合守卫会拒绝:
 
 ```typescript
 // packages/fs/tool-fs/src/sandbox.ts:93-95
@@ -168,8 +168,8 @@ constructor(ctx: Context, config: Config) {
 
 | 决策 | 实现 | 理由 |
 |---|---|---|
-| 构造期即连 | `this.ready = this.open()` | 加载即可用;文件与命令特性"沙箱起来后就绪"(`e2b/e2b/README.md:63`) |
-| 失败保持观察但不拒绝加载 | `void this.ready.catch(() => {})` | "部署可能在任何 adapter 使用它之前就加载 owner"(`index.ts:107-108`) |
+| 构造期即连 | `this.ready = this.open()` | 加载即可用;文件与命令特性"沙箱起来后就绪"([`e2b/e2b/README.md:63`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/README.md#L63)) |
+| 失败保持观察但不拒绝加载 | `void this.ready.catch(() => {})` | "部署可能在任何 adapter 使用它之前就加载 owner"([`index.ts:107-108`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/src/index.ts#L107-L108)) |
 | 拆卸先置 `disposed` | 在 `await this.ready` **之前** | 让"拆卸竞态就绪"可被 `getSandbox` 检测到 |
 | `SandboxNotFoundError` 视为已静止 | 只吞这一种 | 沙箱可能已被超时删除 |
 
@@ -184,7 +184,7 @@ private validate(): void {
 }
 ```
 
-三条都在**启动期**抛错,不是第一次远端操作时。默认 `cwd: /home/user/workspace`、`timeoutMs: 300_000`(`index.ts:78-82`)。API key **绝不进入沙箱**——它是宿主 SDK 连接的凭据(`Config.apiKey` JSDoc,`:46`)。
+三条都在**启动期**抛错,不是第一次远端操作时。默认 `cwd: /home/user/workspace`、`timeoutMs: 300_000`([`index.ts:78-82`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/src/index.ts#L78-L82))。API key **绝不进入沙箱**——它是宿主 SDK 连接的凭据(`Config.apiKey` JSDoc,[`:46`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/src/index.ts#L46))。
 
 ### 3.3 `open()`:建目录、验类型、chmod、一次性回滚
 
@@ -216,13 +216,13 @@ private async open(): Promise<Sandbox> {
 | 步骤 | 校验 | 行号 |
 |---|---|---|
 | `Sandbox.create` | `secure: true` + `lifecycle: { onTimeout: 'kill' }`——过期**一定删除** | `:160-166` |
-| 代理决策 | 对 **SDK 真正会调用的 URL** 判定;`e2bApiUrl()` 按 `E2B_API_URL` → 调试替代 → 域名默认推导 | `:159`;`api-url.ts:21-26` |
+| 代理决策 | 对 **SDK 真正会调用的 URL** 判定;`e2bApiUrl()` 按 `E2B_API_URL` → 调试替代 → 域名默认推导 | `:159`;[`api-url.ts:21-26`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/src/api-url.ts#L21-L26) |
 | 两目录 | `makeDir`,已存在不报错 | `:168-169` |
 | 类型断言 | 必须是**真目录且不是符号链接**(`symlinkTarget !== undefined` 即拒) | `:170-173` |
 | 权限 | `chmod 700`,路径经 `quoteE2BShellArg` 转义 | `:174-177` |
 | 失败回滚 | **只做一次** `kill`,吞掉回滚失败并保留原始错误 | `:179-187` |
 
-回滚只做一次是**有意记录**的取舍:`TODO(e2b-setup-rollback)` 说明"除非真实的双重失败活得比配置的沙箱超时还久,否则重试状态保持延后"(`:183-185`;`e2b/e2b/README.md:141-143`)。两个辅助函数解释了 SDK 的两层不可绕开:
+回滚只做一次是**有意记录**的取舍:`TODO(e2b-setup-rollback)` 说明"除非真实的双重失败活得比配置的沙箱超时还久,否则重试状态保持延后"(`:183-185`;[`e2b/e2b/README.md:141-143`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/README.md#L141-L143))。两个辅助函数解释了 SDK 的两层不可绕开:
 
 ```typescript
 // packages/e2b/e2b/src/index.ts:29-31,38-42
@@ -234,7 +234,7 @@ export function e2bControlEnvs(overrides: Readonly<Record<string, string>> = {})
 }
 ```
 
-前者应对"SDK 无法避免的 `/bin/bash -l -c` 层"(`:24-28`);后者"隔离 E2B 硬编码的登录 shell",给每个内部控制命令一个**全新的随机 HOME**,使 `quoteE2BShellArg` 之外的 profile 影响无从下手。
+前者应对"SDK 无法避免的 `/bin/bash -l -c` 层"([`:24-28`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/README.md#L24-L28));后者"隔离 E2B 硬编码的登录 shell",给每个内部控制命令一个**全新的随机 HOME**,使 `quoteE2BShellArg` 之外的 profile 影响无从下手。
 
 ### 3.4 `getSandbox()`:二次检查 disposed
 
@@ -277,7 +277,7 @@ stateDiagram-v2
 
 ### 4.1 远端包装器:同步接口,异步启动
 
-`ctx.subprocess.spawn` 同步返回句柄,而远端命令必须经 SDK 异步启动。桥的做法是立即返回 `E2BSubprocessHandle`,由远端包装器**异步发布**自己的身份、退出码与状态文件(`commandText`,`subprocess-e2b/src/process.ts:93-120`):
+`ctx.subprocess.spawn` 同步返回句柄,而远端命令必须经 SDK 异步启动。桥的做法是立即返回 `E2BSubprocessHandle`,由远端包装器**异步发布**自己的身份、退出码与状态文件(`commandText`,[`subprocess-e2b/src/process.ts:93-120`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/process.ts#L93-L120)):
 
 ```bash
 set +e
@@ -324,7 +324,7 @@ const OUTPUT_ENCODER_SOURCE = [
 ].join('\n')
 ```
 
-编码器是一个经 `-e` 传入的 node 单行程序(`process.ts:94`):逐块 base64、按行分帧、stdin 结束后写出**保留完成帧**,并**尊重背压**(`drain` 等待)。接收侧是 `E2BBase64Decoder`:
+编码器是一个经 `-e` 传入的 node 单行程序([`process.ts:94`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/process.ts#L94)):逐块 base64、按行分帧、stdin 结束后写出**保留完成帧**,并**尊重背压**(`drain` 等待)。接收侧是 `E2BBase64Decoder`:
 
 ```typescript
 // packages/e2b/subprocess-e2b/src/output.ts:8-9
@@ -334,12 +334,12 @@ export const E2B_OUTPUT_COMPLETE_FRAME = '!dsh-e2b-output-complete!'
 
 | 检查 | 行为 | 行号 |
 |---|---|---|
-| 按 `\n` 切帧,跨回调累积 `pending` | `push(text)` | `output.ts:21-46` |
-| 帧 == 完成帧 | 置 `complete`;重复出现 → 抛 duplicate completion | `:30-33` |
-| 完成之后又来数据 | 抛 continued-after-completion | `:35` |
-| 帧不匹配 `^[A-Za-z0-9+/]+={0,2}$` | 抛 invalid base64 | `:36-38` |
-| base64 往返不一致 | 同样的错误 | `:40-42` |
-| `finish(requireComplete)` | 有残留 → truncated;未见完成帧 → incomplete;`false` 时丢弃残留(被请求终止的场景) | `:52-61` |
+| 按 `\n` 切帧,跨回调累积 `pending` | `push(text)` | [`output.ts:21-46`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/output.ts#L21-L46) |
+| 帧 == 完成帧 | 置 `complete`;重复出现 → 抛 duplicate completion | [`:30-33`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/output.ts#L30-L33) |
+| 完成之后又来数据 | 抛 continued-after-completion | [`:35`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/output.ts#L35) |
+| 帧不匹配 `^[A-Za-z0-9+/]+={0,2}$` | 抛 invalid base64 | [`:36-38`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/output.ts#L36-L38) |
+| base64 往返不一致 | 同样的错误 | [`:40-42`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/output.ts#L40-L42) |
+| `finish(requireComplete)` | 有残留 → truncated;未见完成帧 → incomplete;`false` 时丢弃残留(被请求终止的场景) | [`:52-61`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/output.ts#L52-L61) |
 
 保留帧之所以必要:`!dsh-e2b-output-complete!` **不是合法 base64**,不可能与真实数据混淆;而"看到它"是"远端编码器干净到达 EOF"的唯一证明。
 
@@ -387,10 +387,10 @@ flowchart LR
 | 阶段 | 函数 | 关键点 |
 |---|---|---|
 | 读 | `readRemoteEnvironment`(`:28-55`) | 一次可信控制 shell 探针;`getent passwd` 取登录 home;`env -0` 取完整环境;**base64 ASCII 传输 + 严格 UTF-8 解码**,校验行数恰好 2、home 绝对且无 NUL |
-| 洗 | `scrubRemoteEnvironment`(`:62-69`) | 丢弃 `DSH_` 前缀名与 `SENSITIVE_ENV_PATTERN`(`*KEY*`/`*SECRET*`/`*TOKEN*`,定义在 `packages/subprocess/subprocess/src/index.ts:45`) |
-| 覆 | `serializeRemoteEnvironment`(`:90-104`) | 显式条目在清洗**之后**叠加;`undefined` 是拼接缝的墓碑语义;名字/值校验:非空名、无 `=`、无 NUL |
+| 洗 | `scrubRemoteEnvironment`(`:62-69`) | 丢弃 `DSH_` 前缀名与 `SENSITIVE_ENV_PATTERN`(`*KEY*`/`*SECRET*`/`*TOKEN*`,定义在 [`packages/subprocess/subprocess/src/index.ts:45`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L45)) |
+| 覆 | `serializeRemoteEnvironment`([`:90-104`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L90-L104)) | 显式条目在清洗**之后**叠加;`undefined` 是拼接缝的墓碑语义;名字/值校验:非空名、无 `=`、无 NUL |
 
-两条额外防线:`bootstrapEnvironment`(`:76-82`)给**每个被清洗掉的名字**一个空的 overrides 条目,使"后续命令与 PTY 登录 shell 在用户 profile 运行之前"就拿到空值(`subprocess-e2b/README.md:100`);`e2bControlEnvs` 给每个内部控制命令全新的随机根级 `HOME`。
+两条额外防线:`bootstrapEnvironment`([`:76-82`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L76-L82))给**每个被清洗掉的名字**一个空的 overrides 条目,使"后续命令与 PTY 登录 shell 在用户 profile 运行之前"就拿到空值([`subprocess-e2b/README.md:100`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/README.md#L100));`e2bControlEnvs` 给每个内部控制命令全新的随机根级 `HOME`。
 
 ### 4.5 终止阶梯与拆卸
 
@@ -405,9 +405,9 @@ export async function signalRemoteGroups(sandbox, envs, groups, signal: 'TERM' |
 }
 ```
 
-一个**容忍两种结局**的单一信号路径:`CommandExitError`(组已不存在)与 `SandboxNotFoundError`(沙箱消失)都被吞掉。终止阶梯是 `SIGTERM` → 宽限期过后 `SIGKILL` → 以 **SDK kill 兜底** → 用**有界进程表探针**证明静止,且"只有僵尸的组算空组"(`subprocess-e2b/README.md:108`)。`signalRemoteGroups` 上的 `TODO(e2b-pgid-identity)` 说清了这条缺口:"用户态的身份预检查无法关掉数值 PGID 复用的竞态"(`remote.ts:87-88`)。
+一个**容忍两种结局**的单一信号路径:`CommandExitError`(组已不存在)与 `SandboxNotFoundError`(沙箱消失)都被吞掉。终止阶梯是 `SIGTERM` → 宽限期过后 `SIGKILL` → 以 **SDK kill 兜底** → 用**有界进程表探针**证明静止,且"只有僵尸的组算空组"([`subprocess-e2b/README.md:108`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/README.md#L108))。`signalRemoteGroups` 上的 `TODO(e2b-pgid-identity)` 说清了这条缺口:"用户态的身份预检查无法关掉数值 PGID 复用的竞态"([`remote.ts:87-88`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/remote.ts#L87-L88))。
 
-拆卸顺序是:**先置 `disposing`**(让新 spawn 被拒,`index.ts:149,188`)→ **abort 所有进行中的终端建立并等它们结算** → 并发终止所有 live handle 与 terminal → `Promise.allSettled` 聚合;0 个失败静默,1 个原样抛,多个包 `AggregateError`(`:82-107`)。自动释放路径有一条刻意的"失败时保留"语义:
+拆卸顺序是:**先置 `disposing`**(让新 spawn 被拒,`index.ts:149,188`)→ **abort 所有进行中的终端建立并等它们结算** → 并发终止所有 live handle 与 terminal → `Promise.allSettled` 聚合;0 个失败静默,1 个原样抛,多个包 `AggregateError`([`:82-107`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/remote.ts#L82-L107))。自动释放路径有一条刻意的"失败时保留"语义:
 
 ```typescript
 // packages/e2b/subprocess-e2b/src/index.ts:176-182(节选)
@@ -423,22 +423,22 @@ void handle.done.then(release, release).catch((_automaticReleaseFailure: unknown
 
 | 维度 | 本地(`ctx.sandbox` 家族) | E2B 家族 | 代码依据 |
 |---|---|---|---|
-| 隔离边界 | 宿主内核内套一层 runner(bwrap / Landlock / Seatbelt / 受限令牌) | 远端 Linux 沙箱整机 | `sandbox/src/index.ts:1-6` |
+| 隔离边界 | 宿主内核内套一层 runner(bwrap / Landlock / Seatbelt / 受限令牌) | 远端 Linux 沙箱整机 | [`sandbox/src/index.ts:1-6`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L1-L6) |
 | 接入方式 | 注册 `ctx.sandbox` provider,消费者经 `confine` 包装 argv | 替换 `ctx.fs` 与 `ctx.subprocess` 两个能力实现 | 本篇第二节 |
-| 策略来源 | `ctx.sandboxPolicy` 逐调用解析 mode + 根 | **无 `SandboxMode`**;`cwd` 只是解析约定 | `e2b/e2b/README.md:131` |
-| 升级字段 | 由 `ctx.fs.sandboxMode` / `ctx.shell.sandboxMode` 决定是否广告 | 未覆写 → `undefined` → 不广告 | `fs-e2b/src/index.ts:171`;`fs/src/index.ts:103-105` |
-| `ctx.sandboxPolicy` | 必需(`inject` 或加载期抛错) | 只为满足 `terminal-bash` 注入而挂,且 `danger-full-access` | `composition.e2e.ts:57-60` |
-| 目录语义 | `workspaceRoot` 是**强制边界**(内核/ACL 层) | `cwd` **不是包含边界**;可寻址沙箱内其它路径 | `e2b/e2b/README.md:131` |
-| 状态持久性 | 宿主文件系统,持久 | 到期或关闭即删除;无重连/暂停保留/模板/卷/快照 | `e2b/e2b/README.md:129` |
-| 失败封闭 | `SandboxUnavailableError`(`SANDBOX_UNAVAILABLE`) | 沙箱消失视为**干净结束** | `e2b/e2b/README.md:63` |
-| 环境 | `subprocess-local` 的 `childEnv` 清洗 + 显式覆盖 | 远端探针读环境后清洗,`spec.env` 逐项显式 opt-in | `environment.ts:62-104` |
-| 宿主同步 | 天然同世界 | **无同步**:空 `cwd` 就是空的 | `fs-e2b/README.md:124` |
-| 进程身份 | 宿主 PID / 进程组,句柄直接持有 | 私有包装文件**异步发布**进程组 id,且**不是**目标 PID;无复用围栏 | `process.ts:111-112`;`subprocess-e2b/README.md:74,96` |
-| 输出捕获 | 宿主管道直接读 | 远端 base64 分行帧 + 保留完成帧;SDK 侧仍保留完整输出于宿主内存 | `process.ts:26-37`;`output.ts:8-9` |
+| 策略来源 | `ctx.sandboxPolicy` 逐调用解析 mode + 根 | **无 `SandboxMode`**;`cwd` 只是解析约定 | [`e2b/e2b/README.md:131`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/README.md#L131) |
+| 升级字段 | 由 `ctx.fs.sandboxMode` / `ctx.shell.sandboxMode` 决定是否广告 | 未覆写 → `undefined` → 不广告 | [`fs-e2b/src/index.ts:171`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/fs-e2b/src/index.ts#L171);[`fs/src/index.ts:103-105`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/fs/src/index.ts#L103-L105) |
+| `ctx.sandboxPolicy` | 必需(`inject` 或加载期抛错) | 只为满足 `terminal-bash` 注入而挂,且 `danger-full-access` | [`composition.e2e.ts:57-60`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/tests/composition.e2e.ts#L57-L60) |
+| 目录语义 | `workspaceRoot` 是**强制边界**(内核/ACL 层) | `cwd` **不是包含边界**;可寻址沙箱内其它路径 | [`e2b/e2b/README.md:131`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/README.md#L131) |
+| 状态持久性 | 宿主文件系统,持久 | 到期或关闭即删除;无重连/暂停保留/模板/卷/快照 | [`e2b/e2b/README.md:129`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/README.md#L129) |
+| 失败封闭 | `SandboxUnavailableError`(`SANDBOX_UNAVAILABLE`) | 沙箱消失视为**干净结束** | [`e2b/e2b/README.md:63`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/README.md#L63) |
+| 环境 | `subprocess-local` 的 `childEnv` 清洗 + 显式覆盖 | 远端探针读环境后清洗,`spec.env` 逐项显式 opt-in | [`environment.ts:62-104`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/environment.ts#L62-L104) |
+| 宿主同步 | 天然同世界 | **无同步**:空 `cwd` 就是空的 | [`fs-e2b/README.md:124`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/fs-e2b/README.md#L124) |
+| 进程身份 | 宿主 PID / 进程组,句柄直接持有 | 私有包装文件**异步发布**进程组 id,且**不是**目标 PID;无复用围栏 | [`process.ts:111-112`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/process.ts#L111-L112);`subprocess-e2b/README.md:74,96` |
+| 输出捕获 | 宿主管道直接读 | 远端 base64 分行帧 + 保留完成帧;SDK 侧仍保留完整输出于宿主内存 | [`process.ts:26-37`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/process.ts#L26-L37);[`output.ts:8-9`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/output.ts#L8-L9) |
 | 拒绝形态 / 原子写 | stderr 方言推断(bash)或 `FS_SANDBOX_DENIED`(fs);`fs-local` 的原子写 | E2B 控制器错误 → `FsError` 码映射;随机同级 staging 目录 + `0700` + 同文件系统 rename,`createIfAbsent` 用 `ln -T` 守卫 | `fs-e2b/src/index.ts:135-147,556-625` |
 | 运行环境 | 宿主进程身份;linux / darwin / win32 三档 | 沙箱内同一默认用户(`0700`/`0600` 无法隔离 `.dsh-e2b`);仅远端 Linux | `subprocess-e2b/README.md:146,151` |
 
-E2B 侧另有两点与本地对应物**看似相似但语义不同**:其一是"原子发布"用的是 staging 目录 + rename/link(`fs-e2b/src/index.ts:566-608`),其中 `createIfAbsent` 用 `ln -T` 原子无覆盖发布、失败时用 `test -e || test -L` 分辨"已存在"与"真失败";关键是**取消信号不进入提交动作**(`:594` 显式传 `commandOpts(undefined)`),"所以取消不能中断原子发布,也不能把已提交的写报告成失败"(`fs-e2b/README.md:90`)。其二是进程内序列化:`withLock(targetKey, …)`(`:477-487`)把同一 canonical target 的变更串行化,尾部用 `then(…, …)` 保证失败也不断链。
+E2B 侧另有两点与本地对应物**看似相似但语义不同**:其一是"原子发布"用的是 staging 目录 + rename/link([`fs-e2b/src/index.ts:566-608`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/fs-e2b/src/index.ts#L566-L608)),其中 `createIfAbsent` 用 `ln -T` 原子无覆盖发布、失败时用 `test -e || test -L` 分辨"已存在"与"真失败";关键是**取消信号不进入提交动作**([`:594`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/fs-e2b/src/index.ts#L594) 显式传 `commandOpts(undefined)`),"所以取消不能中断原子发布,也不能把已提交的写报告成失败"([`fs-e2b/README.md:90`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/fs-e2b/README.md#L90))。其二是进程内序列化:`withLock(targetKey, …)`(`:477-487`)把同一 canonical target 的变更串行化,尾部用 `then(…, …)` 保证失败也不断链。
 
 ---
 
@@ -446,17 +446,17 @@ E2B 侧另有两点与本地对应物**看似相似但语义不同**:其一是"�
 
 | 文件 | 关键符号 | 行号 |
 |---|---|---|
-| `packages/sandbox/sandbox/src/index.ts` | same-world 契约注释(排除远端) | 1-6 |
-| `packages/e2b/README.md` | 三包与 ctx key 表 | 25-29 |
-| `packages/e2b/e2b/src/index.ts` | `quoteE2BShellArg` / `e2bControlEnvs` / `Config` / `Config` 默认值 | 29-31 / 38-42 / 45-52 / 78-82 |
+| [`packages/sandbox/sandbox/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts) | same-world 契约注释(排除远端) | 1-6 |
+| [`packages/e2b/README.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/README.md) | 三包与 ctx key 表 | 25-29 |
+| [`packages/e2b/e2b/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/src/index.ts) | `quoteE2BShellArg` / `e2bControlEnvs` / `Config` / `Config` 默认值 | 29-31 / 38-42 / 45-52 / 78-82 |
 | | `E2BRuntime` / 构造与 teardown / `getSandbox` / `validate` / `open` | 77-189 / 93-126 / 133-140 / 142-152 / 154-188 |
-| `packages/e2b/e2b/src/api-url.ts` | `e2bApiUrl` | 21-26 |
-| `packages/e2b/fs-e2b/src/index.ts` | `E2BFileSystem` / `resolve` / `contains` / `mapError` | 171-174 / 176-188 / 200-203 / 135-147 |
+| [`packages/e2b/e2b/src/api-url.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/src/api-url.ts) | `e2bApiUrl` | 21-26 |
+| [`packages/e2b/fs-e2b/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/fs-e2b/src/index.ts) | `E2BFileSystem` / `resolve` / `contains` / `mapError` | 171-174 / 176-188 / 200-203 / 135-147 |
 | | `canonicalPath` / `withLock` / `writeAtomic` | 489-500 / 477-487 / 556-625 |
-| `packages/e2b/subprocess-e2b/src/index.ts` | `E2BSubprocessRuntime` 与 `Config` / teardown effect / `resolveExecutable` / `spawn` / `spawnTerminal` | 60-65 / 82-107 / 111-145 / 148-184 / 187-228 |
-| `packages/e2b/subprocess-e2b/src/process.ts` | `OUTPUT_ENCODER_SOURCE` / `commandText` | 26-37 / 93-120 |
-| `packages/e2b/subprocess-e2b/src/output.ts` | `E2B_OUTPUT_COMPLETE_FRAME` / `E2BBase64Decoder` / `E2BOutputReader` | 9 / 21-61 / 97-130 |
-| `packages/e2b/subprocess-e2b/src/environment.ts` | `readRemoteEnvironment` / `scrub` / `bootstrap` / `serialize` | 28-55 / 62-69 / 76-82 / 90-104 |
-| `packages/e2b/subprocess-e2b/src/remote.ts` | `commandOpts` / `waitTick` / `signalRemoteGroups` | 34-39 / 56-69 / 81-97 |
-| `packages/fs/fs/src/index.ts` + `tool-fs/src/sandbox.ts` | `sandboxMode` 基类默认 `undefined`;广告闸门与组合守卫 | 103-105 / 44-49, 93-95 |
-| `packages/terminal/terminal-bash/src/index.ts` + `e2b/e2b/tests/composition.e2e.ts` | `inject` / `spawnArgv`;仅为满足注入而挂的 `SandboxPolicyService` | 27, 100-109 / 57-60 |
+| [`packages/e2b/subprocess-e2b/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/index.ts) | `E2BSubprocessRuntime` 与 `Config` / teardown effect / `resolveExecutable` / `spawn` / `spawnTerminal` | 60-65 / 82-107 / 111-145 / 148-184 / 187-228 |
+| [`packages/e2b/subprocess-e2b/src/process.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/process.ts) | `OUTPUT_ENCODER_SOURCE` / `commandText` | 26-37 / 93-120 |
+| [`packages/e2b/subprocess-e2b/src/output.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/output.ts) | `E2B_OUTPUT_COMPLETE_FRAME` / `E2BBase64Decoder` / `E2BOutputReader` | 9 / 21-61 / 97-130 |
+| [`packages/e2b/subprocess-e2b/src/environment.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/environment.ts) | `readRemoteEnvironment` / `scrub` / `bootstrap` / `serialize` | 28-55 / 62-69 / 76-82 / 90-104 |
+| [`packages/e2b/subprocess-e2b/src/remote.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/subprocess-e2b/src/remote.ts) | `commandOpts` / `waitTick` / `signalRemoteGroups` | 34-39 / 56-69 / 81-97 |
+| [`packages/fs/fs/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/fs/src/index.ts) + [`tool-fs/src/sandbox.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/sandbox.ts) | `sandboxMode` 基类默认 `undefined`;广告闸门与组合守卫 | 103-105 / 44-49, 93-95 |
+| [`packages/terminal/terminal-bash/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/terminal/terminal-bash/src/index.ts) + [`e2b/e2b/tests/composition.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/e2b/e2b/tests/composition.e2e.ts) | `inject` / `spawnArgv`;仅为满足注入而挂的 `SandboxPolicyService` | 27, 100-109 / 57-60 |

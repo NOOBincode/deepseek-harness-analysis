@@ -1,7 +1,7 @@
 # 02 · Loader、Include 与组合层
 
 > 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
-> 源码面:`vendor/loader/src/**`、`vendor/include/src/index.ts`、`vendor/hmr/src/index.ts`、`packages/boot/app-boot/src/{index,profile}.ts`、`apps/cli/src/profile-boot.ts`、`packages/bundle/*/cordis.patch.yml`
+> 源码面:`vendor/loader/src/**`、[`vendor/include/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts)、[`vendor/hmr/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts)、`packages/boot/app-boot/src/{index,profile}.ts`、[`apps/cli/src/profile-boot.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts)、`packages/bundle/*/cordis.patch.yml`
 > 前置:[第一章第三节](../01-architecture-overview.md)给启动链全貌;[01](./01-cordis-runtime-internals.md)的 fiber/epoch 机制是本篇的运行时底座。
 
 ---
@@ -10,8 +10,8 @@
 
 组合层由三件事构成,彼此解耦:
 
-1. **合成是纯数据操作**:三层 patch 被 `flat()` 成一个列表,对**空条目表**做一次 `applyEntryPatches`(`packages/boot/app-boot/src/profile.ts:841-848`)——没有代码执行,没有产物固化。
-2. **挂载是并发且由依赖驱动的**:`EntryGroup.update` 对同层所有条目 `Promise.allSettled(config.map(create))`(`vendor/loader/src/config/group.ts:71`);`inject` 不齐者停 PENDING,由 `ReflectService.notify` 级联唤醒。**行序不产生加载语义**。
+1. **合成是纯数据操作**:三层 patch 被 `flat()` 成一个列表,对**空条目表**做一次 `applyEntryPatches`([`packages/boot/app-boot/src/profile.ts:841-848`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L841-L848))——没有代码执行,没有产物固化。
+2. **挂载是并发且由依赖驱动的**:`EntryGroup.update` 对同层所有条目 `Promise.allSettled(config.map(create))`([`vendor/loader/src/config/group.ts:71`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/group.ts#L71));`inject` 不齐者停 PENDING,由 `ReflectService.notify` 级联唤醒。**行序不产生加载语义**。
 3. **改动是事务性的**:条目级、组级、文件级、模块级各有一层回滚;失败一律 fail-loud,绝不静默降级。
 
 读之前先对齐六个词,后面反复用到。**Cordis** 是 dsh 底下那套插件框架(被源码级 vendor 进仓库);**fiber** 是一个插件实例的运行时载体,拥有自己的 context 与状态机;**effect** 是一次可逆注册,卸载时按逆序自动回收;**epoch** 是 fiber 用来判断"我依赖的服务这一代是否齐备"的标记,少一个就置为 INACTIVE;**HMR** 是模块热替换,改文件不重启就换掉插件实现;**patch 层叠** 指 bundle、profile、home、命令行各写一层配置,按顺序叠成一棵条目树的组合方式。
@@ -44,19 +44,19 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 收集 bundle 层 | 从 bundle 包声明的 patch 文件读出补丁行 | `packages/boot/app-boot/src/profile.ts:787-797` |
-| 收集 home 层与叠加层 | home 级 patch、命令行 `--patch` 依次入列,遥测开关再派生一层追加在后 | `apps/cli/src/profile-boot.ts:231-242` |
-| 摊平 | 五层补丁被 `flat()` 成一个有序列表,列表顺序就是层叠顺序 | `packages/boot/app-boot/src/profile.ts:841-848` |
-| 合成 | 对空条目表 `[]` 跑补丁算法;先 `structuredClone` 脱离调用方缓存,再顺序应用每个 patch | `packages/boot/app-boot/src/profile.ts:841-848`、`vendor/include/src/index.ts:58-128` |
-| 产出 | 得到 `EntryOptions[]`——纯数据,没有任何代码被执行 | `vendor/include/src/index.ts:110-124` |
-| 锚定 | Include 读入始终为空的根 `cordis.yml`,它只用于提供 `baseUrl` 这个真实文件锚点 | `apps/cli/src/profile-boot.ts:83-91`、`packages/boot/app-boot/src/index.ts:799` |
-| 建树 | Include 把补丁列表应用到根条目组,得到 `EntryTree.root` | `vendor/include/src/index.ts:174-214`、`:316` |
-| 并发挂载 | 同层所有条目一起 `create()`,用 `Promise.allSettled` 收齐结果 | `vendor/loader/src/config/group.ts:71` |
-| 条目启动 | 每个条目导入插件模块、按差异打上下文补丁、注册插件、建立 fiber | `vendor/loader/src/config/entry.ts:291-302` |
-| 依赖判定 | 注入服务不齐的 fiber 停在 PENDING,且不阻塞同层其他条目 | `vendor/cordis/src/fiber.ts:611-623` |
-| 级联唤醒 | 服务上线触发 `notify`,等待中的 fiber 重算 epoch 并激活 | `vendor/loader/src/config/group.ts:71-84` |
-| 整树收敛 | 等全部条目任务与 fiber settle,再唤醒注入 `loader` 的插件 | `vendor/loader/src/config/tree.ts:46-64` |
-| 失败回滚 | 新增行逆序移除、原有行按原序重建;启动期失败先处置半成品上下文再抛错 | `vendor/loader/src/config/group.ts:85-105`、`packages/boot/app-boot/src/index.ts:816-833` |
+| 收集 bundle 层 | 从 bundle 包声明的 patch 文件读出补丁行 | [`packages/boot/app-boot/src/profile.ts:787-797`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L787-L797) |
+| 收集 home 层与叠加层 | home 级 patch、命令行 `--patch` 依次入列,遥测开关再派生一层追加在后 | [`apps/cli/src/profile-boot.ts:231-242`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L231-L242) |
+| 摊平 | 五层补丁被 `flat()` 成一个有序列表,列表顺序就是层叠顺序 | [`packages/boot/app-boot/src/profile.ts:841-848`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L841-L848) |
+| 合成 | 对空条目表 `[]` 跑补丁算法;先 `structuredClone` 脱离调用方缓存,再顺序应用每个 patch | [`packages/boot/app-boot/src/profile.ts:841-848`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L841-L848)、[`vendor/include/src/index.ts:58-128`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L58-L128) |
+| 产出 | 得到 `EntryOptions[]`——纯数据,没有任何代码被执行 | [`vendor/include/src/index.ts:110-124`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L110-L124) |
+| 锚定 | Include 读入始终为空的根 `cordis.yml`,它只用于提供 `baseUrl` 这个真实文件锚点 | [`apps/cli/src/profile-boot.ts:83-91`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L83-L91)、[`packages/boot/app-boot/src/index.ts:799`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L799) |
+| 建树 | Include 把补丁列表应用到根条目组,得到 `EntryTree.root` | [`vendor/include/src/index.ts:174-214`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L174-L214)、[`:316`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L316) |
+| 并发挂载 | 同层所有条目一起 `create()`,用 `Promise.allSettled` 收齐结果 | [`vendor/loader/src/config/group.ts:71`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/group.ts#L71) |
+| 条目启动 | 每个条目导入插件模块、按差异打上下文补丁、注册插件、建立 fiber | [`vendor/loader/src/config/entry.ts:291-302`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L291-L302) |
+| 依赖判定 | 注入服务不齐的 fiber 停在 PENDING,且不阻塞同层其他条目 | [`vendor/cordis/src/fiber.ts:611-623`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L611-L623) |
+| 级联唤醒 | 服务上线触发 `notify`,等待中的 fiber 重算 epoch 并激活 | [`vendor/loader/src/config/group.ts:71-84`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/group.ts#L71-L84) |
+| 整树收敛 | 等全部条目任务与 fiber settle,再唤醒注入 `loader` 的插件 | [`vendor/loader/src/config/tree.ts:46-64`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L46-L64) |
+| 失败回滚 | 新增行逆序移除、原有行按原序重建;启动期失败先处置半成品上下文再抛错 | [`vendor/loader/src/config/group.ts:85-105`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/group.ts#L85-L105)、[`packages/boot/app-boot/src/index.ts:816-833`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L816-L833) |
 
 <details><summary>原图</summary>
 
@@ -80,14 +80,14 @@ flowchart TD
 
 | 层 | 载体 | 解析代码 |
 |---|---|---|
-| bundle 层 | `packages/bundle/*/cordis.patch.yml`,由 bundle 的 `package.json` 里 `dsh.bundle.patch` 声明 | `packages/boot/app-boot/src/profile.ts:787-792` |
-| profile 用户层 | `$DSH_HOME/profiles/<name>/cordis.patch.yml`(`PROFILE_PATCH_FILENAME`,`profile.ts:45`) | `profile.ts:794-797` |
-| home 用户层 | `$DSH_HOME/cordis.patch.yml`(`homePatchPath()`,`apps/cli/src/profile-boot.ts:73`) | `profile-boot.ts:233` |
-| `--patch` 叠加层 | 任意路径,argv 顺序;遥测派生 patch 追加在其后(`:240-242`) | `profile-boot.ts:234` |
+| bundle 层 | `packages/bundle/*/cordis.patch.yml`,由 bundle 的 [`package.json`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/package.json) 里 `dsh.bundle.patch` 声明 | [`packages/boot/app-boot/src/profile.ts:787-792`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L787-L792) |
+| profile 用户层 | `$DSH_HOME/profiles/<name>/cordis.patch.yml`(`PROFILE_PATCH_FILENAME`,[`profile.ts:45`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L45)) | [`profile.ts:794-797`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L794-L797) |
+| home 用户层 | `$DSH_HOME/cordis.patch.yml`(`homePatchPath()`,[`apps/cli/src/profile-boot.ts:73`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L73)) | [`profile-boot.ts:233`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L233) |
+| `--patch` 叠加层 | 任意路径,argv 顺序;遥测派生 patch 追加在其后([`:240-242`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L240-L242)) | [`profile-boot.ts:234`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L234) |
 
-**根 `cordis.yml` 是空的,且每次启动重写**(`profile-boot.ts:83-91` 定义 `PROFILE_ROOT_CONFIG`,`:190` 无条件写出)。它存在只是给 Loader 一个真实文件锚定 `baseUrl`(`boot()` 里 `ctx.baseUrl = pathToFileURL(dirname(absoluteConfigPath)).href + '/'`,`packages/boot/app-boot/src/index.ts:799`)。把组合结果固化进该文件是不允许的:整个组合都是 patch 层,根文件必须保持空,否则 Loader 的树写回会把某一代合成结果变成下一代的"默认值"。
+**根 `cordis.yml` 是空的,且每次启动重写**([`profile-boot.ts:83-91`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L83-L91) 定义 `PROFILE_ROOT_CONFIG`,[`:190`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L190) 无条件写出)。它存在只是给 Loader 一个真实文件锚定 `baseUrl`(`boot()` 里 `ctx.baseUrl = pathToFileURL(dirname(absoluteConfigPath)).href + '/'`,[`packages/boot/app-boot/src/index.ts:799`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L799))。把组合结果固化进该文件是不允许的:整个组合都是 patch 层,根文件必须保持空,否则 Loader 的树写回会把某一代合成结果变成下一代的"默认值"。
 
-profile 清单决定 bundle 列表与重载模式(`profile.ts:776-793`):`dsh.profile.patchReload` 只接受 `'live' | 'startup'`;被 `bundles` 列名却没有 `dsh.bundle` 字段的包**启动即失败**——"naming a bundle-less package as a layer is a misconfiguration, not 'no patches'";每个 bundle 的 patch 路径由 `join(packageDir, declared)` 拼出并当场 `loadOverlayPatches` 解析。
+profile 清单决定 bundle 列表与重载模式([`profile.ts:776-793`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L776-L793)):`dsh.profile.patchReload` 只接受 `'live' | 'startup'`;被 `bundles` 列名却没有 `dsh.bundle` 字段的包**启动即失败**——"naming a bundle-less package as a layer is a misconfiguration, not 'no patches'";每个 bundle 的 patch 路径由 `join(packageDir, declared)` 拼出并当场 `loadOverlayPatches` 解析。
 
 ---
 
@@ -105,11 +105,11 @@ export function composeEntries(
 }
 ```
 
-**起点是 `[]`**:所有层被 `flat()` 成一个 patch 列表,所以"bundle 层"在数据上只是一批 `insert` 行(见 `packages/bundle/base/cordis.patch.yml:15` 的顶层 `- insert:`)。这里的 `structuredClone` 保护调用方缓存,`applyEntryPatches` 内部还会再 clone 一次(`vendor/include/src/index.ts:63`);原因写在 `apps/cli/src/profile-boot.ts:323-327`:
+**起点是 `[]`**:所有层被 `flat()` 成一个 patch 列表,所以"bundle 层"在数据上只是一批 `insert` 行(见 [`packages/bundle/base/cordis.patch.yml:15`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml#L15) 的顶层 `- insert:`)。这里的 `structuredClone` 保护调用方缓存,`applyEntryPatches` 内部还会再 clone 一次([`vendor/include/src/index.ts:63`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L63));原因写在 [`apps/cli/src/profile-boot.ts:323-327`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L323-L327):
 
 > Fresh clones per generation: the include pushes `insert` rows into the mounted tree BY REFERENCE and later id-targeted patches mutate those objects in place. Reusing one parsed patch object across applications would bake a user override into the bundle's in-memory insert row, so removing the override could never revert the row to the bundle default.
 
-算法本体(`vendor/include/src/index.ts:58-128`)的四个关键行:
+算法本体([`vendor/include/src/index.ts:58-128`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L58-L128))的四个关键行:
 
 ```typescript
 // vendor/include/src/index.ts:63,71,82-101,110-124(摘句)
@@ -136,10 +136,10 @@ for (const [key, value] of Object.entries(overrides)) { if (key === 'id') contin
 
 1. **`insert` 无 id ⇒ 追加顶层;有 id ⇒ 目标必须是 group**(`:82-92`),否则告警跳过。
 2. **插入的行立即入索引**(`:101`),所以同一列表里靠后的 patch 能配置/禁用靠前 patch 刚插入的行——层与层因此可以互相引用。
-3. **非 insert patch 是整字段替换,不是深合并**(`:121-124`)。`packages/bundle/base/cordis.patch.yml:6-10` 明说:"A patch replaces the targeted row's whole `config` rather than merging into it, so a row whose value differs by mode does NOT live here"。
-4. **命不中只告警并跳过**(`:83-85`、`:110-114`),告警走 `ctx.root.logger?.('loader').warn`(`include/src/index.ts:268-271`)。
+3. **非 insert patch 是整字段替换,不是深合并**(`:121-124`)。[`packages/bundle/base/cordis.patch.yml:6-10`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml#L6-L10) 明说:"A patch replaces the targeted row's whole `config` rather than merging into it, so a row whose value differs by mode does NOT live here"。
+4. **命不中只告警并跳过**([`:83-85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml#L83-L85)、[`:110-114`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml#L110-L114)),告警走 `ctx.root.logger?.('loader').warn`([`include/src/index.ts:268-271`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L268-L271))。
 
-合成与真正挂载用**同一个函数**(`Include._apply` → `applyPatches` → `applyEntryPatches`,`include/src/index.ts:316`),所以 `dsh --profile web --dump-config` 与实际挂载不会漂移。
+合成与真正挂载用**同一个函数**(`Include._apply` → `applyPatches` → `applyEntryPatches`,[`include/src/index.ts:316`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L316)),所以 `dsh --profile web --dump-config` 与实际挂载不会漂移。
 
 ---
 
@@ -149,24 +149,24 @@ for (const [key, value] of Object.entries(overrides)) { if (key === 'id') contin
 
 `Include` 继承 `EntryTree`,只注入 `loader` 一个服务(vendor/include/src/index.ts:174-175)。它的构造函数做四件事(:194-214):先把 `config.path` 相对 `ctx.baseUrl` 解析成绝对 `filename`;再校验扩展名属于 `.json/.yaml/.yml`,不属于就抛 `extension "<ext>" not supported`;然后把 `this.ctx.baseUrl` **切到配置文件所在目录**(`new URL('.', pathToFileURL(this.filename)).href`),让子树里的相对 specifier 相对配置文件解析;最后注册 `internal/update` 监听,经 `enqueue` 串行地把新 patches 重应用到 `root`。
 
-`[Service.init]`(`:273-289`)是激活过程:**先读文件,ENOENT 且有 `initial` 就写初值再读**(`:275-285`),然后 `yield () => this.stop()`(`:287`,登记卸载),最后 `await this.apply(candidate)`(`:288`)。
+`[Service.init]`([`:273-289`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L273-L289))是激活过程:**先读文件,ENOENT 且有 `initial` 就写初值再读**([`:275-285`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L275-L285)),然后 `yield () => this.stop()`([`:287`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L287),登记卸载),最后 `await this.apply(candidate)`([`:288`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L288))。
 
 ### 3.2 `!!js` 的成立范围
 
-方言在 `entryListSchema`(`include/src/index.ts:9-23`)里定义:`!!js` 标量**往返为表达式节点** `{ __jsExpr: string }`。求值由 Loader 的 `internal/config` 监听器统一驱动(`vendor/loader/src/index.ts:92-101`):先 `next()` 拿配置,若该 fiber 不属于任何 entry 或是"树载体"(Group/Include,由 `plugin?.[EntryGroup.key]` 判定)**原样返回**,否则 `return interpolate(this.ctx, config)`(`:100`)。求值器是 `with` 包一层的 `new Function`(`vendor/loader/src/config/utils.ts:5-9`)。于是边界非常明确:
+方言在 `entryListSchema`([`include/src/index.ts:9-23`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L9-L23))里定义:`!!js` 标量**往返为表达式节点** `{ __jsExpr: string }`。求值由 Loader 的 `internal/config` 监听器统一驱动([`vendor/loader/src/index.ts:92-101`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts#L92-L101)):先 `next()` 拿配置,若该 fiber 不属于任何 entry 或是"树载体"(Group/Include,由 `plugin?.[EntryGroup.key]` 判定)**原样返回**,否则 `return interpolate(this.ctx, config)`([`:100`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts#L100))。求值器是 `with` 包一层的 `new Function`([`vendor/loader/src/config/utils.ts:5-9`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/utils.ts#L5-L9))。于是边界非常明确:
 
 | 位置 | 是否求值 | 证据 |
 |---|---|---|
 | 行 `config` 内的标量 | ✅ 作用域是该条目自己的 `ctx` | `loader/src/index.ts:100` |
-| 行 `disabled` | ✅ 但走另一条路径:`Entry.disabledOf` 在**每次挂载判定**时求值 | `loader/src/config/entry.ts:104-108` |
-| `group` 行(或 Include)的 `config` | ❌ 保持字面量 | `loader/src/index.ts:96-99`;`include/src/index.ts:178-182` |
-| `name`/`id`/`inject`/`isolate` 等元数据 | ❌ 保持字面量 | `docs/cordis-tutorial/05-config.md:80` |
+| 行 `disabled` | ✅ 但走另一条路径:`Entry.disabledOf` 在**每次挂载判定**时求值 | [`loader/src/config/entry.ts:104-108`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L104-L108) |
+| `group` 行(或 Include)的 `config` | ❌ 保持字面量 | `loader/src/index.ts:96-99`;[`include/src/index.ts:178-182`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L178-L182) |
+| `name`/`id`/`inject`/`isolate` 等元数据 | ❌ 保持字面量 | [`docs/cordis-tutorial/05-config.md:80`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/cordis-tutorial/05-config.md#L80) |
 
 `disabledOf`(`entry.ts:100-108`)的 JSDoc 点出关键:"The raw node stays in the options, so write-back keeps the form." **原始表达式节点保留在 options 里**,所以 `tree.write()` 不会把求值结果固化——这是 patch 层的可逆性前提。
 
 ### 3.3 写回与 apply 串行化
 
-`Include.write()`(`:371-374`)先 `emit('loader/config-update')` 再调度 `writeFile`(`:344-350`,`setTimeout(...,0)` 合并同轮多次写);`_writeFile`(`:323-342`)写 `filename + '.tmp'` 后 `rename`,对 `EACCES`/`EBUSY`/`EPERM` 最多重试 10 次(`WRITE_RETRY_LIMIT = 10`、`WRITE_RETRY_DELAY_MS = 50`,`:35-41`)。apply 侧必须串行,原因在 `enqueue` 的注释里(`:216-224`):
+`Include.write()`(`:371-374`)先 `emit('loader/config-update')` 再调度 `writeFile`(`:344-350`,`setTimeout(...,0)` 合并同轮多次写);`_writeFile`(`:323-342`)写 `filename + '.tmp'` 后 `rename`,对 `EACCES`/`EBUSY`/`EPERM` 最多重试 10 次(`WRITE_RETRY_LIMIT = 10`、`WRITE_RETRY_DELAY_MS = 50`,[`:35-41`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/cordis-tutorial/05-config.md#L35-L41))。apply 侧必须串行,原因在 `enqueue` 的注释里(`:216-224`):
 
 > The group's transactional `update` is not reentrant: two concurrent applies (the init apply racing an HMR-triggered refresh from the watcher's initial scan) interleave create and rollback on the same entries and strand the include fiber without settling, so every apply path funnels through this queue.
 
@@ -209,16 +209,16 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 抽象基类 | 条目树只声明接口,持久化与写回由子类提供 | `vendor/loader/src/config/tree.ts:7` |
-| 层级分隔符 | 固定用 `:` 表示条目 id 的层级 | `tree.ts:8` |
-| 继承 context | 树把 `baseUrl` 扩展进自己的 context,让相对 specifier 可解析 | `tree.ts:16` |
-| 根节点 | 根条目组是整棵树的入口,所有顶层行挂在它下面 | `tree.ts:17` |
-| 条目存储 | 以 id 为键的条目字典,供快速定位 | `tree.ts:13` |
-| 条目身份 | 条目 id 可含 `:`,写成从根出发的路径 | `entry.ts:52`、`:75-81` |
-| 条目 context | 每个条目扩展出自己的 context,并把 `Entry.key` 指回条目自身 | `entry.ts:67` |
-| 运行时载体 | 条目持有一个 fiber,即它的插件实例 | `entry.ts:56` |
-| 嵌套形态 | group 行持子条目组,Include 行持子树 | `entry.ts:60-61` |
-| 路径解析 | 按 `:` 拆分 id,沿子树逐级下钻 | `tree.ts:76-87` |
+| 抽象基类 | 条目树只声明接口,持久化与写回由子类提供 | [`vendor/loader/src/config/tree.ts:7`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L7) |
+| 层级分隔符 | 固定用 `:` 表示条目 id 的层级 | [`tree.ts:8`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L8) |
+| 继承 context | 树把 `baseUrl` 扩展进自己的 context,让相对 specifier 可解析 | [`tree.ts:16`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L16) |
+| 根节点 | 根条目组是整棵树的入口,所有顶层行挂在它下面 | [`tree.ts:17`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L17) |
+| 条目存储 | 以 id 为键的条目字典,供快速定位 | [`tree.ts:13`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L13) |
+| 条目身份 | 条目 id 可含 `:`,写成从根出发的路径 | [`entry.ts:52`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L52)、[`:75-81`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L75-L81) |
+| 条目 context | 每个条目扩展出自己的 context,并把 `Entry.key` 指回条目自身 | [`entry.ts:67`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L67) |
+| 运行时载体 | 条目持有一个 fiber,即它的插件实例 | [`entry.ts:56`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L56) |
+| 嵌套形态 | group 行持子条目组,Include 行持子树 | [`entry.ts:60-61`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L60-L61) |
+| 路径解析 | 按 `:` 拆分 id,沿子树逐级下钻 | [`tree.ts:76-87`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L76-L87) |
 
 <details><summary>原图</summary>
 
@@ -232,11 +232,11 @@ EntryTree(抽象,write() 由子类提供)   tree.ts:7
 
 </details>
 
-`Entry.ctx = loader.ctx.extend({ [Entry.key]: this })`(`entry.ts:67`)——**每个条目有自己的 context**;`EntryTree.sep = ':'`(`tree.ts:8`),`Entry.id` 会拼上祖先 id(`entry.ts:75-81`),`resolve(id)` 按 `:` 拆分沿 `subtree` 下钻(`tree.ts:76-87`)。
+`Entry.ctx = loader.ctx.extend({ [Entry.key]: this })`([`entry.ts:67`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L67))——**每个条目有自己的 context**;`EntryTree.sep = ':'`([`tree.ts:8`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L8)),`Entry.id` 会拼上祖先 id([`entry.ts:75-81`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L75-L81)),`resolve(id)` 按 `:` 拆分沿 `subtree` 下钻([`tree.ts:76-87`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L76-L87))。
 
 ### 4.2 并发挂载与依赖序
 
-`EntryGroup.update`(`group.ts:59-106`)先做两件事:对每条目 `ensureId` 并在挂载前拒绝**重复 id**(`:62-66`),再用 `oldMap`/`newMap` 记录新旧条目集。随后:
+`EntryGroup.update`([`group.ts:59-106`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/group.ts#L59-L106))先做两件事:对每条目 `ensureId` 并在挂载前拒绝**重复 id**([`:62-66`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/group.ts#L62-L66)),再用 `oldMap`/`newMap` 记录新旧条目集。随后:
 
 ```typescript
 // vendor/loader/src/config/group.ts:71-84(节选)
@@ -254,7 +254,7 @@ this.data = config
 
 **"依赖序激活"不是这里排序排出来的**。同层条目确实是一起发起的:`config.map(create)` 对每个条目并行调用,而每个条目的挂载都是一次 `create` 触发的 `entry.update(options, true, true)`(group.ts:30),它走无 fiber 分支(entry.ts:168-179)依次做 `init()` 与 `_start()`,后者调用 `ctx.registry.plugin(...)` 并 `await fiber.await()`(entry.ts:291-302)。关键在 `fiber.await()` 等的是 `inertia` 清空,而**依赖不齐的 fiber 根本没进入 `_reload`,`inertia` 是 `undefined`,`await()` 立即返回**,于是它停在 PENDING,却不拖住同层其他人。于是结果分成两类:依赖已满足的当场进入 ACTIVE;依赖未满足的停在 PENDING,并让 `init()` 就此返回;等后续 provider 上线,一次 `notify` 会沿着 `_refresh` → `_setEpoch` → `_reload` 把它推到 ACTIVE。
 
-整树就绪由 `EntryTree.await()`(`tree.ts:46-64`)收敛:循环条件是 `getTasks()`(收集 `entry._initTask || entry.fiber?.inertia`,`:36-40`)为空且所有 `entry._await()` 成功;`_await()`(`entry.ts:269-275`)把 fiber 错误包成 `failed to apply loader entry <id> (<name>)`;多个失败合成 `AggregateError(failures, 'loader fibers failed')`。循环尾部那句 `this.ctx.reflect.notify(['loader'])`(`:61`)是**关键一步**:它重新唤醒所有 inject 了 `loader` 的 fiber——那是"等整棵树就绪"的插件的挂载信号。
+整树就绪由 `EntryTree.await()`([`tree.ts:46-64`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L46-L64))收敛:循环条件是 `getTasks()`(收集 `entry._initTask || entry.fiber?.inertia`,[`:36-40`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L36-L40))为空且所有 `entry._await()` 成功;`_await()`([`entry.ts:269-275`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L269-L275))把 fiber 错误包成 `failed to apply loader entry <id> (<name>)`;多个失败合成 `AggregateError(failures, 'loader fibers failed')`。循环尾部那句 `this.ctx.reflect.notify(['loader'])`([`:61`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L61))是**关键一步**:它重新唤醒所有 inject 了 `loader` 的 fiber——那是"等整棵树就绪"的插件的挂载信号。
 
 ### 4.3 依赖门:Loader 自己的 `check`
 
@@ -267,7 +267,7 @@ this.data = config
 }
 ```
 
-用法是条目上写 `inject: { loader: { await: true } }`。`Service.check` 是**可用性谓词**(见 [01](./01-cordis-runtime-internals.md)第二节),返回 `false` 时 `Fiber._checkImpl` 不把 `loader` 记入 `_store`(`fiber.ts:601-603`),该 fiber 保持 PENDING——这是"服务已注册但尚不可用"的表达范式。
+用法是条目上写 `inject: { loader: { await: true } }`。`Service.check` 是**可用性谓词**(见 [01](./01-cordis-runtime-internals.md)第二节),返回 `false` 时 `Fiber._checkImpl` 不把 `loader` 记入 `_store`([`fiber.ts:601-603`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L601-L603)),该 fiber 保持 PENDING——这是"服务已注册但尚不可用"的表达范式。
 
 ### 4.4 `internal/plugin` 上的七个 case
 
@@ -275,10 +275,10 @@ Loader 用 `internal/plugin` 把 fiber 生死接到条目树上(`loader/src/inde
 
 | case | 条件 | 处理 |
 |---|---|---|
-| 1 | `fiber.uid` 为真(= 创建) | `fiber.entry = parent[Entry.key]`,并把 `entry.options.inject` 合并进 `fiber.inject`(`:119-123`) |
-| 2-7 | 无 entry / 是条目的子插件 / 插件已删(HMR)/ 树在卸载 / `entry._disposing` / `entry.disabled` | 全部忽略(`:131-153`) |
+| 1 | `fiber.uid` 为真(= 创建) | `fiber.entry = parent[Entry.key]`,并把 `entry.options.inject` 合并进 `fiber.inject`([`:119-123`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L119-L123)) |
+| 2-7 | 无 entry / 是条目的子插件 / 插件已删(HMR)/ 树在卸载 / `entry._disposing` / `entry.disabled` | 全部忽略([`:131-153`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L131-L153)) |
 
-走到最后的唯一情形是"**插件自己 `ctx.fiber.dispose()` 了,Loader 并不知情**";此时 Loader 把该行写成 `disabled: true` 并落盘(`:155-156`)。**这是 `disabled` 的第二重语义**:不只是手写开关,也是"运行期自处置"的持久化记录。
+走到最后的唯一情形是"**插件自己 `ctx.fiber.dispose()` 了,Loader 并不知情**";此时 Loader 把该行写成 `disabled: true` 并落盘([`:155-156`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L155-L156))。**这是 `disabled` 的第二重语义**:不只是手写开关,也是"运行期自处置"的持久化记录。
 
 ---
 
@@ -315,16 +315,16 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 候选生成 | 创建语义下直接用新选项;否则逐键合并,`null` 值视为删除,并对键排序 | `entry.ts:145-155` |
-| 幂等短路 | 与旧状态比对得到差异键集合;为空且非强制则直接返回 | `entry.ts:157-160` |
-| 分支 A | 条目还没有 fiber:只做初始化;失败则把选项回滚 | `entry.ts:168-179` |
-| 分支 B | 新候选被禁用:处置旧实例;失败记为 `dispose` 阶段 | `entry.ts:181-192` |
-| 分支 C | 差异不含重挂字段,等于只是配置变了:重打上下文补丁;失败先回滚选项,再补打旧上下文,补偿也失败则抛 `rollback` 聚合错误 | `entry.ts:194-212` |
-| 分支 D | 差异含重挂字段:导入新模块、处置旧实例、启动新插件 | `entry.ts:214-246` |
-| 分支 D 的失败链 | 导入失败记为 `import`,处置失败记为 `dispose`,启动失败则回滚选项并重启旧插件,回滚也失败抛 `rollback` 聚合错误 | `entry.ts:214-246` |
-| 提交 | 全部成功后才 `commit()`,把新状态落为当前代 | `entry.ts:246` |
-| 错误分级 | 失败阶段只有四个取值:`import`、`dispose`、`apply`、`rollback` | `entry.ts:24-27` |
-| 用户可见诊断 | 报错消息形如 `failed to apply loader entry <id> (<name>)`,启动失败的诊断链从这里开始拼 | `entry.ts:24-27` |
+| 候选生成 | 创建语义下直接用新选项;否则逐键合并,`null` 值视为删除,并对键排序 | [`entry.ts:145-155`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L145-L155) |
+| 幂等短路 | 与旧状态比对得到差异键集合;为空且非强制则直接返回 | [`entry.ts:157-160`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L157-L160) |
+| 分支 A | 条目还没有 fiber:只做初始化;失败则把选项回滚 | [`entry.ts:168-179`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L168-L179) |
+| 分支 B | 新候选被禁用:处置旧实例;失败记为 `dispose` 阶段 | [`entry.ts:181-192`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L181-L192) |
+| 分支 C | 差异不含重挂字段,等于只是配置变了:重打上下文补丁;失败先回滚选项,再补打旧上下文,补偿也失败则抛 `rollback` 聚合错误 | [`entry.ts:194-212`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L194-L212) |
+| 分支 D | 差异含重挂字段:导入新模块、处置旧实例、启动新插件 | [`entry.ts:214-246`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L214-L246) |
+| 分支 D 的失败链 | 导入失败记为 `import`,处置失败记为 `dispose`,启动失败则回滚选项并重启旧插件,回滚也失败抛 `rollback` 聚合错误 | [`entry.ts:214-246`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L214-L246) |
+| 提交 | 全部成功后才 `commit()`,把新状态落为当前代 | [`entry.ts:246`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L246) |
+| 错误分级 | 失败阶段只有四个取值:`import`、`dispose`、`apply`、`rollback` | [`entry.ts:24-27`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L24-L27) |
+| 用户可见诊断 | 报错消息形如 `failed to apply loader entry <id> (<name>)`,启动失败的诊断链从这里开始拼 | [`entry.ts:24-27`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L24-L27) |
 
 <details><summary>原图</summary>
 
@@ -345,17 +345,17 @@ update(options, create, force)                                   entry.ts:142
 
 </details>
 
-`updateError` 的 stage 是固定四值 `'import' | 'dispose' | 'apply' | 'rollback'`(`entry.ts:24-27`),消息形如 `failed to apply loader entry <id> (<name>): <detail>`——启动失败时用户看到的诊断链从这里开始拼。
+`updateError` 的 stage 是固定四值 `'import' | 'dispose' | 'apply' | 'rollback'`([`entry.ts:24-27`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L24-L27)),消息形如 `failed to apply loader entry <id> (<name>): <detail>`——启动失败时用户看到的诊断链从这里开始拼。
 
 ### 5.2 组级:反向回滚
 
-`group.ts:85-105` 的 catch 分两步:**新增的行按 `Object.keys(newMap).reverse()` 逆序移除**(跳过 `oldMap` 里已有的),**原有的行按 `oldConfig` 原序重建**,然后 `this.data = oldConfig`。回滚本身出错时把错误收集进 `rollbackErrors`,最后抛 `AggregateError([error, ...rollbackErrors], 'loader entry rollback failed')`——**原始错误永远排第一项**,不掩盖根因。
+[`group.ts:85-105`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/group.ts#L85-L105) 的 catch 分两步:**新增的行按 `Object.keys(newMap).reverse()` 逆序移除**(跳过 `oldMap` 里已有的),**原有的行按 `oldConfig` 原序重建**,然后 `this.data = oldConfig`。回滚本身出错时把错误收集进 `rollbackErrors`,最后抛 `AggregateError([error, ...rollbackErrors], 'loader entry rollback failed')`——**原始错误永远排第一项**,不掩盖根因。
 
 ### 5.3 移动级与启动级
 
-移动(换 group/位置)的 `EntryTree.update`(`tree.ts:114-142`)先 unlink 再插入,失败时反向 unlink 并按 `sourceIndex` 插回,再 `entry.update({}, false, true)` 把状态刷回(`:127-139`);补偿也失败则抛 `failed to roll back loader entry move <id>` 的 `AggregateError`。
+移动(换 group/位置)的 `EntryTree.update`([`tree.ts:114-142`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L114-L142))先 unlink 再插入,失败时反向 unlink 并按 `sourceIndex` 插回,再 `entry.update({}, false, true)` 把状态刷回([`:127-139`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L127-L139));补偿也失败则抛 `failed to roll back loader entry move <id>` 的 `AggregateError`。
 
-根挂载失败由 `boot()` 统一收尾(`packages/boot/app-boot/src/index.ts:816-833`):`await ctx.fiber.dispose()` 处置半成品上下文 → 挖出最深 cause(`while (deepest instanceof Error && deepest.cause !== undefined)`)→ `AggregateError` 时逐项 `formatActivationError` → 抛 `` `${binName}: ${stage}: ${detail}${stack}` ``。`stage` 只有两个取值(`:797`、`:803`):`host preparation failed`(在 `prepare` 阶段,任何条目都还没挂)与 `plugin tree failed to load`(挂载之后)。
+根挂载失败由 `boot()` 统一收尾([`packages/boot/app-boot/src/index.ts:816-833`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L816-L833)):`await ctx.fiber.dispose()` 处置半成品上下文 → 挖出最深 cause(`while (deepest instanceof Error && deepest.cause !== undefined)`)→ `AggregateError` 时逐项 `formatActivationError` → 抛 `` `${binName}: ${stage}: ${detail}${stack}` ``。`stage` 只有两个取值(`:797`、`:803`):`host preparation failed`(在 `prepare` 阶段,任何条目都还没挂)与 `plugin tree failed to load`(挂载之后)。
 
 ---
 
@@ -363,7 +363,7 @@ update(options, create, force)                                   entry.ts:142
 
 ### 6.1 `registerConfig`:一个路径一个 watcher
 
-`Hmr` 是服务插件(`static inject = ['loader', 'timer']`,`hmr/src/index.ts:87`),构造要求 `ctx.loader.internal` 存在(`:120-122`,即需 `--expose-internals`)。`registerConfig`(`:134-187`)的要点:
+`Hmr` 是服务插件(`static inject = ['loader', 'timer']`,`hmr/src/index.ts:87`),构造要求 `ctx.loader.internal` 存在([`:120-122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L120-L122),即需 `--expose-internals`)。`registerConfig`([`:134-187`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L134-L187))的要点:
 
 `registerConfig` 要解决的问题很具体:用户改的是某一个文件,而监听整个目录会带来大量无关事件,所以这里做的是"一个路径一个 watcher"的精确监听。整段注册是一条直路——解析路径、上溯找到真实的监听根、拒绝重复注册、在监听根上建立监听,并**显式关掉全局 ignore 规则**,否则精确监听会被通用忽略规则吃掉。返回的 disposer 挂在当前 fiber 上,注销时不但关闭 watcher,还会等在途刷新跑完,因此调用方完全不需要自己管理 watcher 的生命周期。
 
@@ -388,17 +388,17 @@ flowchart LR
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 解析路径 | `filename` 先相对 `baseDir` 解析成绝对路径 | `vendor/hmr/src/index.ts:136` |
-| 上溯监听根 | 向上找第一个存在且可 `realpath` 的目录,得到规范化路径、监听根与深度 | `hmr/src/index.ts:137-138`、`:64-84` |
-| 拒绝重复 | 同一路径已注册就直接抛 `config path already registered` | `hmr/src/index.ts:139` |
-| 建立精确监听 | 在监听根上 `watch`,并把 `cwd` 与 `ignored` 显式置空以绕过全局 ignore 规则 | `hmr/src/index.ts:142-148` |
-| 首次即刷新 | `ignoreInitial: false` 让注册时对已存在文件立刻刷新一次(与主 watcher 相反) | `hmr/src/index.ts:147`、`:239` |
-| 事件过滤 | `add`、`change`、`unlink` 三类事件统一做绝对路径比对,只认目标文件 | `hmr/src/index.ts:151-158` |
-| 触发刷新 | 命中后交给 `refreshConfig`,由它负责串行化与脏标记 | `hmr/src/index.ts:154`、`:297-324` |
-| 等就绪 | 监听器 `ready` 之后才返回;就绪前报错则注册失败而非静默 | `hmr/src/index.ts:160-173` |
-| 返回 disposer | 返回挂在当前 fiber 上的 effect disposer:注销登记并关闭 watcher | `hmr/src/index.ts:177-181` |
-| 收尾等待 | disposer 还会 `await` 该注册正在跑的刷新,调用方无需自行管理 | `hmr/src/index.ts:180` |
-| 启动失败 | 就绪前出错时先撤销登记、关闭 watcher,再把错误抛出去 | `hmr/src/index.ts:182-186` |
+| 解析路径 | `filename` 先相对 `baseDir` 解析成绝对路径 | [`vendor/hmr/src/index.ts:136`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L136) |
+| 上溯监听根 | 向上找第一个存在且可 `realpath` 的目录,得到规范化路径、监听根与深度 | [`hmr/src/index.ts:137-138`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L137-L138)、[`:64-84`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L64-L84) |
+| 拒绝重复 | 同一路径已注册就直接抛 `config path already registered` | [`hmr/src/index.ts:139`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L139) |
+| 建立精确监听 | 在监听根上 `watch`,并把 `cwd` 与 `ignored` 显式置空以绕过全局 ignore 规则 | [`hmr/src/index.ts:142-148`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L142-L148) |
+| 首次即刷新 | `ignoreInitial: false` 让注册时对已存在文件立刻刷新一次(与主 watcher 相反) | [`hmr/src/index.ts:147`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L147)、[`:239`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L239) |
+| 事件过滤 | `add`、`change`、`unlink` 三类事件统一做绝对路径比对,只认目标文件 | [`hmr/src/index.ts:151-158`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L151-L158) |
+| 触发刷新 | 命中后交给 `refreshConfig`,由它负责串行化与脏标记 | [`hmr/src/index.ts:154`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L154)、[`:297-324`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L297-L324) |
+| 等就绪 | 监听器 `ready` 之后才返回;就绪前报错则注册失败而非静默 | [`hmr/src/index.ts:160-173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L160-L173) |
+| 返回 disposer | 返回挂在当前 fiber 上的 effect disposer:注销登记并关闭 watcher | [`hmr/src/index.ts:177-181`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L177-L181) |
+| 收尾等待 | disposer 还会 `await` 该注册正在跑的刷新,调用方无需自行管理 | [`hmr/src/index.ts:180`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L180) |
+| 启动失败 | 就绪前出错时先撤销登记、关闭 watcher,再把错误抛出去 | [`hmr/src/index.ts:182-186`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L182-L186) |
 
 <details><summary>原图</summary>
 
@@ -424,7 +424,7 @@ flowchart LR
 
 ### 6.3 live patch 的端到端路径
 
-只有 `patchReload: 'live'` 的 profile 装 watcher(`apps/cli/src/profile-boot.ts:355-385`):
+只有 `patchReload: 'live'` 的 profile 装 watcher([`apps/cli/src/profile-boot.ts:355-385`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L355-L385)):
 
 ![时序图：02-loader-and-composition](../assets/diagrams/plugin-system__02-loader-and-composition-261.svg)
 
@@ -448,11 +448,11 @@ sequenceDiagram
 
 </details>
 
-`watchUserPatches`(`app-boot/src/index.ts:250-282`)的回调显式丢弃旧 patches 并重读两个用户文件(`:262-270`),`compose` 即 `composeLive`(`profile-boot.ts:328-333`):bundle 层放下面、overlays 放上面,使"用户编辑永远无法顶掉 bundle 与 `--patch`";两个 watcher(profile 层与 home 层)共享同一个 `composeLive`。它还容忍一种特殊失败(`:274-280`):注册时抛 `INACTIVE_EFFECT`(整棵树在 watcher 打开期间被处置)则返回空 disposer 而非崩溃。
+`watchUserPatches`([`app-boot/src/index.ts:250-282`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L250-L282))的回调显式丢弃旧 patches 并重读两个用户文件([`:262-270`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L262-L270)),`compose` 即 `composeLive`([`profile-boot.ts:328-333`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L328-L333)):bundle 层放下面、overlays 放上面,使"用户编辑永远无法顶掉 bundle 与 `--patch`";两个 watcher(profile 层与 home 层)共享同一个 `composeLive`。它还容忍一种特殊失败([`:274-280`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L274-L280)):注册时抛 `INACTIVE_EFFECT`(整棵树在 watcher 打开期间被处置)则返回空 disposer 而非崩溃。
 
 ### 6.4 模块热替换:`partialReload`
 
-分类算法是**依赖图上的定点迭代**(`hmr/src/index.ts:345-398`):`accepted` 初始为直接改动文件(stashed),`declined` 初始为 externals(`:348-349`);反复扫描 `pending` 直到不再有新结论;规则与注释一致(`:338-343`):**直接改动者 accepted;任一依赖者 accepted 则 accepted;所有依赖者 declined 或属 external 则 declined**;无法判定的保守归入 declined(`:395-397`)。
+分类算法是**依赖图上的定点迭代**(`hmr/src/index.ts:345-398`):`accepted` 初始为直接改动文件(stashed),`declined` 初始为 externals([`:348-349`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L348-L349));反复扫描 `pending` 直到不再有新结论;规则与注释一致([`:338-343`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L338-L343)):**直接改动者 accepted;任一依赖者 accepted 则 accepted;所有依赖者 declined 或属 external 则 declined**;无法判定的保守归入 declined(`:395-397`)。
 
 `partialReload()`(`:400-549`)执行序:
 
@@ -496,18 +496,18 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 启动入口 | 按冻结的环境快照装入 HTTP 代理,必须在任何请求发出前完成 | `apps/cli/src/profile-boot.ts:282`、`:287-290` |
-| 环境快照 | 继承环境 > 调用目录 `.env` > harness home `.env`,两份文件先各自解析校验再应用 | `packages/boot/app-boot/src/index.ts:195-216` |
-| 层叠收集 | 按 bundle 序取层,再依次并入 profile 层、home 层、命令行叠加层 | `apps/cli/src/profile-boot.ts:226-244` |
-| 唯一合成点 | 四层一次 `flat()` 后对空条目表应用,得到最终条目行 | `apps/cli/src/profile-boot.ts:237`、`packages/boot/app-boot/src/profile.ts:841-848` |
-| 遥测派生层 | 遥测开关非空即追加一层 patch,把遥测行置为禁用 | `apps/cli/src/profile-boot.ts:241-242` |
-| 建上下文 | `boot()` 新建 Context,把 `baseUrl` 指向 profile 目录,并提供 harness 家目录路径 | `packages/boot/app-boot/src/index.ts:794-800` |
-| 装入 Loader | `ctx.plugin(Loader)` 注册加载器服务 | `packages/boot/app-boot/src/index.ts:801` |
-| 宿主准备 | `prepare` 回调在任何条目挂载前注入环境快照与命令行服务 | `packages/boot/app-boot/src/index.ts:802`、`apps/cli/src/profile-boot.ts:336-348` |
-| 挂载根 Include | 注册内建 include/group,以固定 id `include` 建根条目并一次带入全部 patch | `packages/boot/app-boot/src/index.ts:804`、`:516-559` |
-| 等整树就绪 | `loader.await()` 收敛全部条目任务,随后做激活审计 | `packages/boot/app-boot/src/index.ts:812`、`:814` |
-| live 监听 | live profile 补装 timer/hmr,并对 profile 层与 home 层各装一个监听 | `apps/cli/src/profile-boot.ts:355-381` |
-| 交还控制 | `appReady.commit()` 宣布应用就绪,进程寿命交给插件 | `apps/cli/src/profile-boot.ts:389` |
+| 启动入口 | 按冻结的环境快照装入 HTTP 代理,必须在任何请求发出前完成 | [`apps/cli/src/profile-boot.ts:282`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L282)、[`:287-290`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L287-L290) |
+| 环境快照 | 继承环境 > 调用目录 `.env` > harness home `.env`,两份文件先各自解析校验再应用 | [`packages/boot/app-boot/src/index.ts:195-216`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L195-L216) |
+| 层叠收集 | 按 bundle 序取层,再依次并入 profile 层、home 层、命令行叠加层 | [`apps/cli/src/profile-boot.ts:226-244`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L226-L244) |
+| 唯一合成点 | 四层一次 `flat()` 后对空条目表应用,得到最终条目行 | [`apps/cli/src/profile-boot.ts:237`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L237)、[`packages/boot/app-boot/src/profile.ts:841-848`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L841-L848) |
+| 遥测派生层 | 遥测开关非空即追加一层 patch,把遥测行置为禁用 | [`apps/cli/src/profile-boot.ts:241-242`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L241-L242) |
+| 建上下文 | `boot()` 新建 Context,把 `baseUrl` 指向 profile 目录,并提供 harness 家目录路径 | [`packages/boot/app-boot/src/index.ts:794-800`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L794-L800) |
+| 装入 Loader | `ctx.plugin(Loader)` 注册加载器服务 | [`packages/boot/app-boot/src/index.ts:801`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L801) |
+| 宿主准备 | `prepare` 回调在任何条目挂载前注入环境快照与命令行服务 | [`packages/boot/app-boot/src/index.ts:802`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L802)、[`apps/cli/src/profile-boot.ts:336-348`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L336-L348) |
+| 挂载根 Include | 注册内建 include/group,以固定 id `include` 建根条目并一次带入全部 patch | [`packages/boot/app-boot/src/index.ts:804`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L804)、[`:516-559`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L516-L559) |
+| 等整树就绪 | `loader.await()` 收敛全部条目任务,随后做激活审计 | [`packages/boot/app-boot/src/index.ts:812`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L812)、[`:814`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L814) |
+| live 监听 | live profile 补装 timer/hmr,并对 profile 层与 home 层各装一个监听 | [`apps/cli/src/profile-boot.ts:355-381`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L355-L381) |
+| 交还控制 | `appReady.commit()` 宣布应用就绪,进程寿命交给插件 | [`apps/cli/src/profile-boot.ts:389`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L389) |
 
 <details><summary>原图</summary>
 
@@ -537,22 +537,22 @@ runProfile(options)                                      profile-boot.ts:282
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `Loader` 类 / 构造 | `vendor/loader/src/index.ts:65`、`:77-160` | 条目树 + 模块导入;`provide('loader')`(`:90`)、`internal/config` 插值(`:92-101`)、配置写回(`:103-109`)、`internal/plugin` 七 case(`:117-157`) |
-| `Loader[Service.check]` / `unwrapExports` | `loader/src/index.ts:166-170`、`:192-199` | `inject: { loader: { await: true } }` 依赖门;ESM/CJS/default 归一化(事故点) |
-| `EntryOptions` / `Entry.update` / `_patchContext` / `_start` / `disabledOf` | `vendor/loader/src/config/entry.ts:9-22`、`:142-246`、`:114-122`、`:291-302`、`:104-108` | 行数据结构;六分支事务化更新;`waterfall('loader/patch-context')`;建 fiber 并等 settle;`!!js` 门控 |
-| `Entry.init` / `_await` | `entry.ts:259-267`、`:269-275` | `_initTask ??=` 去重;fiber 错误包装 |
-| `EntryGroup.update` / `create` / `remove` | `vendor/loader/src/config/group.ts:59-106`、`:20-40`、`:48-57` | 并发挂载 + 反向回滚;条目增删与 `loader/partial-dispose` |
-| `EntryTree.await` / `getTasks` / `import` / `update` / `resolve` | `vendor/loader/src/config/tree.ts:46-64`、`:36-40`、`:145-162`、`:114-142`、`:76-87` | 收敛循环 + `notify(['loader'])`;`cordis:` builtin;移动级回滚;`:` 路径解析 |
-| `evaluate` / `interpolate` / `isJsExpr` / `isolate` 插件 | `vendor/loader/src/config/utils.ts:5-9`、`:12-22`、`:25-27`;`isolate.ts:71-173` | `!!js` 求值器;递归插值;isolate/intercept realm |
-| `entryListSchema` / `applyEntryPatches` | `vendor/include/src/index.ts:23`、`:58-128` | YAML 方言;唯一 patch 算法 |
-| `Include` 构造 / `enqueue` / `[Service.init]` / `refresh` / `_writeFile` / `write` | `include/src/index.ts:194-214`、`:225-229`、`:273-289`、`:301-309`、`:323-342`、`:371-374` | 文件名与 baseUrl;apply 串行化;初读与写入初值;tmp+rename 重试;`loader/config-update` |
-| `Hmr.registerConfig` / `findWatchRoot` / `refreshConfig` | `vendor/hmr/src/index.ts:134-187`、`:64-84`、`:297-324` | 精确路径监听 + effect disposer;上溯 depth;脏标记与失败广播 |
-| `analyzeChanges` / `partialReload` / `Hmr` 主 watcher | `hmr/src/index.ts:345-398`、`:400-549`、`:199-295` | accepted/declined 定点分类;双缓存备份 + dispose→reload + 回滚;配置/外部/loadCache 三分支(`:248-270`) |
-| `boot` / `mountRootInclude` / `watchUserPatches` | `packages/boot/app-boot/src/index.ts:787-834`、`:516-559`、`:250-282` | Loader 装配与 fail-loud;builtins 与根条目;live 层监听 |
-| `loadOptionalPatches` / `loadOverlayPatches` | `app-boot/src/index.ts:295`、`:315` | patch 文件解析(缺失 = 无层;存在但坏 = fail loud) |
-| `composeEntries` / `loadProfileDirectory` / `PROFILE_TEMPLATES` | `app-boot/src/profile.ts:841-848`、`:769-799`、`:105` | 层叠 → 条目表;bundle 解析与 `patchReload` 校验;出厂模板 |
-| `composeProfile` / `composeLive` / `PROFILE_ROOT_CONFIG` | `apps/cli/src/profile-boot.ts:226-244`、`:328-333`、`:84` | 层叠与 live 重算;空根文件内容 |
-| `packages/bundle/base/cordis.patch.yml` | `:1-14` 头注释、`:15` 顶层 `insert` | bundle 层真实形态与"行序无加载语义"自述 |
+| `Loader` 类 / 构造 | [`vendor/loader/src/index.ts:65`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts#L65)、[`:77-160`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts#L77-L160) | 条目树 + 模块导入;`provide('loader')`([`:90`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts#L90))、`internal/config` 插值([`:92-101`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts#L92-L101))、配置写回([`:103-109`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts#L103-L109))、`internal/plugin` 七 case([`:117-157`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts#L117-L157)) |
+| `Loader[Service.check]` / `unwrapExports` | [`loader/src/index.ts:166-170`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts#L166-L170)、[`:192-199`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts#L192-L199) | `inject: { loader: { await: true } }` 依赖门;ESM/CJS/default 归一化(事故点) |
+| `EntryOptions` / `Entry.update` / `_patchContext` / `_start` / `disabledOf` | [`vendor/loader/src/config/entry.ts:9-22`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L9-L22)、[`:142-246`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L142-L246)、[`:114-122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L114-L122)、[`:291-302`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L291-L302)、[`:104-108`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L104-L108) | 行数据结构;六分支事务化更新;`waterfall('loader/patch-context')`;建 fiber 并等 settle;`!!js` 门控 |
+| `Entry.init` / `_await` | [`entry.ts:259-267`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L259-L267)、[`:269-275`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/entry.ts#L269-L275) | `_initTask ??=` 去重;fiber 错误包装 |
+| `EntryGroup.update` / `create` / `remove` | [`vendor/loader/src/config/group.ts:59-106`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/group.ts#L59-L106)、[`:20-40`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/group.ts#L20-L40)、[`:48-57`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/group.ts#L48-L57) | 并发挂载 + 反向回滚;条目增删与 `loader/partial-dispose` |
+| `EntryTree.await` / `getTasks` / `import` / `update` / `resolve` | [`vendor/loader/src/config/tree.ts:46-64`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L46-L64)、[`:36-40`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L36-L40)、[`:145-162`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L145-L162)、[`:114-142`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L114-L142)、[`:76-87`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/tree.ts#L76-L87) | 收敛循环 + `notify(['loader'])`;`cordis:` builtin;移动级回滚;`:` 路径解析 |
+| `evaluate` / `interpolate` / `isJsExpr` / `isolate` 插件 | [`vendor/loader/src/config/utils.ts:5-9`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/utils.ts#L5-L9)、[`:12-22`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/utils.ts#L12-L22)、[`:25-27`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/utils.ts#L25-L27);[`isolate.ts:71-173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/config/isolate.ts#L71-L173) | `!!js` 求值器;递归插值;isolate/intercept realm |
+| `entryListSchema` / `applyEntryPatches` | [`vendor/include/src/index.ts:23`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L23)、[`:58-128`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L58-L128) | YAML 方言;唯一 patch 算法 |
+| `Include` 构造 / `enqueue` / `[Service.init]` / `refresh` / `_writeFile` / `write` | [`include/src/index.ts:194-214`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L194-L214)、[`:225-229`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L225-L229)、[`:273-289`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L273-L289)、[`:301-309`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L301-L309)、[`:323-342`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L323-L342)、[`:371-374`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts#L371-L374) | 文件名与 baseUrl;apply 串行化;初读与写入初值;tmp+rename 重试;`loader/config-update` |
+| `Hmr.registerConfig` / `findWatchRoot` / `refreshConfig` | [`vendor/hmr/src/index.ts:134-187`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L134-L187)、[`:64-84`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L64-L84)、[`:297-324`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L297-L324) | 精确路径监听 + effect disposer;上溯 depth;脏标记与失败广播 |
+| `analyzeChanges` / `partialReload` / `Hmr` 主 watcher | [`hmr/src/index.ts:345-398`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L345-L398)、[`:400-549`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L400-L549)、[`:199-295`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L199-L295) | accepted/declined 定点分类;双缓存备份 + dispose→reload + 回滚;配置/外部/loadCache 三分支([`:248-270`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts#L248-L270)) |
+| `boot` / `mountRootInclude` / `watchUserPatches` | [`packages/boot/app-boot/src/index.ts:787-834`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L787-L834)、[`:516-559`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L516-L559)、[`:250-282`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L250-L282) | Loader 装配与 fail-loud;builtins 与根条目;live 层监听 |
+| `loadOptionalPatches` / `loadOverlayPatches` | [`app-boot/src/index.ts:295`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L295)、[`:315`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/index.ts#L315) | patch 文件解析(缺失 = 无层;存在但坏 = fail loud) |
+| `composeEntries` / `loadProfileDirectory` / `PROFILE_TEMPLATES` | [`app-boot/src/profile.ts:841-848`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L841-L848)、[`:769-799`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L769-L799)、[`:105`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/boot/app-boot/src/profile.ts#L105) | 层叠 → 条目表;bundle 解析与 `patchReload` 校验;出厂模板 |
+| `composeProfile` / `composeLive` / `PROFILE_ROOT_CONFIG` | [`apps/cli/src/profile-boot.ts:226-244`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L226-L244)、[`:328-333`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L328-L333)、[`:84`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L84) | 层叠与 live 重算;空根文件内容 |
+| [`packages/bundle/base/cordis.patch.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml) | [`:1-14`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml#L1-L14) 头注释、[`:15`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/base/cordis.patch.yml#L15) 顶层 `insert` | bundle 层真实形态与"行序无加载语义"自述 |
 
 ---
 

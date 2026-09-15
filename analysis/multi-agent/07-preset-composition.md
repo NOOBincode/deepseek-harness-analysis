@@ -1,14 +1,14 @@
 # 07 · preset 组合:roster → standing composition → agent join
 
-> 源码:`packages/preset/agent-presets/src/preset.ts`(70 行)、`index.ts`(855 行)、`mount.ts`(433 行)、`discovery.ts`(343 行)
-> 出货组合:`packages/preset/agent-presets/presets/standard/agent.cordis.yml`(255 行)
+> 源码:[`packages/preset/agent-presets/src/preset.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/preset.ts)(70 行)、[`index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts)(855 行)、[`mount.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/mount.ts)(433 行)、[`discovery.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/discovery.ts)(343 行)
+> 出货组合:[`packages/preset/agent-presets/presets/standard/agent.cordis.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/presets/standard/agent.cordis.yml)(255 行)
 > 对应[第十章第七节](../10-multi-agent.md);preset 层与父链对子 agent 的后果见 [03](./03-child-agent-composition.md)。
 
 ---
 
 ## 第〇节 一句话结论
 
-preset 是**每会话的 agent 组合**,不是"配置模板"。三段式:**① roster** 扫描若干 root,每个子目录一个 preset,id = 目录名(`discovery.ts` / `preset.ts:18`)→ **② standing composition** 把一个 preset 的 `cordis.yml` 挂成**一份进程内单例子树**,agent 靠"把自己的 scope 父键指向它"加入(`index.ts:769-817`)→ **③ agent join**:`mount`(新会话)或 `composeFrom`(子 agent 加入父正在跑的那一代)(`index.ts:436` / `477`)。
+preset 是**每会话的 agent 组合**,不是"配置模板"。三段式:**① roster** 扫描若干 root,每个子目录一个 preset,id = 目录名([`discovery.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/discovery.ts) / [`preset.ts:18`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/preset.ts#L18))→ **② standing composition** 把一个 preset 的 `cordis.yml` 挂成**一份进程内单例子树**,agent 靠"把自己的 scope 父键指向它"加入([`index.ts:769-817`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L769-L817))→ **③ agent join**:`mount`(新会话)或 `composeFrom`(子 agent 加入父正在跑的那一代)([`index.ts:436`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L436) / `477`)。
 
 三段的统一判据是:**能力在 host 平面,授权在 preset 平面**——装了 provider 不给工具;preset 里少一行才是不给。
 
@@ -31,14 +31,14 @@ export const PRESET_ID = /^[a-z0-9][a-z0-9-]*$/
 
 `PRESET_ID` 是**包含性约束**:因为 id 会成为路径段,`..`、分隔符或看起来像绝对路径的名字会把组合放到部署授权之外。discovery 共用同一个正则,所以"任何副本都声明不了的目录名"根本不是 preset 槽位。
 
-信任只有两档(`preset.ts:3-8`):
+信任只有两档([`preset.ts:3-8`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/preset.ts#L3-L8)):
 
 | `PresetTrust` | 含义 |
 |---|---|
 | `system` | 随部署出货的 preset |
 | `user` | 本地(人写的,或 agent 写的)preset——**因此携带与 shell 访问相同的信任** |
 
-根的顺序在构造期一次性解析(`index.ts:181-185`):
+根的顺序在构造期一次性解析([`index.ts:181-185`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L181-L185)):
 
 ```typescript
 // packages/preset/agent-presets/src/index.ts:181-185
@@ -49,7 +49,7 @@ this.resolvedRoots = [
 ]
 ```
 
-注释与 `Config` JSDoc(`preset.ts:57-69`)说明了两个开关的语义:`includeShippedRoot` 把随包出货的 preset **前置**为 `system` root(所以出货集合总能挂载,并在重名时胜出);`includeUserRoot` 把 harness home 的 `USER_PRESET_DIR` **后置**为 `user` root。
+注释与 `Config` JSDoc([`preset.ts:57-69`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/preset.ts#L57-L69))说明了两个开关的语义:`includeShippedRoot` 把随包出货的 preset **前置**为 `system` root(所以出货集合总能挂载,并在重名时胜出);`includeUserRoot` 把 harness home 的 `USER_PRESET_DIR` **后置**为 `user` root。
 
 读取这两件事必须用 `get roots()`,**不是 `config.roots`**:
 
@@ -64,7 +64,7 @@ this.resolvedRoots = [
 get roots(): readonly PresetRoot[] { return this.resolvedRoots }
 ```
 
-构造期还有一条 fail-loud:`ctx.baseUrl` 缺失直接抛(`index.ts:169-179`)。理由写在注释里:*without a base the roster can neither resolve a row nor tell a healthy preset from one naming a package that is gone, and the silent alternative is the exact failure this check exists to report*。
+构造期还有一条 fail-loud:`ctx.baseUrl` 缺失直接抛([`index.ts:169-179`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L169-L179))。理由写在注释里:*without a base the roster can neither resolve a row nor tell a healthy preset from one naming a package that is gone, and the silent alternative is the exact failure this check exists to report*。
 
 ### 1.1 一个"坏 preset"仍在 roster 上
 
@@ -259,7 +259,7 @@ composeFrom(agentCtx: Context, parentCtx: Context): string | undefined {
 
 | 维度 | `mount` | `composeFrom` |
 |---|---|---|
-| 谁调用 | 新会话的 setup(以及 `recompose`) | 子 agent 的创建窗口(`applyChildComposition`,`child-agent.ts:204`) |
+| 谁调用 | 新会话的 setup(以及 `recompose`) | 子 agent 的创建窗口(`applyChildComposition`,[`child-agent.ts:204`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L204)) |
 | 是否读 roster | 读(`resolveMountable`) | **不读** |
 | 是否可能挂载 | 可能(`ensureStanding`) | **不会** |
 | 是否可能失败 | 会(未知 id / 组合不可用) | 只拒调用者错误(无 scope / 已加入过) |
@@ -285,7 +285,7 @@ composeFrom(agentCtx: Context, parentCtx: Context): string | undefined {
 private readonly bindings = new WeakMap<ScopeKey, ScopeParentBinding>()
 ```
 
-`bindScopeParent`(`packages/core/scope/src/index.ts:72`)在整仓里**唯一的调用方**就是这两个方法加上 `recompose`。所以"一个 agent 属于哪个 preset"这件事只有 roster 能改。
+`bindScopeParent`([`packages/core/scope/src/index.ts:72`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/index.ts#L72))在整仓里**唯一的调用方**就是这两个方法加上 `recompose`。所以"一个 agent 属于哪个 preset"这件事只有 roster 能改。
 
 ### 4.2 rosterless 部署:没有 join 也不是错误
 
@@ -411,7 +411,7 @@ graph TD
 
 规则三条(推导见 [03 第五节](./03-child-agent-composition.md)):
 
-1. **global 层对每个 agent 可见**——它是 `view()` 里那个起点(`packages/core/tools/src/index.ts:1149`)。所以"host 装了能力"是**所有**会话都能看到该工具的必要条件,但**不是充分条件**:preset 里还得有那一行 Consumer。这就是 yml 里 *Host availability alone grants no tool* 的含义。
+1. **global 层对每个 agent 可见**——它是 `view()` 里那个起点([`packages/core/tools/src/index.ts:1149`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1149))。所以"host 装了能力"是**所有**会话都能看到该工具的必要条件,但**不是充分条件**:preset 里还得有那一行 Consumer。这就是 yml 里 *Host availability alone grants no tool* 的含义。
 2. **preset 层的注册对该 preset 下的每个 agent(含其子)可见**,并参与链上限制求交(`tools/index.ts:1164` 的 `layers.every(layer => layer.admits(name))`)。preset 层若 `restrict` 掉某工具,该 preset 下没有任何 agent 能看到它。
 3. **agent 私有层的注册(ACP 的 MCP 客户端、子 agent 自己的 `structured_output` 工具、`toolFilter` 掩码)** 只属于那个 agent,不进 preset 层,**因此不被子 agent 继承**。
 
@@ -419,7 +419,7 @@ graph TD
 
 ### 6.1 recompose:换 preset 的重连
 
-`recompose(agentCtx, id)`(`index.ts:672-716`)与 `select(agent, agentPreset)`(`:717-730`)/`swap`(`:731-762`)构成"空会话上换 preset"的路径,实际动作就是通过 `bindings` 把 agent 的 scope 父键**重连**到另一个 standing key。`standingsKeyFor(id?)`(`:763-766`)把"某个 preset 的 standing key"暴露给需要按 registry view scope 读取的调用者。
+`recompose(agentCtx, id)`([`index.ts:672-716`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L672-L716))与 `select(agent, agentPreset)`([`:717-730`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L717-L730))/`swap`([`:731-762`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L731-L762))构成"空会话上换 preset"的路径,实际动作就是通过 `bindings` 把 agent 的 scope 父键**重连**到另一个 standing key。`standingsKeyFor(id?)`([`:763-766`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L763-L766))把"某个 preset 的 standing key"暴露给需要按 registry view scope 读取的调用者。
 
 **换 preset 只对空会话合法**——`childSessionMeta` 读 `composedPreset(parent.ctx)` 而非 header,正是为了让子 agent 拿到父**实际**在跑的那一代(见 [03 第三节](./03-child-agent-composition.md))。
 
@@ -427,24 +427,24 @@ graph TD
 
 ## 第七节 关键文件/符号索引表
 
-（下表中的 `index.ts` / `mount.ts` / `preset.ts` 均指 `packages/preset/agent-presets/src/` 下的同名文件。）
+（下表中的 [`index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts) / [`mount.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/mount.ts) / [`preset.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/preset.ts) 均指 `packages/preset/agent-presets/src/` 下的同名文件。）
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `PRESET_ID` / `PresetTrust` | `packages/preset/agent-presets/src/preset.ts:18` / `8` | 路径包含边界;`system` / `user` 两档信任 |
-| `AgentPreset` / `PresetRoot` / `Config` | `preset.ts:21-41` / `44-49` / `52-70` | `broken?`;根的信任;两个 include 开关 |
-| `AgentPresets` 构造 | `agent-presets/src/index.ts:166-234` | `baseUrl` fail-loud;`resolvedRoots` 三段拼接;settings 注入;`agent/created` 告警 |
-| `roots` / `authorable` / `defaultId` | `index.ts:508-515` / `243-248` | 读派生结果而非 config 字段;`selectionPolicy()` |
-| `list` / `remoteExportList` / `compositionInventory` | `index.ts:265-267` / `278-...` / `315-...` | roster 与组合清单 |
+| `PRESET_ID` / `PresetTrust` | [`packages/preset/agent-presets/src/preset.ts:18`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/preset.ts#L18) / `8` | 路径包含边界;`system` / `user` 两档信任 |
+| `AgentPreset` / `PresetRoot` / `Config` | [`preset.ts:21-41`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/preset.ts#L21-L41) / `44-49` / `52-70` | `broken?`;根的信任;两个 include 开关 |
+| `AgentPresets` 构造 | [`agent-presets/src/index.ts:166-234`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L166-L234) | `baseUrl` fail-loud;`resolvedRoots` 三段拼接;settings 注入;`agent/created` 告警 |
+| `roots` / `authorable` / `defaultId` | [`index.ts:508-515`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L508-L515) / `243-248` | 读派生结果而非 config 字段;`selectionPolicy()` |
+| `list` / `remoteExportList` / `compositionInventory` | [`index.ts:265-267`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L265-L267) / `278-...` / `315-...` | roster 与组合清单 |
 | `resolve` / `resolveMountable` | `index.ts:365-...` / `390-400` | 解析与"可挂载性"前置拒绝 |
-| `mount` / `composeFrom` / `composedPreset` | `index.ts:436-449` / `477-486` / `497-499` | 确保 standing → 一次 bind;按**实例**加入父世代(同步);读 scope 链 |
-| `bindings` | `index.ts:415-421` | WeakMap;dsh-scope 唯一重连能力的私有持有者 |
-| `recompose` / `select` / `swap` / `standingKeyFor` | `index.ts:672-716` / `717-730` / `731-762` / `763-766` | 空会话换 preset 的重连路径 |
-| `ensureStanding` / `compositionStamp` / `sameStamp` / `StandingMount` | `index.ts:769-817` / `829-843` / `846-849` | single-flight;文件戳代际;失败可重试 |
-| `mountPreset` | `mount.ts:378-433` | 门零无 scope 拒绝 + 两道硬门 + 整树 dispose + `agent-preset/invalid` |
-| `inactiveRows` / `leakedServices` | `mount.ts:304-322` / `210-224` | 跳过 `disabled`;按符号身份判 root realm 泄漏 |
-| `withinFiber` / `serviceForAgent` | `mount.ts:189-196` / `277-293` | fiber 身份成员判断;反向读地址 |
-| `standingMountFor` / `livePresetMounts` / `pruneDisposedMounts` | `mount.ts:243-251` / `173-...` / `156-...` | 用 agent 的 **scope 父键**定位 standing 组合 |
-| `mountDetail` / `detailBranches` | `mount.ts:355-368` / `338-341` | 渲染误差链分支(含被包装的 `AggregateError`) |
-| `presets/standard/agent.cordis.yml` | 第 158-235 行 | delegation 组、`isolate` 边界、host/agent 平面分工、`disabled` 样板 |
-| `ToolRegistry.view` | `packages/core/tools/src/index.ts:1142-1173` | global → 链上逐层 → own layer;链上限制求交 |
+| `mount` / `composeFrom` / `composedPreset` | [`index.ts:436-449`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L436-L449) / `477-486` / `497-499` | 确保 standing → 一次 bind;按**实例**加入父世代(同步);读 scope 链 |
+| `bindings` | [`index.ts:415-421`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L415-L421) | WeakMap;dsh-scope 唯一重连能力的私有持有者 |
+| `recompose` / `select` / `swap` / `standingKeyFor` | [`index.ts:672-716`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L672-L716) / `717-730` / `731-762` / `763-766` | 空会话换 preset 的重连路径 |
+| `ensureStanding` / `compositionStamp` / `sameStamp` / `StandingMount` | [`index.ts:769-817`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L769-L817) / `829-843` / `846-849` | single-flight;文件戳代际;失败可重试 |
+| `mountPreset` | [`mount.ts:378-433`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/mount.ts#L378-L433) | 门零无 scope 拒绝 + 两道硬门 + 整树 dispose + `agent-preset/invalid` |
+| `inactiveRows` / `leakedServices` | [`mount.ts:304-322`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/mount.ts#L304-L322) / `210-224` | 跳过 `disabled`;按符号身份判 root realm 泄漏 |
+| `withinFiber` / `serviceForAgent` | [`mount.ts:189-196`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/mount.ts#L189-L196) / `277-293` | fiber 身份成员判断;反向读地址 |
+| `standingMountFor` / `livePresetMounts` / `pruneDisposedMounts` | [`mount.ts:243-251`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/mount.ts#L243-L251) / `173-...` / `156-...` | 用 agent 的 **scope 父键**定位 standing 组合 |
+| `mountDetail` / `detailBranches` | [`mount.ts:355-368`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/mount.ts#L355-L368) / `338-341` | 渲染误差链分支(含被包装的 `AggregateError`) |
+| [`presets/standard/agent.cordis.yml`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/presets/standard/agent.cordis.yml) | 第 158-235 行 | delegation 组、`isolate` 边界、host/agent 平面分工、`disabled` 样板 |
+| `ToolRegistry.view` | [`packages/core/tools/src/index.ts:1142-1173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1142-L1173) | global → 链上逐层 → own layer;链上限制求交 |

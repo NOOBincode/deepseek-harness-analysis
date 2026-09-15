@@ -1,6 +1,6 @@
 # 03 · agent-loop 侧调度器:分组、滚动池、模型序提交与并发时序
 
-> 分析对象 `dbbaa4a37`。核心源码:`packages/core/agent-loop/src/tool-calls.ts`(290 行,调度器全部实现)、`packages/core/tools/src/index.ts:1266`(分类器)、`packages/core/agent-loop/src/constants.ts`(默认并发上限)、`packages/core/agent-loop/src/agent.ts:486-492`(调用方与回流)。
+> 分析对象 `dbbaa4a37`。核心源码:[`packages/core/agent-loop/src/tool-calls.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts)(290 行,调度器全部实现)、[`packages/core/tools/src/index.ts:1266`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1266)(分类器)、[`packages/core/agent-loop/src/constants.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/constants.ts)(默认并发上限)、[`packages/core/agent-loop/src/agent.ts:486-492`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L486-L492)(调用方与回流)。
 > 第五章第五节给了 `fillPool` 的一段摘录。
 
 ---
@@ -33,14 +33,14 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 分组循环 | 反复取首个未提交的调用,按它的并发分类切出下一组,把组回报的消费数累加,并冒泡"是否结束本轮"与取消标志 | `tool-calls.ts:60`、`:85`、`:94`、`:95` |
+| 分组循环 | 反复取首个未提交的调用,按它的并发分类切出下一组,把组回报的消费数累加,并冒泡"是否结束本轮"与取消标志 | [`tool-calls.ts:60`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L60)、[`:85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L85)、[`:94`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L94)、[`:95`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L95) |
 | 分类器 | 向注册表询问这个调用能否并发;未声明、抛错、返回非 `true`、工具不可见都算独占 | `index.ts:1266` |
-| 一个组的生命周期 | 建组内槽位数组与调用事件序号数组,再依次跑启动、补池、提交三条链 | `tool-calls.ts:122`、`:133`、`:135` |
-| 启动一个调用 | 先落 `tool/call` 事件(这样被拒或取消的调用也留痕),再等前置门,最后按前置结果分流 | `tool-calls.ts:165`、`:168`、`:170` |
-| 滚动补池 | 三个条件都满足才继续启动:未取消、组内还有待启动、在飞数未到上限;每轮启动后立刻尝试提交 | `tool-calls.ts:199`、`:200`、`:206`、`:209` |
-| 提交 | 只推进连续前缀;待后置的走`finalize`,无需后置的走`finish`,然后落 `tool/result` 并接管随附上下文 | `tool-calls.ts:147`、`:148`、`:150`、`:153`、`:156` |
-| 主循环 | 等任一次执行落定 → 删掉槽位 → 提交 → 复查取消 → 再补池 | `tool-calls.ts:221`、`:222`、`:223`、`:225`、`:230` |
-| 组间屏障 | 组返回前池必然排空、每个已启动调用都已提交,外层才继续分类下一组;正常完成按实际启动数回报,取消则跳过整组 | `tool-calls.ts:238`、`:242`、`:246` |
+| 一个组的生命周期 | 建组内槽位数组与调用事件序号数组,再依次跑启动、补池、提交三条链 | [`tool-calls.ts:122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L122)、[`:133`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L133)、[`:135`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L135) |
+| 启动一个调用 | 先落 `tool/call` 事件(这样被拒或取消的调用也留痕),再等前置门,最后按前置结果分流 | [`tool-calls.ts:165`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L165)、[`:168`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L168)、[`:170`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L170) |
+| 滚动补池 | 三个条件都满足才继续启动:未取消、组内还有待启动、在飞数未到上限;每轮启动后立刻尝试提交 | [`tool-calls.ts:199`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L199)、[`:200`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L200)、[`:206`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L206)、[`:209`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L209) |
+| 提交 | 只推进连续前缀;待后置的走`finalize`,无需后置的走`finish`,然后落 `tool/result` 并接管随附上下文 | [`tool-calls.ts:147`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L147)、[`:148`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L148)、[`:150`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L150)、[`:153`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L153)、[`:156`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L156) |
+| 主循环 | 等任一次执行落定 → 删掉槽位 → 提交 → 复查取消 → 再补池 | [`tool-calls.ts:221`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L221)、[`:222`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L222)、[`:223`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L223)、[`:225`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L225)、[`:230`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L230) |
+| 组间屏障 | 组返回前池必然排空、每个已启动调用都已提交,外层才继续分类下一组;正常完成按实际启动数回报,取消则跳过整组 | [`tool-calls.ts:238`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L238)、[`:242`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L242)、[`:246`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L246) |
 
 <details><summary>完整调用树</summary>
 
@@ -142,7 +142,7 @@ function parseArguments(raw: string): unknown {
 | 正常完成 | `started`(`:246`) | exclusive 组恒为 1;parallel 组是**实际启动数**——若被重分类截断,`started < group.length`,`next` 只推进到屏障处,外层重新用 `executionMode` 决定下一组 |
 | 取消 | `group.length`(`:242`) | `next` 直接跳过整组,随后 `outcome.aborted` 触发对剩余调用的合成,函数返回 |
 
-`concluded ||= outcome.concluded`(`:95`)让"任一组里任一提交结果标了 `concludesTurn`"冒泡到 `agent.ts:492`,由它决定本轮 step 结束。
+`concluded ||= outcome.concluded`(`:95`)让"任一组里任一提交结果标了 `concludesTurn`"冒泡到 [`agent.ts:492`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L492),由它决定本轮 step 结束。
 
 ---
 
@@ -265,12 +265,12 @@ while (!aborted && nextToStart < group.length && inFlight.size < maxParallelTool
 |---|---|---|
 | `!aborted` | `:200` | 取消后不再启动新的 |
 | `nextToStart < group.length` | `:200` | 组内还有待启动 |
-| `inFlight.size < maxParallelToolCalls` | `:200` | 池未满(默认 10,`constants.ts:5`;可配,`index.ts:314`) |
+| `inFlight.size < maxParallelToolCalls` | `:200` | 池未满(默认 10,[`constants.ts:5`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/constants.ts#L5);可配,[`index.ts:314`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L314)) |
 
 | 动作 | 行 | 作用 |
 |---|---|---|
-| 重分类检查 | `:204-205` | `nextToStart > 0`(组首不复查,模式已由它决定)且组模式是 `parallel` 时,重读 `executionMode`;不再 parallel 就 `break`,把屏障留给外层循环下一组 |
-| `await startCall` → `await commitReady` | `:206-209` | **启动一个,立刻尝试提交一批**。这是"只有 dispatch/body 并发"的实现:pre-execute 与 post-execute 交替串行 |
+| 重分类检查 | [`:204-205`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L204-L205) | `nextToStart > 0`(组首不复查,模式已由它决定)且组模式是 `parallel` 时,重读 `executionMode`;不再 parallel 就 `break`,把屏障留给外层循环下一组 |
+| `await startCall` → `await commitReady` | [`:206-209`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L206-L209) | **启动一个,立刻尝试提交一批**。这是"只有 dispatch/body 并发"的实现:pre-execute 与 post-execute 交替串行 |
 
 重分类的注释("Re-read later modes after ordered commits so registry changes can create a barrier")解释了两件事:时机是"有序提交之后"——因为提交点正是注册表可能被改变的时机(`tools/change` 的订阅者、工具自己注册新工具、agent 卸载);效果是"注册表变化可以立起屏障"。
 
@@ -342,16 +342,16 @@ sequenceDiagram
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 进组 | 读并发上限,并把取消标志初始化为信号此刻的状态 | `tool-calls.ts:132`、`:139` |
-| 启动第 0 个 | 先落 `tool/call` 事件,再等前置门——这是全组唯一的串行入口 | `tool-calls.ts:168`、`:170` |
-| 立刻尝试提交 | 第 0 个还没落定,槽位为空,提交循环第一步就退出 | `tool-calls.ts:148`、`:149`、`:150` |
-| 第 0 个进入执行 | 执行 promise 被放进在飞表,从此与后续的前置门并行 | `tool-calls.ts:174`、`:184` |
-| 启动第 1 个 | 第 1 个的前置门排在第 0 个之后,两者不重叠 | `tool-calls.ts:206` |
-| 池满 | 在飞数达到上限 2,补池循环的条件不再成立,停下 | `tool-calls.ts:200` |
-| 第 0 个落定 | 竞争返回下标 0,槽位在回调里写入后才由竞争的结果接手 | `tool-calls.ts:222`、`:176` |
-| 提交第 0 个 | 待后置就先跑后置再终结,然后落 `tool/result`;此时第 1 个还没落定,提交游标停在前一处 | `tool-calls.ts:153`、`:156`、`:151` |
-| 复查取消并补池 | 取消标志在 await 之后重读,腾出来的池位立刻补上 | `tool-calls.ts:229`、`:230` |
-| 池排空后收尾 | 主循环退出时在飞表为空,组按实际启动数回报给外层 | `tool-calls.ts:221`、`:246` |
+| 进组 | 读并发上限,并把取消标志初始化为信号此刻的状态 | [`tool-calls.ts:132`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L132)、[`:139`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L139) |
+| 启动第 0 个 | 先落 `tool/call` 事件,再等前置门——这是全组唯一的串行入口 | [`tool-calls.ts:168`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L168)、[`:170`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L170) |
+| 立刻尝试提交 | 第 0 个还没落定,槽位为空,提交循环第一步就退出 | [`tool-calls.ts:148`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L148)、[`:149`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L149)、[`:150`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L150) |
+| 第 0 个进入执行 | 执行 promise 被放进在飞表,从此与后续的前置门并行 | [`tool-calls.ts:174`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L174)、[`:184`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L184) |
+| 启动第 1 个 | 第 1 个的前置门排在第 0 个之后,两者不重叠 | [`tool-calls.ts:206`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L206) |
+| 池满 | 在飞数达到上限 2,补池循环的条件不再成立,停下 | [`tool-calls.ts:200`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L200) |
+| 第 0 个落定 | 竞争返回下标 0,槽位在回调里写入后才由竞争的结果接手 | [`tool-calls.ts:222`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L222)、[`:176`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L176) |
+| 提交第 0 个 | 待后置就先跑后置再终结,然后落 `tool/result`;此时第 1 个还没落定,提交游标停在前一处 | [`tool-calls.ts:153`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L153)、[`:156`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L156)、[`:151`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L151) |
+| 复查取消并补池 | 取消标志在 await 之后重读,腾出来的池位立刻补上 | [`tool-calls.ts:229`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L229)、[`:230`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L230) |
+| 池排空后收尾 | 主循环退出时在飞表为空,组按实际启动数回报给外层 | [`tool-calls.ts:221`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L221)、[`:246`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L246) |
 
 <details><summary>完整调用树</summary>
 
@@ -401,17 +401,17 @@ function appendSkippedToolCall(session, turn, step, block): void {
 
 ### 4.1 为什么必须合成
 
-会话日志是**唯一权威**(仓库根约定的"Model-visible ⟺ logged")。取消发生时,`assistant/message`(含全部 N 个 `tool-call` 块)已经 durable 地落盘(`agent.ts:476`)。如果只有部分调用有结果:`deriveMessages()` 会产出"发了 N 个调用、回来 M 个结果"的消息序列;replay 该会话时"每个 `tool/call` 恰有一个 `tool/result`"的不变量被破坏;客户端 `ToolCallTree` 会把没有结果的调用永远渲染成 running。合成修复全部三条。注意它是**成对**追加的:`appendToolCall` + `appendToolResult`(`:251-259`),第二条用 `sourceEventSeqs: [callSeq]` 引用第一条(`:289`)。
+会话日志是**唯一权威**(仓库根约定的"Model-visible ⟺ logged")。取消发生时,`assistant/message`(含全部 N 个 `tool-call` 块)已经 durable 地落盘([`agent.ts:476`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L476))。如果只有部分调用有结果:`deriveMessages()` 会产出"发了 N 个调用、回来 M 个结果"的消息序列;replay 该会话时"每个 `tool/call` 恰有一个 `tool/result`"的不变量被破坏;客户端 `ToolCallTree` 会把没有结果的调用永远渲染成 running。合成修复全部三条。注意它是**成对**追加的:`appendToolCall` + `appendToolResult`([`:251-259`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L251-L259)),第二条用 `sourceEventSeqs: [callSeq]` 引用第一条([`:289`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L289))。
 
 ### 4.2 合成结果与注册表结果的一致性
 
-`tool-calls.ts:17` 从 `@deepseek-ai/dsh-tools` 导入 `TOOL_ABORTED_BEFORE_DISPATCH` 这个**常量**,而不是写字符串字面量。于是调度器合成的 `error.info.code` 与注册表 `toolAbortedBeforeDispatchResult()`(`index.ts:1923-1934`)产出的完全一致;模型可见文本也逐字节相同(`'Error: tool call aborted before dispatch'`,两边分别在 `tool-calls.ts:253` 与 `index.ts:1926`)。
+[`tool-calls.ts:17`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L17) 从 `@deepseek-ai/dsh-tools` 导入 `TOOL_ABORTED_BEFORE_DISPATCH` 这个**常量**,而不是写字符串字面量。于是调度器合成的 `error.info.code` 与注册表 `toolAbortedBeforeDispatchResult()`(`index.ts:1923-1934`)产出的完全一致;模型可见文本也逐字节相同(`'Error: tool call aborted before dispatch'`,两边分别在 [`tool-calls.ts:253`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L253) 与 `index.ts:1926`)。
 
-**两个独立生产者、一套词汇**——这正是 `packages/core/agent-loop/src/tool-calls.ts` 顶部注释(`:8-10`)所谓 "Abort records synthetic error results for skipped calls so replay stays valid" 的含义。
+**两个独立生产者、一套词汇**——这正是 [`packages/core/agent-loop/src/tool-calls.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts) 顶部注释([`:8-10`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L8-L10))所谓 "Abort records synthetic error results for skipped calls so replay stays valid" 的含义。
 
 ### 4.3 `aborted` 的初始值
 
-`let aborted: boolean = signal.aborted`(`:139`)。进入 `runGroup` 时信号已中止的话:`fillPool` 第一个条件为假 → 立即返回;主循环条件为假 → 跳过;`aborted` 为真 → `group.slice(0)`(**全部**)被合成;返回 `consumed: group.length`。于是"step 中途被取消,而这一批调用还没开始任何一个"这条路径不需要任何特殊分支——它与其他取消路径共用同一段收尾代码。
+`let aborted: boolean = signal.aborted`([`:139`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L139))。进入 `runGroup` 时信号已中止的话:`fillPool` 第一个条件为假 → 立即返回;主循环条件为假 → 跳过;`aborted` 为真 → `group.slice(0)`(**全部**)被合成;返回 `consumed: group.length`。于是"step 中途被取消,而这一批调用还没开始任何一个"这条路径不需要任何特殊分支——它与其他取消路径共用同一段收尾代码。
 
 ---
 
@@ -438,12 +438,12 @@ const throwSchedulerFailure = (): void => {
 | 触发源 | `signal.aborted` | `dispatch` 的 promise reject(即 `TOOL_RUNTIME_SCHEDULER.dispatch` 抛错) |
 | 对已启动调用 | 排空 → **提交其结果** | `await Promise.allSettled(inFlight.values())` 排空,**不提交** |
 | 对未启动调用 | 逐个 `appendSkippedToolCall` | **不动** |
-| 已落的 `tool/call` | 各配一条合成 `tool/result` | **原样保留**,交给 turn 边界的错误处理(`agent.ts:322-335`) |
+| 已落的 `tool/call` | 各配一条合成 `tool/result` | **原样保留**,交给 turn 边界的错误处理([`agent.ts:322-335`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L322-L335)) |
 | 函数结果 | `GroupOutcome{aborted: true}` | **抛出**第一个失败 |
 
-差异的理由:取消是**正常的产品结果**(用户按了停止),会话必须保持可 replay,所以补全;调度器失败是**缺陷信号**,伪造结果会把"调度器坏了"伪装成"工具失败了"。`tool-calls.ts:9-10` 的注释把这条对照写在模块头:"A terminal scheduler failure preserves already-recorded `tool/call` events without fabricating results."
+差异的理由:取消是**正常的产品结果**(用户按了停止),会话必须保持可 replay,所以补全;调度器失败是**缺陷信号**,伪造结果会把"调度器坏了"伪装成"工具失败了"。[`tool-calls.ts:9-10`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L9-L10) 的注释把这条对照写在模块头:"A terminal scheduler failure preserves already-recorded `tool/call` events without fabricating results."
 
-`??=`(`:180`、`:233`)保证**第一个**失败被保留;后续失败不覆盖它。
+`??=`([`:180`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L180)、[`:233`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L233))保证**第一个**失败被保留;后续失败不覆盖它。
 
 ---
 
@@ -478,15 +478,15 @@ export interface ToolRuntimeScheduler {
 
 三条推论:
 
-1. **策略监听器看到的调用顺序是确定的**。`tools/pre-execute`、`tools/post-execute` 的监听器可以安全地维护"第几个调用"这类状态,因为有序阶段从不相交(`tool-calls.ts:216-218` 注释:"Ordered pre-execute may await; only dispatch/body overlaps")。
+1. **策略监听器看到的调用顺序是确定的**。`tools/pre-execute`、`tools/post-execute` 的监听器可以安全地维护"第几个调用"这类状态,因为有序阶段从不相交([`tool-calls.ts:216-218`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L216-L218) 注释:"Ordered pre-execute may await; only dispatch/body overlaps")。
 2. **`tools/execute` wrapper 是唯一需要线程安全意识的扩展点**。`timeout-policy` 会原地写 `exec.signal`——因为每个调用有独立 `exec`(§2.1)且 wrapper 在 `finally` 里还原(`timeout-policy:78`),这不会串味。
-3. **`isConcurrencySafe` 的义务由此确定**。`index.ts:248-261` 的 JSDoc 要求"不得改动父级持有的状态,共享状态必须容忍并发派发;recorder 竞态只有在可交换或 fail-closed 时才被允许"。这句话在时序上的确切含义就是:并行阶段只有 `dispatch`,它跨越的正是 `await tool.execute(...)`(`index.ts:1539`)。
+3. **`isConcurrencySafe` 的义务由此确定**。[`index.ts:248-261`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L248-L261) 的 JSDoc 要求"不得改动父级持有的状态,共享状态必须容忍并发派发;recorder 竞态只有在可交换或 fail-closed 时才被允许"。这句话在时序上的确切含义就是:并行阶段只有 `dispatch`,它跨越的正是 `await tool.execute(...)`(`index.ts:1539`)。
 
 ### 6.2 `exclusive` 的屏障语义
 
 `exclusive` 不是"串行执行",而是**两件事同时成立**:①**独占地执行**——`group = [first]`,没有任何兄弟与之并发;②**排序栅栏**——`runGroup` 返回前必然 `while (inFlight.size > 0)` 排空且 `committed === started`,所以外层 `executeToolCalls` 的下一轮分类不可能与它重叠。② 的实现就是主循环退出条件本身:下一组的 `prepare` 开始时,上一组**连 post-execute 和日志追加都已完成**。
 
-PTC 侧刻意复刻了这条时序,包括"屏障覆盖到 commit":`ptc.ts:405-407` 的注释写明 "The barrier covers post-execute: later starts wait for the exclusive call's full pipeline, as under the native loop."(详见 [05-ptc-mode.md](./05-ptc-mode.md))。
+PTC 侧刻意复刻了这条时序,包括"屏障覆盖到 commit":[`ptc.ts:405-407`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L405-L407) 的注释写明 "The barrier covers post-execute: later starts wait for the exclusive call's full pipeline, as under the native loop."(详见 [05-ptc-mode.md](./05-ptc-mode.md))。
 
 ### 6.3 一个端到端的时序图
 
@@ -530,16 +530,16 @@ sequenceDiagram
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `executeToolCalls` | `packages/core/agent-loop/src/tool-calls.ts:60` | 分组循环;`next`/`concluded`;取消后对剩余调用合成 |
-| `PlannedCall` / `Slot` / `GroupOutcome` | `tool-calls.ts:21` / `:27` / `:34` | 每个调用一个独立 `exec`;`{exec,result,needsPost}`;`{consumed,aborted,concluded}` |
-| `parseArguments` | `tool-calls.ts:105` | 空串→`{}`;非法 JSON 保留原文 |
-| `runGroup` | `tool-calls.ts:122` | 一个组的完整生命周期与六个游标 |
-| `commitReady` | `tool-calls.ts:147` | 只推进连续模型序前缀;`needsPost` 选 `finalize`/`finish` |
-| `startCall` | `tool-calls.ts:165` | append `tool/call` → `await prepare` → 分流 dispatch/post-result/final-result |
-| `fillPool` / 主循环 | `tool-calls.ts:199` / `:221` | 三条件滚动补池、惰性重分类;`Promise.race` → 提交 → 复查 abort → 补池 |
-| catch / `throwSchedulerFailure` | `tool-calls.ts:142` / `:232` | 失败不伪造结果,排空后抛第一个错误 |
-| `appendSkippedToolCall` / `appendToolCall` / `appendToolResult` | `tool-calls.ts:250` / `:263` / `:269` | 取消合成;`sourceEventSeqs: [callSeq]`;持久化 `error.info` 与 `meta` |
-| `DEFAULT_MAX_PARALLEL_TOOL_CALLS` / `maxParallelToolCalls` 配置 | `packages/core/agent-loop/src/constants.ts:5` / `src/index.ts:314`、`:396` | `10`;正整数校验(`:191-195`) |
-| `ToolRuntime.executionMode` | `packages/core/tools/src/index.ts:1266` | fail-closed 分类;每次重跑 `view()` |
-| `TOOL_RUNTIME_SCHEDULER` / `ScheduledToolPreparation` / `ScheduledToolDispatch` | `index.ts:459`(接口 `:444`)/ `:424` / `:434` | 四段接口与阶段可见性编码 |
-| `step()` 中的调用与回流 / `acceptContext` 闭包 | `packages/core/agent-loop/src/agent.ts:486-492` / `:490` | `filter(tool-call)` → `executeToolCalls` → `concluded`;`inbox.splice('next-step', …)` |
+| `executeToolCalls` | [`packages/core/agent-loop/src/tool-calls.ts:60`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L60) | 分组循环;`next`/`concluded`;取消后对剩余调用合成 |
+| `PlannedCall` / `Slot` / `GroupOutcome` | [`tool-calls.ts:21`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L21) / [`:27`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L27) / [`:34`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L34) | 每个调用一个独立 `exec`;`{exec,result,needsPost}`;`{consumed,aborted,concluded}` |
+| `parseArguments` | [`tool-calls.ts:105`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L105) | 空串→`{}`;非法 JSON 保留原文 |
+| `runGroup` | [`tool-calls.ts:122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L122) | 一个组的完整生命周期与六个游标 |
+| `commitReady` | [`tool-calls.ts:147`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L147) | 只推进连续模型序前缀;`needsPost` 选 `finalize`/`finish` |
+| `startCall` | [`tool-calls.ts:165`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L165) | append `tool/call` → `await prepare` → 分流 dispatch/post-result/final-result |
+| `fillPool` / 主循环 | [`tool-calls.ts:199`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L199) / [`:221`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L221) | 三条件滚动补池、惰性重分类;`Promise.race` → 提交 → 复查 abort → 补池 |
+| catch / `throwSchedulerFailure` | [`tool-calls.ts:142`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L142) / [`:232`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L232) | 失败不伪造结果,排空后抛第一个错误 |
+| `appendSkippedToolCall` / `appendToolCall` / `appendToolResult` | [`tool-calls.ts:250`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L250) / [`:263`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L263) / [`:269`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L269) | 取消合成;`sourceEventSeqs: [callSeq]`;持久化 `error.info` 与 `meta` |
+| `DEFAULT_MAX_PARALLEL_TOOL_CALLS` / `maxParallelToolCalls` 配置 | [`packages/core/agent-loop/src/constants.ts:5`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/constants.ts#L5) / [`src/index.ts:314`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L314)、[`:396`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L396) | `10`;正整数校验([`:191-195`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L191-L195)) |
+| `ToolRuntime.executionMode` | [`packages/core/tools/src/index.ts:1266`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1266) | fail-closed 分类;每次重跑 `view()` |
+| `TOOL_RUNTIME_SCHEDULER` / `ScheduledToolPreparation` / `ScheduledToolDispatch` | [`index.ts:459`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L459)(接口 [`:444`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L444))/ [`:424`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L424) / [`:434`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L434) | 四段接口与阶段可见性编码 |
+| `step()` 中的调用与回流 / `acceptContext` 闭包 | [`packages/core/agent-loop/src/agent.ts:486-492`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L486-L492) / [`:490`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L490) | `filter(tool-call)` → `executeToolCalls` → `concluded`;`inbox.splice('next-step', …)` |

@@ -42,7 +42,7 @@ export interface ProjectionDefinition<
 - **同一个事件无关时必须返回同一个引用**。这不是风格建议:框架用 `Object.is` 判定"是否变化",返回新对象等于声称状态变了,会白白计算视图、白白比较、白白持久化。
 - **`state` 必须是纯 JSON**。检查点会把状态原样序列化进存储域,一个含 `Map`/`Date`/类实例的状态在写入时才炸,而那时已经远离产生它的代码。`stateVersion` 是这条约束的补救条款:改了字段含义就直接丢掉旧行重折,而不是尝试迁移。
 
-两项类型表本身是空的,由领域包合并(`session-projection/src/types.ts:11-24`):一个键可以只出现在 `SessionProjectionStateMap` 里,那就是"仅宿主可见"的单元——它照常折、照常落检查点,只是不出现在客户端快照里。
+两项类型表本身是空的,由领域包合并([`session-projection/src/types.ts:11-24`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/types.ts#L11-L24)):一个键可以只出现在 `SessionProjectionStateMap` 里,那就是"仅宿主可见"的单元——它照常折、照常落检查点,只是不出现在客户端快照里。
 
 ---
 
@@ -290,7 +290,7 @@ function lifecycleIdentityMatches(
   }
 ```
 
-纯折叠函数本身只有五行(`request-header.ts:63-69`),`request/context` 用的是同一套写法(`index.ts:797`)。快照的语义是"最新一份即重建值"——中间的历史快照对重建无用,只对审计有用:
+纯折叠函数本身只有五行([`request-header.ts:63-69`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts#L63-L69)),`request/context` 用的是同一套写法([`index.ts:797`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L797))。快照的语义是"最新一份即重建值"——中间的历史快照对重建无用,只对审计有用:
 
 ```typescript
 // packages/core/session/src/types.ts:253-261
@@ -330,7 +330,7 @@ export type RequestHeaderReason = 'initial' | 'resume' | 'change' | 'series'
 | `change` | 与折叠出的基线不等 | 换了模型、改了工具集,header 真的变了 |
 | `series` | 头没变,但开始了明确的新消息序列 | `startsRequestSeries` 或 surface 世代变了 |
 
-普通读取路径下,**头没变就什么都不写**。这是"日志即真源"反过来带来的设计:既然重建只认最后一份快照,重复写同样的快照纯属噪音。`canonicalHeader()` 负责把"空工具列表"这类等价表示归一,否则同一份逻辑头会因为 `[]` 与 `undefined` 的差别被判成"变了"(`request-header.ts:21-30`)。
+普通读取路径下,**头没变就什么都不写**。这是"日志即真源"反过来带来的设计:既然重建只认最后一份快照,重复写同样的快照纯属噪音。`canonicalHeader()` 负责把"空工具列表"这类等价表示归一,否则同一份逻辑头会因为 `[]` 与 `undefined` 的差别被判成"变了"([`request-header.ts:21-30`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts#L21-L30))。
 
 ---
 
@@ -358,7 +358,7 @@ export type RequestHeaderReason = 'initial' | 'resume' | 'change' | 'series'
         // instead of growing persisted state forever.
         return Object.keys(state.pendingCalls).length === 0 ? state : { ...state, pendingCalls: {} }
 ```
-`turns` 靠 `lastTurn === event.data.turn` 去重——同一回合的多个步骤只算一次。`turn/end` 分支则体现了"状态必须能被有界表示为纯 JSON"的直接后果:未落地的工具调用在回合结束时被清掉,否则一个被取消的回合会永久留下一条悬挂记录。定义在 `session-stats/src/projection.ts:113`(key `sessionStats`,`stateVersion: 1`)。
+`turns` 靠 `lastTurn === event.data.turn` 去重——同一回合的多个步骤只算一次。`turn/end` 分支则体现了"状态必须能被有界表示为纯 JSON"的直接后果:未落地的工具调用在回合结束时被清掉,否则一个被取消的回合会永久留下一条悬挂记录。定义在 [`session-stats/src/projection.ts:113`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-stats/src/projection.ts#L113)(key `sessionStats`,`stateVersion: 1`)。
 
 ### 标题:一个投影单元不够,要两个
 
@@ -377,7 +377,7 @@ export const titleProjectionDefinition = {
   // ...(略):wire 视图与 satisfies ProjectionDefinition<'title', string | null>
 ```
 
-第二个是**自动标题的判定输入**——第一条用户消息是什么、一共有几条、最后一条的 seq。它必须是独立单元,因为它折的是 `user/message`,水印要能独立于标题结果推进(`session-title/src/index.ts:340`,`stateVersion: 3`)。标题事件是 log-only 的——它进日志、进投影,但**永不进 surface**:
+第二个是**自动标题的判定输入**——第一条用户消息是什么、一共有几条、最后一条的 seq。它必须是独立单元,因为它折的是 `user/message`,水印要能独立于标题结果推进([`session-title/src/index.ts:340`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-title/src/index.ts#L340),`stateVersion: 3`)。标题事件是 log-only 的——它进日志、进投影,但**永不进 surface**:
 
 ```typescript
 // packages/session/session-title/src/index.ts:71-79
@@ -434,20 +434,20 @@ declare module '@deepseek-ai/dsh-session/types' {
 
 | 符号 | 位置 | 作用 |
 |---|---|---|
-| `ProjectionDefinition` | `packages/session/session-projection/src/index.ts:48` | 投影单元契约 |
-| `ProjectionChangeListener` / `ProjectionSnapshot` | `packages/session/session-projection/src/index.ts:100` / `:112` | 变更回调与一致切面 |
-| `ProjectionCheckpointRow` / `UnitCell` / `Registration` | `packages/session/session-projection/src/index.ts:127` / `:150` / `:169` | 检查点行、水印与视图双槽、单元定义与引用计数 |
-| `SessionProjectionRegistry` / `register` | `packages/session/session-projection/src/index.ts:199` / `:253` | 注册表与驱动服务;注册与引用计数 |
-| `stateOf` / `snapshot` / `cachedSnapshot` / `viewCheckpoint` | `packages/session/session-projection/src/index.ts:319` / `:338` / `:362` / `:448` | 四层读取阶梯 |
-| `checkpoint` / `restoreFloor` | `packages/session/session-projection/src/index.ts:396` / `:425` | 检查点写侧;冷读起点(水位减一锚点) |
-| `restore` / `hydrate` / `advanceCell` / `drive` | `packages/session/session-projection/src/index.ts:495` / `:552` / `:633` / `:657` | 冷读重建、切面装载、增量推进与变更广播 |
-| `SessionProjectionCache.write` | `packages/session/session-projection-cache/src/index.ts:246` | 检查点持久化(先 flush 后落行) |
-| `coldSnapshot` / `cachedPredecessorTitle` | `packages/session/session-projection-cache/src/index.ts:277` / `:172` | 冷读写回;前一代记录只暴露标题 |
-| `identityMatches` / `installWritePath` | `packages/session/session-projection-cache/src/index.ts:419` / `:301` | 生命周期绑定;节流与三个强制点 |
-| `Session.requestHeader` / `requestContext` | `packages/core/session/src/index.ts:776` / `:797` | 请求头与路由元数据的增量折叠 |
-| `foldRequestHeader` / `canonicalHeader` / `headerEquals` | `packages/core/session/src/request-header.ts:63` / `:21` / `:43` | 纯离线重建、空字段归一、字段级相等 |
-| `RequestHeaderReason` | `packages/core/session/src/types.ts:261` | 四个 `reason` 的语义 |
-| `sessionStatsProjectionDefinition` | `packages/session/session-stats/src/projection.ts:113` | 统计单元 |
-| `titleProjectionDefinition` / `titleInput` / `foldSessionTitle` | `packages/session/session-title/src/index.ts:263` / `:340` / `:282` | 标题结果、自动标题输入、纯折叠读回 |
-| `cleanTitleText` | `packages/session/session-title/src/normalize.ts:22` | 标题文本的控制序列净化 |
-| `todos` 注册 | `packages/todo/tool-todo/src/index.ts:134` | 最小投影单元样本 |
+| `ProjectionDefinition` | [`packages/session/session-projection/src/index.ts:48`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L48) | 投影单元契约 |
+| `ProjectionChangeListener` / `ProjectionSnapshot` | [`packages/session/session-projection/src/index.ts:100`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L100) / [`:112`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L112) | 变更回调与一致切面 |
+| `ProjectionCheckpointRow` / `UnitCell` / `Registration` | [`packages/session/session-projection/src/index.ts:127`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L127) / [`:150`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L150) / [`:169`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L169) | 检查点行、水印与视图双槽、单元定义与引用计数 |
+| `SessionProjectionRegistry` / `register` | [`packages/session/session-projection/src/index.ts:199`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L199) / [`:253`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L253) | 注册表与驱动服务;注册与引用计数 |
+| `stateOf` / `snapshot` / `cachedSnapshot` / `viewCheckpoint` | [`packages/session/session-projection/src/index.ts:319`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L319) / [`:338`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L338) / [`:362`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L362) / [`:448`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L448) | 四层读取阶梯 |
+| `checkpoint` / `restoreFloor` | [`packages/session/session-projection/src/index.ts:396`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L396) / [`:425`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L425) | 检查点写侧;冷读起点(水位减一锚点) |
+| `restore` / `hydrate` / `advanceCell` / `drive` | [`packages/session/session-projection/src/index.ts:495`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L495) / [`:552`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L552) / [`:633`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L633) / [`:657`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection/src/index.ts#L657) | 冷读重建、切面装载、增量推进与变更广播 |
+| `SessionProjectionCache.write` | [`packages/session/session-projection-cache/src/index.ts:246`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection-cache/src/index.ts#L246) | 检查点持久化(先 flush 后落行) |
+| `coldSnapshot` / `cachedPredecessorTitle` | [`packages/session/session-projection-cache/src/index.ts:277`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection-cache/src/index.ts#L277) / [`:172`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection-cache/src/index.ts#L172) | 冷读写回;前一代记录只暴露标题 |
+| `identityMatches` / `installWritePath` | [`packages/session/session-projection-cache/src/index.ts:419`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection-cache/src/index.ts#L419) / [`:301`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-projection-cache/src/index.ts#L301) | 生命周期绑定;节流与三个强制点 |
+| `Session.requestHeader` / `requestContext` | [`packages/core/session/src/index.ts:776`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L776) / [`:797`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L797) | 请求头与路由元数据的增量折叠 |
+| `foldRequestHeader` / `canonicalHeader` / `headerEquals` | [`packages/core/session/src/request-header.ts:63`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts#L63) / [`:21`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts#L21) / [`:43`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts#L43) | 纯离线重建、空字段归一、字段级相等 |
+| `RequestHeaderReason` | [`packages/core/session/src/types.ts:261`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L261) | 四个 `reason` 的语义 |
+| `sessionStatsProjectionDefinition` | [`packages/session/session-stats/src/projection.ts:113`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-stats/src/projection.ts#L113) | 统计单元 |
+| `titleProjectionDefinition` / `titleInput` / `foldSessionTitle` | [`packages/session/session-title/src/index.ts:263`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-title/src/index.ts#L263) / [`:340`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-title/src/index.ts#L340) / [`:282`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-title/src/index.ts#L282) | 标题结果、自动标题输入、纯折叠读回 |
+| `cleanTitleText` | [`packages/session/session-title/src/normalize.ts:22`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/session/session-title/src/normalize.ts#L22) | 标题文本的控制序列净化 |
+| `todos` 注册 | [`packages/todo/tool-todo/src/index.ts:134`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/todo/tool-todo/src/index.ts#L134) | 最小投影单元样本 |

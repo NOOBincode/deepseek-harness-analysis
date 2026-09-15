@@ -34,25 +34,25 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 能力缝 | 抽象服务只声明三个方法,触发器是封闭联合 | `CompactionEngine`(`packages/compaction/compaction/src/index.ts:96-170`) |
+| 能力缝 | 抽象服务只声明三个方法,触发器是封闭联合 | `CompactionEngine`([`packages/compaction/compaction/src/index.ts:96-170`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/index.ts#L96-L170)) |
 | 压力触发 | 挂在 `agent/pre-step` 上做前置检查,完成后无条件放行 | `compaction-basic/index.ts:148-166` |
 | 溢出触发 | 挂在 `agent/request-error` 上,只认 provider 确认的窗口溢出 | `compaction-basic/index.ts:180-224` |
 | 路由解析 | 从已落日志的请求信封读精确 provider/model | `routedTarget()`(`compaction-basic/index.ts:52-61`) |
 | 策略合并 | 精确覆盖项盖在服务默认值之上 | `resolveTargetPolicy()`(`config.ts:105-125`) |
 | 阈值折算 | 比例折算成绝对 token 预算 | `resolveCompactSpec()`(`config.ts:133-167`) |
-| 无模型裁剪 | 先把超预算的工具结果裁一遍,再重新计量 | `pruneSession()`(`compaction-tool-result-pruner/src/index.ts:136-185`) |
-| 选区 | 对齐可见面、从尾部倒推保留量、工具对平衡 | `selectCompactableRange()`(`region.ts:117-155`) |
-| 摘要 | 复用会话前缀的一次性调用 | `summarizeWithLlm()`(`summarizer.ts:119-179`) |
-| 增量校验 | 摘要必须真的比被遮蔽区间更小 | `summarizeCompaction()`(`region.ts:386-413`) |
-| 稳定性断言 | 自动压缩要求整份可见面一字不差 | `assertWholeSurfaceUnchanged()`(`region.ts:416-425`) |
-| 提交 | 先写摘要记录,再用一条用户消息替换整段区间 | `commitCompactionBody()`(`region.ts:456-507`) |
+| 无模型裁剪 | 先把超预算的工具结果裁一遍,再重新计量 | `pruneSession()`([`compaction-tool-result-pruner/src/index.ts:136-185`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-tool-result-pruner/src/index.ts#L136-L185)) |
+| 选区 | 对齐可见面、从尾部倒推保留量、工具对平衡 | `selectCompactableRange()`([`region.ts:117-155`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L117-L155)) |
+| 摘要 | 复用会话前缀的一次性调用 | `summarizeWithLlm()`([`summarizer.ts:119-179`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/summarizer.ts#L119-L179)) |
+| 增量校验 | 摘要必须真的比被遮蔽区间更小 | `summarizeCompaction()`([`region.ts:386-413`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L386-L413)) |
+| 稳定性断言 | 自动压缩要求整份可见面一字不差 | `assertWholeSurfaceUnchanged()`([`region.ts:416-425`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L416-L425)) |
+| 提交 | 先写摘要记录,再用一条用户消息替换整段区间 | `commitCompactionBody()`([`region.ts:456-507`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L456-L507)) |
 | 进度证明 | 可见面代数没有增长就不重试 | `compaction-basic/index.ts:218-223` |
 
 ---
 
 ## 一、阈值:比例在加载期验一次,绝对预算在每次检查时算一次
 
-配置分两层:顶层是服务默认值,`modelPolicies` 是按精确 `provider/model` 的覆盖表。加载期能验的都验掉——键名、取值范围、`retainRatio` 与 `retainTokens` 互斥、`summarizationProvider` 与 `summarizationModel` 必须成对出现(`config.ts:227-275`)。
+配置分两层:顶层是服务默认值,`modelPolicies` 是按精确 `provider/model` 的覆盖表。加载期能验的都验掉——键名、取值范围、`retainRatio` 与 `retainTokens` 互斥、`summarizationProvider` 与 `summarizationModel` 必须成对出现([`config.ts:227-275`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/config.ts#L227-L275))。
 
 其中只有一类冲突能在加载期判定:
 
@@ -66,7 +66,7 @@ flowchart TD
   }
 ```
 
-两个比例的比较与容量无关,所以加载期就能判定——"保留得比触发线还多"这种策略没有任何容量能让它成立。默认 `thresholdRatio = 0.8`、`retainRatio = 0.16`(`config.ts:19-23`):触发线在八成,保留尾部一成半,中间那段就是压缩区间。
+两个比例的比较与容量无关,所以加载期就能判定——"保留得比触发线还多"这种策略没有任何容量能让它成立。默认 `thresholdRatio = 0.8`、`retainRatio = 0.16`([`config.ts:19-23`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/config.ts#L19-L23)):触发线在八成,保留尾部一成半,中间那段就是压缩区间。
 
 绝对值形式做不到这一点。`retainTokens` 是绝对数,而触发线是比例的乘积,只有拿到容量才能比较:
 
@@ -101,7 +101,7 @@ function routedTarget(
 }
 ```
 
-读的是**日志里已落盘的请求信封**,不是内存里的 agent 选项。好处是重放时能看到同一套决策依据——会话中途切 provider 或 model,容量与策略立即跟着变,而日志能解释为什么。溢出恢复场景下还没有可用的信封时,`conversationTarget()` 退而用 agent 选项(`index.ts:63-72`)。
+读的是**日志里已落盘的请求信封**,不是内存里的 agent 选项。好处是重放时能看到同一套决策依据——会话中途切 provider 或 model,容量与策略立即跟着变,而日志能解释为什么。溢出恢复场景下还没有可用的信封时,`conversationTarget()` 退而用 agent 选项([`index.ts:63-72`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L63-L72))。
 
 ---
 
@@ -133,9 +133,9 @@ function routedTarget(
 2. **目标级配置错误只警告一次**。`warnedPressureConfigTargets` 用 `provider/model` 当键;缺容量元数据这类错误会在每一步重复出现,警告一次足够。
 3. **其余错误一律降级为 warning**。压缩的收益不值得赔上一个可用回合。
 
-`TargetPressureConfigError` 专门标记"这个键可以抑制"的情况,它把 `targetKey` 作为只读字段一起抛出(`config.ts:51-60`)。
+`TargetPressureConfigError` 专门标记"这个键可以抑制"的情况,它把 `targetKey` 作为只读字段一起抛出([`config.ts:51-60`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/config.ts#L51-L60))。
 
-压力分支的判断顺序(`index.ts:264-327`):
+压力分支的判断顺序([`index.ts:264-327`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L264-L327)):
 
 | 步骤 | 说明 |
 |---|---|
@@ -155,9 +155,9 @@ function routedTarget(
 
 ## 三、选区:保留尾部、不切断工具对、永不压掉系统提示
 
-`selectCompactableRange()` 做三件事。第一件是对齐:计量结果里的**逐个节点有序序号**必须与当前 `session.surface.nodes` 逐位相同,不等就抛 `compaction: token-meter surface does not match the current session surface`(`region.ts:122-129`)。用过期计量裁当前历史会切错区间,所以这里选择失败而不是尽量对齐。
+`selectCompactableRange()` 做三件事。第一件是对齐:计量结果里的**逐个节点有序序号**必须与当前 `session.surface.nodes` 逐位相同,不等就抛 `compaction: token-meter surface does not match the current session surface`([`region.ts:122-129`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L122-L129))。用过期计量裁当前历史会切错区间,所以这里选择失败而不是尽量对齐。
 
-第二件是确定可压区间的左端。`systemHead()` 判断可见面节点 0 是不是 `system/message`(`region.ts:99-105`),是就从节点 1 开始压,于是**系统提示永远不会被压掉**。第三件是尾部保留量与工具对平衡:
+第二件是确定可压区间的左端。`systemHead()` 判断可见面节点 0 是不是 `system/message`([`region.ts:99-105`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L99-L105)),是就从节点 1 开始压,于是**系统提示永远不会被压掉**。第三件是尾部保留量与工具对平衡:
 
 ```typescript
 // packages/compaction/compaction-basic/src/region.ts:133-148
@@ -204,13 +204,13 @@ function routedTarget(
 
 与压力触发的三点差异:
 
-1. **不看阈值**。溢出是既定事实,不需要比例判定;它走"强制做一次有用的缩减"分支——`selectCompactableRange(session, measurement, 0)` 传保留量为 0(`index.ts:289`),意味着尾部可以压到只剩不破坏工具对的最小量。
-2. **裁剪无条件先跑**。压力分支里裁剪是可选优化,溢出分支里它是首选手段(`index.ts:284-292`)。
+1. **不看阈值**。溢出是既定事实,不需要比例判定;它走"强制做一次有用的缩减"分支——`selectCompactableRange(session, measurement, 0)` 传保留量为 0([`index.ts:289`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L289)),意味着尾部可以压到只剩不破坏工具对的最小量。
+2. **裁剪无条件先跑**。压力分支里裁剪是可选优化,溢出分支里它是首选手段([`index.ts:284-292`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L284-L292))。
 3. **重试次数受限**。`maxOverflowRetries` 默认 1。
 
-溢出分支的降级写在返回类型上:`RequestErrorAction` 只有 `{ kind: 'retry' } | undefined`(`packages/core/agent/src/runtime-types.ts:122`),返回 `next()` 就是"我不管,保留原始错误"。
+溢出分支的降级写在返回类型上:`RequestErrorAction` 只有 `{ kind: 'retry' } | undefined`([`packages/core/agent/src/runtime-types.ts:122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts#L122)),返回 `next()` 就是"我不管,保留原始错误"。
 
-**恢复计数在两种情况下清空**:agent 转为 idle,或收到一条成功的 `assistant/message`(`index.ts:168-178`)。第二条的注释说明了理由:同一回合里工具调用会让循环继续发新请求,一次成功响应就证明"窗口现在够用",此前的溢出计数不该继续压着后续请求。
+**恢复计数在两种情况下清空**:agent 转为 idle,或收到一条成功的 `assistant/message`([`index.ts:168-178`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L168-L178))。第二条的注释说明了理由:同一回合里工具调用会让循环继续发新请求,一次成功响应就证明"窗口现在够用",此前的溢出计数不该继续压着后续请求。
 
 ---
 
@@ -229,13 +229,13 @@ function routedTarget(
 
 `replaceGeneration` 是一个单调计数器,任何一次可见面替换都会推进它。进入本次尝试前先记下当时的代数;压缩结束后代数没涨,说明**本次压缩没有产生任何持久缩减**,于是保留原始 provider 错误,而不是重试同一个注定失败的请求。
 
-异常路径用同一个判据,理由是"无模型裁剪可能先落地、摘要后失败"(`index.ts:196-209`):裁剪的替换是持久且立即生效的缩减,重试是合理的;把它一并丢弃会让这次恢复白做。但取消优先于一切——`signal.aborted` 为真时直接放弃。
+异常路径用同一个判据,理由是"无模型裁剪可能先落地、摘要后失败"([`index.ts:196-209`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L196-L209)):裁剪的替换是持久且立即生效的缩减,重试是合理的;把它一并丢弃会让这次恢复白做。但取消优先于一切——`signal.aborted` 为真时直接放弃。
 
 ---
 
 ## 六、摘要必须真的更小
 
-摘要生成本身复用会话自己的前缀:可见面节点 0 的 `system/message`、header 里的 tool schemas、被遮蔽区间按可见面顺序派生出的消息(`region.ts:529-548`)。摘要指令作为**最后一条用户消息**追加,而不是另起一个摘要器系统提示,这样这次辅助调用是上一次请求的真正前缀,provider 的 KV 缓存能命中(`summarizer.ts:24-30` 的注释写明这一点);调用带 `purpose: 'compaction'` 与 `sessionId`(`summarizer.ts:151-160`)。
+摘要生成本身复用会话自己的前缀:可见面节点 0 的 `system/message`、header 里的 tool schemas、被遮蔽区间按可见面顺序派生出的消息([`region.ts:529-548`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L529-L548))。摘要指令作为**最后一条用户消息**追加,而不是另起一个摘要器系统提示,这样这次辅助调用是上一次请求的真正前缀,provider 的 KV 缓存能命中([`summarizer.ts:24-30`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/summarizer.ts#L24-L30) 的注释写明这一点);调用带 `purpose: 'compaction'` 与 `sessionId`([`summarizer.ts:151-160`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/summarizer.ts#L151-L160))。
 
 提交前有一道硬校验:
 
@@ -261,13 +261,13 @@ function routedTarget(
 | 自动压缩 | `whole-surface` | 整个可见面节点序列一字不差 | 会使断言失败,放弃本次 |
 | 手动压缩 | `selected-span` | 选中那段仍是同一个"当前、连续、等价定价、边界平衡"的替换目标 | 仍可见,不影响 |
 
-`assertWholeSurfaceUnchanged()` 用一次重新计量加 `isDeepStrictEqual` 比较整份节点序列(`region.ts:416-425`)。自动压缩要求更严,因为它跑在回合里:期间任何外部写入都意味着决策依据已经变了,重做比强行提交安全。手动压缩跑在空闲会话上,只需要保证选中那段还是原来的替换目标。
+`assertWholeSurfaceUnchanged()` 用一次重新计量加 `isDeepStrictEqual` 比较整份节点序列([`region.ts:416-425`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L416-L425))。自动压缩要求更严,因为它跑在回合里:期间任何外部写入都意味着决策依据已经变了,重做比强行提交安全。手动压缩跑在空闲会话上,只需要保证选中那段还是原来的替换目标。
 
 ---
 
 ## 七、一个事务:一个开启标记就是锁
 
-摘要阶段是异步的,期间可能有并发进入。锁不是内存变量,而是日志里的一条事件:`compaction/start` 一旦落盘,后续任何进入都被 `assertCompactionInactive()` 拒绝(`region.ts:300-319`)。"未闭合的开启标记"就是锁,所以进程崩溃后重启仍能识别出"上次压缩没做完"。唯一的豁免是 `session/end-seed` 边界——它证明那个未闭合标记属于更早的一次会话生命周期。
+摘要阶段是异步的,期间可能有并发进入。锁不是内存变量,而是日志里的一条事件:`compaction/start` 一旦落盘,后续任何进入都被 `assertCompactionInactive()` 拒绝([`region.ts:300-319`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L300-L319))。"未闭合的开启标记"就是锁,所以进程崩溃后重启仍能识别出"上次压缩没做完"。唯一的豁免是 `session/end-seed` 边界——它证明那个未闭合标记属于更早的一次会话生命周期。
 
 提交是两步且**不让出控制权**:
 
@@ -279,17 +279,17 @@ function routedTarget(
   })
 ```
 
-在此之前已有一次 `compaction/summary` 落盘,记录摘要正文、模型、用量、被遮蔽区间与逐节点序号(`region.ts:476-490`)。两条事件之间没有 `await`,所以不存在"记录了摘要但没替换"的中间态。`shadowedSeqs` 把被遮蔽的每个 seq 写进 `sourceEventSeqs`,重放、UI、引用投影都能追溯"这条摘要吞掉了什么"。
+在此之前已有一次 `compaction/summary` 落盘,记录摘要正文、模型、用量、被遮蔽区间与逐节点序号([`region.ts:476-490`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L476-L490))。两条事件之间没有 `await`,所以不存在"记录了摘要但没替换"的中间态。`shadowedSeqs` 把被遮蔽的每个 seq 写进 `sourceEventSeqs`,重放、UI、引用投影都能追溯"这条摘要吞掉了什么"。
 
-`shadowedTokenCount` 用的是固定启发式价(`region.ts:375-378` 的注释说明了原因):影子价协议要求替换事件的价格与投影自己的追加口径一致,而投影按固定启发式定价。区间选择与增量校验读的是另一个字段 `tokens`,那是路由价。
+`shadowedTokenCount` 用的是固定启发式价([`region.ts:375-378`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L375-L378) 的注释说明了原因):影子价协议要求替换事件的价格与投影自己的追加口径一致,而投影按固定启发式定价。区间选择与增量校验读的是另一个字段 `tokens`,那是路由价。
 
 ---
 
 ## 八、溢写与压缩:两种"变小",优先级不同
 
-溢写(spill)处理的是**单条工具结果过大**,不是窗口整体压力。它在 `tools/post-execute` 上以 `{ prepend: true }` 注册,先 `await next()` 让下游(例如 hook)定型,再对最终内容限幅(`spill-policy/src/index.ts:185-204`)。三条透传规则:`block` 决策、值替换(`Object.hasOwn(decision, 'value')`)、以及 `decision.additionalContexts` 都原样保留——溢写只处理"被接受的纯文本结果",绝不改写纠错反馈,也不切断工具携带的附加上下文。
+溢写(spill)处理的是**单条工具结果过大**,不是窗口整体压力。它在 `tools/post-execute` 上以 `{ prepend: true }` 注册,先 `await next()` 让下游(例如 hook)定型,再对最终内容限幅([`spill-policy/src/index.ts:185-204`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/spill/spill-policy/src/index.ts#L185-L204))。三条透传规则:`block` 决策、值替换(`Object.hasOwn(decision, 'value')`)、以及 `decision.additionalContexts` 都原样保留——溢写只处理"被接受的纯文本结果",绝不改写纠错反馈,也不切断工具携带的附加上下文。
 
-`read` 被显式跳过,避免 `read → spill → read again` 循环。默认省略 `maxInlineBytes` 时**什么都不注册**,是真正的 no-op(`index.ts:106-108`)。
+`read` 被显式跳过,避免 `read → spill → read again` 循环。默认省略 `maxInlineBytes` 时**什么都不注册**,是真正的 no-op([`index.ts:106-108`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L106-L108))。
 
 **溢写永远不能把成功的工具调用变成失败**:
 
@@ -325,7 +325,7 @@ function routedTarget(
     const replacedText = previewText.length > 0 ? `${previewText}\n\n${notice}` : notice
 ```
 
-不预留的话,"预览用满预算 + 追加通知"会超过承诺上限,对刚刚超限的结果甚至可能比原文更大。预留用最坏情况的数字位数估算,所以是安全上界。若通知本身就超过 `maxInlineBytes`(上限极小或溢写根路径很长),合成不出合规的替换文本,于是保留原文——溢写宁可失效,也不破坏自己承诺的上限(`index.ts:171-181`)。
+不预留的话,"预览用满预算 + 追加通知"会超过承诺上限,对刚刚超限的结果甚至可能比原文更大。预留用最坏情况的数字位数估算,所以是安全上界。若通知本身就超过 `maxInlineBytes`(上限极小或溢写根路径很长),合成不出合规的替换文本,于是保留原文——溢写宁可失效,也不破坏自己承诺的上限([`index.ts:171-181`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L171-L181))。
 
 ### 三者的优先级与分工
 
@@ -350,7 +350,7 @@ function routedTarget(
 
 第二条判定的含义是:裁剪之后压力已经合格,就不再压摘要。这是"零成本手段优先"的直接实现。
 
-裁剪的提交必须遵守影子价协议——**计量事件与被替换节点同步相邻**(`compaction-tool-result-pruner/src/index.ts:160-174`):先 append 一条 `compaction/prune` 声明被替换节点的固定启发式价,紧接着用一次 replace 换掉它。裁剪完全不依赖 `compaction-basic`,它在自己的服务里提供 `pruneSession()`,由压缩引擎通过 `ctx.get('toolResultPruner')` 可选地使用(`index.ts:279-282` 的注释写明"裁剪是可选的,好让 compaction-basic 保持独立可组合")。服务不存在时,压缩照常按摘要路径工作。
+裁剪的提交必须遵守影子价协议——**计量事件与被替换节点同步相邻**([`compaction-tool-result-pruner/src/index.ts:160-174`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-tool-result-pruner/src/index.ts#L160-L174)):先 append 一条 `compaction/prune` 声明被替换节点的固定启发式价,紧接着用一次 replace 换掉它。裁剪完全不依赖 `compaction-basic`,它在自己的服务里提供 `pruneSession()`,由压缩引擎通过 `ctx.get('toolResultPruner')` 可选地使用([`index.ts:279-282`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts#L279-L282) 的注释写明"裁剪是可选的,好让 compaction-basic 保持独立可组合")。服务不存在时,压缩照常按摘要路径工作。
 
 ---
 
@@ -358,10 +358,10 @@ function routedTarget(
 
 | 文件 | 符号 | 行 | 本模块用途 |
 |---|---|---|---|
-| `packages/compaction/compaction/src/index.ts` | `CompactionTrigger` | 24-25 | 两个触发器的封闭联合 |
+| [`packages/compaction/compaction/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction/src/index.ts) | `CompactionTrigger` | 24-25 | 两个触发器的封闭联合 |
 | 同上 | `ManualCompactionError` | 41-57 | 手动压缩的分类失败 |
 | 同上 | `CompactionEngine` | 96-170 | 抽象服务的三个方法 |
-| `packages/compaction/compaction-basic/src/index.ts` | `routedTarget` / `conversationTarget` | 52-72 | 精确路由解析与回退 |
+| [`packages/compaction/compaction-basic/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/index.ts) | `routedTarget` / `conversationTarget` | 52-72 | 精确路由解析与回退 |
 | 同上 | `BasicCompactionEngine` | 104-131 | 配置解析与自动压缩注册 |
 | 同上 | `_registerAutomaticCompaction` | 138-225 | 两个触发点、计数清空 |
 | 同上 | 压力触发器 | 148-166 | `next()` 之前压缩;失败降级 |
@@ -369,14 +369,14 @@ function routedTarget(
 | 同上 | `compactIfNeeded` | 259-333 | 阈值判定、裁剪优先、循环压缩 |
 | 同上 | `compactRegion` | 344-359 | 自动压缩走 `whole-surface` |
 | 同上 | `compactNow` | 369-421 | 手动压缩走 `selected-span` |
-| `packages/compaction/compaction-basic/src/config.ts` | 默认比例 | 19-23 | 0.8 与 0.16 |
+| [`packages/compaction/compaction-basic/src/config.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/config.ts) | 默认比例 | 19-23 | 0.8 与 0.16 |
 | 同上 | `TargetPressureConfigError` | 51-60 | 可抑制一次的目标级配置错误 |
 | 同上 | `resolveConfig` | 67-97 | 加载期校验与默认值 |
 | 同上 | `resolveTargetPolicy` | 105-125 | 精确覆盖盖在默认值上 |
 | 同上 | `resolveCompactSpec` | 133-167 | 比例折算成绝对预算 |
 | 同上 | `validateRatioRetention` | 179-191 | 容量无关的冲突在加载期失败 |
 | 同上 | `resolveModelPolicies` | 194-212 | 重复目标在加载期报错 |
-| `packages/compaction/compaction-basic/src/region.ts` | `systemHead` | 99-105 | 系统提示永不入选 |
+| [`packages/compaction/compaction-basic/src/region.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts) | `systemHead` | 99-105 | 系统提示永不入选 |
 | 同上 | `selectCompactableRange` | 117-155 | 对齐、尾部倒推、工具对平衡 |
 | 同上 | `compactSurfaceRegion` | 173-275 | 单次事务、锁、恰好一次闭合 |
 | 同上 | `assertCompactionInactive` / `assertNoActiveCompaction` | 307-333 | 未闭合标记即锁 |
@@ -388,13 +388,13 @@ function routedTarget(
 | 同上 | `commitCompactionBody` | 456-507 | 摘要记录加一次区间替换 |
 | 同上 | `buildSummarizationInput` | 529-548 | 复用会话前缀 |
 | 同上 | `inspectCompactionEntryState` | 551-585 | 反向扫描开启标记与回合状态 |
-| `packages/compaction/compaction-basic/src/summarizer.ts` | 指令与框架文本 | 31-70 | 摘要指令与检查点前导 |
+| [`packages/compaction/compaction-basic/src/summarizer.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/summarizer.ts) | 指令与框架文本 | 31-70 | 摘要指令与检查点前导 |
 | 同上 | `summarizeWithLlm` | 119-179 | 前缀复用的一次性调用 |
 | 同上 | `frameSummary` | 186-192 | 检查点包裹 |
-| `packages/compaction/compaction-tool-result-pruner/src/index.ts` | `pruneContent` | 83-122 | 头尾保留、中段移除 |
+| [`packages/compaction/compaction-tool-result-pruner/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-tool-result-pruner/src/index.ts) | `pruneContent` | 83-122 | 头尾保留、中段移除 |
 | 同上 | `pruneSession` | 136-185 | 批量裁剪与影子价协议 |
-| `packages/spill/spill-policy/src/index.ts` | `apply` | 105-227 | 加载期校验与两个臂 |
+| [`packages/spill/spill-policy/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/spill/spill-policy/src/index.ts) | `apply` | 105-227 | 加载期校验与两个臂 |
 | 同上 | `spillReplacement` | 125-183 | 通知预算内扣除与降级 |
 | 同上 | `tools/post-execute` 臂 | 185-204 | 面向模型的结果限幅 |
 | 同上 | `tools/ptc-dispatch-log` 臂 | 212-226 | 面向日志的副本限幅 |
-| `packages/core/agent/src/runtime-types.ts` | `RequestErrorAction` | 122 | 溢出触发器只能返回重试或不接管 |
+| [`packages/core/agent/src/runtime-types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts) | `RequestErrorAction` | 122 | 溢出触发器只能返回重试或不接管 |

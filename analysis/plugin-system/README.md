@@ -24,9 +24,9 @@
 | # | 文档 | 一句话 | 主要源码面 |
 |---|---|---|---|
 | 01 | [Cordis 运行时内部实现](./01-cordis-runtime-internals.md) | Context 代理的属性读写如何落到 service store / reflect;`Service` 构造即注册;fiber 六状态状态机与转换函数;effect 树与逆序回收;registry 与 reflect 的分工;五种事件分发的实现级差异 | `vendor/cordis/src/{context,reflect,service,fiber,registry,events,utils}.ts` |
-| 02 | [Loader、Include 与组合层](./02-loader-and-composition.md) | 条目树结构、依赖序并发激活的实现判定、事务化回滚、HMR 精确配置监听与热替换、`!!js` 求值边界、profile/bundle/patch 三层合成 | `vendor/{loader,include,hmr}/src/**`、`packages/boot/app-boot/src/*`、`apps/cli/src/profile-boot.ts` |
+| 02 | [Loader、Include 与组合层](./02-loader-and-composition.md) | 条目树结构、依赖序并发激活的实现判定、事务化回滚、HMR 精确配置监听与热替换、`!!js` 求值边界、profile/bundle/patch 三层合成 | `vendor/{loader,include,hmr}/src/**`、`packages/boot/app-boot/src/*`、[`apps/cli/src/profile-boot.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts) |
 | 03 | [能力缝三角色的函数级解剖](./03-capability-seam-anatomy.md) | sandbox / llm / subagent / session-persistence 四条真实缝的三列对照(契约方法 → Provider 实现 → Consumer 调用点)+ invariant 伴随插件的判定与写法 | `packages/{sandbox,llm,subagent,session,core}/*/src/*` |
-| 04 | [全仓扩展点目录](./04-extension-points-catalog.md) | 按内核阶段分类的事件、瀑布、hook 点;每项给注册方/消费方与 `路径:行号` | `packages/core/**/src/*`、`docs/event-producer-consumer.md` |
+| 04 | [全仓扩展点目录](./04-extension-points-catalog.md) | 按内核阶段分类的事件、瀑布、hook 点;每项给注册方/消费方与 `路径:行号` | `packages/core/**/src/*`、[`docs/event-producer-consumer.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/event-producer-consumer.md) |
 | 05 | [插件编写指南](./05-plugin-authoring-guide.md) | 函数插件 vs 服务插件的导出规则、`name`/`inject`/`Config`/`apply` 契约、Schemastery 校验、no hardcoded tunables、effect 处置与 HMR 安全、REAL-composition 测试与覆盖率门、default export 翻车 postmortem | `packages/**/src/index.ts`、`docs/postmortem/0001-*.md`、`docs/cordis-tutorial/*` |
 
 ---
@@ -82,9 +82,9 @@ flowchart TB
 
 三条读图要点,后续各篇反复用到:
 
-1. **属性读不走普通原型链**。`ctx.tools` 这类读取被 `ReflectService.handler.get` 截获,按 `fiber.store` 沿 `parent.fiber` 逐级上溯(`reflect.ts:155-166`);走到根 fiber 仍未命中就抛 `cannot get property "tools" without inject`(`reflect.ts:144`)。这就是"必须诚实声明 `inject`"的机械保证。
-2. **依赖满足与否被压成一个字符串 epoch**。`_refresh()` 把每个 inject 键解析成 `:<providerUid>` 拼起来,任一键缺席就置 `INACTIVE`(`fiber.ts:611-623`);`INACTIVE → 非 INACTIVE` 触发 `_reload()`,`非 INACTIVE → 其他` 触发 `_unload()`(`fiber.ts:625-639`)。HMR 重挂就是这条边被走了一遍。
-3. **一切注册都挂在 fiber 的 effect 列表上**。`ctx.provide()`(`reflect.ts:278`)、`ctx.on()`(`events.ts:256`)、`ctx.mixin()`(`reflect.ts:366`)内部都是 `this.ctx.fiber.effect(...)`;卸载时 `_disposables.clear()` 返回**逆序**数组(`utils.ts:27-31`)逐个 await 处置(`fiber.ts:676-686`)。
+1. **属性读不走普通原型链**。`ctx.tools` 这类读取被 `ReflectService.handler.get` 截获,按 `fiber.store` 沿 `parent.fiber` 逐级上溯([`reflect.ts:155-166`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L155-L166));走到根 fiber 仍未命中就抛 `cannot get property "tools" without inject`([`reflect.ts:144`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L144))。这就是"必须诚实声明 `inject`"的机械保证。
+2. **依赖满足与否被压成一个字符串 epoch**。`_refresh()` 把每个 inject 键解析成 `:<providerUid>` 拼起来,任一键缺席就置 `INACTIVE`([`fiber.ts:611-623`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L611-L623));`INACTIVE → 非 INACTIVE` 触发 `_reload()`,`非 INACTIVE → 其他` 触发 `_unload()`([`fiber.ts:625-639`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L625-L639))。HMR 重挂就是这条边被走了一遍。
+3. **一切注册都挂在 fiber 的 effect 列表上**。`ctx.provide()`([`reflect.ts:278`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L278))、`ctx.on()`([`events.ts:256`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts#L256))、`ctx.mixin()`([`reflect.ts:366`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts#L366))内部都是 `this.ctx.fiber.effect(...)`;卸载时 `_disposables.clear()` 返回**逆序**数组([`utils.ts:27-31`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/utils.ts#L27-L31))逐个 await 处置([`fiber.ts:676-686`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts#L676-L686))。
 
 ---
 
@@ -121,19 +121,19 @@ flowchart TB
 
 | 文件 | 在本模块中的角色 |
 |---|---|
-| `vendor/cordis/src/context.ts` | `Context` 类、代理创建、四种内建服务安装、`extend`/`isolate`/`intercept` |
-| `vendor/cordis/src/reflect.ts` | 三个 Proxy trap、服务解析上溯、`provide`/`notify`/`accessor`/`mixin` |
-| `vendor/cordis/src/service.ts` | `Service` 基类:构造即注册、`resolveConfig` 的 intercept 合并 |
-| `vendor/cordis/src/fiber.ts` | 六状态机、`effect()` 全程、`_checkImpl`/`_refresh`/`_setEpoch`/`_reload`/`_unload` |
-| `vendor/cordis/src/registry.ts` | `plugin()`/`inject()`、`Plugin.Runtime`、`Inject.resolve` |
-| `vendor/cordis/src/events.ts` | `dispatch` 与五种模式实现、内建 `internal/*` 事件契约 |
-| `vendor/cordis/src/utils.ts` | `DisposableList`(逆序 `clear`)、`getTraceable`、`composeError` |
-| `vendor/loader/src/index.ts` | `Loader` 服务:`!!js` 惰性插值、`unwrapExports`、`[Service.check]` 依赖门 |
+| [`vendor/cordis/src/context.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/context.ts) | `Context` 类、代理创建、四种内建服务安装、`extend`/`isolate`/`intercept` |
+| [`vendor/cordis/src/reflect.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/reflect.ts) | 三个 Proxy trap、服务解析上溯、`provide`/`notify`/`accessor`/`mixin` |
+| [`vendor/cordis/src/service.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/service.ts) | `Service` 基类:构造即注册、`resolveConfig` 的 intercept 合并 |
+| [`vendor/cordis/src/fiber.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/fiber.ts) | 六状态机、`effect()` 全程、`_checkImpl`/`_refresh`/`_setEpoch`/`_reload`/`_unload` |
+| [`vendor/cordis/src/registry.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/registry.ts) | `plugin()`/`inject()`、`Plugin.Runtime`、`Inject.resolve` |
+| [`vendor/cordis/src/events.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/events.ts) | `dispatch` 与五种模式实现、内建 `internal/*` 事件契约 |
+| [`vendor/cordis/src/utils.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/cordis/src/utils.ts) | `DisposableList`(逆序 `clear`)、`getTraceable`、`composeError` |
+| [`vendor/loader/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/loader/src/index.ts) | `Loader` 服务:`!!js` 惰性插值、`unwrapExports`、`[Service.check]` 依赖门 |
 | `vendor/loader/src/config/{entry,group,tree,utils,isolate}.ts` | 条目生命周期、事务化更新与回滚、树遍历与 `await`、`!!js` 求值、isolate realm |
-| `vendor/include/src/index.ts` | `entryListSchema`、`applyEntryPatches`、文件型条目树与写回 |
-| `vendor/hmr/src/index.ts` | `registerConfig` 精确监听、变更分类、热替换与回滚 |
+| [`vendor/include/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/include/src/index.ts) | `entryListSchema`、`applyEntryPatches`、文件型条目树与写回 |
+| [`vendor/hmr/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/vendor/hmr/src/index.ts) | `registerConfig` 精确监听、变更分类、热替换与回滚 |
 | `packages/boot/app-boot/src/{index,profile}.ts` | `boot()`、`mountRootInclude`、`composeEntries`、`watchUserPatches`、profile/bundle 解析 |
-| `apps/cli/src/profile-boot.ts` | `composeProfile` / `composeLive` / `runProfile` 的层叠与 live 重载 |
+| [`apps/cli/src/profile-boot.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts) | `composeProfile` / `composeLive` / `runProfile` 的层叠与 live 重载 |
 | `packages/bundle/*/cordis.patch.yml` | 三层合成里的 bundle 层真实内容 |
-| `docs/event-producer-consumer.md` | 生成的事件生产者/消费者矩阵(04 的数据底座) |
-| `docs/postmortem/0001-acp-default-export-drops-inject.md` | 插件导出规则的来源事故 |
+| [`docs/event-producer-consumer.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/event-producer-consumer.md) | 生成的事件生产者/消费者矩阵(04 的数据底座) |
+| [`docs/postmortem/0001-acp-default-export-drops-inject.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/postmortem/0001-acp-default-export-drops-inject.md) | 插件导出规则的来源事故 |

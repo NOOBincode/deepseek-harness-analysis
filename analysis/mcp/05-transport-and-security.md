@@ -1,7 +1,7 @@
 # 05 · 传输与安全:`createTransport()`、环境清洗与 ACP 挂载
 
-> 源码:`packages/mcp/mcp-client/src/transport.ts`(50 行)、`packages/acp/acp/src/mcp.ts`(143 行)
-> 依赖:`packages/subprocess/subprocess/src/index.ts`(环境清洗)、`packages/util/http-proxy/src/install.ts`(代理出口)
+> 源码:[`packages/mcp/mcp-client/src/transport.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/transport.ts)(50 行)、[`packages/acp/acp/src/mcp.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts)(143 行)
+> 依赖:[`packages/subprocess/subprocess/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts)(环境清洗)、[`packages/util/http-proxy/src/install.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/http-proxy/src/install.ts)(代理出口)
 > 上游:第六章 [§1.3](../06-mcp.md) 与 [§四 安全边界表](../06-mcp.md)
 
 ---
@@ -40,7 +40,7 @@ export function createTransport(config: Config): Transport {
 | `new URL(config.url)` 在工厂里解析 | URL 语法错误在**连接尝试时**抛出,被 `connectGeneration` 的 catch 当作普通连接失败处理;ACP 路径则更早——在配置解析阶段就用 `assertHttpUrl` 拒绝(见 §7) |
 | 每次调用都 `new` 一个 transport | 与"一代际一 transport"的模型对齐(`connection.ts:272` 每次尝试都调用 `createTransport`) |
 
-`cwd` 在 stdio 配置里默认是空串(`index.ts:120` 的 `z.string().default('')`),`StdioClientTransport` 对空串的处理是"继承父进程工作目录";ACP 路径则强制注入 `sessionCwd`(`packages/acp/acp/src/mcp.ts:55`)。
+`cwd` 在 stdio 配置里默认是空串(`index.ts:120` 的 `z.string().default('')`),`StdioClientTransport` 对空串的处理是"继承父进程工作目录";ACP 路径则强制注入 `sessionCwd`([`packages/acp/acp/src/mcp.ts:55`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L55))。
 
 ---
 
@@ -64,7 +64,7 @@ function buildChildEnv(extra: Record<string, string>): Record<string, string> {
 
 ### 2.1 第一层:`scrubbedParentEnv()` 的剔除与保留
 
-`packages/subprocess/subprocess/src/index.ts:64-78`:
+[`packages/subprocess/subprocess/src/index.ts:64-78`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L64-L78):
 
 ```typescript
 export function scrubbedParentEnv(): Record<string, string> {
@@ -88,10 +88,10 @@ export function scrubbedParentEnv(): Record<string, string> {
 
 | 规则 | 常量 | 位置 | 例 |
 |---|---|---|---|
-| 名字匹配 `/KEY\|PASSWORD\|SECRET\|TOKEN/i` | `SENSITIVE_ENV_PATTERN` | `subprocess/src/index.ts:45` | `DEEPSEEK_API_KEY`、`MY_SECRET`、`AUTH_TOKEN`、`GITHUB_TOKEN`、`DB_PASSWORD`、`APIKEY` |
-| 名字以 `DSH_` 开头(**先 `toUpperCase()` 再判**) | `DSH_ENV_PREFIX = 'DSH_'` | `subprocess/src/types.ts:13` | `DSH_HOME`、`dsh_foo`(Windows 环境名大小写不敏感) |
+| 名字匹配 `/KEY\|PASSWORD\|SECRET\|TOKEN/i` | `SENSITIVE_ENV_PATTERN` | [`subprocess/src/index.ts:45`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L45) | `DEEPSEEK_API_KEY`、`MY_SECRET`、`AUTH_TOKEN`、`GITHUB_TOKEN`、`DB_PASSWORD`、`APIKEY` |
+| 名字以 `DSH_` 开头(**先 `toUpperCase()` 再判**) | `DSH_ENV_PREFIX = 'DSH_'` | [`subprocess/src/types.ts:13`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/types.ts#L13) | `DSH_HOME`、`dsh_foo`(Windows 环境名大小写不敏感) |
 
-三段 JSDoc(`subprocess/src/index.ts:38-63`)把理由写得很直白:
+三段 JSDoc([`subprocess/src/index.ts:38-63`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L38-L63))把理由写得很直白:
 
 ```typescript
  * Credential-shaped environment names are NOT forwarded to children (the
@@ -146,9 +146,9 @@ flowchart TD
 ---
 
 ## 三、显式 `env` 为什么能覆盖清洗
-合并顺序是唯一的原因:`{ ...scrubbedParentEnv(), ...extra }`——后面展开的键赢。而 `extra` 就是配置里的 `env`(`index.ts:64` 声明为 "Extra env vars merged on top of scrubbed ambient env")。
+合并顺序是唯一的原因:`{ ...scrubbedParentEnv(), ...extra }`——后面展开的键赢。而 `extra` 就是配置里的 `env`([`index.ts:64`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L64) 声明为 "Extra env vars merged on top of scrubbed ambient env")。
 
-配置文件里最常见的写法恰恰是**把被剔除的名字显式放回来**(`mcp-client/README.md:42-43`):
+配置文件里最常见的写法恰恰是**把被剔除的名字显式放回来**([`mcp-client/README.md:42-43`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/README.md#L42-L43)):
 
 ```yaml
     env:
@@ -157,14 +157,14 @@ flowchart TD
 
 `GITHUB_TOKEN` 命中 `TOKEN`,在环境清洗时被剔除;但 `!!js` 在**加载期求值**,把父进程里的真实值作为字符串写进配置对象,于是它以"显式声明"的身份重新进入子环境。**安全边界因此是"默认不外泄 + 显式放行",而不是"禁止外泄"**——桥无法也不该阻止部署者把凭据交给它自己配置的服务器进程。
 
-一个必要的诚实说明:单元测试**没有**能直接断言传进 `StdioClientTransport` 的 env 内容。`mcp-client.spec.ts:1231-1232` 的注释写明了原因:
+一个必要的诚实说明:单元测试**没有**能直接断言传进 `StdioClientTransport` 的 env 内容。[`mcp-client.spec.ts:1231-1232`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L1231-L1232) 的注释写明了原因:
 
 ```typescript
 // StdioClientTransport keeps its env private; the observable contract is
 // that createTransport(config) returns a transport without throwing.
 ```
 
-因此该文件的 `createTransport` 段(`mcp-client.spec.ts:1165-1260`)只覆盖"三种配置不抛异常"这一层;清洗规则本身的正确性由 `scrubbedParentEnv` 自己的测试与 `buildChildEnv` 的纯函数语义保证。
+因此该文件的 `createTransport` 段([`mcp-client.spec.ts:1165-1260`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L1165-L1260))只覆盖"三种配置不抛异常"这一层;清洗规则本身的正确性由 `scrubbedParentEnv` 自己的测试与 `buildChildEnv` 的纯函数语义保证。
 
 ---
 
@@ -172,7 +172,7 @@ flowchart TD
 
 ### 4.1 头部
 
-`headers` 直接作为 `requestInit.headers` 传给 SDK(`transport.ts:47`),配置形态是 `z.dict(String).default({})`(`index.ts:129`)。E2E 用一个记录每个请求 `authorization` 头的本地 HTTP 服务器验证"**每一次**请求都带"(不是只有 initialize):
+`headers` 直接作为 `requestInit.headers` 传给 SDK(`transport.ts:47`),配置形态是 `z.dict(String).default({})`([`index.ts:129`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L129))。E2E 用一个记录每个请求 `authorization` 头的本地 HTTP 服务器验证"**每一次**请求都带"(不是只有 initialize):
 
 ```typescript
 // mcp-client.e2e.ts:559-562
@@ -182,11 +182,11 @@ it('sends configured headers on every HTTP request', () => {
 })
 ```
 
-`seenAuth` 的采集点在 `mcp-client.e2e.ts:473`(`seenAuth.push(req.headers.authorization)`),即服务端视角,而不是客户端调用参数——证据强度更高。
+`seenAuth` 的采集点在 [`mcp-client.e2e.ts:473`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts#L473)(`seenAuth.push(req.headers.authorization)`),即服务端视角,而不是客户端调用参数——证据强度更高。
 
 ### 4.2 出口:进程内的全局 dispatcher
 
-进程内发起 HTTP 的是 `StreamableHTTPClientTransport`,底层是 undici 的 fetch。Node 的 fetch **不会**自己读代理环境变量,所以出口由启动器在**第一个插件挂载之前**安装(`apps/cli/src/profile-boot.ts:287`):
+进程内发起 HTTP 的是 `StreamableHTTPClientTransport`,底层是 undici 的 fetch。Node 的 fetch **不会**自己读代理环境变量,所以出口由启动器在**第一个插件挂载之前**安装([`apps/cli/src/profile-boot.ts:287`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L287)):
 
 ```typescript
 // Before the first plugin mounts and before anything can issue a request: Node's fetch ignores the
@@ -199,11 +199,11 @@ const disposeProxy = await installProxyFromEnvironment(
 )
 ```
 
-`installProxyFromEnvironment` 做三件事(`packages/util/http-proxy/src/install.ts:208-223`):写回代理环境变量、`setGlobalDispatcher(agent)`、返回恢复函数。**因此 MCP 的 HTTP 传输不需要任何自己的代理代码**——它落在进程级配置之下,是"能力缝之外的免费继承"。
+`installProxyFromEnvironment` 做三件事([`packages/util/http-proxy/src/install.ts:208-223`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/http-proxy/src/install.ts#L208-L223)):写回代理环境变量、`setGlobalDispatcher(agent)`、返回恢复函数。**因此 MCP 的 HTTP 传输不需要任何自己的代理代码**——它落在进程级配置之下,是"能力缝之外的免费继承"。
 
 ### 4.3 出口测试:`egress.spec.ts`
 
-`packages/mcp/mcp-client/tests/egress.spec.ts:35-41` 用一个真实的假代理服务器(收到任何请求都回 502 并记录 URL)证明流量确实经过代理:
+[`packages/mcp/mcp-client/tests/egress.spec.ts:35-41`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/egress.spec.ts#L35-L41) 用一个真实的假代理服务器(收到任何请求都回 502 并记录 URL)证明流量确实经过代理:
 
 ```typescript
 it('goes through the proxy', async () => {
@@ -213,7 +213,7 @@ it('goes through the proxy', async () => {
 })
 ```
 
-`observe()`(`egress.spec.ts:28-33`)的构造值得注意:
+`observe()`([`egress.spec.ts:28-33`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/egress.spec.ts#L28-L33))的构造值得注意:
 
 ```typescript
 async function observe(run: () => Promise<unknown>): Promise<string[]> {
@@ -226,11 +226,11 @@ async function observe(run: () => Promise<unknown>): Promise<string[]> {
 
 它**断言的是"代理看见了目标主机名",而不是"请求成功了"**。目标 `mcp-probe.invalid` 是不可解析的域名、代理固定回 502、`run()` 的异常被吞掉——这个测试只关心路由,不关心结果。这是 egress 类测试的正确姿势:把"是否走代理"与"服务器是否可用"解耦,测试因此**无需网络**也能跑。
 
-同名的 `egress.spec.ts` 在多个子系统里重复出现(`web-search-*`、`llm-*`、`e2b`、`session-telemetry-otel`、`subprocess`、`workflow-worker-thread`),说明"每个出网点都要有自己的出口测试"是本仓库的一条质量约定。
+同名的 [`egress.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/egress.spec.ts) 在多个子系统里重复出现(`web-search-*`、`llm-*`、`e2b`、`session-telemetry-otel`、`subprocess`、`workflow-worker-thread`),说明"每个出网点都要有自己的出口测试"是本仓库的一条质量约定。
 
 ### 4.4 子进程的代理:NODE_USE_ENV_PROXY
 
-对 stdio MCP 服务器,代理通过**环境变量**传递,规则在 `proxyEnvironmentForChild()`(`packages/util/http-proxy/src/install.ts:262-279`):
+对 stdio MCP 服务器,代理通过**环境变量**传递,规则在 `proxyEnvironmentForChild()`([`packages/util/http-proxy/src/install.ts:262-279`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/http-proxy/src/install.ts#L262-L279)):
 
 | 规则 | 实现 | 理由(install.ts 的 JSDoc) |
 |---|---|---|
@@ -243,7 +243,7 @@ async function observe(run: () => Promise<unknown>): Promise<string[]> {
 
 最后一条是这套设计里最微妙的地方:同一份 overlay 要同时服务 Node 子进程与 `curl`/`git`/`pnpm`,而后者的能力集合不同。代码选择"优先保证所有子进程都能启动"。
 
-> **一条与安全相关的边界判断**:代理 URL 可能内嵌凭据,因此 worker thread **刻意**不给代理环境(`install.ts:256-257`:"A worker thread is deliberately NOT served here — see the workflow engine, which runs model-authored scripts and must not receive a proxy URL that may carry credentials")。而 MCP stdio 子进程**会**拿到——因为它是部署者在 `cordis.yml` 里显式声明的受信可执行文件,与"模型编写的脚本"不是一个信任级别。
+> **一条与安全相关的边界判断**:代理 URL 可能内嵌凭据,因此 worker thread **刻意**不给代理环境([`install.ts:256-257`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/http-proxy/src/install.ts#L256-L257):"A worker thread is deliberately NOT served here — see the workflow engine, which runs model-authored scripts and must not receive a proxy URL that may carry credentials")。而 MCP stdio 子进程**会**拿到——因为它是部署者在 `cordis.yml` 里显式声明的受信可执行文件,与"模型编写的脚本"不是一个信任级别。
 
 ---
 
@@ -256,7 +256,7 @@ MCP stdio 服务器是**由 `StdioClientTransport` 直接 spawn 的子进程,既
  * definition rather than the spawn path.
 ```
 
-因此 README 的定位陈述必须被当作配置前提来读(`mcp-client/README.md:12`):**默认不启用任何服务器**;每启用一台,就等于给 agent 增加一条"沙箱之外受信代码"的执行路径。桥能做的三件事只有:默认清洗凭据、强制命名空间、把发现与执行的输入都当作不可信数据处理。
+因此 README 的定位陈述必须被当作配置前提来读([`mcp-client/README.md:12`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/README.md#L12)):**默认不启用任何服务器**;每启用一台,就等于给 agent 增加一条"沙箱之外受信代码"的执行路径。桥能做的三件事只有:默认清洗凭据、强制命名空间、把发现与执行的输入都当作不可信数据处理。
 
 ---
 
@@ -266,7 +266,7 @@ ACP(Agent Client Protocol)是唯一一条**非 `cordis.yml`** 的 MCP 装载路�
 
 ### 6.1 入口
 
-`packages/acp/acp/src/mcp.ts:20-33`:
+[`packages/acp/acp/src/mcp.ts:20-33`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L20-L33):
 
 ```typescript
 export async function mountAcpMcpServers(
@@ -282,11 +282,11 @@ export async function mountAcpMcpServers(
 两个语义要点:
 
 1. **先全部解析,再逐个挂载**。`resolveMcpConfigs` 是一个 `servers.map(...)`,任何一项校验失败都会在**挂载第一个之前**抛出 `AcpMcpConfigError`。因此"列表里第三项非法"不会留下前两个已挂载的客户端。
-2. **`agentCtx.plugin(McpClient, config)` 是 Agent 作用域**。结合 `serverName` 预订按 scope 隔离的实现(`index.ts:154-168`),同一台服务可以在不同 Agent 里复用同名命名空间,而同一 Agent 内重复挂载会失败。
+2. **`agentCtx.plugin(McpClient, config)` 是 Agent 作用域**。结合 `serverName` 预订按 scope 隔离的实现([`index.ts:154-168`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L154-L168)),同一台服务可以在不同 Agent 里复用同名命名空间,而同一 Agent 内重复挂载会失败。
 
 ### 6.2 `resolveMcpConfigs()` 的校验清单
 
-`packages/acp/acp/src/mcp.ts:36-74`。每一项及其失败消息:
+[`packages/acp/acp/src/mcp.ts:36-74`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L36-L74)。每一项及其失败消息:
 
 | # | 校验 | 位置 | 失败消息 |
 |---|---|---|---|
@@ -305,7 +305,7 @@ export async function mountAcpMcpServers(
 
 ### 6.3 `entriesToRecord()`:环境与头部的转换细节
 
-`packages/acp/acp/src/mcp.ts:76-108`:
+[`packages/acp/acp/src/mcp.ts:76-108`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L76-L108):
 
 ```typescript
 const result = Object.create(null) as Record<string, string>
@@ -338,7 +338,7 @@ for (const entry of entries) {
 
 ### 6.4 `normalizeServerName()`:ACP 侧的第二套命名归一
 
-`packages/acp/acp/src/mcp.ts:110-122`:
+[`packages/acp/acp/src/mcp.ts:110-122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L110-L122):
 
 ```typescript
 function normalizeServerName(name: string): string {
@@ -385,7 +385,7 @@ function normalizeServerName(name: string): string {
 
 ## 七、`AcpMcpConfigError`:可纠正的失败分类
 
-`packages/acp/acp/src/mcp.ts:12-18`:
+[`packages/acp/acp/src/mcp.ts:12-18`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L12-L18):
 
 ```typescript
 /** Caller-correctable MCP declaration failure. */
@@ -407,28 +407,28 @@ export class AcpMcpConfigError extends Error {
 |---|---|---|
 | `createTransport()` | `transport.ts:31` | 判别式传输工厂 |
 | `buildChildEnv()` | `transport.ts:21` | 清洗环境 + 显式 env |
-| `scrubbedParentEnv()` | `subprocess/subprocess/src/index.ts:64` | 全仓共享的环境清洗 |
-| `SENSITIVE_ENV_PATTERN` | `subprocess/subprocess/src/index.ts:45` | `/KEY\|PASSWORD\|SECRET\|TOKEN/i` |
-| `DSH_ENV_PREFIX` | `subprocess/subprocess/src/types.ts:13` | `'DSH_'`,大小写不敏感剔除 |
-| `proxyEnvironmentForChild()` | `util/http-proxy/src/install.ts:262` | 子进程代理 overlay 规则 |
-| `installProxyFromEnvironment()` | `util/http-proxy/src/install.ts:296` | 进程级代理安装 |
-| `runProfile()` 的代理安装点 | `apps/cli/src/profile-boot.ts:287` | 唯一的生产调用点 |
-| `mountAcpMcpServers()` | `acp/acp/src/mcp.ts:26` | ACP → Agent 作用域 MCP 客户端 |
-| `resolveMcpConfigs()` | `acp/acp/src/mcp.ts:36` | 七项校验 |
-| `entriesToRecord()` | `acp/acp/src/mcp.ts:77` | env/header 转换与原型污染防护 |
-| `normalizeServerName()` | `acp/acp/src/mcp.ts:111` | ACP 服务器名归一 |
-| `assertHttpUrl()` | `acp/acp/src/mcp.ts:125` | 绝对 HTTP(S) URL 校验 |
-| `validateClientConfig()` | `acp/acp/src/mcp.ts:135` | schema 错误 → `AcpMcpConfigError` |
-| `AcpMcpConfigError` | `acp/acp/src/mcp.ts:13` | 可纠正失败分类 |
+| `scrubbedParentEnv()` | [`subprocess/subprocess/src/index.ts:64`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L64) | 全仓共享的环境清洗 |
+| `SENSITIVE_ENV_PATTERN` | [`subprocess/subprocess/src/index.ts:45`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L45) | `/KEY\|PASSWORD\|SECRET\|TOKEN/i` |
+| `DSH_ENV_PREFIX` | [`subprocess/subprocess/src/types.ts:13`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/types.ts#L13) | `'DSH_'`,大小写不敏感剔除 |
+| `proxyEnvironmentForChild()` | [`util/http-proxy/src/install.ts:262`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/http-proxy/src/install.ts#L262) | 子进程代理 overlay 规则 |
+| `installProxyFromEnvironment()` | [`util/http-proxy/src/install.ts:296`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/http-proxy/src/install.ts#L296) | 进程级代理安装 |
+| `runProfile()` 的代理安装点 | [`apps/cli/src/profile-boot.ts:287`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/apps/cli/src/profile-boot.ts#L287) | 唯一的生产调用点 |
+| `mountAcpMcpServers()` | [`acp/acp/src/mcp.ts:26`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L26) | ACP → Agent 作用域 MCP 客户端 |
+| `resolveMcpConfigs()` | [`acp/acp/src/mcp.ts:36`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L36) | 七项校验 |
+| `entriesToRecord()` | [`acp/acp/src/mcp.ts:77`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L77) | env/header 转换与原型污染防护 |
+| `normalizeServerName()` | [`acp/acp/src/mcp.ts:111`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L111) | ACP 服务器名归一 |
+| `assertHttpUrl()` | [`acp/acp/src/mcp.ts:125`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L125) | 绝对 HTTP(S) URL 校验 |
+| `validateClientConfig()` | [`acp/acp/src/mcp.ts:135`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L135) | schema 错误 → `AcpMcpConfigError` |
+| `AcpMcpConfigError` | [`acp/acp/src/mcp.ts:13`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L13) | 可纠正失败分类 |
 
 ### 测试锚点
 
 | 断言 | 位置 |
 |---|---|
-| 两种传输都能构造 | `mcp-client.spec.ts:1165-1211` |
-| 清洗与显式 env 不抛异常(私有 env,无法直接断言) | `mcp-client.spec.ts:1213-1259` |
-| 每次 HTTP 请求都带配置的 header | `mcp-client.e2e.ts:559-562` |
-| HTTP 传输的真实往返 | `mcp-client.e2e.ts:535-557` |
-| streamable-http 走代理 | `tests/egress.spec.ts:35-41` |
-| 代理 overlay 的用户值还原与 flag 撤销 | `util/http-proxy/tests/install.spec.ts:247-410` |
+| 两种传输都能构造 | [`mcp-client.spec.ts:1165-1211`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L1165-L1211) |
+| 清洗与显式 env 不抛异常(私有 env,无法直接断言) | [`mcp-client.spec.ts:1213-1259`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts#L1213-L1259) |
+| 每次 HTTP 请求都带配置的 header | [`mcp-client.e2e.ts:559-562`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts#L559-L562) |
+| HTTP 传输的真实往返 | [`mcp-client.e2e.ts:535-557`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts#L535-L557) |
+| streamable-http 走代理 | [`tests/egress.spec.ts:35-41`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/egress.spec.ts#L35-L41) |
+| 代理 overlay 的用户值还原与 flag 撤销 | [`util/http-proxy/tests/install.spec.ts:247-410`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/util/http-proxy/tests/install.spec.ts#L247-L410) |
 | ACP 挂载后的模型可见工具名 | `acp/acp/tests/bridge.spec.ts:747,768,826` |

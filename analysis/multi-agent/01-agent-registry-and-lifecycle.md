@@ -1,7 +1,7 @@
 # 01 · Agent 注册表与生命周期(函数级走查)
 
-> 源码:`packages/core/agent/src/index.ts`(690 行)、`packages/core/agent/src/runtime-types.ts`(405 行)
-> 配套:`packages/core/agent-loop/src/index.ts`(930 行,创建事务的真实实现)、`packages/core/agent-loop/src/agent.ts`、`packages/core/session/src/index.ts`
+> 源码:[`packages/core/agent/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts)(690 行)、[`packages/core/agent/src/runtime-types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts)(405 行)
+> 配套:[`packages/core/agent-loop/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts)(930 行,创建事务的真实实现)、[`packages/core/agent-loop/src/agent.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts)、[`packages/core/session/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts)
 
 ---
 
@@ -43,19 +43,19 @@ flowchart LR
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 1 取出工厂 | 从工厂槽拿到目标;没有工厂就直接抛"请先加载 agent-loop 插件" | `core/agent/src/index.ts:374-377` |
-| 2 所有权跟随调用者 | 用调用者的 fiber 与作用域当 owner,而不是工厂自己的注册上下文 | `core/agent/src/index.ts:388-398` |
-| 3 会话边界校验 | seed 必须自 seq 0 连续、是纯无损 JSON、没有开放 turn 或悬空 tool call | `agent-loop/src/index.ts:730-738` |
-| 4 建驱动与作用域 | 建 ReactLoopAgent、建 scope,并在任何资源之前登记反向 teardown | `agent-loop/src/index.ts:530-687` |
-| 5 未发布窗口 | `await setup(...)` 被 raceAbort 包住,caller signal、owner 卸载、工厂 teardown 三路任一触发都会中断它 | `agent-loop/src/index.ts:826` |
-| 6 提交点 | 所有 setup await 都已 settle、即将发布的那一瞬同步执行 commit | `agent-loop/src/index.ts:827` |
-| 7 冲写未存后缀 | 把创建窗口里 append 的事件在活事件开始路由之前写进句柄 | `agent-loop/src/index.ts:749-757` |
-| 8 enter | 插入活体表但不广播;Agent id 必须等于 session id,重复 id 直接抛错 | `core/agent/src/index.ts:458-493` |
-| 9 announce | 同步派发 `agent/created`;同步抛错的监听者会否决发布并触发回滚 | `core/agent/src/index.ts:533-560` |
-| 10 发布顺序 | 会话先可见、Agent 后可见,最后发 session-start 作为"可以开始注入上下文"的时机 | `agent-loop/src/index.ts:662-677` |
-| 11 拆卸 | 取消 → 等闲 → 撤销作用域 → 关写句柄 → 离表,失败全部收集而不是吞掉 | `agent-loop/src/index.ts:576-619` |
-| 12 解绑逆序 | 先摘 Agent 再摘会话;销毁事件发生在驱动收敛之后、会话解绑之前 | `agent-loop/src/index.ts:609-610` |
-| 13 因果归属 | withInitiator 只做归属不授权;关闭时先把发起本次卸载的那条链从自己的 drain 里排除 | `core/agent/src/index.ts:672-678` |
+| 1 取出工厂 | 从工厂槽拿到目标;没有工厂就直接抛"请先加载 agent-loop 插件" | [`core/agent/src/index.ts:374-377`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L374-L377) |
+| 2 所有权跟随调用者 | 用调用者的 fiber 与作用域当 owner,而不是工厂自己的注册上下文 | [`core/agent/src/index.ts:388-398`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L388-L398) |
+| 3 会话边界校验 | seed 必须自 seq 0 连续、是纯无损 JSON、没有开放 turn 或悬空 tool call | [`agent-loop/src/index.ts:730-738`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L730-L738) |
+| 4 建驱动与作用域 | 建 ReactLoopAgent、建 scope,并在任何资源之前登记反向 teardown | [`agent-loop/src/index.ts:530-687`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L530-L687) |
+| 5 未发布窗口 | `await setup(...)` 被 raceAbort 包住,caller signal、owner 卸载、工厂 teardown 三路任一触发都会中断它 | [`agent-loop/src/index.ts:826`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L826) |
+| 6 提交点 | 所有 setup await 都已 settle、即将发布的那一瞬同步执行 commit | [`agent-loop/src/index.ts:827`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L827) |
+| 7 冲写未存后缀 | 把创建窗口里 append 的事件在活事件开始路由之前写进句柄 | [`agent-loop/src/index.ts:749-757`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L749-L757) |
+| 8 enter | 插入活体表但不广播;Agent id 必须等于 session id,重复 id 直接抛错 | [`core/agent/src/index.ts:458-493`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L458-L493) |
+| 9 announce | 同步派发 `agent/created`;同步抛错的监听者会否决发布并触发回滚 | [`core/agent/src/index.ts:533-560`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L533-L560) |
+| 10 发布顺序 | 会话先可见、Agent 后可见,最后发 session-start 作为"可以开始注入上下文"的时机 | [`agent-loop/src/index.ts:662-677`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L662-L677) |
+| 11 拆卸 | 取消 → 等闲 → 撤销作用域 → 关写句柄 → 离表,失败全部收集而不是吞掉 | [`agent-loop/src/index.ts:576-619`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L576-L619) |
+| 12 解绑逆序 | 先摘 Agent 再摘会话;销毁事件发生在驱动收敛之后、会话解绑之前 | [`agent-loop/src/index.ts:609-610`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L609-L610) |
+| 13 因果归属 | withInitiator 只做归属不授权;关闭时先把发起本次卸载的那条链从自己的 drain 里排除 | [`core/agent/src/index.ts:672-678`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L672-L678) |
 
 <details><summary>原图</summary>
 
@@ -81,9 +81,9 @@ dispose()  cancel(disposed) → whenIdle → scope.dispose → handle.close → 
 
 ## 第一节 三层职责:册子 / 工厂 / 驱动
 
-`AgentRegistry` 的私有状态只有八项(`packages/core/agent/src/index.ts:246-253`):`store`(活体表)、`factory`(工厂槽)、`initiators` / `initiatorRuns`(两条 ALS)、`initiatorState` / `activeInitiatorRuns` / `initiatorDrain` / `initiatorDisposal`(关闭状态机)。
+`AgentRegistry` 的私有状态只有八项([`packages/core/agent/src/index.ts:246-253`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L246-L253)):`store`(活体表)、`factory`(工厂槽)、`initiators` / `initiatorRuns`(两条 ALS)、`initiatorState` / `activeInitiatorRuns` / `initiatorDrain` / `initiatorDisposal`(关闭状态机)。
 
-`store` 的每一项是 `AgentEntry`(`:211-220`):
+`store` 的每一项是 `AgentEntry`([`:211-220`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L211-L220)):
 
 ```typescript
 interface AgentEntry {
@@ -211,7 +211,7 @@ unfollowOwner = ownerCtx.effect(function* () {                        // :623-63
 }, `agentLoop.lifecycle(${id})`)
 ```
 
-生成器 effect 的两个 `yield` 按 Cordis 规则**反序**转出:**先跑生命周期析构(dispose),再放 scope**——"停驱动/等收敛"必须发生在"scope 里的注册被撤销"之前。`continuation-activation.ts:184-198` 用的是同一条规则,那里把理由写成了明文。
+生成器 effect 的两个 `yield` 按 Cordis 规则**反序**转出:**先跑生命周期析构(dispose),再放 scope**——"停驱动/等收敛"必须发生在"scope 里的注册被撤销"之前。[`continuation-activation.ts:184-198`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/continuation-activation.ts#L184-L198) 用的是同一条规则,那里把理由写成了明文。
 
 ---
 
@@ -285,13 +285,13 @@ register(agent: Agent): () => void {
 
 ## 第四节 `AgentHandle`:disposer 是能力,不是方法
 
-`AgentHandle` 就是 `{ agent: Agent; dispose(): Promise<void> }`(`packages/core/agent/src/index.ts:160-163`)。契约在 `:146-159` 写全,三条要点:
+`AgentHandle` 就是 `{ agent: Agent; dispose(): Promise<void> }`([`packages/core/agent/src/index.ts:160-163`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L160-L163))。契约在 [`:146-159`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L146-L159) 写全,三条要点:
 
-1. **"among consumers, only the holder can tear this agent down"**——disposer 是能力。`ctx.agents.get(id)` 只返回裸 `Agent`(`:567-569`),拿不到 `dispose`。
-2. **提供者是结构性 owner**:scoped agent 依赖该 provider 的服务 API,provider 卸载时会 stop + drain 它造的每一个活句柄(`:150-152`);实现是 `FactoryOwnership.track`(`agent-loop/src/index.ts:116-119`)与 `dispose()`(`:138-146`)。
-3. **config 建的 agent 不需要 handle**:loop 自己启动的那些由 loop fiber 拥有,永不外发句柄(`:157-158`)。
+1. **"among consumers, only the holder can tear this agent down"**——disposer 是能力。`ctx.agents.get(id)` 只返回裸 `Agent`([`:567-569`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L567-L569)),拿不到 `dispose`。
+2. **提供者是结构性 owner**:scoped agent 依赖该 provider 的服务 API,provider 卸载时会 stop + drain 它造的每一个活句柄([`:150-152`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L150-L152));实现是 `FactoryOwnership.track`([`agent-loop/src/index.ts:116-119`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L116-L119))与 `dispose()`([`:138-146`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L138-L146))。
+3. **config 建的 agent 不需要 handle**:loop 自己启动的那些由 loop fiber 拥有,永不外发句柄([`:157-158`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L157-L158))。
 
-`dispose` 的实现就是 `prepare()` 里那个 memoized 闭包(`agent-loop/src/index.ts:576-619`)——无论多少个 owner 同时触发,拿到的都是同一个 Promise。
+`dispose` 的实现就是 `prepare()` 里那个 memoized 闭包([`agent-loop/src/index.ts:576-619`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L576-L619))——无论多少个 owner 同时触发,拿到的都是同一个 Promise。
 
 ---
 
@@ -349,15 +349,15 @@ flowchart LR
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 1 取消 | 以 disposed 为因取消循环,并摘掉两个 abort 监听 | `agent-loop/src/index.ts:576-619` |
-| 2 等收敛 | 等驱动与维护任务全部闲下来 | `agent-loop/src/index.ts:583-585` |
-| 3 拆作用域 | 撤销 agentCtx 上的全部注册 | `agent-loop/src/index.ts:586` |
-| 4 关写句柄 | 让收尾事件耐久落盘;这里常常是第一个暴露持久化失败的地方 | `agent-loop/src/index.ts:599-602` |
-| 5 摘 Agent | 从 agents 表移除并同步发 `agent/disposed` | `agent-loop/src/index.ts:609-610` |
-| 6 摘会话 | 从 sessions 表移除并同步发 `session/disposed` | `agent-loop/src/index.ts:609-610` |
-| 7 解除跟踪 | untrack 解除工厂跟踪;owner 触发的拆卸会跳过 unfollowOwner | `agent-loop/src/index.ts:613` |
-| 8 失败处理 | 收集所有失败:只有一个就抛它,多个合成 AggregateError | `agent-loop/src/index.ts:580-582` |
-| 9 幂等 | dispose 是 memoized 闭包,多个 owner 同时触发拿到的是同一个 Promise | `agent-loop/src/index.ts:576-619` |
+| 1 取消 | 以 disposed 为因取消循环,并摘掉两个 abort 监听 | [`agent-loop/src/index.ts:576-619`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L576-L619) |
+| 2 等收敛 | 等驱动与维护任务全部闲下来 | [`agent-loop/src/index.ts:583-585`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L583-L585) |
+| 3 拆作用域 | 撤销 agentCtx 上的全部注册 | [`agent-loop/src/index.ts:586`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L586) |
+| 4 关写句柄 | 让收尾事件耐久落盘;这里常常是第一个暴露持久化失败的地方 | [`agent-loop/src/index.ts:599-602`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L599-L602) |
+| 5 摘 Agent | 从 agents 表移除并同步发 `agent/disposed` | [`agent-loop/src/index.ts:609-610`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L609-L610) |
+| 6 摘会话 | 从 sessions 表移除并同步发 `session/disposed` | [`agent-loop/src/index.ts:609-610`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L609-L610) |
+| 7 解除跟踪 | untrack 解除工厂跟踪;owner 触发的拆卸会跳过 unfollowOwner | [`agent-loop/src/index.ts:613`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L613) |
+| 8 失败处理 | 收集所有失败:只有一个就抛它,多个合成 AggregateError | [`agent-loop/src/index.ts:580-582`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L580-L582) |
+| 9 幂等 | dispose 是 memoized 闭包,多个 owner 同时触发拿到的是同一个 Promise | [`agent-loop/src/index.ts:576-619`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L576-L619) |
 
 <details><summary>原图</summary>
 
@@ -401,10 +401,10 @@ publish: (source) => {
 }
 ```
 
-- `SessionStore.enter`(`packages/core/session/src/index.ts:1035`)与 `announce`(`:1090`)是同一套两段式:`enter` 提供 disposer 但**不发** `session/created`,注释(`:1016-1018`)说明原因——让一个抛错的 `session/created` 监听器能回滚这次 attach。
+- `SessionStore.enter`([`packages/core/session/src/index.ts:1035`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L1035))与 `announce`([`:1090`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L1090))是同一套两段式:`enter` 提供 disposer 但**不发** `session/created`,注释([`:1016-1018`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L1016-L1018))说明原因——让一个抛错的 `session/created` 监听器能回滚这次 attach。
 - **顺序不可交换**:session 必须先于 agent 可见(否则 `agent/created` 的监听者看到的 agent 没有已发布的 session);`agent/session-start` 必须在两者之后,它是"可以开始 `inject` 上下文"的时机(`runtime-types.ts:306-316`)。
 - 每一步之间都插了 `assertLive()`(`:663,669,671,674,676`):同步的 publish 监听器可能已经启动 teardown,而机器此时**已经可用**(投递从 session-start 起就工作),所以只差一次活性复检。
-- 解绑在 dispose 里**逆序**:`detachAgent()` 再 `detachSession()`(`:609-610`)。`agent/disposed` 的语义被限定为 *after driver quiescence and scoped-registration unwind, but before session detachment*(`packages/core/agent/src/runtime-types.ts:259-267`)。
+- 解绑在 dispose 里**逆序**:`detachAgent()` 再 `detachSession()`([`:609-610`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L609-L610))。`agent/disposed` 的语义被限定为 *after driver quiescence and scoped-registration unwind, but before session detachment*([`packages/core/agent/src/runtime-types.ts:259-267`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts#L259-L267))。
 
 ---
 
@@ -412,12 +412,12 @@ publish: (source) => {
 
 | 方法 | 位置 | 语义 |
 |---|---|---|
-| `currentInitiator()` | `agent/src/index.ts:292-295` | 可选读取;边界外或显式清除边界内为 `undefined`;服务 disposed 后抛 |
-| `requireInitiator()` | `:305-309` | 缺失即抛 `no initiating agent is active`(`:207`) |
-| `withInitiator(agent, op)` | `:324-326` | 建立归属边界,**原样保留返回值(含 Promise)** |
-| `withoutInitiator(op)` | `:339-341` | 清除继承的 initiator(定时器 / 队列泵 / 导出器) |
+| `currentInitiator()` | [`agent/src/index.ts:292-295`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L292-L295) | 可选读取;边界外或显式清除边界内为 `undefined`;服务 disposed 后抛 |
+| `requireInitiator()` | [`:305-309`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L305-L309) | 缺失即抛 `no initiating agent is active`([`:207`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L207)) |
+| `withInitiator(agent, op)` | [`:324-326`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L324-L326) | 建立归属边界,**原样保留返回值(含 Promise)** |
+| `withoutInitiator(op)` | [`:339-341`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L339-L341) | 清除继承的 initiator(定时器 / 队列泵 / 导出器) |
 
-定性依据是 `withInitiator` JSDoc 那句:*presence is neither liveness proof nor authorization*(`:319`)。另有实现义务:*this method does neither*——队列或 wire 接收方只有在**显式校验身份并解析出活的 Agent 之后**才允许建立这个边界(`:316-318`)。
+定性依据是 `withInitiator` JSDoc 那句:*presence is neither liveness proof nor authorization*([`:319`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L319))。另有实现义务:*this method does neither*——队列或 wire 接收方只有在**显式校验身份并解析出活的 Agent 之后**才允许建立这个边界([`:316-318`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L316-L318))。
 
 ```typescript
 // packages/core/agent/src/index.ts:624-654(节选)
@@ -499,22 +499,22 @@ graph TD
 
 | 显式主体 | 位置 |
 |---|---|
-| `SubagentStartRequest.parent` | `packages/subagent/subagent/src/types.ts:150-155` |
-| `WorkflowStartRequest.parent` | `packages/workflow/workflow/src/runtime-types.ts:30-31` |
-| `JobStart.owner` | `packages/jobs/jobs/src/types.ts:56-62` |
-| `SubagentInterruptAuthority` | `packages/subagent/subagent/src/types.ts:60-67` |
+| `SubagentStartRequest.parent` | [`packages/subagent/subagent/src/types.ts:150-155`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts#L150-L155) |
+| `WorkflowStartRequest.parent` | [`packages/workflow/workflow/src/runtime-types.ts:30-31`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow/src/runtime-types.ts#L30-L31) |
+| `JobStart.owner` | [`packages/jobs/jobs/src/types.ts:56-62`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L56-L62) |
+| `SubagentInterruptAuthority` | [`packages/subagent/subagent/src/types.ts:60-67`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/types.ts#L60-L67) |
 
-工具层据此硬校验:`exec.agent` 缺失即抛,不猜(`tool-subagent/src/index.ts:472-476`、`tool-subagent-control/src/index.ts:61-64,106-110`)。
+工具层据此硬校验:`exec.agent` 缺失即抛,不猜([`tool-subagent/src/index.ts:472-476`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L472-L476)、`tool-subagent-control/src/index.ts:61-64,106-110`)。
 
 ---
 
 ## 第七节 `resume`:差别只在加载屏障
 
-`resume()`(`agent-loop/src/index.ts:844-850`)先要求持久化服务存在,否则抛 `cannot resume: session persistence is not configured (load a dsh-session-persistence backend)`。`resumeWith`(`:853-925`)与 `createAgent` 的差别是**先拿写所有权**——注释原文(`:877-879`):*Taking write ownership FIRST excludes a concurrent resume of the same id (in this process, a live agent's handle holds the claim)*。
+`resume()`([`agent-loop/src/index.ts:844-850`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L844-L850))先要求持久化服务存在,否则抛 `cannot resume: session persistence is not configured (load a dsh-session-persistence backend)`。`resumeWith`([`:853-925`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L853-L925))与 `createAgent` 的差别是**先拿写所有权**——注释原文([`:877-879`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L877-L879)):*Taking write ownership FIRST excludes a concurrent resume of the same id (in this process, a live agent's handle holds the claim)*。
 
-以及一条三路 fuse 的取消信号(`:863-871`):`AbortSignal.any([options.signal?, ownerAbort.signal, this.ownership.signal])`。`ownerAbort` 由一个 owner effect 驱动(`:864-866`):owner 在加载期间被销毁时 open/read 也要被取消,否则一个永不 settle 的后端会把 id 永久钉住。加载完成后 `handle = undefined`(`:908`,注释 *ownership passes to setupAndPublish/prepare*),所有权随即转交给新建的 `PreparedAgent`。
+以及一条三路 fuse 的取消信号([`:863-871`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L863-L871)):`AbortSignal.any([options.signal?, ownerAbort.signal, this.ownership.signal])`。`ownerAbort` 由一个 owner effect 驱动([`:864-866`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L864-L866)):owner 在加载期间被销毁时 open/read 也要被取消,否则一个永不 settle 的后端会把 id 永久钉住。加载完成后 `handle = undefined`([`:908`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L908),注释 *ownership passes to setupAndPublish/prepare*),所有权随即转交给新建的 `PreparedAgent`。
 
-`waitForDrainingConfiguredIdentity`(`:502-522`)处理另一类竞态:**同 id 的上一条生命周期正在 registry 里 drain**。它只在这种情况下等;健康的占用者会由 create/resume 自己以碰撞错误暴露。
+`waitForDrainingConfiguredIdentity`([`:502-522`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L502-L522))处理另一类竞态:**同 id 的上一条生命周期正在 registry 里 drain**。它只在这种情况下等;健康的占用者会由 create/resume 自己以碰撞错误暴露。
 
 ---
 
@@ -522,23 +522,23 @@ graph TD
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `AgentHandle` | `packages/core/agent/src/index.ts:160-163` | `{agent, dispose}`,disposer 即能力 |
-| `AgentFactory` | `agent/src/index.ts:171-203` | 工厂契约:`createAgent` / `resume` |
-| `CreateAgentOptions` / `ResumeAgentOptions` | `agent/src/index.ts:62-119` / `125-144` | 身份、`meta`、`seed`、`setup`、`signal` |
-| `AgentSetup` / `AgentSetupCommit` | `agent/src/index.ts:32-53` | 组合式 setup 与发布提交点 |
-| `AgentEntry` / `InitiatorRun` / `FactorySlot` | `agent/src/index.ts:211-231` | 活体项 / 嵌套链 / 防过早追踪持有器 |
-| `AgentRegistry.create` / `resume` | `agent/src/index.ts:388-398` / `407-413` | 委派给工厂,不自己造 agent |
-| `AgentRegistry.setFactory` | `agent/src/index.ts:355-371` | effect 独占槽;返回精确 disposer |
-| `AgentRegistry.enter` / `announce` | `agent/src/index.ts:458-493` / `533-560` | 插入不广播 / 同步抛否决发布 |
-| `AgentRegistry.detachEntered` / `emitDisposed` | `agent/src/index.ts:496-509` / `512-524` | 身份校验;未发布不补销毁边 |
-| `isOwnedBy` / `list` / `roots` | `agent/src/index.ts:579-601` | 运行期归属 ≠ 持久谱系 |
-| `withInitiator` / `runWithInitiator` | `agent/src/index.ts:324-341` / `624-654` | 因果归属,非授权 |
-| `closeInitiators` / `disposeInitiators` / `releaseReentrantInitiatorRuns` | `agent/src/index.ts:604-621` / `672-678` | 关门 → 排除发起链 → drain → disable |
-| `FactoryOwnership` | `packages/core/agent-loop/src/index.ts:96-147` | 活句柄集合 + 启动任务集合 |
-| `PreparedAgent` / `AgentLoop.prepare` | `agent-loop/src/index.ts:213-221` / `530-687` | 建机器 / scope / 反向 teardown |
-| `publish()` / `dispose` 闭包 | `agent-loop/src/index.ts:662-677` / `576-619` | 发布五步 / memoized 反序 teardown |
-| `setupAndPublish` | `agent-loop/src/index.ts:804-836` | setup → commit → 冲写 → publish |
-| `createStoredSession` / `appendUnstoredSuffix` | `agent-loop/src/index.ts:730-738` / `749-757` | 先拿写所有权;发布前冲未存后缀 |
-| `raceAbort` / `raceAbortCall` | `agent-loop/src/index.ts:150-163` / `166-180` | 把 await 与 signal 竞速 |
-| `SessionStore.enter` / `announce` | `packages/core/session/src/index.ts:1035` / `1090` | 同一套两段式 session 发布 |
-| `Agent` 运行面 / `agent/*` 事件 | `packages/core/agent/src/runtime-types.ts:163-243` / `245-404` | 驱动三件套与机器扩展点 |
+| `AgentHandle` | [`packages/core/agent/src/index.ts:160-163`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L160-L163) | `{agent, dispose}`,disposer 即能力 |
+| `AgentFactory` | [`agent/src/index.ts:171-203`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L171-L203) | 工厂契约:`createAgent` / `resume` |
+| `CreateAgentOptions` / `ResumeAgentOptions` | [`agent/src/index.ts:62-119`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L62-L119) / `125-144` | 身份、`meta`、`seed`、`setup`、`signal` |
+| `AgentSetup` / `AgentSetupCommit` | [`agent/src/index.ts:32-53`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L32-L53) | 组合式 setup 与发布提交点 |
+| `AgentEntry` / `InitiatorRun` / `FactorySlot` | [`agent/src/index.ts:211-231`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L211-L231) | 活体项 / 嵌套链 / 防过早追踪持有器 |
+| `AgentRegistry.create` / `resume` | [`agent/src/index.ts:388-398`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L388-L398) / `407-413` | 委派给工厂,不自己造 agent |
+| `AgentRegistry.setFactory` | [`agent/src/index.ts:355-371`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L355-L371) | effect 独占槽;返回精确 disposer |
+| `AgentRegistry.enter` / `announce` | [`agent/src/index.ts:458-493`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L458-L493) / `533-560` | 插入不广播 / 同步抛否决发布 |
+| `AgentRegistry.detachEntered` / `emitDisposed` | [`agent/src/index.ts:496-509`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L496-L509) / `512-524` | 身份校验;未发布不补销毁边 |
+| `isOwnedBy` / `list` / `roots` | [`agent/src/index.ts:579-601`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L579-L601) | 运行期归属 ≠ 持久谱系 |
+| `withInitiator` / `runWithInitiator` | [`agent/src/index.ts:324-341`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L324-L341) / `624-654` | 因果归属,非授权 |
+| `closeInitiators` / `disposeInitiators` / `releaseReentrantInitiatorRuns` | [`agent/src/index.ts:604-621`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/index.ts#L604-L621) / `672-678` | 关门 → 排除发起链 → drain → disable |
+| `FactoryOwnership` | [`packages/core/agent-loop/src/index.ts:96-147`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L96-L147) | 活句柄集合 + 启动任务集合 |
+| `PreparedAgent` / `AgentLoop.prepare` | [`agent-loop/src/index.ts:213-221`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L213-L221) / `530-687` | 建机器 / scope / 反向 teardown |
+| `publish()` / `dispose` 闭包 | [`agent-loop/src/index.ts:662-677`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L662-L677) / `576-619` | 发布五步 / memoized 反序 teardown |
+| `setupAndPublish` | [`agent-loop/src/index.ts:804-836`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L804-L836) | setup → commit → 冲写 → publish |
+| `createStoredSession` / `appendUnstoredSuffix` | [`agent-loop/src/index.ts:730-738`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L730-L738) / `749-757` | 先拿写所有权;发布前冲未存后缀 |
+| `raceAbort` / `raceAbortCall` | [`agent-loop/src/index.ts:150-163`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L150-L163) / `166-180` | 把 await 与 signal 竞速 |
+| `SessionStore.enter` / `announce` | [`packages/core/session/src/index.ts:1035`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L1035) / `1090` | 同一套两段式 session 发布 |
+| `Agent` 运行面 / `agent/*` 事件 | [`packages/core/agent/src/runtime-types.ts:163-243`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts#L163-L243) / `245-404` | 驱动三件套与机器扩展点 |

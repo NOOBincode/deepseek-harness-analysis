@@ -1,7 +1,7 @@
 # 04 · 文件监视与失效闭环
 
 > 上游:[第四章 · 第三节](../04-skills.md#第三节-本地-provider监视与失效闭环)、[第六节第 4 条](../04-skills.md#第六节-作用域行为agent--preset-分层)
-> 主源码:`packages/skill/skill-filesystem/src/index.ts:134-147, 288-707`、`packages/api/session-controller/src/skill-catalog.ts`、`packages/client/ui-skill/src/client/index.ts`
+> 主源码:`packages/skill/skill-filesystem/src/index.ts:134-147, 288-707`、[`packages/api/session-controller/src/skill-catalog.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/skill-catalog.ts)、[`packages/client/ui-skill/src/client/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-skill/src/client/index.ts)
 
 ---
 
@@ -68,7 +68,7 @@ flowchart TD
 | `awaitWriteFinish.stabilityThreshold` / `pollInterval` | `Config.watchStabilityThresholdMs` / `Config.watchPollIntervalMs`,默认 **200** / **100** | 文件须稳定 200ms 才上报,防止读到写了一半的 frontmatter;`pollInterval` 同时是 `usePolling` 的轮询间隔 |
 | `usePolling` | `Config.watchUsePolling`,默认 false | 网络盘 / 容器挂载 / 某些 Windows 场景下原生事件不可靠时的退路 |
 
-`resolveWatchConfig`(`:612-627`)对 `watchStabilityThresholdMs` / `watchPollIntervalMs` / `watchMaxProjects` 各过一遍 `assertPositiveInteger`(`:703-707`),plugin 加载期就抛错(测试 `skill-filesystem.spec.ts:848`)。
+`resolveWatchConfig`(`:612-627`)对 `watchStabilityThresholdMs` / `watchPollIntervalMs` / `watchMaxProjects` 各过一遍 `assertPositiveInteger`(`:703-707`),plugin 加载期就抛错(测试 [`skill-filesystem.spec.ts:848`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/tests/skill-filesystem.spec.ts#L848))。
 
 **稳定窗口与 `fs/observed` 的分工**是这一节的重点:模型用 `write`/`edit` 写 SKILL.md,若只靠 chokidar 要等 200ms 稳定窗口加事件调度;`fs/observed` 直通把这一段完全跳过,所以"模型刚写的 skill 下一步就能用"是**确定性的**。
 
@@ -103,7 +103,7 @@ flowchart TD
 | `root` | 根本身存在且是目录 | `chokidar.watch(anchor, ...)`(`:491`) | 全套事件过滤 |
 | `ancestor` | 根不存在,`candidate` 是最近现存祖先 | `fs.watchFile(nextPath, { persistent: false, interval })`(`:456-470`) | 只关心"路径出现/消失",不看内容 |
 
-`nextPath = join(anchor, firstSegment)` 监视的是**从现存祖先到目标根的第一段路径**。根是 `~/.dsh/skills` 而 `~/.dsh` 存在时监视 `~/.dsh/skills` 这一条;若 `~/.dsh` 也不存在则继续向上,直到某一级现存,再监视"那一级下的下一段"。这实现的是**一次只补一段缺失路径**的渐进探测(`skill-filesystem/README.md:151`)。
+`nextPath = join(anchor, firstSegment)` 监视的是**从现存祖先到目标根的第一段路径**。根是 `~/.dsh/skills` 而 `~/.dsh` 存在时监视 `~/.dsh/skills` 这一条;若 `~/.dsh` 也不存在则继续向上,直到某一级现存,再监视"那一级下的下一段"。这实现的是**一次只补一段缺失路径**的渐进探测([`skill-filesystem/README.md:151`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/README.md#L151))。
 
 用 Node 原生 `watchFile` 而非 chokidar 的理由:这类"路径还不存在"的探测在 chokidar 上平台差异极大,而 `watchFile` 的轮询语义三平台一致,代价是固定延迟 `watchPollIntervalMs`。`persistent: false` 让这种句柄**不阻止进程退出**,生命周期完全由 provider 的 disposal 负责。`sameWatchMode`(`:656-660`)比较 `kind` 与 `anchor`(ancestor 模式还比 `nextPath`),用在"是否要重挂"(`:404`)与"ancestor 事件是否意味着状态真变了"(`:485`)两处。
 
@@ -198,7 +198,7 @@ function isRelevantWatchEvent(root: SkillRoot, event: SkillWatchEvent, path: str
   })
 ```
 
-**同一 microtask 批次内的所有事件合并成一次失效**。写一个 SKILL.md 常见的 unlink+add+change 三连,或一批文件同时落地,都只产生一次 `revision++` 与一次缓存清空。粒度是 microtask 而非定时器:同步事件回调里连续触发会合并,跨宏任务的两次改动各触发一次(测试 `skill-filesystem-watcher.spec.ts:245`)。
+**同一 microtask 批次内的所有事件合并成一次失效**。写一个 SKILL.md 常见的 unlink+add+change 三连,或一批文件同时落地,都只产生一次 `revision++` 与一次缓存清空。粒度是 microtask 而非定时器:同步事件回调里连续触发会合并,跨宏任务的两次改动各触发一次(测试 [`skill-filesystem-watcher.spec.ts:245`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/tests/skill-filesystem-watcher.spec.ts#L245))。
 
 ```typescript
 // packages/skill/skill-filesystem/src/index.ts:336-341
@@ -250,7 +250,7 @@ observeHostMutation(path: string): void {
 | 所有权与引用计数 | `owners: Set<string>`(`:276`):共享根 owner 是 `shared:<path>`,项目根是 `project:<projectRoot>`;`retainRoot` 加(`:363`)、`releaseRoot` 减(`:371`),**归零才关 watcher**(`:372-377`) |
 | LRU 与驱逐 | `projects: Map<projectRoot, Set<rootPath>>` 靠"删了再插"维持访问序;超 `watchMaxProjects` 时从头弹、释放其下所有根、主动 `invalidate()` |
 
-驱逐后主动失效的理由:候选没问题,但根不再被监视,目录可能漏掉后续变化,所以让下一读重新建立。`retainRoot`(`:357-365`)对新根先登记 `unhealthy: true` 再尝试 `ensureWatcher`;起不来时 `owners` 里仍有它,下次读还会重试(测试 `skill-filesystem.spec.ts:743`)。
+驱逐后主动失效的理由:候选没问题,但根不再被监视,目录可能漏掉后续变化,所以让下一读重新建立。`retainRoot`(`:357-365`)对新根先登记 `unhealthy: true` 再尝试 `ensureWatcher`;起不来时 `owners` 里仍有它,下次读还会重试(测试 [`skill-filesystem.spec.ts:743`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/tests/skill-filesystem.spec.ts#L743))。
 
 ### 6.2 重挂路径
 
@@ -277,7 +277,7 @@ void (async () => {
     if (!state.unhealthy && sameWatchMode(watcher.mode, current)) return
 ```
 
-注释说的是:一个子目录被删可能先发出目录已空的信号,而根的 `unlinkDir` 还没到;只有独立复核才能发现保留的句柄其实已过期。这是"子项 unlink 后能被立即重建并观测到"的基础(测试 `skill-filesystem-watcher.spec.ts:320`)。`replaceWatcher`(`:409-436`)先关旧再开新,并在每个 await 之后复核 `this.closing || state.owners.size === 0`;失败时置 `unhealthy = true`、warn、然后 `throw`。
+注释说的是:一个子目录被删可能先发出目录已空的信号,而根的 `unlinkDir` 还没到;只有独立复核才能发现保留的句柄其实已过期。这是"子项 unlink 后能被立即重建并观测到"的基础(测试 [`skill-filesystem-watcher.spec.ts:320`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/tests/skill-filesystem-watcher.spec.ts#L320))。`replaceWatcher`([`:409-436`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/tests/skill-filesystem-watcher.spec.ts#L409-L436))先关旧再开新,并在每个 await 之后复核 `this.closing || state.owners.size === 0`;失败时置 `unhealthy = true`、warn、然后 `throw`。
 
 ### 6.3 dispose 与接线
 
@@ -295,7 +295,7 @@ void (async () => {
   }))
 ```
 
-四步各自对应一个竞态:第 1 步拦住所有回调的第一道守卫(`closing`);第 2 步让 `openRootWatcher` 里注册的 `onAbort` reject 挂载中的 `readiness`,使 `ensureWatcher` 的 promise 落定而非悬挂;第 3 步 `settleWatcherOpening`(`:603-610`)吞掉启动错误——它已记过日志;第 4 步 `closeWatcher`(`:594-600`)把 `close()` 异常降级为 warn。外层 `FileSystemSkillProvider.dispose()`(`:240-243`)用 `??=` 做成**单飞**,并发与重复调用幂等(测试 `skill-filesystem.spec.ts:785`)。
+四步各自对应一个竞态:第 1 步拦住所有回调的第一道守卫(`closing`);第 2 步让 `openRootWatcher` 里注册的 `onAbort` reject 挂载中的 `readiness`,使 `ensureWatcher` 的 promise 落定而非悬挂;第 3 步 `settleWatcherOpening`(`:603-610`)吞掉启动错误——它已记过日志;第 4 步 `closeWatcher`(`:594-600`)把 `close()` 异常降级为 warn。外层 `FileSystemSkillProvider.dispose()`(`:240-243`)用 `??=` 做成**单飞**,并发与重复调用幂等(测试 [`skill-filesystem.spec.ts:785`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/tests/skill-filesystem.spec.ts#L785))。
 
 ```typescript
 // packages/skill/skill-filesystem/src/index.ts:134-147(节选)
@@ -363,9 +363,9 @@ catch {
 }
 ```
 
-**`standingKeyFor` 不激活 Agent**:它只保证 preset 的 standing composition 已挂载并返回其 scope key(`packages/preset/agent-presets/src/index.ts:763-766`)。因此冷会话也能读到"如果这个会话现在跑起来会看到什么目录"。三级降级最终落到 `undefined` scope = 只读全局层。
+**`standingKeyFor` 不激活 Agent**:它只保证 preset 的 standing composition 已挂载并返回其 scope key([`packages/preset/agent-presets/src/index.ts:763-766`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L763-L766))。因此冷会话也能读到"如果这个会话现在跑起来会看到什么目录"。三级降级最终落到 `undefined` scope = 只读全局层。
 
-返回的 `SkillEntry`(`packages/api/session-controller/src/types.ts:225-236`)字段面与模型目录**不同**:有 `name` / `description` / `whenToUse?` / `path?` / `modelInvocable`;没有 `content`(只列目录,绝不加载正文)、`source` / `provider` / `rank` / `resourceBase`。`path` 的存在是为了**预览**(UI 可点击条目直接打开真实文件)。过滤用 `isUserInvocable`(`:77`),与模型目录的 `isModelInvocable` 正交——两个方向的目录互不污染。
+返回的 `SkillEntry`([`packages/api/session-controller/src/types.ts:225-236`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/types.ts#L225-L236))字段面与模型目录**不同**:有 `name` / `description` / `whenToUse?` / `path?` / `modelInvocable`;没有 `content`(只列目录,绝不加载正文)、`source` / `provider` / `rank` / `resourceBase`。`path` 的存在是为了**预览**(UI 可点击条目直接打开真实文件)。过滤用 `isUserInvocable`([`:77`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/types.ts#L77)),与模型目录的 `isModelInvocable` 正交——两个方向的目录互不污染。
 
 ---
 
@@ -376,7 +376,7 @@ catch {
 export const inject = ['inputTriggers', 'sessions', 'slots', 'locale', 'remote', 'remote.skills', 'sidebarRight']
 ```
 
-`apply()`(`:70-220`)装四样:locale 字典(`:71`)、`tool.call.toolview` 上的 `skill` 行视图(`:72-75`)、`/` 输入源(`:214`)、两级失效监听(`:211-212`)。宿主行在 `packages/bundle/web-app/cordis.patch.yml:294-295`。
+`apply()`([`:70-220`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/types.ts#L70-L220))装四样:locale 字典([`:71`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/types.ts#L71))、`tool.call.toolview` 上的 `skill` 行视图([`:72-75`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/types.ts#L72-L75))、`/` 输入源([`:214`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/types.ts#L214))、两级失效监听([`:211-212`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/types.ts#L211-L212))。宿主行在 [`packages/bundle/web-app/cordis.patch.yml:294-295`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/web-app/cordis.patch.yml#L294-L295)。
 
 ```typescript
 // packages/client/ui-skill/src/client/index.ts:98-122(节选)
@@ -422,7 +422,7 @@ const source: InputTriggerSource = {
 ```
 
 - **子 agent 会话直接返回空**(`:145`):子会话的历史不属于当前输入面(测试 `:474`)。
-- 排序复用 `rankByName`(`packages/client/ui-primitives/src/rank-by-name.ts:70-93`):大小写不敏感的**有序子序列**匹配,前缀命中优先,再按对齐分,最后保持源序——与同一个 `/` 菜单里的命令组一致。
+- 排序复用 `rankByName`([`packages/client/ui-primitives/src/rank-by-name.ts:70-93`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-primitives/src/rank-by-name.ts#L70-L93)):大小写不敏感的**有序子序列**匹配,前缀命中优先,再按对齐分,最后保持源序——与同一个 `/` 菜单里的命令组一致。
 - `modelInvocable === false` 的条目**加前缀标记**而非隐藏:它们是人类唯一可用的 skill,必须出现在补全里(测试 `:380`)。
 
 ```typescript
@@ -446,12 +446,12 @@ const source: InputTriggerSource = {
 
 | 位置 | 符号 | 作用 |
 |---|---|---|
-| `skill-filesystem/src/index.ts:60-89` | `Config` 的 `watch*` 字段 | 全部监视可调项(默认 200 / 100 / 128 / true) |
+| [`skill-filesystem/src/index.ts:60-89`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L60-L89) | `Config` 的 `watch*` 字段 | 全部监视可调项(默认 200 / 100 / 128 / true) |
 | `skill-filesystem/src/index.ts:134-147,232-243` | `apply()` / `observeHostMutation` / `dispose` | 接线、直通入口与单飞拆除 |
-| `skill-filesystem/src/index.ts:288-378` | `SkillWatchManager` 字段 / `observeRoots` / `observeHostMutation` / `dispose` / `retainRoot` / `releaseRoot` | owner 分组、LRU 驱逐、第一方直通、平息式拆除与引用计数 |
-| `skill-filesystem/src/index.ts:380-544` | `ensureWatcher` / `ensureCurrentWatcher` / `replaceWatcher` / `openStableWatcher` / `openAncestorWatcher` / `handleAncestorWatchEvent` / `openRootWatcher` | 重挂、双探测、缺路径轮询、chokidar 配置与 `ready` 门 |
-| `skill-filesystem/src/index.ts:546-707` | `handleWatchEvent` / `handleWatcherError` / `scheduleRewatch` / `queueInvalidation` / `closeWatcher` / `settleWatcherOpening` / `resolveWatchConfig` / `resolveRootWatchMode` / `sameWatchMode` / 三个路径谓词 / `mutationToolName` | 事件分发、错误升级、microtask 去抖、配置校验与路径判定 |
-| `api/session-controller/src/skill-catalog.ts:20-107` / `types.ts:219-241` | `SessionSkillCatalog` / `list()` / `scopeFor()` / `SkillListRequest` / `SkillEntry` / `SkillListValue` | 冷可读 Remote、三级回退 scope 与 RPC 契约(含 `path` 供预览) |
-| `packages/preset/agent-presets/src/index.ts:763-766` | `standingKeyFor()` | 不激活 Agent 的 scope key |
+| [`skill-filesystem/src/index.ts:288-378`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L288-L378) | `SkillWatchManager` 字段 / `observeRoots` / `observeHostMutation` / `dispose` / `retainRoot` / `releaseRoot` | owner 分组、LRU 驱逐、第一方直通、平息式拆除与引用计数 |
+| [`skill-filesystem/src/index.ts:380-544`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L380-L544) | `ensureWatcher` / `ensureCurrentWatcher` / `replaceWatcher` / `openStableWatcher` / `openAncestorWatcher` / `handleAncestorWatchEvent` / `openRootWatcher` | 重挂、双探测、缺路径轮询、chokidar 配置与 `ready` 门 |
+| [`skill-filesystem/src/index.ts:546-707`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/skill/skill-filesystem/src/index.ts#L546-L707) | `handleWatchEvent` / `handleWatcherError` / `scheduleRewatch` / `queueInvalidation` / `closeWatcher` / `settleWatcherOpening` / `resolveWatchConfig` / `resolveRootWatchMode` / `sameWatchMode` / 三个路径谓词 / `mutationToolName` | 事件分发、错误升级、microtask 去抖、配置校验与路径判定 |
+| [`api/session-controller/src/skill-catalog.ts:20-107`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/skill-catalog.ts#L20-L107) / [`types.ts:219-241`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/api/session-controller/src/types.ts#L219-L241) | `SessionSkillCatalog` / `list()` / `scopeFor()` / `SkillListRequest` / `SkillEntry` / `SkillListValue` | 冷可读 Remote、三级回退 scope 与 RPC 契约(含 `path` 供预览) |
+| [`packages/preset/agent-presets/src/index.ts:763-766`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/preset/agent-presets/src/index.ts#L763-L766) | `standingKeyFor()` | 不激活 Agent 的 scope key |
 | `client/ui-skill/src/client/index.ts:55-134,140-207` | `CatalogFetch` / `fetchCatalog` / `invalidate` / `clearAll` / `source` | 单飞、会话级缓存、两层失效、触发符声明与落字面文本 |
-| `client/ui-primitives/src/rank-by-name.ts:70-93` / `packages/bundle/web-app/cordis.patch.yml:294-295` | `rankByName()` / `ui-skill` 行 | 与命令组共享的匹配排序、浏览器半的装载点 |
+| [`client/ui-primitives/src/rank-by-name.ts:70-93`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/client/ui-primitives/src/rank-by-name.ts#L70-L93) / [`packages/bundle/web-app/cordis.patch.yml:294-295`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/bundle/web-app/cordis.patch.yml#L294-L295) | `rankByName()` / `ui-skill` 行 | 与命令组共享的匹配排序、浏览器半的装载点 |

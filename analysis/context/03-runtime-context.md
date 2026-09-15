@@ -35,13 +35,13 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 归属判定 | 只认来源插件为本模块、且内容恰好是单个文本块的用户消息 | `isOwned()` / `textOf()`(`packages/core/agent-loop/src/runtime-context.ts:17-24`) |
-| 恢复扫描 | 从最新事件倒序找第一条本模块拥有且仍在 surface 上的快照;先无条件把状态置为"当前不保留" | 构造函数(`runtime-context.ts:118-127`) |
-| 反向扫描 | 通过 `snapshotEvents()` 取全部事件再反转,命中首条即停 | `eventsNewestFirst()`(`runtime-context.ts:47-50`) |
-| 跟随事件 | 订阅 `session/event`:本模块新发的快照刷新记忆 | `runtime-context.ts:129-138` |
-| 失效判定 | 替换类事件且 `sourceEventSeqs` 命中当前记忆的序号,则置回"不保留" | `isReplacementSurfaceEvent`(`packages/core/session/src/surface.ts:73-77`) |
-| 去重投影 | 与记忆文本相同就返回 `undefined`,不同才构造候选消息 | `project()`(`runtime-context.ts:147-158`) |
-| 清空哨兵 | 渲染结果为空但曾经有过快照时,发固定清空语句 | `CLEARED`(`runtime-context.ts:15`) |
+| 归属判定 | 只认来源插件为本模块、且内容恰好是单个文本块的用户消息 | `isOwned()` / `textOf()`([`packages/core/agent-loop/src/runtime-context.ts:17-24`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/runtime-context.ts#L17-L24)) |
+| 恢复扫描 | 从最新事件倒序找第一条本模块拥有且仍在 surface 上的快照;先无条件把状态置为"当前不保留" | 构造函数([`runtime-context.ts:118-127`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/runtime-context.ts#L118-L127)) |
+| 反向扫描 | 通过 `snapshotEvents()` 取全部事件再反转,命中首条即停 | `eventsNewestFirst()`([`runtime-context.ts:47-50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/runtime-context.ts#L47-L50)) |
+| 跟随事件 | 订阅 `session/event`:本模块新发的快照刷新记忆 | [`runtime-context.ts:129-138`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/runtime-context.ts#L129-L138) |
+| 失效判定 | 替换类事件且 `sourceEventSeqs` 命中当前记忆的序号,则置回"不保留" | `isReplacementSurfaceEvent`([`packages/core/session/src/surface.ts:73-77`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts#L73-L77)) |
+| 去重投影 | 与记忆文本相同就返回 `undefined`,不同才构造候选消息 | `project()`([`runtime-context.ts:147-158`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/runtime-context.ts#L147-L158)) |
+| 清空哨兵 | 渲染结果为空但曾经有过快照时,发固定清空语句 | `CLEARED`([`runtime-context.ts:15`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/runtime-context.ts#L15)) |
 
 <details><summary>原始实现</summary>
 
@@ -111,14 +111,14 @@ export class RuntimeContextProjection {
 
 | 贡献者 | 名字 | 位置 | 装的是什么 |
 |---|---|---|---|
-| 沙箱策略 | `sandbox:policy` | 110 | 当前文件策略与工作区根,例如 `Current DSH file policy: workspace-write. …`(`packages/sandbox/sandbox-policy/src/index.ts:41-55`) |
-| 审批策略 | `approval:policy` | 115 | 当前会话是"必须问"还是"一律拒绝"(`packages/interaction/user-approval/src/index.ts:66-68`) |
-| 子 agent 委派 | `subagent:delegation` | 120 | 该 agent 是委派出来的,权限范围已冻结(`packages/subagent/subagent/src/child-agent.ts:171-175`) |
+| 沙箱策略 | `sandbox:policy` | 110 | 当前文件策略与工作区根,例如 `Current DSH file policy: workspace-write. …`([`packages/sandbox/sandbox-policy/src/index.ts:41-55`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox-policy/src/index.ts#L41-L55)) |
+| 审批策略 | `approval:policy` | 115 | 当前会话是"必须问"还是"一律拒绝"([`packages/interaction/user-approval/src/index.ts:66-68`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/interaction/user-approval/src/index.ts#L66-L68)) |
+| 子 agent 委派 | `subagent:delegation` | 120 | 该 agent 是委派出来的,权限范围已冻结([`packages/subagent/subagent/src/child-agent.ts:171-175`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts#L171-L175)) |
 
 这里有一个必须澄清的边界:**工作区事实、跨会话引用、时间读数都不是这条通道**。
 
 - **工作区事实**里"文件策略与写边界"由 `sandbox:policy` 承载,走快照;"工作区指令文件内容"则由 `agent-instructions` 走 `agent/pre-step` 消息——前者是"每次都对的策略",后者是"读了文件才有的内容",值变化频率与体量完全不同。
-- **跨会话引用**由 `session-reference` 在 `agent/pre-step` 上把消息改写成"直接消息 + 紧随其后的快照"(`packages/context/session-reference/src/index.ts:153-177`)。它只在被引用时才存在,是一次性事实,不是环境状态。
+- **跨会话引用**由 `session-reference` 在 `agent/pre-step` 上把消息改写成"直接消息 + 紧随其后的快照"([`packages/context/session-reference/src/index.ts:153-177`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/index.ts#L153-L177))。它只在被引用时才存在,是一次性事实,不是环境状态。
 - **时间与 tmux 位置**:走 `agent/pre-step` 消息。它们变化频率太高,放进快照会让"每次比对都不同"变成"每步都发一条",收益为负。
 
 判断标准可以直接写成一句话:**值是"环境状态"就写快照,值是"这次事件的产物"就写 pre-step 消息**。快照会因为值变化而整体重发,消息不会。
@@ -239,7 +239,7 @@ export function isReplacementSurfaceEvent(
 
 为什么要用 `sourceEventSeqs` 而不是"任何替换都让我失效":一次压缩只用一条摘要替换整段区间,被替换的节点里可能既有运行时快照、也有普通对话。如果替换一律触发失效,那么每次压缩后都会无条件重发一条内容没变的快照,白花一次请求前缀。用 `sourceEventSeqs` 精确指向被吞掉的 seq,才是"我的快照真的没了"。
 
-反过来也有一个必然结果:**被压缩吃掉的那段区间里,快照一定在被吞名单里**。因为压缩提交时把 `shadowedSeqs` 全写进了 `sourceEventSeqs`(`packages/compaction/compaction-basic/src/region.ts:491-494`),而快照只要在该区间内就会被列入。
+反过来也有一个必然结果:**被压缩吃掉的那段区间里,快照一定在被吞名单里**。因为压缩提交时把 `shadowedSeqs` 全写进了 `sourceEventSeqs`([`packages/compaction/compaction-basic/src/region.ts:491-494`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts#L491-L494)),而快照只要在该区间内就会被列入。
 
 ---
 
@@ -258,7 +258,7 @@ export function isReplacementSurfaceEvent(
     })
 ```
 
-- **正常快照**带 `form: 'snapshot'` 与具名贡献列表。`ContextSnapshotSection` 就是 `{ name, text }` 二元组(`packages/llm/llm/src/message.ts:65-70`),UI 拿它把一段散文拆回来源,不需要重新分词。
+- **正常快照**带 `form: 'snapshot'` 与具名贡献列表。`ContextSnapshotSection` 就是 `{ name, text }` 二元组([`packages/llm/llm/src/message.ts:65-70`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/message.ts#L65-L70)),UI 拿它把一段散文拆回来源,不需要重新分词。
 - **清空哨兵**不带贡献,因为此刻确实没有贡献可归属。内容固定为:
 
 ```typescript
@@ -291,7 +291,7 @@ const CLEARED = 'Current runtime context: none. Earlier runtime-context snapshot
 1. **值是"稳定前缀"就写段落**。人格、工具使用规范这类内容在一次会话里基本不变,放在提示正文里能让 provider 的前缀缓存长期命中。
 2. **值是"会切来切去的当前状态"就写上下文**。审批策略可以从 ask 切到 never,沙箱模式可以中途切换;这类值放进段落,每次切换都要改写提示,而快照只是多追加一条。
 
-审批策略的注释把这条理由写在了原地——"完整的当前值跟在保留历史之后,所以切换策略不会改写稳定的系统提示缓存前缀"(`packages/interaction/user-approval/src/index.ts:153-154`)。
+审批策略的注释把这条理由写在了原地——"完整的当前值跟在保留历史之后,所以切换策略不会改写稳定的系统提示缓存前缀"([`packages/interaction/user-approval/src/index.ts:153-154`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/interaction/user-approval/src/index.ts#L153-L154))。
 
 还有一条隐含约束:**快照是全量的,不是增量的**。每次渲染都会把所有当前贡献拼成整份文本,而不是只发变化的那一段。所以贡献者数量增长会线性放大每条快照的体量,贡献者应当保持精简。
 
@@ -359,25 +359,25 @@ type FullSnapshot = ({ status: 'saved' } & SpillRef)
 
 | 文件 | 符号 | 行 | 本模块用途 |
 |---|---|---|---|
-| `packages/core/agent-loop/src/runtime-context.ts` | `SOURCE` / `CLEARED` | 14-15 | 快照来源标识与清空哨兵文本 |
+| [`packages/core/agent-loop/src/runtime-context.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/runtime-context.ts) | `SOURCE` / `CLEARED` | 14-15 | 快照来源标识与清空哨兵文本 |
 | 同上 | `isOwned` / `textOf` | 17-24 | 归属判定与单块文本提取 |
 | 同上 | `eventsNewestFirst` | 46-50 | 倒序事件扫描 |
 | 同上 | `RuntimeContextProjection` | 109-159 | 三态记忆与去重投影 |
 | 同上 | `retained` 字段 | 110-111 | `undefined` / `null` / 记录三态 |
 | 同上 | 构造函数 | 118-139 | 恢复扫描与事件订阅 |
 | 同上 | `project` | 147-158 | 去重、清空哨兵、来源构造 |
-| `packages/core/session/src/surface.ts` | `isSurfaceEvent` | 43-47 | 类型与标记双判 |
+| [`packages/core/session/src/surface.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/surface.ts) | `isSurfaceEvent` | 43-47 | 类型与标记双判 |
 | 同上 | `isReplacementSurfaceEvent` | 73-77 | 替换类事件判定 |
 | 同上 | `isAppendSurfaceEvent` | 60-64 | 追加类事件判定 |
-| `packages/core/system-prompt/src/index.ts` | `renderContextSections` | 312-316 | 贡献渲染与空段丢弃 |
+| [`packages/core/system-prompt/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/src/index.ts) | `renderContextSections` | 312-316 | 贡献渲染与空段丢弃 |
 | 同上 | `joinContextSections` | 297-301 | 固定抬头与整份拼接 |
 | 同上 | `CONTEXT_ORDERS` | 159-163 | 三个具名位置 |
-| `packages/sandbox/sandbox-policy/src/index.ts` | `renderPolicyContext` | 41-55 | 沙箱模式对应的模型可见文本 |
-| `packages/interaction/user-approval/src/index.ts` | `NEVER_SENTENCE` / `ASK_SENTENCE` | 66-68 | 审批策略文本 |
+| [`packages/sandbox/sandbox-policy/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox-policy/src/index.ts) | `renderPolicyContext` | 41-55 | 沙箱模式对应的模型可见文本 |
+| [`packages/interaction/user-approval/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/interaction/user-approval/src/index.ts) | `NEVER_SENTENCE` / `ASK_SENTENCE` | 66-68 | 审批策略文本 |
 | 同上 | 上下文注册 | 153-167 | 取当前值、无 agent 返回空串 |
-| `packages/subagent/subagent/src/child-agent.ts` | `SUBAGENT_DELEGATION_CONTEXT` | 171-175 | 委派身份说明 |
+| [`packages/subagent/subagent/src/child-agent.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/subagent/src/child-agent.ts) | `SUBAGENT_DELEGATION_CONTEXT` | 171-175 | 委派身份说明 |
 | 同上 | `applyChildComposition` | 199-218 | 子上下文登记委派上下文与人格段落 |
-| `packages/context/time-context/src/index.ts` | `renderText` | 93-108 | `unavailable` 时间差写法 |
-| `packages/context/time-context/src/request-zone.ts` | `renderBrowserTimeZoneContext` | 66-81 | 时区三态文本 |
-| `packages/context/session-reference/src/spill.ts` | `FullSnapshot` / `prepareReferenceOmission` | 12-50 | 完整快照的 `saved` / `unavailable` 语义 |
-| `packages/compaction/compaction-basic/src/region.ts` | `commitCompactionBody` | 456-507 | 替换提交与 `sourceEventSeqs` |
+| [`packages/context/time-context/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/time-context/src/index.ts) | `renderText` | 93-108 | `unavailable` 时间差写法 |
+| [`packages/context/time-context/src/request-zone.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/time-context/src/request-zone.ts) | `renderBrowserTimeZoneContext` | 66-81 | 时区三态文本 |
+| [`packages/context/session-reference/src/spill.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/context/session-reference/src/spill.ts) | `FullSnapshot` / `prepareReferenceOmission` | 12-50 | 完整快照的 `saved` / `unavailable` 语义 |
+| [`packages/compaction/compaction-basic/src/region.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/compaction/compaction-basic/src/region.ts) | `commitCompactionBody` | 456-507 | 替换提交与 `sourceEventSeqs` |

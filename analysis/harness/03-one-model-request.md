@@ -1,7 +1,7 @@
 # 03 · 一次模型请求:prepareRequest → buildRequest → llm.stream
 
-> 核心源码:`packages/core/agent-loop/src/agent.ts:500-618`(`prepareRequest` 与 `buildRequest` 两个方法),重试裁决在 `:441-464`。
-> 请求头记账工具在 `packages/core/session/src/request-header.ts`(69 行)。
+> 核心源码:[`packages/core/agent-loop/src/agent.ts:500-618`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L500-L618)(`prepareRequest` 与 `buildRequest` 两个方法),重试裁决在 [`:441-464`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L441-L464)。
+> 请求头记账工具在 [`packages/core/session/src/request-header.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts)(69 行)。
 
 ---
 
@@ -67,20 +67,20 @@ flowchart TD
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 读历史头 | 取当前日志里生效的请求头快照(增量折叠,每次只算新事件) | `agent.ts:510`、`session/src/index.ts:776` |
+| 读历史头 | 取当前日志里生效的请求头快照(增量折叠,每次只算新事件) | `agent.ts:510`、[`session/src/index.ts:776`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L776) |
 | 决定路由 | provider 与 model 直接取声明值 | `agent.ts:512` |
 | 恢复推理力度 | 只在历史配置属于同一路由且不是适配器补的时候沿用 | `agent.ts:513-517` |
 | 组装提议 | 已记过头就用历史剥离版,否则用声明值;整体克隆并深冻结 | `agent.ts:520`、`agent.ts:63` |
 | 配置瀑布 | `agent/request` 允许监听器整体替换配置;不调用 `next()` 即短路 | `agent.ts:530`、`runtime-types.ts:347` |
 | 路由完整性校验 | 没有 provider 或 model 直接抛错,错误信息指明两条补救途径 | `agent.ts:535-537` |
-| 绑定适配器 | 由 LLM 服务解析注册信息、物化默认值、冻结最终配置,并返回一个只能派发一次的调用句柄 | `agent.ts:541`、`llm/src/index.ts:916` |
-| 无适配器回退 | 只吞 `NO_ADAPTER` 这一种错误,其余原样抛;回退后用的是未物化的配置,把兜底权留给中间件 | `agent.ts:543-547`、`llm/src/index.ts:966` |
+| 绑定适配器 | 由 LLM 服务解析注册信息、物化默认值、冻结最终配置,并返回一个只能派发一次的调用句柄 | `agent.ts:541`、[`llm/src/index.ts:916`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/index.ts#L916) |
+| 无适配器回退 | 只吞 `NO_ADAPTER` 这一种错误,其余原样抛;回退后用的是未物化的配置,把兜底权留给中间件 | `agent.ts:543-547`、[`llm/src/index.ts:966`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/index.ts#L966) |
 | 取消检查 | 瀑布返回后与适配器绑定后各检查一次信号 | `agent.ts:534`、`agent.ts:548` |
-| 规范化请求头 | 空工具列表折叠成"没有这个字段",避免同一份内容出现两种表示 | `agent.ts:562`、`request-header.ts:21` |
+| 规范化请求头 | 空工具列表折叠成"没有这个字段",避免同一份内容出现两种表示 | `agent.ts:562`、[`request-header.ts:21`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts#L21) |
 | 三种记账理由 | 首记(区分 initial 与 resume)、有变化(可附系列起点)、仅系列起点 | `agent.ts:570-581` |
 | 路由快照 | 只有 provider、model、上下文窗口、系统提示更新模式之一变化时才写 | `agent.ts:586-598` |
 | 冻结与取材 | 深冻结请求头,把新出现的派生消息逐个深冻结,冻结消息数组本身 | `agent.ts:602-609` |
-| 拼请求 | 配置字段 + 消息 + 工具 + 会话 id + 取消信号,整体冻结并打上循环来源标记 | `agent.ts:610`、`call-config.ts:66` |
+| 拼请求 | 配置字段 + 消息 + 工具 + 会话 id + 取消信号,整体冻结并打上循环来源标记 | `agent.ts:610`、[`call-config.ts:66`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/call-config.ts#L66) |
 | 发起 | 优先用准备好的调用句柄派发,没有则退回服务级流式入口 | `agent.ts:390` |
 | 失败裁决 | 跑 `agent/request-error` 瀑布,只有明确要求重试才重来一次 | `agent.ts:448-463` |
 
@@ -234,7 +234,7 @@ flowchart TD
 
 冻结发生在三个层次(`agent.ts:602-609`):请求头对象、派生出来的消息对象、以及承载消息的数组。消息的冻结用了一个弱集合去重(`agent.ts:94`、`:605`)——同一份导出历史在后续步里会被反复取到,而其中的消息对象是**共享的**(`session.deriveMessages()` 返回新数组但复用已冻结的消息对象),所以只需要在第一次看到时冻结并把身份记下来。用 `WeakSet` 而不是 `Set` 是有意的:被压缩替换掉的历史消息不会因为这份记账而无法回收。
 
-冻结之后才构造请求(`agent.ts:610-616`),并且用 `markAgentLoopRequest` 打上一个进程内的弱标记(`call-config.ts:66`)。这个标记的唯一消费者是 agent-loop 自己的不变量伴随插件——它订阅 `llm/stream`,只对带标记的请求做重建一致性检查(见 [06-invariants-and-guards.md](./06-invariants-and-guards.md))。
+冻结之后才构造请求(`agent.ts:610-616`),并且用 `markAgentLoopRequest` 打上一个进程内的弱标记([`call-config.ts:66`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/call-config.ts#L66))。这个标记的唯一消费者是 agent-loop 自己的不变量伴随插件——它订阅 `llm/stream`,只对带标记的请求做重建一致性检查(见 [06-invariants-and-guards.md](./06-invariants-and-guards.md))。
 
 注意这里冻结的**不包括** `signal`。取消信号必须保持活的,整条链路靠它传递中止。
 
@@ -271,9 +271,9 @@ flowchart TD
 
 裁决只有三个结果:返回 `{ kind: 'retry' }`(接手恢复,通常不调用 `next()`)、调用 `next()` 把决定权交给后面的监听器、或者什么都不做(默认值 `undefined`,失败即为终局)。默认值是 `undefined` 而不是"重试",所以**没装任何重试插件时不会静默重试**。
 
-`retryPolicy` 是随请求一起准备好的(`prepareCall` 从适配器注册信息里取,`llm/src/index.ts:166`),不是错误发生时才去查——这样即便期间发生了 HMR 换适配器,裁决用的也是失败那次调用真正生效的策略。
+`retryPolicy` 是随请求一起准备好的(`prepareCall` 从适配器注册信息里取,[`llm/src/index.ts:166`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/index.ts#L166)),不是错误发生时才去查——这样即便期间发生了 HMR 换适配器,裁决用的也是失败那次调用真正生效的策略。
 
-生产环境里的实现是 `packages/llm/llm-retry/src/index.ts:194` 的 `recover`:它按错误码筛选、算退避延迟、先落 `llm/retry` 再落 `llm/retry-started`,最后才返回重试动作(`llm-retry/src/index.ts:188-191`)。裁决与记账在同一处完成,所以"重试了几次"这件事也是可回放的。
+生产环境里的实现是 [`packages/llm/llm-retry/src/index.ts:194`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm-retry/src/index.ts#L194) 的 `recover`:它按错误码筛选、算退避延迟、先落 `llm/retry` 再落 `llm/retry-started`,最后才返回重试动作([`llm-retry/src/index.ts:188-191`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm-retry/src/index.ts#L188-L191))。裁决与记账在同一处完成,所以"重试了几次"这件事也是可回放的。
 
 `continue` 回到 `step()` 里那个 `while (true)`(`agent.ts:361`),于是**重试会重新走一遍 `prepareRequest` 与 `buildRequest`**:配置会被重新解析一次,请求头也可能因为工具集或系列状态变化而多记一条。但它不会重跑提示组装、不会重跑 `agent/pre-step`、也不会重复写用户消息——那些被 `firstAttempt` 挡住了(`agent.ts:363`、`:373-378`)。
 
@@ -281,12 +281,12 @@ flowchart TD
 
 | 文件 | 行数 | 符号与行号 |
 |---|---|---|
-| `packages/core/agent-loop/src/agent.ts` | 619 | `requestProposal`(`:63`)、`frozenMessages`(`:94`)、`requestHeaderLogged`(`:85`)、`requestSurfaceGeneration`(`:87`)、`toolsChanged`(`:262`)、`step`(`:352`)、`prepareRequest`(`:501`)、`buildRequest`(`:553`) |
-| `packages/core/session/src/request-header.ts` | 69 | `canonicalHeader`(`:21`)、`sameSchema`(`:33`)、`headerEquals`(`:43`)、`foldRequestHeader`(`:63`) |
-| `packages/core/session/src/index.ts` | 1284 | `requestHeader`(`:776`)、`requestContext`(`:797`)、`deriveMessages`(`:832`) |
-| `packages/core/session/src/types.ts` | 495 | `RequestHeaderReason`(`:261`)、`EpochHeader`(`:232`)、`request/header`(`:365`)、`request/context`(`:377`) |
-| `packages/llm/llm/src/index.ts` | 1147 | `PreparedLlmCall`(`:163`)、`prepareCall`(`:916`)、`registration`(`:964`)、`NO_ADAPTER` 抛出点(`:966`) |
-| `packages/llm/llm/src/call-config.ts` | 78 | `LlmCallConfig`(`:23`)、`callConfigEquals`(`:49`)、`markAgentLoopRequest`(`:66`)、`isAgentLoopRequest`(`:76`) |
-| `packages/llm/llm/src/types.ts` | 459 | `GenerateOptions`(`:419`) |
-| `packages/llm/llm-retry/src/index.ts` | 259 | `recover`(`:194`)、`backoff`(`:149`)、`agent/request-error` 监听(`:243`) |
-| `packages/core/agent/src/runtime-types.ts` | 405 | `agent/request`(`:347`)、`agent/request-error`(`:363`)、`RequestErrorAction`(`:122`) |
+| [`packages/core/agent-loop/src/agent.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts) | 619 | `requestProposal`([`:63`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L63))、`frozenMessages`([`:94`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L94))、`requestHeaderLogged`([`:85`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L85))、`requestSurfaceGeneration`([`:87`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L87))、`toolsChanged`([`:262`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L262))、`step`([`:352`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L352))、`prepareRequest`([`:501`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L501))、`buildRequest`([`:553`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/agent.ts#L553)) |
+| [`packages/core/session/src/request-header.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts) | 69 | `canonicalHeader`([`:21`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts#L21))、`sameSchema`([`:33`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts#L33))、`headerEquals`([`:43`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts#L43))、`foldRequestHeader`([`:63`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/request-header.ts#L63)) |
+| [`packages/core/session/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts) | 1284 | `requestHeader`([`:776`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L776))、`requestContext`([`:797`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L797))、`deriveMessages`([`:832`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/index.ts#L832)) |
+| [`packages/core/session/src/types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts) | 495 | `RequestHeaderReason`([`:261`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L261))、`EpochHeader`([`:232`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L232))、`request/header`([`:365`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L365))、`request/context`([`:377`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/session/src/types.ts#L377)) |
+| [`packages/llm/llm/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/index.ts) | 1147 | `PreparedLlmCall`([`:163`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/index.ts#L163))、`prepareCall`([`:916`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/index.ts#L916))、`registration`([`:964`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/index.ts#L964))、`NO_ADAPTER` 抛出点([`:966`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/index.ts#L966)) |
+| [`packages/llm/llm/src/call-config.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/call-config.ts) | 78 | `LlmCallConfig`([`:23`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/call-config.ts#L23))、`callConfigEquals`([`:49`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/call-config.ts#L49))、`markAgentLoopRequest`([`:66`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/call-config.ts#L66))、`isAgentLoopRequest`([`:76`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/call-config.ts#L76)) |
+| [`packages/llm/llm/src/types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/types.ts) | 459 | `GenerateOptions`([`:419`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm/src/types.ts#L419)) |
+| [`packages/llm/llm-retry/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm-retry/src/index.ts) | 259 | `recover`([`:194`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm-retry/src/index.ts#L194))、`backoff`([`:149`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm-retry/src/index.ts#L149))、`agent/request-error` 监听([`:243`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/llm/llm-retry/src/index.ts#L243)) |
+| [`packages/core/agent/src/runtime-types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts) | 405 | `agent/request`([`:347`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts#L347))、`agent/request-error`([`:363`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts#L363))、`RequestErrorAction`([`:122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent/src/runtime-types.ts#L122)) |

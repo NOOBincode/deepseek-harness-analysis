@@ -1,7 +1,7 @@
 # 05 · workflow 引擎:worker 线程 + vm realm(函数级走查)
 
-> 源码:`packages/workflow/workflow-worker-thread/src/`(index 205 / runtime 488 / host 625 / realm 151 / protocol 101 / meta 82 / session 201 / types 94 行)、`packages/workflow/workflow/src/index.ts`(203 行)
-> 模型侧:`packages/workflow/tool-workflow/src/index.ts`(334 行)、`tool-ralph/src/index.ts`(477 行)
+> 源码:`packages/workflow/workflow-worker-thread/src/`(index 205 / runtime 488 / host 625 / realm 151 / protocol 101 / meta 82 / session 201 / types 94 行)、[`packages/workflow/workflow/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow/src/index.ts)(203 行)
+> 模型侧:[`packages/workflow/tool-workflow/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts)(334 行)、[`tool-ralph/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-ralph/src/index.ts)(477 行)
 > 对应[第十章第 5.1–5.4 节](../10-multi-agent.md)。
 
 ---
@@ -47,18 +47,18 @@ flowchart LR
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 1 校验 meta | meta 当数据校验,绝不用 vm 求值,并返回一份 normalized 副本 | `workflow-worker-thread/src/meta.ts:76-82` |
-| 2 解析脚本 | 宿主先编译一次,让语法错误在 start 里同步抛出;`export const meta` 有专门文案 | `workflow-worker-thread/src/index.ts:64-74` |
-| 3 解析 provider | 在发布任何工作之前确认 provider(真正负责造 Agent 的那个后端)已注册,否则抛 AGENT_START | `workflow-worker-thread/src/index.ts:77-89` |
-| 4 解析限额 | 请求值只能调小、不能越过部署天花板;并发上限 0 表示按核数算 | `workflow-worker-thread/src/index.ts:143-157` |
-| 5 捕获依赖 | start 期间就把 subagents 句柄抓下来,让 run 活得比引擎插件更久 | `workflow-worker-thread/src/index.ts:164-171` |
-| 6 起 worker | 清洗 worker 环境后起线程,先 Ready 再 Go | `workflow-worker-thread/src/host.ts:48-60`、`:278-280` |
-| 7 注入钩子 | 五个 hook 挂进 vm context 并冻结,每个 hook 的 Promise 都挂一个空 rejection consumer | `workflow-worker-thread/src/runtime.ts:91-114` |
-| 8 起子 Agent | agent() 走九步:查取消 → 校验参数 → 总量闸门 → 抢并发槽 → 取到槽后再查一次取消 | `workflow-worker-thread/src/runtime.ts:251-275` |
-| 9 结果解释 | 有 schema 且完成就取结构化值,无 schema 取文本拼接,非 completed 得 null | `workflow-worker-thread/src/runtime.ts:318-339` |
-| 10 失败分级 | 致命错误上抛杀死脚本,普通失败只把该项降级成 null | `workflow-worker-thread/src/runtime.ts:414-425` |
-| 11 值物化 | 出边界的值必须是纯 JSON;非有限数、函数、symbol、循环引用等一律拒绝并报路径 | `workflow-worker-thread/src/realm.ts:66-151` |
-| 12 取消 | 双通道取消 + 宽限计时器 + 无条件终止线程 | `workflow-worker-thread/src/host.ts:183-207`、`:224-255` |
+| 1 校验 meta | meta 当数据校验,绝不用 vm 求值,并返回一份 normalized 副本 | [`workflow-worker-thread/src/meta.ts:76-82`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/meta.ts#L76-L82) |
+| 2 解析脚本 | 宿主先编译一次,让语法错误在 start 里同步抛出;`export const meta` 有专门文案 | [`workflow-worker-thread/src/index.ts:64-74`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/index.ts#L64-L74) |
+| 3 解析 provider | 在发布任何工作之前确认 provider(真正负责造 Agent 的那个后端)已注册,否则抛 AGENT_START | [`workflow-worker-thread/src/index.ts:77-89`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/index.ts#L77-L89) |
+| 4 解析限额 | 请求值只能调小、不能越过部署天花板;并发上限 0 表示按核数算 | [`workflow-worker-thread/src/index.ts:143-157`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/index.ts#L143-L157) |
+| 5 捕获依赖 | start 期间就把 subagents 句柄抓下来,让 run 活得比引擎插件更久 | [`workflow-worker-thread/src/index.ts:164-171`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/index.ts#L164-L171) |
+| 6 起 worker | 清洗 worker 环境后起线程,先 Ready 再 Go | [`workflow-worker-thread/src/host.ts:48-60`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L48-L60)、[`:278-280`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L278-L280) |
+| 7 注入钩子 | 五个 hook 挂进 vm context 并冻结,每个 hook 的 Promise 都挂一个空 rejection consumer | [`workflow-worker-thread/src/runtime.ts:91-114`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L91-L114) |
+| 8 起子 Agent | agent() 走九步:查取消 → 校验参数 → 总量闸门 → 抢并发槽 → 取到槽后再查一次取消 | [`workflow-worker-thread/src/runtime.ts:251-275`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L251-L275) |
+| 9 结果解释 | 有 schema 且完成就取结构化值,无 schema 取文本拼接,非 completed 得 null | [`workflow-worker-thread/src/runtime.ts:318-339`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L318-L339) |
+| 10 失败分级 | 致命错误上抛杀死脚本,普通失败只把该项降级成 null | [`workflow-worker-thread/src/runtime.ts:414-425`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L414-L425) |
+| 11 值物化 | 出边界的值必须是纯 JSON;非有限数、函数、symbol、循环引用等一律拒绝并报路径 | [`workflow-worker-thread/src/realm.ts:66-151`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/realm.ts#L66-L151) |
+| 12 取消 | 双通道取消 + 宽限计时器 + 无条件终止线程 | [`workflow-worker-thread/src/host.ts:183-207`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L183-L207)、[`:224-255`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L224-L255) |
 
 <details><summary>原图</summary>
 
@@ -93,7 +93,7 @@ WorkflowEngine.start(request)                       ┌────────�
  */
 ```
 
-这段注释给出了一个不显然的安全取舍:**meta 绝不用 `vm` 求值**。如果为了拿 `export const meta` 而在宿主 `runInContext` 一次,模型写的 getter 就会在**没有 worker 超时保护**的宿主线程里跑。所以 `validateMeta`(`meta.ts:76-82`)是纯数据结构校验:未知字段、缺失/类型错误的 `name`/`description`、畸形的 `phases` 逐条报名字,并且返回一份 **normalized 副本**,引擎从不别名调用者的对象(`meta.ts:68-73`)。
+这段注释给出了一个不显然的安全取舍:**meta 绝不用 `vm` 求值**。如果为了拿 `export const meta` 而在宿主 `runInContext` 一次,模型写的 getter 就会在**没有 worker 超时保护**的宿主线程里跑。所以 `validateMeta`([`meta.ts:76-82`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/meta.ts#L76-L82))是纯数据结构校验:未知字段、缺失/类型错误的 `name`/`description`、畸形的 `phases` 逐条报名字,并且返回一份 **normalized 副本**,引擎从不别名调用者的对象([`meta.ts:68-73`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/meta.ts#L68-L73))。
 
 ### 1.2 body 解析检查:刻意重复一次 parse
 
@@ -114,9 +114,9 @@ function assertBodyParses(body: string, name: string): void {
 
 `META_STATEMENT = /^\s*export\s+const\s+meta\b/`(`:54`)。三点:
 
-1. **同一条包装** `(async () => {\n${body}\n})()` 在宿主(`:70`)与 worker(`runtime.ts:91`)各编译一次。JSDoc 承认这是 *One redundant parse per run, bought deliberately for the contract*——为了让 `start()` **同步**抛出 `SCRIPT_PARSE`,而不是把一个语法错误推迟到"线程已经起来了"之后。
+1. **同一条包装** `(async () => {\n${body}\n})()` 在宿主(`:70`)与 worker([`runtime.ts:91`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L91))各编译一次。JSDoc 承认这是 *One redundant parse per run, bought deliberately for the contract*——为了让 `start()` **同步**抛出 `SCRIPT_PARSE`,而不是把一个语法错误推迟到"线程已经起来了"之后。
 2. `lineOffset: -1` 补偿包装头部那一行,让栈里的行号回到脚本自己的行号。
-3. 首行 `export const meta` 得到**专门的文案**,因为这是模型最可能犯的作者错误(`:60-62`)。
+3. 首行 `export const meta` 得到**专门的文案**,因为这是模型最可能犯的作者错误([`:60-62`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L60-L62))。
 
 ### 1.3 限额解析:请求值不得越过部署天花板
 
@@ -135,13 +135,13 @@ const limits: WorkerLimits = {
 }
 ```
 
-`Config` 六个字段(`index.ts:115-122`):`provider`(默认 `'spawn'`)、`maxConcurrentAgents`(0 → `min(16, max(1, cores - 2))`)、`maxTotalAgents`(1000,runaway 循环兜底)、`maxItemsPerCall`(4096)、`syncTimeoutMs`(5000,脚本**首个同步切片**的 vm 超时)、`disposeGraceMs`(5000,取消后强制结算并 terminate 的宽限,也界定 `dispose()`)。`maxConcurrentAgents: 0` 的解析写成显式三元而非藏在默认值里,符合仓库的 *Explicit > implicit at package boundaries*。
+`Config` 六个字段([`index.ts:115-122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/index.ts#L115-L122)):`provider`(默认 `'spawn'`)、`maxConcurrentAgents`(0 → `min(16, max(1, cores - 2))`)、`maxTotalAgents`(1000,runaway 循环兜底)、`maxItemsPerCall`(4096)、`syncTimeoutMs`(5000,脚本**首个同步切片**的 vm 超时)、`disposeGraceMs`(5000,取消后强制结算并 terminate 的宽限,也界定 `dispose()`)。`maxConcurrentAgents: 0` 的解析写成显式三元而非藏在默认值里,符合仓库的 *Explicit > implicit at package boundaries*。
 
-`resolveSubagentProvider`(`:77-89`)在**发布任何工作之前**校验 provider 名非空、已 trim,且 `ctx.subagents.getProvider(provider) !== undefined`,否则抛 `AGENT_START`。`resolveMaxTotalAgents`(`:92-104`)只允许**调小**:`requested > ceiling` 抛 `INVALID_ARGUMENT`。
+`resolveSubagentProvider`([`:77-89`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/index.ts#L77-L89))在**发布任何工作之前**校验 provider 名非空、已 trim,且 `ctx.subagents.getProvider(provider) !== undefined`,否则抛 `AGENT_START`。`resolveMaxTotalAgents`([`:92-104`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/index.ts#L92-L104))只允许**调小**:`requested > ceiling` 抛 `INVALID_ARGUMENT`。
 
 ### 1.4 依赖在 start() 期间被捕获
 
-`index.ts:164-171` 的注释解释了 `const runCtx = this.ctx; const subagents = runCtx.subagents`:**run 的寿命长于引擎插件**。Cordis 在返回 `SubagentRuntime` 句柄时会剥掉 engine-provider 影子,所以已交出的 run 在引擎 HMR 卸载、`ctx.workflowEngine` 消失之后,仍能起子 agent、仍能收尾;若等到 `WorkerRun` 内部再解析 `this.ctx.subagents`,就会走进已失活的 engine fiber。
+[`index.ts:164-171`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/index.ts#L164-L171) 的注释解释了 `const runCtx = this.ctx; const subagents = runCtx.subagents`:**run 的寿命长于引擎插件**。Cordis 在返回 `SubagentRuntime` 句柄时会剥掉 engine-provider 影子,所以已交出的 run 在引擎 HMR 卸载、`ctx.workflowEngine` 消失之后,仍能起子 agent、仍能收尾;若等到 `WorkerRun` 内部再解析 `this.ctx.subagents`,就会走进已失活的 engine fiber。
 
 ---
 
@@ -195,11 +195,11 @@ private async agent(rawPrompt: unknown, rawOpts: unknown): Promise<unknown> {
 
 第 5 步的理由写在源码注释里(`:270-274`):*the await yields at least one microtask tick even when a slot is free, and a queued waiter resumes a tick after its release — a cancel() landing in either window must not reach the host*。而且:**两个窗口都要查**,因为取消可能落在任意一个 tick 里。
 
-接着是启动、生命周期、结果解释(`runtime.ts:276-345`):
+接着是启动、生命周期、结果解释([`runtime.ts:276-345`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L276-L345)):
 
 - **启动失败** → 先查 `isCancelled()`:是则抛 `CANCELLED`(*a refusal that races our own cancel state must read as the cancellation it is*),否则抛致命 `AGENT_START`。
-- **启动成功但随即发现已取消** → `await run.dispose()` 收掉这个刚起的子,再抛 `CANCELLED`(`:295-298`)。
-- **`run.result` reject** → 致命 `AGENT_RESULT`。这是宿主中继的**基础设施**故障,注释明确:an ordinary throw would dissolve to a per-item null inside the combinators, and a broken provider must not read as a failed child(`:305-316`)。
+- **启动成功但随即发现已取消** → `await run.dispose()` 收掉这个刚起的子,再抛 `CANCELLED`([`:295-298`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L295-L298))。
+- **`run.result` reject** → 致命 `AGENT_RESULT`。这是宿主中继的**基础设施**故障,注释明确:an ordinary throw would dissolve to a per-item null inside the combinators, and a broken provider must not read as a failed child([`:305-316`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L305-L316))。
 - **`finally { await run.dispose() }`** 保证每个成功启动的子都被释放,包括所有抛出路径。
 
 `agent()` 的返回值规则,四条:
@@ -207,7 +207,7 @@ private async agent(rawPrompt: unknown, rawOpts: unknown): Promise<unknown> {
 | 情况 | 返回 |
 |---|---|
 | 有 `schema` 且 `completed` | `result.structured`;**缺失即该项失败 → `null`** |
-| 无 `schema` 且 `completed` | `outputText(result.output)`(只拼 `text` 块,`runtime.ts:45-50`) |
+| 无 `schema` 且 `completed` | `outputText(result.output)`(只拼 `text` 块,[`runtime.ts:45-50`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L45-L50)) |
 | 非 `completed`(子自己失败) | `null`(注释:*scripts .filter(Boolean) per the CC contract*) |
 | `run.result` **reject** | 致命 `AGENT_RESULT`——这是宿主中继的**基础设施**故障,不能被读成"子失败了" |
 
@@ -250,7 +250,7 @@ return Promise.all(thunks.map(async (thunk) => {
 
 `pipeline` 同规则但**无跨阶段屏障**(`:444-458`):每个 item 独立走完全部 stage,普通 stage 抛错则该项变 `null` 并**跳过剩余 stage**。
 
-`isFatalWorkflowError`(`workflow/src/index.ts:146-148`):
+`isFatalWorkflowError`([`workflow/src/index.ts:146-148`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow/src/index.ts#L146-L148)):
 
 ```typescript
 export function isFatalWorkflowError(error: unknown): boolean {
@@ -258,7 +258,7 @@ export function isFatalWorkflowError(error: unknown): boolean {
 }
 ```
 
-**fatality 由宿主 realm 的 class `instanceof` 判定**:脚本自己造的对象永远过不了这个检查,所以"伪造致命性"和"意外消解致命性"都不可能。`WorkflowError` 的 `fatal` 默认 `true`(`workflow/src/index.ts:130-139`),`WorkflowErrorCode` 共 11 个(`:108-119`,全部致命)——保留 `fatal` 字段的目的是让这个区分在**每个 catch 站点显式可见**,而不是隐含。
+**fatality 由宿主 realm 的 class `instanceof` 判定**:脚本自己造的对象永远过不了这个检查,所以"伪造致命性"和"意外消解致命性"都不可能。`WorkflowError` 的 `fatal` 默认 `true`([`workflow/src/index.ts:130-139`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow/src/index.ts#L130-L139)),`WorkflowErrorCode` 共 11 个([`:108-119`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow/src/index.ts#L108-L119),全部致命)——保留 `fatal` 字段的目的是让这个区分在**每个 catch 站点显式可见**,而不是隐含。
 
 ### 2.4 `phase` / `log` 与取消的钩子边界
 
@@ -363,7 +363,7 @@ export type WorkerToHostMessage<T extends WorkerToHostType = WorkerToHostType> =
 
 ### 4.2 启动门:Ready → Go
 
-worker 起来后先发 `Ready`,宿主回 `Go` 才真正执行脚本(`host.ts:278-280`)。这让"线程已就绪"与"开始跑"分成两件事:宿主可以在 `Go` 之前完成任何它需要的准备,而且**取消可以发生在 `Go` 之前**——`drive()` 的第一句就是 `if (this.isCancelled()) throw this.cancelledError()`,注释写明 *the script must not execute at all, let alone report `completed`*(`runtime.ts:165-168`)。
+worker 起来后先发 `Ready`,宿主回 `Go` 才真正执行脚本(`host.ts:278-280`)。这让"线程已就绪"与"开始跑"分成两件事:宿主可以在 `Go` 之前完成任何它需要的准备,而且**取消可以发生在 `Go` 之前**——`drive()` 的第一句就是 `if (this.isCancelled()) throw this.cancelledError()`,注释写明 *the script must not execute at all, let alone report `completed`*([`runtime.ts:165-168`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L165-L168))。
 
 ### 4.3 子 agent RPC 的四个往返
 
@@ -402,11 +402,11 @@ sequenceDiagram
 
 | 阶段 | 做了什么 | 关键调用(文件:行) |
 |---|---|---|
-| 起子 Agent | 脚本发 ChildStart,宿主先做准入检查,通过后才走 subagents.start | `workflow-worker-thread/src/host.ts:319-330`、`:352-368` |
-| 公布句柄 | 先把 result 转发挂上,再向脚本公布子 Agent 句柄 | `workflow-worker-thread/src/host.ts:388-414` |
-| 交回结果 | 结果先快照成纯 JSON;不可序列化就改回一条 ChildFailed | `workflow-worker-thread/src/host.ts:393-411` |
-| 释放 | 按请求编号记忆化释放,重复请求照样回 ack | `workflow-worker-thread/src/host.ts:441-450`、`:417-427` |
-| 结算 run | 认领终局 → 收掉残留子 Agent → 结算 | `workflow-worker-thread/src/host.ts:489-519` |
+| 起子 Agent | 脚本发 ChildStart,宿主先做准入检查,通过后才走 subagents.start | [`workflow-worker-thread/src/host.ts:319-330`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L319-L330)、[`:352-368`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L352-L368) |
+| 公布句柄 | 先把 result 转发挂上,再向脚本公布子 Agent 句柄 | [`workflow-worker-thread/src/host.ts:388-414`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L388-L414) |
+| 交回结果 | 结果先快照成纯 JSON;不可序列化就改回一条 ChildFailed | [`workflow-worker-thread/src/host.ts:393-411`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L393-L411) |
+| 释放 | 按请求编号记忆化释放,重复请求照样回 ack | [`workflow-worker-thread/src/host.ts:441-450`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L441-L450)、[`:417-427`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L417-L427) |
+| 结算 run | 认领终局 → 收掉残留子 Agent → 结算 | [`workflow-worker-thread/src/host.ts:489-519`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L489-L519) |
 
 <details><summary>原图</summary>
 
@@ -429,27 +429,27 @@ Result{result} ─────────────────────�
 
 三处顺序上的讲究:
 
-1. **`result` 转发先挂,句柄后公布**(`host.ts:390-414`):注释说明 *Because the callback itself runs in a later microtask, ChildStarted is still posted first even for an already-settled scripted provider*。即"先挂转发、后公布句柄"与"公布必须先到"两件事同时成立。
-2. **结算结果必须能无损 JSON 化**:`snapshotJsonValue<ChildResult>({output, structured?, stopReason})` 返回 `undefined` 时抛 `TypeError('child result is not losslessly JSON-serializable')`,然后回 `ChildFailed`(`:396-406`)。**不可序列化被当作基础设施故障上报**,而不是塞一个残缺对象过去。
-3. **`ChildDisposed` 的 ack 是欠的**:即使 host 侧已经 dispose 过(dispose 驱动或死亡 reap 抢先),也仍要回 ack——因为 worker 侧的包装在 await 它(`:419-423`)。
+1. **`result` 转发先挂,句柄后公布**([`host.ts:390-414`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L390-L414)):注释说明 *Because the callback itself runs in a later microtask, ChildStarted is still posted first even for an already-settled scripted provider*。即"先挂转发、后公布句柄"与"公布必须先到"两件事同时成立。
+2. **结算结果必须能无损 JSON 化**:`snapshotJsonValue<ChildResult>({output, structured?, stopReason})` 返回 `undefined` 时抛 `TypeError('child result is not losslessly JSON-serializable')`,然后回 `ChildFailed`([`:396-406`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L396-L406))。**不可序列化被当作基础设施故障上报**,而不是塞一个残缺对象过去。
+3. **`ChildDisposed` 的 ack 是欠的**:即使 host 侧已经 dispose 过(dispose 驱动或死亡 reap 抢先),也仍要回 ack——因为 worker 侧的包装在 await 它([`:419-423`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L419-L423))。
 
 ### 4.4 取消:双通道 + 宽限 + terminate
 
-`cancel(reason?)`(`host.ts:183-207`)四步:**先查终局守卫**(`if (this.settled || this.terminalClaimed || this.cancelReason !== undefined) return`)→ `post(Cancel, {reason})` → `abortChildren(reason)` → `graceTimer = setTimeout(...)` 里 `terminalClaimed = true`、`endStrandedAgents()`、`settleResult(cancelledResult(hostStarted))`、`void this.worker.terminate()`,最后 `this.graceTimer.unref()`。
+`cancel(reason?)`([`host.ts:183-207`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L183-L207))四步:**先查终局守卫**(`if (this.settled || this.terminalClaimed || this.cancelReason !== undefined) return`)→ `post(Cancel, {reason})` → `abortChildren(reason)` → `graceTimer = setTimeout(...)` 里 `terminalClaimed = true`、`endStrandedAgents()`、`settleResult(cancelledResult(hostStarted))`、`void this.worker.terminate()`,最后 `this.graceTimer.unref()`。
 
-- **`settled` 守卫**(`:184-190`)防的是"普通消费路径(await result 后再 dispose → cancel)给一个已完成运行装上永不清理的 grace timer"——注释直说是 *a bounded leak per completed run*。
-- **`unref()`**(`:206`):armed 的 grace timer 绝不能把进程吊住。
-- `cancel` 幂等,**第一个 reason 胜出**;`dispose()`(`:224-255`)是"cancel + 有界结算 + 终止":**立即**驱动每个已注册子的销毁(注释:*a wedged worker can relay no dispose RPC*),`Promise.race([result → childQuiescence, sleep(grace)])` 之后**无条件** terminate——*the thread never outlives its run*。
+- **`settled` 守卫**([`:184-190`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L184-L190))防的是"普通消费路径(await result 后再 dispose → cancel)给一个已完成运行装上永不清理的 grace timer"——注释直说是 *a bounded leak per completed run*。
+- **`unref()`**([`:206`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L206)):armed 的 grace timer 绝不能把进程吊住。
+- `cancel` 幂等,**第一个 reason 胜出**;`dispose()`([`:224-255`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L224-L255))是"cancel + 有界结算 + 终止":**立即**驱动每个已注册子的销毁(注释:*a wedged worker can relay no dispose RPC*),`Promise.race([result → childQuiescence, sleep(grace)])` 之后**无条件** terminate——*the thread never outlives its run*。
 
 ### 4.5 worker 死亡:第一条死亡信号是逻辑投递屏障
 
-`host.ts:271-276` 的注释给出时序事实:*Node may emit `error`, then deliver an already-queued `message`, then emit `exit`. The first death signal is the host's logical delivery barrier: nothing arriving afterward may create a child, narrate after workflow/end, or compete with the chosen outcome.*
+[`host.ts:271-276`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L271-L276) 的注释给出时序事实:*Node may emit `error`, then deliver an already-queued `message`, then emit `exit`. The first death signal is the host's logical delivery barrier: nothing arriving afterward may create a child, narrate after workflow/end, or compete with the chosen outcome.*
 
-`onWorkerDeath`(`:522-554`)先关消息准入,再读"终局是否已被认领",然后才碰子 agent 与 observer 回调——因为 reap 与合成回调都可能**同步重入 `cancel()`**,一个先到的死亡必须保持为 error,一个先被接受的取消必须保持为 cancelled(`:531-536`)。取消后 `phase`/`log` 在**宿主侧**被抑制(`:287,290`):worker 侧要等 Cancel 消息被处理才抛,而"已经在路上"的叙事不能落到 observer 上——*nothing is emitted after cancel() returns*。
+`onWorkerDeath`([`:522-554`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L522-L554))先关消息准入,再读"终局是否已被认领",然后才碰子 agent 与 observer 回调——因为 reap 与合成回调都可能**同步重入 `cancel()`**,一个先到的死亡必须保持为 error,一个先被接受的取消必须保持为 cancelled([`:531-536`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L531-L536))。取消后 `phase`/`log` 在**宿主侧**被抑制(`:287,290`):worker 侧要等 Cancel 消息被处理才抛,而"已经在路上"的叙事不能落到 observer 上——*nothing is emitted after cancel() returns*。
 
 ### 4.6 `agent-start` / `agent-end` 恰好一对一
 
-`endAgent`(`host.ts:563-567`)只有两行,靠 `liveAgents` 这个按 `seq` 记的**配对账本**:`if (!this.liveAgents.delete(end.seq)) return`,随后才转给 observer。worker 能说话就转发它自己的 end,不能说话(grace 强制结算 / worker 死亡 / 物理退出)则由 `endStrandedAgents()`(`:581-585`)合成一条 `outcome: 'cancelled'`。账本让"恰好一次"在**两种顺序下**都成立——注释:*already-known pairs precede workflow/end; after an earlier Result, exit cleanup may close a survivor afterward*。
+`endAgent`([`host.ts:563-567`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L563-L567))只有两行,靠 `liveAgents` 这个按 `seq` 记的**配对账本**:`if (!this.liveAgents.delete(end.seq)) return`,随后才转给 observer。worker 能说话就转发它自己的 end,不能说话(grace 强制结算 / worker 死亡 / 物理退出)则由 `endStrandedAgents()`([`:581-585`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L581-L585))合成一条 `outcome: 'cancelled'`。账本让"恰好一次"在**两种顺序下**都成立——注释:*already-known pairs precede workflow/end; after an earlier Result, exit cleanup may close a survivor afterward*。
 
 ---
 
@@ -459,39 +459,39 @@ Result{result} ─────────────────────�
 
 | 闸门 | 位置 | 语义 |
 |---|---|---|
-| **并发槽(FIFO)** | `acquireSlot`/`releaseSlot`(`runtime.ts:228-248`) | 最多 `maxConcurrentAgents` 个 `agent()` 同时在跑;`if (this.activeSlots < limit)` 时直接 `+= 1` 返回已 resolve 的 Promise,否则推进 `slotWaiters` 队列;释放时 `shift()` 唤醒队首并 `+= 1` |
-| **总量** | `agent()` 第 3 步(`runtime.ts:257-263`) | `started >= maxTotalAgents` 抛 `AGENT_CAP`,**在排队之前**判,所以排队不会绕过总量 |
-| **每调用 item 上限** | `assertItemCap`(`runtime.ts:461-468`) | `parallel()`/`pipeline()` 的数组长度上限,抛 `ITEM_CAP` |
+| **并发槽(FIFO)** | `acquireSlot`/`releaseSlot`([`runtime.ts:228-248`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L228-L248)) | 最多 `maxConcurrentAgents` 个 `agent()` 同时在跑;`if (this.activeSlots < limit)` 时直接 `+= 1` 返回已 resolve 的 Promise,否则推进 `slotWaiters` 队列;释放时 `shift()` 唤醒队首并 `+= 1` |
+| **总量** | `agent()` 第 3 步([`runtime.ts:257-263`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L257-L263)) | `started >= maxTotalAgents` 抛 `AGENT_CAP`,**在排队之前**判,所以排队不会绕过总量 |
+| **每调用 item 上限** | `assertItemCap`([`runtime.ts:461-468`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L461-L468)) | `parallel()`/`pipeline()` 的数组长度上限,抛 `ITEM_CAP` |
 
-取消时**逐个 reject 排队中的 waiter**(`runtime.ts:151`):`for (const waiter of this.slotWaiters.splice(0)) waiter.reject(this.cancelledError())`。脚本不会在取消之后悄悄起子 agent。
+取消时**逐个 reject 排队中的 waiter**([`runtime.ts:151`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L151)):`for (const waiter of this.slotWaiters.splice(0)) waiter.reject(this.cancelledError())`。脚本不会在取消之后悄悄起子 agent。
 
 ### 5.2 背压:三层
 
 脚本能同时压给系统多少压力,被三道闸门分别挡住:worker 侧限并发、宿主侧要看 run 是不是真安静了、结果本身还必须能无损序列化。
 
 1. **worker 侧并发槽**:FIFO,先到先服务,取消即清空队列。
-2. **宿主侧的静默判据**:宿主用两组记录一起判断这个 run 有没有安静下来——既没有还没结算的启动,也没有活着的子 Agent,两个条件都满足才算结束(`host.ts:464-474`)。
-3. **结果封顶**:`WorkflowResult` 的值本身要过 `materializeResult`(worker 侧,`runtime.ts:209-221`,失败抛 `RESULT_UNSERIALIZABLE`),`ChildResult` 再过一次 `snapshotJsonValue`(宿主侧)。模型可见的渲染由工具层截断:`tool-workflow` 的 `maxResultChars` 默认 50 000(`tool-workflow/src/index.ts:41`)。
+2. **宿主侧的静默判据**:宿主用两组记录一起判断这个 run 有没有安静下来——既没有还没结算的启动,也没有活着的子 Agent,两个条件都满足才算结束([`host.ts:464-474`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L464-L474))。
+3. **结果封顶**:`WorkflowResult` 的值本身要过 `materializeResult`(worker 侧,[`runtime.ts:209-221`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L209-L221),失败抛 `RESULT_UNSERIALIZABLE`),`ChildResult` 再过一次 `snapshotJsonValue`(宿主侧)。模型可见的渲染由工具层截断:`tool-workflow` 的 `maxResultChars` 默认 50 000([`tool-workflow/src/index.ts:41`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts#L41))。
 
 ### 5.3 `result` 永不 reject
 
-`drive()`(`runtime.ts:163-188`)只有两条出口:**成功**走 `raw === undefined ? null : this.materializeResult(raw)`,返回 `{value, stopReason:'completed', agentsStarted}`;**失败**统一走 catch。catch 里面又分两支:**若已取消** → `stopReason:'cancelled'`;**否则** → `stopReason:'error'` 且 `error: renderThrown(error)`。
+`drive()`([`runtime.ts:163-188`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L163-L188))只有两条出口:**成功**走 `raw === undefined ? null : this.materializeResult(raw)`,返回 `{value, stopReason:'completed', agentsStarted}`;**失败**统一走 catch。catch 里面又分两支:**若已取消** → `stopReason:'cancelled'`;**否则** → `stopReason:'error'` 且 `error: renderThrown(error)`。
 
-两处"settle 之后再查一次取消"是同一件事的两面:**resolve 路径**(`:174`)与 **reject 路径**(`:180`)都要检查——*the holder asked for cancellation and `completed` would be a lie*。`renderThrown` 是**全函数**(任何 realm 的抛值都能渲染,连 `String()` 抛错也兜底),所以 catch 分支不可能再抛,`result` never rejects 的契约因此成立(`realm.ts:28-40`)。
+两处"settle 之后再查一次取消"是同一件事的两面:**resolve 路径**([`:174`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L174))与 **reject 路径**([`:180`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L180))都要检查——*the holder asked for cancellation and `completed` would be a lie*。`renderThrown` 是**全函数**(任何 realm 的抛值都能渲染,连 `String()` 抛错也兜底),所以 catch 分支不可能再抛,`result` never rejects 的契约因此成立([`realm.ts:28-40`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/realm.ts#L28-L40))。
 
 ---
 
 ## 第六节 工具侧:三件事
 
-`tool-workflow` 只做三件事(`tool-workflow/src/index.ts`):
+`tool-workflow` 只做三件事([`tool-workflow/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts)):
 
-1. **把四个 `tool-workflow/*` 事件记进父会话**(`createWorkflowRecorder`,`:72-130`):`run-start`/`agent-start`/`agent-end`/`run-end`。注释明确 *recording failure must not affect tool execution*——append 失败就禁用该记录器并 warn(`:88-90`),并且 `agent-end` 的记录失败会把这条从 active 集合里摘掉(`:114`)。
-2. **把 `exec.signal` 桥到 `run.cancel`**(`:298-299`),`finally` 里 `await run.dispose()`(`:320`)。
-3. **渲染时按 `maxResultChars` 截断**(`:268`)。
+1. **把四个 `tool-workflow/*` 事件记进父会话**(`createWorkflowRecorder`,[`:72-130`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts#L72-L130)):`run-start`/`agent-start`/`agent-end`/`run-end`。注释明确 *recording failure must not affect tool execution*——append 失败就禁用该记录器并 warn([`:88-90`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts#L88-L90)),并且 `agent-end` 的记录失败会把这条从 active 集合里摘掉([`:114`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts#L114))。
+2. **把 `exec.signal` 桥到 `run.cancel`**([`:298-299`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts#L298-L299)),`finally` 里 `await run.dispose()`([`:320`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts#L320))。
+3. **渲染时按 `maxResultChars` 截断**([`:268`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts#L268))。
 
-另外 `recordsRun` 的判据是 `exec.parent === undefined`(`:290`)——只有顶层工具调用才记运行边界,嵌套调用不重复记。
+另外 `recordsRun` 的判据是 `exec.parent === undefined`([`:290`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts#L290))——只有顶层工具调用才记运行边界,嵌套调用不重复记。
 
-`tool-ralph` 是**固定脚本形态**:模型只给 `objective`,脚本每轮用 `agent(prompt, {schema})` 起全新 spawn 子,轮间只传有界结构化 handoff(`tool-ralph/src/index.ts:88-175`;出货 preset 里 `maxRounds: 64`,见 [07](./07-preset-composition.md))。
+`tool-ralph` 是**固定脚本形态**:模型只给 `objective`,脚本每轮用 `agent(prompt, {schema})` 起全新 spawn 子,轮间只传有界结构化 handoff([`tool-ralph/src/index.ts:88-175`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-ralph/src/index.ts#L88-L175);出货 preset 里 `maxRounds: 64`,见 [07](./07-preset-composition.md))。
 
 ![流程图：05-workflow-worker-thread](../assets/diagrams/multi-agent__05-workflow-worker-thread-397.svg)
 
@@ -526,23 +526,23 @@ flowchart TD
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `WorkflowEngine` / `WorkflowError` / `isFatalWorkflowError` | `packages/workflow/workflow/src/index.ts:157-187` / `130-139` / `146-148` | seam;11 个致命码;`instanceof` 判致命 |
-| `workflow/*` 六个事件 | `workflow/src/index.ts:36-100` | start/phase/log/agent-start/agent-end/end |
-| `validateMeta` | `workflow-worker-thread/src/meta.ts:76-82` | meta 是数据不是脚本;返回 normalized 副本 |
-| `assertBodyParses` / `start` / `Config` | `workflow-worker-thread/src/index.ts:64-74` / `143-202` / `115-122` | 同包装重复 parse;校验 → 限额 → 捕获 `subagents` → `WorkerRun` |
-| `resolveSubagentProvider` / `resolveMaxTotalAgents` | `index.ts:77-89` / `92-104` | provider 必须已注册;总量只能调小 |
-| `WorkflowExecution` / `drive` / `contain` | `src/runtime.ts:65-488` / `163-188` / `196-199` | vm context + 五个 hook;永不 reject;空 rejection consumer |
-| `acquireSlot` / `releaseSlot` / `assertItemCap` | `runtime.ts:228-248` / `461-468` | FIFO 并发槽;取消清空排队者;`ITEM_CAP` |
-| `agent` / `readAgentOptions` | `runtime.ts:251-346` / `349-399` | 九步 + 两条取消检查 + 四条返回规则;白名单与 `DEFERRED_AGENT_OPTIONS` |
-| `parallel` / `pipeline` / `phase` / `log` | `runtime.ts:402-426` / `429-459` / `471-478` / `481-487` | 普通错误 → item `null`;致命上抛;无跨阶段屏障 |
-| `materializeFromRealm` / `renderThrown` / `MaterializeError` | `src/realm.ts:66-76` / `28-40` / `12-17` | 全量 JSON 物化(带路径)/ 全函数渲染 |
-| `materializeArray` / `materializeObject` / `hasPlainPrototype` | `realm.ts:110-128` / `130-150` / `48-52` | 稀疏数组、非索引属性、symbol 键、异形原型拒绝;`__proto__` 走 defineProperty |
-| `WorkerToHostType` / `HostToWorkerType` / `Payloads` | `src/protocol.ts:14-31` / `34-51,72-87` | 双向闭合协议,payload 单一事实源 |
-| `workerSpawnEnv` / `resolveWorkerSpawn` | `src/host.ts:48-60` / `70-94` | worker 环境清洗与入口解析 |
-| `WorkerRun.onMessage` / `childAdmissionFailure` | `host.ts:271-316` / `319-330` | 死亡屏障;调用后准入拒绝 |
-| `WorkerRun.startChild` / `disposeChild` / `onChildDispose` | `host.ts:352-415` / `441-450` / `417-427` | RPC 往返;记忆化 dispose;ack 永远回 |
-| `WorkerRun.cancel` / `dispose` | `host.ts:183-207` / `224-255` | 双通道取消 + grace + terminate;有界 dispose |
-| `onWorkerDeath` / `onResult` / `endAgent` / `endStrandedAgents` | `host.ts:522-554` / `489-519` / `563-567` / `581-585` | 死亡屏障;first-wins 终局;配对账本 |
-| `childQuiescence` / `notifyChildQuiescence` | `host.ts:471-474` / `465-468` | `pendingStarts` + `children` 双条件静默 |
-| `tool-workflow` 记录器与桥接 | `packages/workflow/tool-workflow/src/index.ts:72-130` / `283-329` | 四个 `tool-workflow/*` 事件;signal→cancel;`maxResultChars` |
-| `tool-ralph` | `packages/workflow/tool-ralph/src/index.ts:88-175` | 固定脚本的 fresh-agent 循环 |
+| `WorkflowEngine` / `WorkflowError` / `isFatalWorkflowError` | [`packages/workflow/workflow/src/index.ts:157-187`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow/src/index.ts#L157-L187) / `130-139` / `146-148` | seam;11 个致命码;`instanceof` 判致命 |
+| `workflow/*` 六个事件 | [`workflow/src/index.ts:36-100`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow/src/index.ts#L36-L100) | start/phase/log/agent-start/agent-end/end |
+| `validateMeta` | [`workflow-worker-thread/src/meta.ts:76-82`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/meta.ts#L76-L82) | meta 是数据不是脚本;返回 normalized 副本 |
+| `assertBodyParses` / `start` / `Config` | [`workflow-worker-thread/src/index.ts:64-74`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/index.ts#L64-L74) / `143-202` / `115-122` | 同包装重复 parse;校验 → 限额 → 捕获 `subagents` → `WorkerRun` |
+| `resolveSubagentProvider` / `resolveMaxTotalAgents` | [`index.ts:77-89`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/index.ts#L77-L89) / `92-104` | provider 必须已注册;总量只能调小 |
+| `WorkflowExecution` / `drive` / `contain` | [`src/runtime.ts:65-488`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L65-L488) / `163-188` / `196-199` | vm context + 五个 hook;永不 reject;空 rejection consumer |
+| `acquireSlot` / `releaseSlot` / `assertItemCap` | [`runtime.ts:228-248`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L228-L248) / `461-468` | FIFO 并发槽;取消清空排队者;`ITEM_CAP` |
+| `agent` / `readAgentOptions` | [`runtime.ts:251-346`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L251-L346) / `349-399` | 九步 + 两条取消检查 + 四条返回规则;白名单与 `DEFERRED_AGENT_OPTIONS` |
+| `parallel` / `pipeline` / `phase` / `log` | [`runtime.ts:402-426`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/runtime.ts#L402-L426) / `429-459` / `471-478` / `481-487` | 普通错误 → item `null`;致命上抛;无跨阶段屏障 |
+| `materializeFromRealm` / `renderThrown` / `MaterializeError` | [`src/realm.ts:66-76`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/realm.ts#L66-L76) / `28-40` / `12-17` | 全量 JSON 物化(带路径)/ 全函数渲染 |
+| `materializeArray` / `materializeObject` / `hasPlainPrototype` | [`realm.ts:110-128`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/realm.ts#L110-L128) / `130-150` / `48-52` | 稀疏数组、非索引属性、symbol 键、异形原型拒绝;`__proto__` 走 defineProperty |
+| `WorkerToHostType` / `HostToWorkerType` / `Payloads` | [`src/protocol.ts:14-31`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/protocol.ts#L14-L31) / `34-51,72-87` | 双向闭合协议,payload 单一事实源 |
+| `workerSpawnEnv` / `resolveWorkerSpawn` | [`src/host.ts:48-60`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L48-L60) / `70-94` | worker 环境清洗与入口解析 |
+| `WorkerRun.onMessage` / `childAdmissionFailure` | [`host.ts:271-316`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L271-L316) / `319-330` | 死亡屏障;调用后准入拒绝 |
+| `WorkerRun.startChild` / `disposeChild` / `onChildDispose` | [`host.ts:352-415`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L352-L415) / `441-450` / `417-427` | RPC 往返;记忆化 dispose;ack 永远回 |
+| `WorkerRun.cancel` / `dispose` | [`host.ts:183-207`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L183-L207) / `224-255` | 双通道取消 + grace + terminate;有界 dispose |
+| `onWorkerDeath` / `onResult` / `endAgent` / `endStrandedAgents` | [`host.ts:522-554`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L522-L554) / `489-519` / `563-567` / `581-585` | 死亡屏障;first-wins 终局;配对账本 |
+| `childQuiescence` / `notifyChildQuiescence` | [`host.ts:471-474`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/workflow-worker-thread/src/host.ts#L471-L474) / `465-468` | `pendingStarts` + `children` 双条件静默 |
+| `tool-workflow` 记录器与桥接 | [`packages/workflow/tool-workflow/src/index.ts:72-130`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-workflow/src/index.ts#L72-L130) / `283-329` | 四个 `tool-workflow/*` 事件;signal→cancel;`maxResultChars` |
+| `tool-ralph` | [`packages/workflow/tool-ralph/src/index.ts:88-175`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/workflow/tool-ralph/src/index.ts#L88-L175) | 固定脚本的 fresh-agent 循环 |

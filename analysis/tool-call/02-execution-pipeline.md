@@ -1,6 +1,6 @@
 # 02 · 执行管道函数级走查:createExecution → prepare → dispatch → finalize/finish
 
-> 分析对象 `dbbaa4a37`。覆盖 `packages/core/tools/src/index.ts:1332-1852` 与调用侧 `packages/core/agent-loop/src/tool-calls.ts:122-247`。
+> 分析对象 `dbbaa4a37`。覆盖 [`packages/core/tools/src/index.ts:1332-1852`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1332-L1852) 与调用侧 [`packages/core/agent-loop/src/tool-calls.ts:122-247`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L122-L247)。
 
 ---
 
@@ -22,7 +22,7 @@ case 'post-result': return await this.finalizeScheduledExecution(prepared.exec, 
 case 'final-result': return this.finishScheduledExecution(prepared.exec, prepared.result)
 ```
 
-调度器入口把同一组函数**跨时间**摊开(`TOOL_RUNTIME_SCHEDULER`,`index.ts:789-794`):
+调度器入口把同一组函数**跨时间**摊开(`TOOL_RUNTIME_SCHEDULER`,[`index.ts:789-794`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L789-L794)):
 
 ```typescript
 // packages/core/tools/src/index.ts:789
@@ -124,7 +124,7 @@ try {
 
 **`finalizerFor()` 的例外**——**被折叠的调用**只有在**已经取消**时才保留终结器:正常调用保留;折叠 + 未取消丢弃(`UNKNOWN_TOOL` 拒绝不该经过工具的内容改写);折叠 + 已取消保留(取消合同要求每个归一化结果都过一次 `finalizeContent`)。注释 `:1392-1397` 记录了更细的一层:在 `snapshotJsonValue` 中途 abort 的 getter 会让"无效参数失败"落到与取消同一条保留路径上。
 
-**catch 分支少登记两个 WeakMap 是安全的**:它只登记 `contentFinalizers`。安全性来自**这条执行永远走不到读它们的地方**——`final-result` 由调度器直接送进 `finishScheduledExecution`(`tool-calls.ts:191` 的 `needsPost: false`),不经过取消检查也不 dispatch。`callerCancelled`(`:1503`)与 `dispatchScheduledExecution`(`:1570`)里那两条 `throw new Error('tool registry scheduler invariant violated: …')` 就是这两条不变式的断言。
+**catch 分支少登记两个 WeakMap 是安全的**:它只登记 `contentFinalizers`。安全性来自**这条执行永远走不到读它们的地方**——`final-result` 由调度器直接送进 `finishScheduledExecution`([`tool-calls.ts:191`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/tool-calls.ts#L191) 的 `needsPost: false`),不经过取消检查也不 dispatch。`callerCancelled`(`:1503`)与 `dispatchScheduledExecution`(`:1570`)里那两条 `throw new Error('tool registry scheduler invariant violated: …')` 就是这两条不变式的断言。
 
 **折叠判定必须在策略管道之前**(注释 `:1363-1369`):被 `ptc` 折叠的调用是**确定性失败**,放进 try 块会让 pre-execute 监听器、`ask`、guard 看见它,甚至"批准"一个只能失败的调用。真正未知的工具**保留** dispatch 阶段的 `UNKNOWN_TOOL` 路径,好让策略监听器看到每一个到达注册表的名字。唯一例外是预派发取消:折叠分支先查 `signal.aborted`(`:1419`),返回 `ABORTED_BEFORE_DISPATCH`。
 
@@ -187,7 +187,7 @@ export type ScheduledToolPreparation =
 | `post-result` | 走 `tools/post-execute` + `finalizeContent` | post-execute 监听器、`finalizeContent`、`tools/result` | 审批取消 `:1474`、策略拒绝 `:1479`、预派发取消 `:1491`、dispatch 后全部结果 `:1580` |
 | `final-result` | 只走 `finishScheduledExecution`(**跳过 post-execute**) | `finalizeContent`、`tools/result` | 折叠/参数失败 `:1420/:1426/:1439`、入口取消 `:1461`、前置门抛错 `:1495`、dispatch 抛错 `:1587` |
 
-**"拒绝也走 post-execute"是有意的**(`:172` 注释):`repeat-tool-reminder` 正是靠这条统计被拒调用的重复链(`packages/guard/repeat-tool-reminder/src/index.ts:184-187`)。管道**还没开始**的失败(参数快照、折叠、前置门抛错)不该被当成"一次执行"观测,所以走 `final-result`。
+**"拒绝也走 post-execute"是有意的**(`:172` 注释):`repeat-tool-reminder` 正是靠这条统计被拒调用的重复链([`packages/guard/repeat-tool-reminder/src/index.ts:184-187`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/guard/repeat-tool-reminder/src/index.ts#L184-L187))。管道**还没开始**的失败(参数快照、折叠、前置门抛错)不该被当成"一次执行"观测,所以走 `final-result`。
 
 ### 3.2 `ask` 是旁路而非决策源
 
@@ -404,7 +404,7 @@ return this.markCanonical(exec, this.materializeFinalResult({                   
 | `render` 抛错 | `output.render failed: <msg>`(`:519`) |
 | 投影非无损 | `output.render returned non-lossless JSON`(`:527`) |
 
-四条都归到 `ToolOutputError`(`code: 'INVALID_TOOL_OUTPUT'`)。`exec.parent === undefined` 把 PTC 子派发排除在 `meta` 之外(子调用的卡片由 Client 从 `tool/ptc-dispatch` 的 `content` 派生,见 [05-ptc-mode.md](./05-ptc-mode.md));`packages/fs/tool-fs-search/tests/tools.spec.ts:1156` 就是这条规则的验收用例。`bodyInvoked` 与 `concludeTurn()` 都以"注册表自己铸的对象"为 WeakMap/WeakSet 键,外部无法伪造。
+四条都归到 `ToolOutputError`(`code: 'INVALID_TOOL_OUTPUT'`)。`exec.parent === undefined` 把 PTC 子派发排除在 `meta` 之外(子调用的卡片由 Client 从 `tool/ptc-dispatch` 的 `content` 派生,见 [05-ptc-mode.md](./05-ptc-mode.md));[`packages/fs/tool-fs-search/tests/tools.spec.ts:1156`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs-search/tests/tools.spec.ts#L1156) 就是这条规则的验收用例。`bodyInvoked` 与 `concludeTurn()` 都以"注册表自己铸的对象"为 WeakMap/WeakSet 键,外部无法伪造。
 
 ---
 
@@ -441,7 +441,7 @@ return deepFreeze({ ...detached, value: result.value })
 | 符号 | 位置 | 职责 |
 |---|---|---|
 | `ToolRuntime.execute` / `completeScheduledExecution` / `TOOL_RUNTIME_SCHEDULER` | `index.ts:1332` / `:1336` / `:459`(接口 `:444`) | 公开入口、三分支串接、四段接口 |
-| `ScheduledToolPreparation` / `ScheduledToolDispatch` | `index.ts:424` / `:434` | 阶段可见性编码 |
+| `ScheduledToolPreparation` / `ScheduledToolDispatch` | [`index.ts:424`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L424) / [`:434`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L434) | 阶段可见性编码 |
 | `createExecution` / `createExecutionToken` | `index.ts:1354` / `:1856` | 身份、参数快照、三个 WeakMap、折叠判定 |
 | `prepareExecution` / `prepareScheduledExecution` | `index.ts:1453` / `:1449` | 有序前置门;续延参数 |
 | `callerCancelled` / `cancellationResult` | `index.ts:1500` / `:1508` | 原始调用者信号读;按 `bodyInvoked` 二选一 |
@@ -449,8 +449,8 @@ return deepFreeze({ ...detached, value: result.value })
 | `dispatchScheduledExecution` / `dispatchToolBody` | `index.ts:1559` / `:1522` | around 瀑布 + 上下文合并 + 取消复核;body 唯一调用点 |
 | `normalizeDispatchResult` / `canonicalResults` / `markCanonical` | `index.ts:1816` / `:1774` / `:1777` | wrapper 结果的归属判定与合同重校验 |
 | `finalizeScheduledExecution` / `finishScheduledExecution` | `index.ts:1599` / `:1621` | post-execute + 取消复核;三层 try 物化 |
-| `applyFinalContent` / `postExecute` / `failureMessageFromContent` | `index.ts:1639` / `:1732` / `:618` | 只覆盖 `content`;三态决策;反馈→`error.message` |
+| `applyFinalContent` / `postExecute` / `failureMessageFromContent` | `index.ts:1639` / `:1732` / [`:618`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L618) | 只覆盖 `content`;三态决策;反馈→`error.message` |
 | `notifyResult` / `createSuccessResult` | `index.ts:1647` / `:1783` | `freeze(exec)` + emit `tools/result`,失败包容;输出合同四道强制 + 顶层 `presentationMeta` |
-| `materializeFinalResult` / `materializePresentation` / `snapshotToolValue` / `snapshotProjection` | `index.ts:1837` / `:626` / `:537` / `:523` | 唯一提交物化;无损 JSON + `deepFreeze`;快照与错误归类 |
+| `materializeFinalResult` / `materializePresentation` / `snapshotToolValue` / `snapshotProjection` | `index.ts:1837` / [`:626`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L626) / [`:537`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L537) / [`:523`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L523) | 唯一提交物化;无损 JSON + `deepFreeze`;快照与错误归类 |
 | `toolErrorResult` / `toolAbortedResult` / `toolAbortedBeforeDispatchResult` | `index.ts:1860` / `:1909` / `:1923` | 任意抛出值 → 结构化失败结果;两个规范取消码 |
-| `errorMessage` / `errorInfo` | `index.ts:601` / `:635` | 唯一的字符串化与结构化信息提取入口 |
+| `errorMessage` / `errorInfo` | [`index.ts:601`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L601) / [`:635`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/index.ts#L635) | 唯一的字符串化与结构化信息提取入口 |

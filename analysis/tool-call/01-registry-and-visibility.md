@@ -1,13 +1,13 @@
 # 01 · 注册表内部:ScopedLayers 分层、遮蔽、回收与 view() 可见性解析
 
-> 分析对象 `dbbaa4a37`。核心源码:`packages/core/scope/src/store.ts`(267 行)、`packages/core/scope/src/index.ts`(204 行)、`packages/core/tools/src/index.ts:707-1183`。
+> 分析对象 `dbbaa4a37`。核心源码:[`packages/core/scope/src/store.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts)(267 行)、[`packages/core/scope/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/index.ts)(204 行)、[`packages/core/tools/src/index.ts:707-1183`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L707-L1183)。
 > 第五章第二节给出了四条可见性结论。
 
 ---
 
 ## 一、两张存储表 + 一张分层容器
 
-`ScopedLayers` 不认识"工具",它只认识**层**(`ScopeLayer`)。工具世界的层是 `ToolLayer`(`index.ts:707`),聚合四张表:
+`ScopedLayers` 不认识"工具",它只认识**层**(`ScopeLayer`)。工具世界的层是 `ToolLayer`([`index.ts:707`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L707)),聚合四张表:
 
 ```typescript
 // packages/core/tools/src/index.ts:707
@@ -27,12 +27,12 @@ class ToolLayer implements ScopeLayer {
 
 | 表 | 类型 | 重复注册时 | 为什么 |
 |---|---|---|---|
-| `tools` | `NamedEntries<ToolDefinition>` | 层内同名**抛错**(`index.ts:719-721`) | 名字是查找键,两个同名工具无法共存 |
-| `restrictions` | `AnonymousEntries<CompiledToolRestriction>` | 各自独立,求**交**(`index.ts:731-737`) | 限制是可叠加的策略,不是覆盖关系 |
-| `guards` | `AnonymousEntries<ToolGuard>` | 各自独立,取**首个拒绝**(`index.ts:740-746`) | 守卫单调,顺序即优先级 |
-| `mode` | 单格 `ToolPresentationMode \| undefined` | 第二次声明**抛错**(`index.ts:947-949`) | 注释已写明:"两个答案"是矛盾,不是合并 |
+| `tools` | `NamedEntries<ToolDefinition>` | 层内同名**抛错**([`index.ts:719-721`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L719-L721)) | 名字是查找键,两个同名工具无法共存 |
+| `restrictions` | `AnonymousEntries<CompiledToolRestriction>` | 各自独立,求**交**([`index.ts:731-737`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L731-L737)) | 限制是可叠加的策略,不是覆盖关系 |
+| `guards` | `AnonymousEntries<ToolGuard>` | 各自独立,取**首个拒绝**([`index.ts:740-746`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L740-L746)) | 守卫单调,顺序即优先级 |
+| `mode` | 单格 `ToolPresentationMode \| undefined` | 第二次声明**抛错**([`index.ts:947-949`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L947-L949)) | 注释已写明:"两个答案"是矛盾,不是合并 |
 
-两种 entry 表的实现差异只有一处但很关键(`store.ts:30-105` / `:114-150`):
+两种 entry 表的实现差异只有一处但很关键(`store.ts:30-105` / [`:114-150`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L114-L150)):
 
 ```typescript
 // packages/core/scope/src/store.ts:43
@@ -174,8 +174,8 @@ effect(
 时序要点(容易读漏的三条):
 
 1. **读操作永不建层**。`peek`/`chainLayers` 只 `get`,没有 `set`(`store.ts:180-198`);创建只发生在 `effect()` 里。所以"某个 agent 从没注册过任何东西"不会在 `scoped` Map 里留下空壳。
-2. **回收条件是"整层为空"**,由各层自己的 `isEmpty()` 定义(`ToolLayer.isEmpty()` 要求四张表全空,`index.ts:725-728`)。撤销一个工具但该层还有一条 restriction,层就留着。
-3. **`notify` 只在层内容真的可能变化时发**。`guard()` 传 `notify: false`(`index.ts:1104`),因为"守卫不改变可见工具集"——不必惊动 `tools/change` 的订阅者(`index.ts:806` 构造 `ScopedLayers` 时把通知接到 `this.ctx.emit('tools/change')`)。这直接关系到 KV-Cache:多余的 `tools/change` 会让上层误判工具集变化。
+2. **回收条件是"整层为空"**,由各层自己的 `isEmpty()` 定义(`ToolLayer.isEmpty()` 要求四张表全空,[`index.ts:725-728`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L725-L728))。撤销一个工具但该层还有一条 restriction,层就留着。
+3. **`notify` 只在层内容真的可能变化时发**。`guard()` 传 `notify: false`([`index.ts:1104`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1104)),因为"守卫不改变可见工具集"——不必惊动 `tools/change` 的订阅者([`index.ts:806`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L806) 构造 `ScopedLayers` 时把通知接到 `this.ctx.emit('tools/change')`)。这直接关系到 KV-Cache:多余的 `tools/change` 会让上层误判工具集变化。
 
 `ctx.effect()` 的 generator 语义保证了"注册"与"撤销"共享同一个 fiber 生命周期:插件卸载、HMR 热替换、agent 销毁都只走 `dispose` 这一条路。返回的 `dispose` 就是 Cordis 的原件(注释 `store.ts:264`),不做二次包装。
 
@@ -229,20 +229,20 @@ private view(scope?: ScopeKey): ToolView {
 | 容器 | 内容 | 谁读 |
 |---|---|---|
 | `visible` | 继承面 ∩ 全链 restriction + own 注册 + `run_code`(mode 非 native 时) | `get()`(`:1194`)、`schemas()`(`:1224`)、`sdkSchemas()`(`:1229`)、`executionMode()`(经 `resolveExecution`) |
-| `knownNames` | **过滤之前**的继承面 + own 注册名(不含 `run_code`) | `wireSchemas()`(`:977`、`:992`)→ `systemPrompt.tools` 的 `knownNames`,决定 `toolOrder` 校验的合法集合(`packages/core/system-prompt/src/index.ts:216-218`) |
+| `knownNames` | **过滤之前**的继承面 + own 注册名(不含 `run_code`) | `wireSchemas()`(`:977`、`:992`)→ `systemPrompt.tools` 的 `knownNames`,决定 `toolOrder` 校验的合法集合([`packages/core/system-prompt/src/index.ts:216-218`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/src/index.ts#L216-L218)) |
 | `restrictableNames` | `inherited` 的键集合 | `restrict()` 的未知名检查(`:1078-1082`) |
 
-**必须点出的一处源码措辞与实现的偏差**:`restrictableNames` 在 JSDoc 里写作"Current global names"(`index.ts:692`),报错文本也说 "known global tools"(`:1081`),但 `inherited` 实际含**祖先 scoped 层**的注册(`:1152-1155`),不含 own。因此 `restrict()` 能命名一个祖先注册的名字——这恰恰是注释 `:1134-1138` 描述的场景:preset 把工具搬到了 agent 平面(祖先层),子 agent 的过滤器必须约束得到它。把 `restrictableNames` 收窄成"只有全局层"会让那个场景静默失效。
+**必须点出的一处源码措辞与实现的偏差**:`restrictableNames` 在 JSDoc 里写作"Current global names"([`index.ts:692`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L692)),报错文本也说 "known global tools"([`:1081`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1081)),但 `inherited` 实际含**祖先 scoped 层**的注册([`:1152-1155`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1152-L1155)),不含 own。因此 `restrict()` 能命名一个祖先注册的名字——这恰恰是注释 [`:1134-1138`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1134-L1138) 描述的场景:preset 把工具搬到了 agent 平面(祖先层),子 agent 的过滤器必须约束得到它。把 `restrictableNames` 收窄成"只有全局层"会让那个场景静默失效。
 
 `own` 名**不进** `restrictableNames`:一个 scope 不能 restrict 自己注册的工具(自己的东西本来就不该被自己的过滤器裁掉)。
 
 ### 3.2 三条过滤规则与它们的实现行
 
-1. **近层遮蔽远层** —— `inherited` 的 `set` 顺序(`:1151` 全局先,`:1152-1155` 由远及近)。因为 `chainLayers` 已是"远处祖先在前",直接顺序 `set` 即可,无需比较深度。
-2. **restriction 沿链取交** —— `layers.every(layer => layer.admits(name))`(`:1164`)。注意 `layers` **包含 own**,所以"某个 scope 自己声明的 restriction 会过滤它继承来的名字"。`ToolLayer.admits()` 的语义是**合取**(`index.ts:731-737`):该层每一条 compiled restriction 都必须放行(`allow` 未含 → 拒;`deny` 含 → 拒)。多条 restriction 之间是交,链上多层之间也是交。
-3. **restriction 不过滤本层自己的注册** —— `own.tools` 直接 `visible.set`(`:1168-1173`),完全跳过 `admits`。这是被踩过坑的设计(`index.ts:1127-1138` 注释):委派 runtime 把子 agent 的结构化输出工具注册进**子 agent 自己的层**,而"允许该子 agent 用哪些能力"的过滤器按定义列的是**能力**名;若豁免集合被读成"全局层"而非"不是我的",一旦 preset 把模型可见工具挪到 agent 平面,子 agent 的过滤器就会把它自己赖以作答的机件一起剥掉。
+1. **近层遮蔽远层** —— `inherited` 的 `set` 顺序([`:1151`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1151) 全局先,[`:1152-1155`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1152-L1155) 由远及近)。因为 `chainLayers` 已是"远处祖先在前",直接顺序 `set` 即可,无需比较深度。
+2. **restriction 沿链取交** —— `layers.every(layer => layer.admits(name))`([`:1164`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1164))。注意 `layers` **包含 own**,所以"某个 scope 自己声明的 restriction 会过滤它继承来的名字"。`ToolLayer.admits()` 的语义是**合取**([`index.ts:731-737`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L731-L737)):该层每一条 compiled restriction 都必须放行(`allow` 未含 → 拒;`deny` 含 → 拒)。多条 restriction 之间是交,链上多层之间也是交。
+3. **restriction 不过滤本层自己的注册** —— `own.tools` 直接 `visible.set`([`:1168-1173`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1168-L1173)),完全跳过 `admits`。这是被踩过坑的设计([`index.ts:1127-1138`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1127-L1138) 注释):委派 runtime 把子 agent 的结构化输出工具注册进**子 agent 自己的层**,而"允许该子 agent 用哪些能力"的过滤器按定义列的是**能力**名;若豁免集合被读成"全局层"而非"不是我的",一旦 preset 把模型可见工具挪到 agent 平面,子 agent 的过滤器就会把它自己赖以作答的机件一起剥掉。
 
-`run_code` 的插入(`:1179-1181`)是第四条规则:它**不在任何注册层里**,所以既不受 restriction 影响,也可能遮蔽不了(`register()` 无条件拒绝这个保留名,`index.ts:1044-1046`,因此这一行同时是不变式断言)。它是**按 scope 判定**的:`native` 的 agent 不该在派发表里发现别的 agent 呈现的 `run_code`。
+`run_code` 的插入([`:1179-1181`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1179-L1181))是第四条规则:它**不在任何注册层里**,所以既不受 restriction 影响,也可能遮蔽不了(`register()` 无条件拒绝这个保留名,[`index.ts:1044-1046`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1044-L1046),因此这一行同时是不变式断言)。它是**按 scope 判定**的:`native` 的 agent 不该在派发表里发现别的 agent 呈现的 `run_code`。
 
 ### 3.3 view() 的调用者:四个出口共用同一次遍历
 
@@ -277,7 +277,7 @@ flowchart LR
   | `ptc` | 只留 `run_code`(`:988`) | 只有 `[RUN_CODE_NAME]`(`:989`) |
   | `both` | 全部 visible | `knownNames` + `RUN_CODE_NAME`(`:992`) |
 
-- **`schemas()` 深拷贝参数,`wireSchemas()` 不拷**(`schemaOf(def, detachParameters)`,`:1224` vs `:976`)。后者由 system-prompt 随后自己 `structuredClone`(`packages/core/system-prompt/src/index.ts:583`)。
+- **`schemas()` 深拷贝参数,`wireSchemas()` 不拷**(`schemaOf(def, detachParameters)`,`:1224` vs `:976`)。后者由 system-prompt 随后自己 `structuredClone`([`packages/core/system-prompt/src/index.ts:583`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/system-prompt/src/index.ts#L583))。
 - **`executionMode()` 每次都重跑整个 `view()`**(`:1266-1275`)。这正是调度器能在滚动池里反复"重新分类"的前提(见 [03-scheduler-and-concurrency.md](./03-scheduler-and-concurrency.md)):注册表变化立刻反映到下一次分类,无需任何缓存失效机制。
 
 ## 四、`register()`:加载期 fail loud 的四道校验
@@ -315,17 +315,17 @@ register(definition: ToolDefinition): () => void {
 | 校验 | 行 | 拒绝什么 | 为什么在加载期 |
 |---|---|---|---|
 | `output` 三件套 | `:1029-1034` | 缺 `output`、`render` 非函数、`presentationMeta` 非函数 | 没有 `output` 就没有结果合同;`render` 是唯一的值→文本投影,缺了就无法产出模型内容 |
-| `assertSupportedJsonSchema(output.schema)` | `:1035` | 用了受支持子集之外的 JSON Schema 关键字 | 校验器(`json-schema.ts`)只实现这个子集,非法 schema 会让每个结果都校验失败 |
+| `assertSupportedJsonSchema(output.schema)` | `:1035` | 用了受支持子集之外的 JSON Schema 关键字 | 校验器([`json-schema.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/json-schema.ts))只实现这个子集,非法 schema 会让每个结果都校验失败 |
 | `timeoutMs` 正有限 | `:1036-1040` | `0`、负数、`NaN`、`Infinity` | `timeoutMs` 是"声明式预算",值是 `0` 会与"未声明"混淆;超时插件读到的必须是一个可用的毫秒数 |
 | `RUN_CODE_NAME` 保留 | `:1044-1046` | 名为 `run_code` 的注册 | 无条件保留:任何 agent 都可能为自己选用 code 模式,一个"当前默认下空闲"的名字会在某个 preset 挂载的瞬间变成冲突——把冲突挪到注册期 |
 
 **未在此处校验**的三项,以及它们各自的归属:
 
 - `isConcurrencySafe` 的类型 —— `defineTool` 在编译 DSL 时约束;`executionMode()` 对非法返回值 fail-closed(`:1272-1274`)。手写定义绕过 `defineTool` 时不会在注册期报错,而是在调度时退化为 `exclusive`。
-- `presentCall` / `presentResult` —— 纯可选展示回调,失败由消费方包容(`presentResult` 的契约要求"畸形数据返回 `undefined` 而不是抛错",见 `packages/fs/tool-fs/src/read.ts:170-176`)。
-- 名字是否为空 —— 无校验。空串名会在 `view()` 的 Map 里成为一个可查找的键;这是可信同进程边界的取舍(`AGENTS.md`:"Trust TypeScript at typed same-process boundaries")。
+- `presentCall` / `presentResult` —— 纯可选展示回调,失败由消费方包容(`presentResult` 的契约要求"畸形数据返回 `undefined` 而不是抛错",见 [`packages/fs/tool-fs/src/read.ts:170-176`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/fs/tool-fs/src/read.ts#L170-L176))。
+- 名字是否为空 —— 无校验。空串名会在 `view()` 的 Map 里成为一个可查找的键;这是可信同进程边界的取舍([`AGENTS.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/AGENTS.md):"Trust TypeScript at typed same-process boundaries")。
 
-`base` 的析构发生在 `createExecution()` 而不是这里;`register()` 的最后一行把整个 `ToolDefinition` **按引用**存进表里——注册表从不拷贝定义对象,所以 `run_code` 才能用 `Object.defineProperty` 安装 language-aware getter(`ptc.ts:664-676`)。
+`base` 的析构发生在 `createExecution()` 而不是这里;`register()` 的最后一行把整个 `ToolDefinition` **按引用**存进表里——注册表从不拷贝定义对象,所以 `run_code` 才能用 `Object.defineProperty` 安装 language-aware getter([`ptc.ts:664-676`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/ptc.ts#L664-L676))。
 
 ## 五、`restrict()` 与 `presentAs()`:两个必须作用域化的写操作
 
@@ -408,7 +408,7 @@ private modeFor(scope?: ScopeKey): ToolPresentationMode {
 
 注释 `:893-896` 点出 mode 属于"链会继承的那类事实":preset 的常驻声明覆盖挂在其下的每个 agent,agent 自己的声明(若有)覆盖 preset 的。**`collapses()` 必须读 `modeFor` 而不是 `defaultMode`**(见 [05-ptc-mode.md](./05-ptc-mode.md)),否则"native 部署下被 preset 赋予 ptc 的 agent"恰好漏网。
 
-`agent-tool-presentation` 包(`packages/core/agent-tool-presentation/src/index.ts:59`)就是这条路径的部署形态:一行 preset 配置 → 一个作用域声明。
+`agent-tool-presentation` 包([`packages/core/agent-tool-presentation/src/index.ts:59`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-tool-presentation/src/index.ts#L59))就是这条路径的部署形态:一行 preset 配置 → 一个作用域声明。
 
 ```typescript
 // packages/core/agent-tool-presentation/src/index.ts:59
@@ -431,26 +431,26 @@ export function apply(ctx: Context, config: Config): void {
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `NamedEntries` | `packages/core/scope/src/store.ts:30` | 插入序命名表;层内重名抛错;undo 幂等 |
-| `NamedEntries.insert` | `store.ts:43` | 唯一写入口;清空时换新 `Map`(迭代器代际) |
-| `AnonymousEntries` | `store.ts:114` | 匿名表;`append`(`:122`)以 `Symbol()` 为键,同值多次注册独立 |
-| `ScopedLayers` | `store.ts:159` | 全局层 + `Map<ScopeKey, L>` overlay 容器 |
-| `ScopedLayers.global` | `store.ts:161` | 构造时急切创建(`:169`),不存在"全局层还没建"的状态 |
-| `ScopedLayers.peek` | `store.ts:180` | chain-blind 读精确 scope 的 own 层,不建层 |
-| `ScopedLayers.chainLayers` | `store.ts:192` | 沿 `scopeChainOf().reverse()` 取现存 overlay,远祖先在前 |
-| `ScopedLayers.merge` | `store.ts:208` | 通用"全局 + 链遮蔽"合并(`system-prompt` `:569`、`commands` `:471` 在用;`ToolRuntime` 不用) |
-| `ScopedLayers.effect` | `store.ts:226` | 唯一写入口:按 `scopeOf(ctx)` 选层、`ctx.effect` 所有权、空层回收、可选通知 |
-| `scopeOf` | `packages/core/scope/src/index.ts:154` | 读最近的作用域标签 |
+| `NamedEntries` | [`packages/core/scope/src/store.ts:30`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L30) | 插入序命名表;层内重名抛错;undo 幂等 |
+| `NamedEntries.insert` | [`store.ts:43`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L43) | 唯一写入口;清空时换新 `Map`(迭代器代际) |
+| `AnonymousEntries` | [`store.ts:114`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L114) | 匿名表;`append`([`:122`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L122))以 `Symbol()` 为键,同值多次注册独立 |
+| `ScopedLayers` | [`store.ts:159`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L159) | 全局层 + `Map<ScopeKey, L>` overlay 容器 |
+| `ScopedLayers.global` | [`store.ts:161`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L161) | 构造时急切创建([`:169`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L169)),不存在"全局层还没建"的状态 |
+| `ScopedLayers.peek` | [`store.ts:180`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L180) | chain-blind 读精确 scope 的 own 层,不建层 |
+| `ScopedLayers.chainLayers` | [`store.ts:192`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L192) | 沿 `scopeChainOf().reverse()` 取现存 overlay,远祖先在前 |
+| `ScopedLayers.merge` | [`store.ts:208`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L208) | 通用"全局 + 链遮蔽"合并(`system-prompt` `:569`、`commands` `:471` 在用;`ToolRuntime` 不用) |
+| `ScopedLayers.effect` | [`store.ts:226`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L226) | 唯一写入口:按 `scopeOf(ctx)` 选层、`ctx.effect` 所有权、空层回收、可选通知 |
+| `scopeOf` | [`packages/core/scope/src/index.ts:154`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/index.ts#L154) | 读最近的作用域标签 |
 | `scopeChainOf` | `scope/index.ts:98` | 近者在前的作用域链 |
 | `bindScopeParent` | `scope/index.ts:72` | 一次绑定 + 环检测,返回唯一可重链的绑定 |
 | `scopeTarget` | `scope/index.ts:170` | 保留基类 filter、无标签监听器全局准入、标签监听器向上扩展 |
 | `createScope` | `scope/index.ts:137` | 铸出 scoped ctx(共享 no-op 插件作承载 fiber) |
-| `ToolLayer` | `packages/core/tools/src/index.ts:707` | 四张表的聚合层 |
-| `ToolLayer.admits` | `index.ts:731` | 层内所有 restriction 的合取求值 |
-| `ToolLayer.guardReason` | `index.ts:740` | 层内首个拒绝理由 |
-| `ScopedLayers` 实例化 | `index.ts:804` | `new ScopedLayers(scope => new ToolLayer(scope), () => ctx.emit('tools/change'))` |
-| `ToolView` / `ToolRuntime.view` | `index.ts:687` / `:1142` | `{ visible, knownNames, restrictableNames }`;一次遍历产出三个容器 |
-| `ToolRuntime.get` / `schemas` / `sdkSchemas` / `wireSchemas` | `index.ts:1194` / `:1224` / `:1229` / `:972` | `visible.get(name)`;模型 schema 投影;PTC SDK 投影;native/ptc/both 三态 provider |
-| `ToolRuntime.resolveExecution` / `executionMode` | `index.ts:1211` / `:1266` | `get` + `collapses` 的执行面解析;fail-closed 并发分类(每次都重跑 `view()`) |
-| `ToolRuntime.register` / `restrict` / `presentAs` / `modeFor` / `requireCodeTransport` | `index.ts:1027` / `:1061` / `:938` / `:892` / `:914` | 四道加载期校验;作用域限制;作用域 mode 声明;链上最近的 `mode`;惰性铸造 `run_code` |
-| `apply` | `packages/core/agent-tool-presentation/src/index.ts:59` | preset 行的 `presentAs` 装配,`codeRuntime` 依赖延迟到 mode 分支 |
+| `ToolLayer` | [`packages/core/tools/src/index.ts:707`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L707) | 四张表的聚合层 |
+| `ToolLayer.admits` | [`index.ts:731`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L731) | 层内所有 restriction 的合取求值 |
+| `ToolLayer.guardReason` | [`index.ts:740`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L740) | 层内首个拒绝理由 |
+| `ScopedLayers` 实例化 | [`index.ts:804`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L804) | `new ScopedLayers(scope => new ToolLayer(scope), () => ctx.emit('tools/change'))` |
+| `ToolView` / `ToolRuntime.view` | [`index.ts:687`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L687) / [`:1142`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1142) | `{ visible, knownNames, restrictableNames }`;一次遍历产出三个容器 |
+| `ToolRuntime.get` / `schemas` / `sdkSchemas` / `wireSchemas` | [`index.ts:1194`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1194) / [`:1224`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1224) / [`:1229`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1229) / [`:972`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L972) | `visible.get(name)`;模型 schema 投影;PTC SDK 投影;native/ptc/both 三态 provider |
+| `ToolRuntime.resolveExecution` / `executionMode` | [`index.ts:1211`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1211) / [`:1266`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1266) | `get` + `collapses` 的执行面解析;fail-closed 并发分类(每次都重跑 `view()`) |
+| `ToolRuntime.register` / `restrict` / `presentAs` / `modeFor` / `requireCodeTransport` | [`index.ts:1027`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1027) / [`:1061`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L1061) / [`:938`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L938) / [`:892`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L892) / [`:914`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/tools/src/index.ts#L914) | 四道加载期校验;作用域限制;作用域 mode 声明;链上最近的 `mode`;惰性铸造 `run_code` |
+| `apply` | [`packages/core/agent-tool-presentation/src/index.ts:59`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-tool-presentation/src/index.ts#L59) | preset 行的 `presentAs` 装配,`codeRuntime` 依赖延迟到 mode 分支 |

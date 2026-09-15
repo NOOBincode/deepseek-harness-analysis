@@ -12,10 +12,10 @@ DSH 是**用"插件 + 能力缝 + 事件日志"三条机制替换掉传统 agent
 
 | 不变式 | 内容 | 违反时的表现 | 出处 |
 |---|---|---|---|
-| **模型可见 ⟺ 已落日志** | 任何进入模型请求的内容必须能从会话日志重建;新增模型可见输入 = 新增 Session 事件 | 开发期不变式断言直接失败 | `AGENTS.md`;`core/agent-loop/src/invariant.ts:40-51` |
-| **注册即 effect** | 每个贡献经 `ctx.effect()`/`ctx.on()` 落地,注册返回精确 disposer;fiber 处置即回收 | HMR 后残留注册、测试无法验证移除 | `docs/architecture.md:13`;`core/scope/src/store.ts:226` |
-| **能力缝三角色** | 可替换能力恒为 Service Definition / Provider / Consumer 三角色,缺一即不完整 | 出现"有接口没实现"或"实现直接进主循环" | `docs/glossary.md:9` |
-| **fail-closed / fail-loud** | 自包含的错配在加载期抛错;安全与策略不可判定时拒绝执行而非放行 | 静默降级、部分可用态长期存在 | `packages/sandbox/sandbox/src/index.ts:152`;`packages/mcp/mcp-client/src/index.ts:150` |
+| **模型可见 ⟺ 已落日志** | 任何进入模型请求的内容必须能从会话日志重建;新增模型可见输入 = 新增 Session 事件 | 开发期不变式断言直接失败 | [`AGENTS.md`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/AGENTS.md);[`core/agent-loop/src/invariant.ts:40-51`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/agent-loop/src/invariant.ts#L40-L51) |
+| **注册即 effect** | 每个贡献经 `ctx.effect()`/`ctx.on()` 落地,注册返回精确 disposer;fiber 处置即回收 | HMR 后残留注册、测试无法验证移除 | [`docs/architecture.md:13`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/architecture.md#L13);[`core/scope/src/store.ts:226`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/core/scope/src/store.ts#L226) |
+| **能力缝三角色** | 可替换能力恒为 Service Definition / Provider / Consumer 三角色,缺一即不完整 | 出现"有接口没实现"或"实现直接进主循环" | [`docs/glossary.md:9`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/docs/glossary.md#L9) |
+| **fail-closed / fail-loud** | 自包含的错配在加载期抛错;安全与策略不可判定时拒绝执行而非放行 | 静默降级、部分可用态长期存在 | [`packages/sandbox/sandbox/src/index.ts:152`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/sandbox/sandbox/src/index.ts#L152);[`packages/mcp/mcp-client/src/index.ts:150`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/index.ts#L150) |
 
 ---
 

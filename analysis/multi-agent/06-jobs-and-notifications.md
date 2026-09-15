@@ -1,9 +1,9 @@
 # 06 · jobs:后台执行、完成通知与回收(函数级走查)
 
-> 源码:`packages/jobs/jobs/src/index.ts`(179 行,Service Definition)、`types.ts`(160 行)、`brand.ts`
-> 实现:`packages/jobs/jobs-local/src/index.ts`(534 行,进程内注册表)
-> 消费者:`packages/jobs/tool-jobs/src/index.ts`(401 行,`job_output`/`job_list`/`job_kill`)
-> 后台 subagent 的产生方:`packages/subagent/tool-subagent/src/index.ts:544-560`
+> 源码:[`packages/jobs/jobs/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/index.ts)(179 行,Service Definition)、[`types.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts)(160 行)、[`brand.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/brand.ts)
+> 实现:[`packages/jobs/jobs-local/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts)(534 行,进程内注册表)
+> 消费者:[`packages/jobs/tool-jobs/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts)(401 行,`job_output`/`job_list`/`job_kill`)
+> 后台 subagent 的产生方:[`packages/subagent/tool-subagent/src/index.ts:544-560`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L544-L560)
 > 对应[第十章第 6 节](../10-multi-agent.md);子 agent 本身见 [02](./02-subagent-seam-and-providers.md)/[04](./04-continuation-and-control.md)。
 
 ---
@@ -26,7 +26,7 @@ job_kill(job_id)             kill(id)     ────────────�
 
 ## 第一节 seam 的六条语义(抽象类即是契约)
 
-`JobRegistry` 是抽象类(`jobs/src/index.ts:62-177`),构造时就拒绝被直接加载:
+`JobRegistry` 是抽象类([`jobs/src/index.ts:62-177`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/index.ts#L62-L177)),构造时就拒绝被直接加载:
 
 ```typescript
 // packages/jobs/jobs/src/index.ts:63-71
@@ -66,7 +66,7 @@ constructor(ctx: Context) {
 | `wait(id, timeoutMs, caller?, signal?)` | 等结算或超时,**不取消作业**。caller abort 只在作业存活时 reject;结算之后终态快照胜出——**这样"为这个 waiter 抑制掉的通知"仍会被送达** |
 | `onJobDone(listener)` / `onJobsChanged(listener)` / `attachController(name)` | 三者都是 effect-scoped 注册,返回 disposer |
 
-`wait` 那条契约(`:122-131`)值得单独记住:*after settlement the terminal snapshot wins so a notice suppressed for this waiter is still delivered*。原因是 `settle()` 里有一行 `if (job.waiters > 0) job.reported = true`(`jobs-local/src/index.ts:422`)——**有 waiter 在场时,终态通知会被抑制**(因为 waiter 自己会看到结果)。若这个 wait 后来因为 caller abort 而 reject,通知就再也没人发了;所以"已结算则返回终态快照"必须优先于 abort。
+`wait` 那条契约(`:122-131`)值得单独记住:*after settlement the terminal snapshot wins so a notice suppressed for this waiter is still delivered*。原因是 `settle()` 里有一行 `if (job.waiters > 0) job.reported = true`([`jobs-local/src/index.ts:422`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L422))——**有 waiter 在场时,终态通知会被抑制**(因为 waiter 自己会看到结果)。若这个 wait 后来因为 caller abort 而 reject,通知就再也没人发了;所以"已结算则返回终态快照"必须优先于 abort。
 
 ---
 
@@ -103,7 +103,7 @@ start(spec: JobStart): JobId {
 
 `counters` 是按 **kind** 计数的(`:151-153`),所以 id 形如 `subagent-1`、`subagent-2`——同一 kind 的编号在进程内单调,进程重启后从 1 开始。这个 id **可预测**正是第一条语义成立的前提:围栏必须是授权而不是保密。
 
-本地实现是 `LocalJobRegistry`(`jobs-local/src/index.ts:91-533`),其 `Config` 只有一项:`maxConcurrentJobsPerOwner`(默认 `DEFAULT_MAX_CONCURRENT_TASKS_PER_OWNER = 10`,`:28`,`:92-98`)。`activeTaskCount`(`:322-328`)按**精确 owner 对象**统计(`job.owner === owner`)且只算 `running`/`stopping`。
+本地实现是 `LocalJobRegistry`([`jobs-local/src/index.ts:91-533`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L91-L533)),其 `Config` 只有一项:`maxConcurrentJobsPerOwner`(默认 `DEFAULT_MAX_CONCURRENT_TASKS_PER_OWNER = 10`,[`:28`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L28),[`:92-98`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L92-L98))。`activeTaskCount`([`:322-328`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L322-L328))按**精确 owner 对象**统计(`job.owner === owner`)且只算 `running`/`stopping`。
 
 ### 2.1 `done` 的两条来路
 
@@ -119,7 +119,7 @@ void hooks.done.then(
 )
 ```
 
-生产者契约要求 `done` **不得 reject**(`types.ts:78-84`),但实现仍然兜底成 `failed`——否则 cleanup 与 waiter 会永久挂住。
+生产者契约要求 `done` **不得 reject**([`types.ts:78-84`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L78-L84)),但实现仍然兜底成 `failed`——否则 cleanup 与 waiter 会永久挂住。
 
 ---
 
@@ -182,11 +182,11 @@ if (!isTerminal(job.status)) {
 
 ### 3.1 `read` 的实现与输出游标
 
-`read` 只有四行逻辑(`jobs-local/src/index.ts:205-213`):**有 `readOutput()` = 流式作业**,每次 `read` 是**消费式增量**,由一个游标拥有(`types.ts:85-90`:*each job has one consuming cursor*);**无 `readOutput()` = 仅最终输出**,存活时返回空串、结算后返回 `outcome.output`,**幂等、永不消费**;**终态读标记 `reported`**(`:211`)——这就是完成通知不会重复发的机制。
+`read` 只有四行逻辑([`jobs-local/src/index.ts:205-213`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L205-L213)):**有 `readOutput()` = 流式作业**,每次 `read` 是**消费式增量**,由一个游标拥有([`types.ts:85-90`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L85-L90):*each job has one consuming cursor*);**无 `readOutput()` = 仅最终输出**,存活时返回空串、结算后返回 `outcome.output`,**幂等、永不消费**;**终态读标记 `reported`**(`:211`)——这就是完成通知不会重复发的机制。
 
 ### 3.2 输出体积上限
 
-`outputLimitBytes` 由 `JobStart` 指定、进入快照(`types.ts:51-55`、`:101-105`),消费侧在 `tool-jobs` 里落成两条:`visibleOutputLimit`(`:184-189`)从 `exec.arguments.job_id` 反查该作业的上限(只对 `job_output`/`job_kill` 生效),配合 `tools/pre-execute` 的 `prepend` 监听(`:232-236`)与 `finalizeContent`(`:237-256`),在**完整结果已知处**执行字节上限——符合 *Apply bounds to the complete result* 规则。`job_output` 的渲染还保留了 `output`/`status` 的切分(注释 `:242-243`)。
+`outputLimitBytes` 由 `JobStart` 指定、进入快照([`types.ts:51-55`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L51-L55)、[`:101-105`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L101-L105)),消费侧在 `tool-jobs` 里落成两条:`visibleOutputLimit`(`:184-189`)从 `exec.arguments.job_id` 反查该作业的上限(只对 `job_output`/`job_kill` 生效),配合 `tools/pre-execute` 的 `prepend` 监听(`:232-236`)与 `finalizeContent`(`:237-256`),在**完整结果已知处**执行字节上限——符合 *Apply bounds to the complete result* 规则。`job_output` 的渲染还保留了 `output`/`status` 的切分(注释 `:242-243`)。
 
 ---
 
@@ -205,7 +205,7 @@ private servesOwner(owner?: Agent): boolean {
 
 三类读取各自解析 listener/controller 集合:**`servesOwner`**(`:315-319`)——global 层有 controller 则**服务所有 owner**,否则沿 owner 的 scope 链找;**`listenersFor`**(`:338-342`)与 **`changedFor`**(`:388-392`)——global 层的先,再沿 owner 的 scope 链逐层,两者解析规则完全相同。三者都通过 `this.layers.effect(this.ctx, ...)` 注册(`:281-305`),即**贡献落到注册者的 scope 层**——与工具注册表同一形状。
 
-`attachController(name)`(`:297-305`)每次调用生成一个新的 `Symbol(name)` 作 token,注释:*One token per call keeps duplicate labels independently disposable*。全仓只有 `tool-jobs` 调用它(`tool-jobs/src/index.ts:259`),所以拒绝文案直接点名:`load @deepseek-ai/dsh-tool-jobs in its composition`。
+`attachController(name)`(`:297-305`)每次调用生成一个新的 `Symbol(name)` 作 token,注释:*One token per call keeps duplicate labels independently disposable*。全仓只有 `tool-jobs` 调用它([`tool-jobs/src/index.ts:259`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts#L259)),所以拒绝文案直接点名:`load @deepseek-ai/dsh-tool-jobs in its composition`。
 
 ---
 
@@ -320,13 +320,13 @@ kill(id: JobId, caller?: Agent, reason?: string): 'requested' | 'already-finishe
 | `kill` 返回 `'requested'` 时,生产者的 `cancel(reason)` **已被同步调用** | `:223` 在改状态之前 |
 | `cancel` 抛错时,**作业状态与通知状态都不变** | 同上,注释 *Cancel first so a throw leaves both lifecycle and notice state unchanged* |
 | 状态立即变为 `stopping`,且**标记 `reported`** | `:224-225` —— 所以不会再有完成通知 |
-| 作业**尚未**停止 | 工具描述原文:*Returns immediately; the job settles as killed once its work actually stops*(`tool-jobs/src/index.ts:363`) |
+| 作业**尚未**停止 | 工具描述原文:*Returns immediately; the job settles as killed once its work actually stops*([`tool-jobs/src/index.ts:363`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts#L363)) |
 | 真正的终态是 `done` resolve 出的 `JobOutcome.status`(`killed`/`failed`/`completed`) | `settle()`(`:416-419`) |
 | service / owner 销毁时会**等** `job.settled` | `disposeOwned`/`disposeAll`(`:467-475`/`481-...`) |
 
-`cancel` 的契约(`types.ts:73-77`):*Must be synchronous, idempotent, and eventually settle `done`; throws propagate*。所以实现刻意让 throw 在**改状态之前**发生。
+`cancel` 的契约([`types.ts:73-77`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L73-L77)):*Must be synchronous, idempotent, and eventually settle `done`; throws propagate*。所以实现刻意让 throw 在**改状态之前**发生。
 
-`job_kill` 工具侧的返回(`tool-jobs/src/index.ts:389-398`)是 `outcome: 'cancellation-requested' | 'already-finished'` 加一份 `ctx.jobs.get(...)` 的当前快照——`get` 是**非消费**的,不会动 `reported`。
+`job_kill` 工具侧的返回([`tool-jobs/src/index.ts:389-398`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts#L389-L398))是 `outcome: 'cancellation-requested' | 'already-finished'` 加一份 `ctx.jobs.get(...)` 的当前快照——`get` 是**非消费**的,不会动 `reported`。
 
 ### 6.1 teardown 的强制失败
 
@@ -352,7 +352,7 @@ const id = jobs.start({ kind: 'subagent', label: args.description, owner: parent
 
 三个观察:
 
-1. **`kind: 'subagent'` 是 `JobKindMap` 的成员之一**(与 `bash` 并列,`jobs/src/types.ts:23-26`),插件可用 declaration merging 扩展。
+1. **`kind: 'subagent'` 是 `JobKindMap` 的成员之一**(与 `bash` 并列,[`jobs/src/types.ts:23-26`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L23-L26)),插件可用 declaration merging 扩展。
 2. **`cancel` 只是 `controller.abort(...)`**:因为 `cancel` 必须**同步**、而 `subagents.start()` 是异步的,所以这里用"先造 controller、再拿它的 signal 去 start"的写法——把异步启动与同步取消解耦。
 3. **`done` 由 `settleStart` 提供**,它把两种失败分开:
 
@@ -381,7 +381,7 @@ async function settleStart(start: Promise<SubagentRun>, signal: AbortSignal): Pr
 | 续存后台 | `backgroundMode: continuable`(默认调度为后台) | `SubagentContinuationManager` 持有 `AgentHandle` | `send_message` 继续对话;`ctx.subagents.drainContinuableChildren` 释放 |
 | 前台 | 默认(`one-shot` 且未指定后台) | 工具调用的 `await` 持有 | 工具返回即结束;`exec.signal` 取消 |
 
-调度判据是 `request.run_in_background ?? options.continuable`(`tool-subagent/src/index.ts:303`)——**one-shot 默认前台,continuable 默认后台**。续存路线**不**经过 jobs:它返回一个 `subagentId`,由 [04](./04-continuation-and-control.md) 的续存机制接管。
+调度判据是 `request.run_in_background ?? options.continuable`([`tool-subagent/src/index.ts:303`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L303))——**one-shot 默认前台,continuable 默认后台**。续存路线**不**经过 jobs:它返回一个 `subagentId`,由 [04](./04-continuation-and-control.md) 的续存机制接管。
 
 ![时序图：06-jobs-and-notifications](../assets/diagrams/multi-agent__06-jobs-and-notifications-386.svg)
 
@@ -429,21 +429,21 @@ sequenceDiagram
 
 | 符号 | 位置 | 职责 |
 |---|---|---|
-| `JobRegistry`(抽象) | `packages/jobs/jobs/src/index.ts:62-177` | seam;`new.target` 拒绝直接加载;六条实现语义 |
-| `start` / `list` / `get` / `read` / `kill` / `wait` | `jobs/src/index.ts:82` / `90` / `99` / `109` / `120` / `133` | 抽象方法契约 |
-| `onJobDone` / `onJobsChanged` / `attachController` | `jobs/src/index.ts:143` / `167` / `176` | effect-scoped 注册;owner 相对投递 |
-| `JobStatus` / `JobKindMap` | `jobs/src/types.ts:17` / `23-29` | 生命周期状态;`bash` / `subagent`,可声明合并扩展 |
-| `JobStart` / `JobHooks` | `jobs/src/types.ts:46-69` / `72-91` | `kind`/`label`/`outputLimitBytes?`/`owner?`/`run()`;`cancel`(同步幂等)/ `done`(不 reject)/ `readOutput?` |
-| `JobOutcome` / `JobSnapshot` / `JobRead` | `jobs/src/types.ts:32-39` / `97-128` / `131-140` | 终态、只读投影、读取返回 |
-| `JobDoneListener` / `JobsChangedListener` | `jobs/src/types.ts:146-160` | 完成通知(带精确 owner)/ 可见集变更(owner 粒度) |
-| `LocalJobRegistry.start` | `packages/jobs/jobs-local/src/index.ts:131-190` | 三道闸 + `run()` 分界 + 四步注册 |
-| `wait` / `read` / `kill` | `jobs-local/src/index.ts:230-280` / `205-213` / `215-228` | `deadline` 区分超时与取消;消费游标;先 cancel 后改状态 |
-| `settle` | `jobs-local/src/index.ts:416-440` | first-wins → 释放 waiter → 变更通知 → **最后**完成通知 |
-| `servesOwner` / `listenersFor` / `changedFor` | `jobs-local/src/index.ts:315-319` / `338-342` / `388-392` | owner 相对的三处解析 |
-| `attachController` / `onJobDone` / `onJobsChanged` | `jobs-local/src/index.ts:297-305` / `281-287` / `289-295` | 分层注册;Symbol token 保证独立可销毁 |
-| `ensureOwnerCleanup` / `disposeOwned` / `disposeAll` / `cancelForTeardown` | `jobs-local/src/index.ts:448-464` / `467-475` / `481-...` / `507` | owner scope 上的 awaited cleanup;抛错的 cancel 强制失败 |
-| `Config`(tool-jobs) | `packages/jobs/tool-jobs/src/index.ts:31-52` | wait 默认/上限、`completionDelivery`、`maxConsecutiveWakes` |
-| `job_output` / `job_list` / `job_kill` | `tool-jobs/src/index.ts:301-339` / `341-359` / `361-399` | 三个模型侧控制 |
-| `onJobDone` 通知 + 唤醒预算 | `tool-jobs/src/index.ts:278-299` / `210-229` | busy→inject / idle→followup;预算只在 `kind==='user'` 认领时重置 |
-| `visibleOutputLimit` / `finalizeTaskContent` | `tool-jobs/src/index.ts:184-189` / `237-256` | 按作业的 `outputLimitBytes` 截断完整结果 |
-| 后台 subagent 产生方 / `settleStart` / `resolveDelegationRun` | `packages/subagent/tool-subagent/src/index.ts:544-560` / `142-153` / `287-305` | `kind:'subagent'` 的 job;`AggregateError` → `failed`;`run_in_background ?? continuable` |
+| `JobRegistry`(抽象) | [`packages/jobs/jobs/src/index.ts:62-177`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/index.ts#L62-L177) | seam;`new.target` 拒绝直接加载;六条实现语义 |
+| `start` / `list` / `get` / `read` / `kill` / `wait` | [`jobs/src/index.ts:82`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/index.ts#L82) / `90` / `99` / `109` / `120` / `133` | 抽象方法契约 |
+| `onJobDone` / `onJobsChanged` / `attachController` | [`jobs/src/index.ts:143`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/index.ts#L143) / `167` / `176` | effect-scoped 注册;owner 相对投递 |
+| `JobStatus` / `JobKindMap` | [`jobs/src/types.ts:17`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L17) / `23-29` | 生命周期状态;`bash` / `subagent`,可声明合并扩展 |
+| `JobStart` / `JobHooks` | [`jobs/src/types.ts:46-69`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L46-L69) / `72-91` | `kind`/`label`/`outputLimitBytes?`/`owner?`/`run()`;`cancel`(同步幂等)/ `done`(不 reject)/ `readOutput?` |
+| `JobOutcome` / `JobSnapshot` / `JobRead` | [`jobs/src/types.ts:32-39`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L32-L39) / `97-128` / `131-140` | 终态、只读投影、读取返回 |
+| `JobDoneListener` / `JobsChangedListener` | [`jobs/src/types.ts:146-160`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs/src/types.ts#L146-L160) | 完成通知(带精确 owner)/ 可见集变更(owner 粒度) |
+| `LocalJobRegistry.start` | [`packages/jobs/jobs-local/src/index.ts:131-190`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L131-L190) | 三道闸 + `run()` 分界 + 四步注册 |
+| `wait` / `read` / `kill` | [`jobs-local/src/index.ts:230-280`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L230-L280) / `205-213` / `215-228` | `deadline` 区分超时与取消;消费游标;先 cancel 后改状态 |
+| `settle` | [`jobs-local/src/index.ts:416-440`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L416-L440) | first-wins → 释放 waiter → 变更通知 → **最后**完成通知 |
+| `servesOwner` / `listenersFor` / `changedFor` | [`jobs-local/src/index.ts:315-319`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L315-L319) / `338-342` / `388-392` | owner 相对的三处解析 |
+| `attachController` / `onJobDone` / `onJobsChanged` | [`jobs-local/src/index.ts:297-305`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L297-L305) / `281-287` / `289-295` | 分层注册;Symbol token 保证独立可销毁 |
+| `ensureOwnerCleanup` / `disposeOwned` / `disposeAll` / `cancelForTeardown` | [`jobs-local/src/index.ts:448-464`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/jobs-local/src/index.ts#L448-L464) / `467-475` / `481-...` / `507` | owner scope 上的 awaited cleanup;抛错的 cancel 强制失败 |
+| `Config`(tool-jobs) | [`packages/jobs/tool-jobs/src/index.ts:31-52`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts#L31-L52) | wait 默认/上限、`completionDelivery`、`maxConsecutiveWakes` |
+| `job_output` / `job_list` / `job_kill` | [`tool-jobs/src/index.ts:301-339`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts#L301-L339) / `341-359` / `361-399` | 三个模型侧控制 |
+| `onJobDone` 通知 + 唤醒预算 | [`tool-jobs/src/index.ts:278-299`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts#L278-L299) / `210-229` | busy→inject / idle→followup;预算只在 `kind==='user'` 认领时重置 |
+| `visibleOutputLimit` / `finalizeTaskContent` | [`tool-jobs/src/index.ts:184-189`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/jobs/tool-jobs/src/index.ts#L184-L189) / `237-256` | 按作业的 `outputLimitBytes` 截断完整结果 |
+| 后台 subagent 产生方 / `settleStart` / `resolveDelegationRun` | [`packages/subagent/tool-subagent/src/index.ts:544-560`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subagent/tool-subagent/src/index.ts#L544-L560) / `142-153` / `287-305` | `kind:'subagent'` 的 job;`AggregateError` → `failed`;`run_in_background ?? continuable` |

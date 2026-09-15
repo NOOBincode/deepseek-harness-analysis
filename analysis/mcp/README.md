@@ -1,7 +1,7 @@
 # MCP 模块 · 函数级深化分析
 
 > 分析对象:[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) @ `dbbaa4a37`
-> 范围:`packages/mcp/mcp-client/src/`(4 个源文件,共 1018 行)+ `packages/acp/acp/src/mcp.ts` + 相关测试与上游契约
+> 范围:`packages/mcp/mcp-client/src/`(4 个源文件,共 1018 行)+ [`packages/acp/acp/src/mcp.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts) + 相关测试与上游契约
 
 ---
 
@@ -90,10 +90,10 @@ flowchart TD
 | 文件 | 覆盖符号(真实位置) | 一句话 |
 |---|---|---|
 | [`01-discovery-and-sync.md`](./01-discovery-and-sync.md) | `syncTools` `tools.ts:144`、`listToolsUncached` `tools.ts:73`、`createDefinition` `tools.ts:254`、`supportedOutputSchema` `tools.ts:231`、`enqueueSync`/`syncChain` `connection.ts:161`、通知处理器 `connection.ts:257` | 两阶段同步的逐行走查:分页 drain、两类非法列表检测、代际 swap 与冲突回滚、`registrationFailure` 两种模式的真实使用点 |
-| [`02-naming-algorithm.md`](./02-naming-algorithm.md) | `publicToolName` `tools.ts:112`、常量 `tools.ts:46-56`、`serverName` 模式 `index.ts:38` | 完整算法推演 + 真实输入→输出示例表(含实测哈希)、128 字符/含点/跨服务器同名/serverName 上限四类边界、rawName 只上线的实现位置 |
+| [`02-naming-algorithm.md`](./02-naming-algorithm.md) | `publicToolName` `tools.ts:112`、常量 `tools.ts:46-56`、`serverName` 模式 [`index.ts:38`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/index.ts#L38) | 完整算法推演 + 真实输入→输出示例表(含实测哈希)、128 字符/含点/跨服务器同名/serverName 上限四类边界、rawName 只上线的实现位置 |
 | [`03-execution-and-result-mapping.md`](./03-execution-and-result-mapping.md) | `createExecutor` `tools.ts:313`、`callToolUncached` `tools.ts:81`、`extractText` `tools.ts:507`、`projectContent` `tools.ts:519`、`decodeImage` `tools.ts:389`、`resolveImageAdmission` `tools.ts:409`、`prepareImageProjection` `tools.ts:443`、`finalizeContent` `tools.ts:272` | taskSupport 拒绝、参数容错、legacy 归一、`isError`→throw 的理由、块级映射规则、图片严格解码与双 `isDeepStrictEqual` 守卫 |
 | [`04-connection-supervisor.md`](./04-connection-supervisor.md) | `resolveReconnectPolicy` `connection.ts:65`、`RECONNECT_DEFAULTS` `connection.ts:40`、`isCurrent` `connection.ts:153`、`connectGeneration` `connection.ts:237`、`generationDown` `connection.ts:173`、`scheduleReconnect` `connection.ts:192`、`waitForClose` `connection.ts:181`、`dispose` `connection.ts:327` | 每条失败分支、预算与稳定窗口、5 秒关闭屏障、平息顺序,以及正常重连/崩溃循环/预算耗尽三张时序图 |
-| [`05-transport-and-security.md`](./05-transport-and-security.md) | `createTransport` `transport.ts:31`、`buildChildEnv` `transport.ts:21`、`scrubbedParentEnv` `packages/subprocess/subprocess/src/index.ts:64`、`mountAcpMcpServers` `packages/acp/acp/src/mcp.ts:26`、`normalizeServerName` `packages/acp/acp/src/mcp.ts:111` | 两条传输路径的字段落点、环境清洗规则与显式 env 覆盖原理、streamable-http 头部与代理出口、ACP 挂载的六项校验 |
+| [`05-transport-and-security.md`](./05-transport-and-security.md) | `createTransport` `transport.ts:31`、`buildChildEnv` `transport.ts:21`、`scrubbedParentEnv` [`packages/subprocess/subprocess/src/index.ts:64`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/subprocess/subprocess/src/index.ts#L64)、`mountAcpMcpServers` [`packages/acp/acp/src/mcp.ts:26`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L26)、`normalizeServerName` [`packages/acp/acp/src/mcp.ts:111`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/acp/acp/src/mcp.ts#L111) | 两条传输路径的字段落点、环境清洗规则与显式 env 覆盖原理、streamable-http 头部与代理出口、ACP 挂载的六项校验 |
 | [`06-testing-and-failure-modes.md`](./06-testing-and-failure-modes.md) | `tests/` 下 7 个 spec/fixture 文件 | 每个 spec 覆盖的行为矩阵 + 十类失败模式与其显式语义对照表 |
 
 建议阅读顺序:`01 → 02 → 03`(发现与执行主干),再看 `04`(可靠性),最后 `05`/`06`(边界与证据)。
@@ -104,18 +104,18 @@ flowchart TD
 
 | 文件 | 行数 | 职责 |
 |---|---|---|
-| `packages/mcp/mcp-client/src/index.ts` | 188 | 插件入口:`Config` 判别联合、`serverName` 作用域预订、激活阻塞 |
-| `packages/mcp/mcp-client/src/connection.ts` | 351 | 连接监管:代际、重连预算、关闭屏障、平息式 dispose |
-| `packages/mcp/mcp-client/src/tools.ts` | 569 | 工具桥:同步、命名、执行器、结果投影、图片准入 |
-| `packages/mcp/mcp-client/src/transport.ts` | 50 | 传输工厂:stdio(环境清洗)/ streamable-http |
-| `packages/mcp/mcp-client/tests/mcp-client.spec.ts` | 1300 | 单元:命名、同步、执行、投影、图片、传输 |
-| `packages/mcp/mcp-client/tests/apply.spec.ts` | 461 | 单元:插件生命周期与激活语义(mock SDK) |
-| `packages/mcp/mcp-client/tests/reconnect.spec.ts` | 521 | 单元:监管器全部失败分支与策略校验 |
-| `packages/mcp/mcp-client/tests/mcp-client.e2e.ts` | 563 | 无密钥 e2e:真实 MCP 协议 + 官方服务器 + HTTP |
-| `packages/mcp/mcp-client/tests/load-path.spec.ts` | 29 | 真实装载路径守卫(命名空间插件无 default export) |
-| `packages/mcp/mcp-client/tests/egress.spec.ts` | 41 | streamable-http 代理出口 |
-| `packages/mcp/mcp-client/tests/fixture-server.ts` / `http-fixture.ts` | 76 / 52 | stdio 与 HTTP 测试夹具服务器 |
-| `packages/mcp/mcp-client/tests/fixtures/repeated-cursor-server.ts` | 18 | 重复 cursor 的线上夹具 + 快照 overlay |
+| [`packages/mcp/mcp-client/src/index.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/index.ts) | 188 | 插件入口:`Config` 判别联合、`serverName` 作用域预订、激活阻塞 |
+| [`packages/mcp/mcp-client/src/connection.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/connection.ts) | 351 | 连接监管:代际、重连预算、关闭屏障、平息式 dispose |
+| [`packages/mcp/mcp-client/src/tools.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/tools.ts) | 569 | 工具桥:同步、命名、执行器、结果投影、图片准入 |
+| [`packages/mcp/mcp-client/src/transport.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/src/transport.ts) | 50 | 传输工厂:stdio(环境清洗)/ streamable-http |
+| [`packages/mcp/mcp-client/tests/mcp-client.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.spec.ts) | 1300 | 单元:命名、同步、执行、投影、图片、传输 |
+| [`packages/mcp/mcp-client/tests/apply.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/apply.spec.ts) | 461 | 单元:插件生命周期与激活语义(mock SDK) |
+| [`packages/mcp/mcp-client/tests/reconnect.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/reconnect.spec.ts) | 521 | 单元:监管器全部失败分支与策略校验 |
+| [`packages/mcp/mcp-client/tests/mcp-client.e2e.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/mcp-client.e2e.ts) | 563 | 无密钥 e2e:真实 MCP 协议 + 官方服务器 + HTTP |
+| [`packages/mcp/mcp-client/tests/load-path.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/load-path.spec.ts) | 29 | 真实装载路径守卫(命名空间插件无 default export) |
+| [`packages/mcp/mcp-client/tests/egress.spec.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/egress.spec.ts) | 41 | streamable-http 代理出口 |
+| [`packages/mcp/mcp-client/tests/fixture-server.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/fixture-server.ts) / [`http-fixture.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/http-fixture.ts) | 76 / 52 | stdio 与 HTTP 测试夹具服务器 |
+| [`packages/mcp/mcp-client/tests/fixtures/repeated-cursor-server.ts`](https://github.com/deepseek-ai/deepseek-harness/blob/dbbaa4a37fb9098aba814c97d2956f7b2f105f46/packages/mcp/mcp-client/tests/fixtures/repeated-cursor-server.ts) | 18 | 重复 cursor 的线上夹具 + 快照 overlay |
 
 ---
 
